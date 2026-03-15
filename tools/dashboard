@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+TOOLS_DIR="$ROOT/tools"
+
+SESSION_RUNTIME="maksimar"
+SESSION_GUARD="maksimar_guard"
+SESSION_CORE="maksimar_core_guard"
+SESSION_KERNEL="maksimar_kernel_guard"
+
+WINDOW_NAME="dash"
+
+log() {
+  echo "[dashboard] $1"
+}
+
+session_exists() {
+  local session_name="$1"
+  tmux has-session -t "$session_name" 2>/dev/null
+}
+
+window_exists() {
+  local session_name="$1"
+  local window_name="$2"
+  tmux list-windows -t "$session_name" -F '#W' 2>/dev/null | grep -qx "$window_name"
+}
+
+ensure_window() {
+  local session_name="$1"
+  local command_string="$2"
+
+  if ! session_exists "$session_name"; then
+    log "session missing, skip: $session_name"
+    return 0
+  fi
+
+  if window_exists "$session_name" "$WINDOW_NAME"; then
+    log "dashboard window already exists: ${session_name}:${WINDOW_NAME}"
+    return 0
+  fi
+
+  log "creating dashboard window: ${session_name}:${WINDOW_NAME}"
+  tmux new-window -t "${session_name}:" -n "$WINDOW_NAME" -c "$ROOT" "$command_string"
+}
+
+open() {
+  ensure_window "$SESSION_RUNTIME" "watch -n1 '$TOOLS_DIR/ctl status'"
+  ensure_window "$SESSION_GUARD" "watch -n1 '$TOOLS_DIR/guard_ctl status'"
+  ensure_window "$SESSION_CORE" "watch -n1 '$TOOLS_DIR/core_guard_ctl status'"
+  ensure_window "$SESSION_KERNEL" "watch -n1 '$TOOLS_DIR/kernel_guard_ctl status'"
+
+  log "done"
+}
+
+close_window_if_exists() {
+  local session_name="$1"
+
+  if ! session_exists "$session_name"; then
+    return 0
+  fi
+
+  if window_exists "$session_name" "$WINDOW_NAME"; then
+    log "closing dashboard window: ${session_name}:${WINDOW_NAME}"
+    tmux kill-window -t "${session_name}:${WINDOW_NAME}" 2>/dev/null || true
+  fi
+}
+
+close() {
+  close_window_if_exists "$SESSION_RUNTIME"
+  close_window_if_exists "$SESSION_GUARD"
+  close_window_if_exists "$SESSION_CORE"
+  close_window_if_exists "$SESSION_KERNEL"
+
+  log "done"
+}
+
+attach_runtime() {
+  if ! session_exists "$SESSION_RUNTIME"; then
+    log "runtime session missing"
+    exit 1
+  fi
+
+  if window_exists "$SESSION_RUNTIME" "$WINDOW_NAME"; then
+    tmux attach -t "${SESSION_RUNTIME}:${WINDOW_NAME}"
+  else
+    tmux attach -t "$SESSION_RUNTIME"
+  fi
+}
+
+attach_guard() {
+  if ! session_exists "$SESSION_GUARD"; then
+    log "guard session missing"
+    exit 1
+  fi
+
+  if window_exists "$SESSION_GUARD" "$WINDOW_NAME"; then
+    tmux attach -t "${SESSION_GUARD}:${WINDOW_NAME}"
+  else
+    tmux attach -t "$SESSION_GUARD"
+  fi
+}
+
+attach_core() {
+  if ! session_exists "$SESSION_CORE"; then
+    log "core session missing"
+    exit 1
+  fi
+
+  if window_exists "$SESSION_CORE" "$WINDOW_NAME"; then
+    tmux attach -t "${SESSION_CORE}:${WINDOW_NAME}"
+  else
+    tmux attach -t "$SESSION_CORE"
+  fi
+}
+
+attach_kernel() {
+  if ! session_exists "$SESSION_KERNEL"; then
+    log "kernel session missing"
+    exit 1
+  fi
+
+  if window_exists "$SESSION_KERNEL" "$WINDOW_NAME"; then
+    tmux attach -t "${SESSION_KERNEL}:${WINDOW_NAME}"
+  else
+    tmux attach -t "$SESSION_KERNEL"
+  fi
+}
+
+status() {
+  for session_name in \
+    "$SESSION_RUNTIME" \
+    "$SESSION_GUARD" \
+    "$SESSION_CORE" \
+    "$SESSION_KERNEL"; do
+    if session_exists "$session_name"; then
+      if window_exists "$session_name" "$WINDOW_NAME"; then
+        log "${session_name}:${WINDOW_NAME} -> PRESENT"
+      else
+        log "${session_name}:${WINDOW_NAME} -> MISSING"
+      fi
+    else
+      log "${session_name} -> SESSION_MISSING"
+    fi
+  done
+}
+
+usage() {
+  cat <<'EOF'
+Usage: ./tools/dashboard {open|close|status|attach-runtime|attach-guard|attach-core|attach-kernel}
+EOF
+}
+
+main() {
+  local cmd="${1:-}"
+
+  case "$cmd" in
+    open)
+      open
+      ;;
+    close)
+      close
+      ;;
+    status)
+      status
+      ;;
+    attach-runtime)
+      attach_runtime
+      ;;
+    attach-guard)
+      attach_guard
+      ;;
+    attach-core)
+      attach_core
+      ;;
+    attach-kernel)
+      attach_kernel
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+CORE_ROOT="$ROOT/CORE_ROOT"
+
+IMMUTABLE_TARGETS=(
+  "$CORE_ROOT/stop_gate.py"
+  "$CORE_ROOT/stop_gate_watcher.py"
+  "$CORE_ROOT/core_guard.py"
+  "$CORE_ROOT/core_integrity_verifier.py"
+  "$CORE_ROOT/genesis_hash.bin"
+)
+
+log() {
+  echo "[core_lsattr] $1"
+}
+
+require_lsattr() {
+  if ! command -v lsattr >/dev/null 2>&1; then
+    log "lsattr not found. Install e2fsprogs first."
+    exit 1
+  fi
+}
+
+main() {
+  require_lsattr
+
+  log "checking immutable flags"
+  for target in "${IMMUTABLE_TARGETS[@]}"; do
+    if [[ -e "$target" ]]; then
+      lsattr "$target"
+    else
+      log "missing target: $target"
+    fi
+  done
+}
+
+main "$@"

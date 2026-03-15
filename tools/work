@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+TOOLS_DIR="$ROOT/tools"
+RUNTIME_STATE_DIR="$ROOT/RUNTIME/state"
+
+RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
+GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
+CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
+KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
+
+log() {
+    echo "[work] $1"
+}
+
+abort() {
+    local reason="$1"
+    log "ERROR: $reason"
+    "$TOOLS_DIR/rest" || true
+    exit 1
+}
+
+wait_for_file() {
+    local file_path="$1"
+    local label="$2"
+    local timeout_sec="$3"
+
+    local started_at
+    started_at="$(date +%s)"
+
+    while true; do
+        if [[ -f "$file_path" ]]; then
+            log "$label heartbeat file detected: $file_path"
+            return 0
+        fi
+
+        local now
+        now="$(date +%s)"
+        if (( now - started_at >= timeout_sec )); then
+            log "timeout waiting for $label heartbeat: $file_path"
+            return 1
+        fi
+
+        sleep 1
+    done
+}
+
+remove_stale_state_files() {
+    log "removing stale state files"
+    mkdir -p "$RUNTIME_STATE_DIR"
+    rm -f \
+        "$RUNTIME_HEARTBEAT_FILE" \
+        "$GUARD_HEARTBEAT_FILE" \
+        "$CORE_GUARD_HEARTBEAT_FILE" \
+        "$KERNEL_HEARTBEAT_FILE"
+}
+
+start_runtime() {
+    log "starting runtime..."
+    "$TOOLS_DIR/ctl" start
+    "$TOOLS_DIR/ctl" status
+}
+
+start_guard() {
+    log "starting supervisor guard..."
+    "$TOOLS_DIR/guard_ctl" start
+    "$TOOLS_DIR/guard_ctl" status
+}
+
+start_core_guard() {
+    log "starting core guard..."
+    "$TOOLS_DIR/core_guard_ctl" start
+    "$TOOLS_DIR/core_guard_ctl" status
+}
+
+start_kernel_watchdog() {
+    log "starting kernel watchdog..."
+    "$TOOLS_DIR/kernel_guard_ctl" start
+    "$TOOLS_DIR/kernel_guard_ctl" status
+}
+
+open_dashboards_best_effort() {
+    log "opening dashboards (best effort, non-critical)"
+    "$TOOLS_DIR/dashboards_open" 2>/dev/null || true
+}
+
+main() {
+    mkdir -p "$RUNTIME_STATE_DIR"
+    remove_stale_state_files
+
+    start_runtime || abort "runtime start failed"
+    wait_for_file "$RUNTIME_HEARTBEAT_FILE" "runtime" 15 || abort "runtime heartbeat timeout"
+
+    start_guard || abort "guard start failed"
+    wait_for_file "$GUARD_HEARTBEAT_FILE" "guard" 15 || abort "guard heartbeat timeout"
+
+    start_core_guard || abort "core guard start failed"
+    wait_for_file "$CORE_GUARD_HEARTBEAT_FILE" "core guard" 15 || abort "core guard heartbeat timeout"
+
+    start_kernel_watchdog || abort "kernel watchdog start failed"
+    wait_for_file "$KERNEL_HEARTBEAT_FILE" "kernel" 15 || abort "kernel heartbeat timeout"
+
+    open_dashboards_best_effort
+    log "done"
+}
+
+main "$@"

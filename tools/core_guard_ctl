@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+SESSION_NAME="maksimar_core_guard"
+LOG_FILE="$ROOT/logs/core_guard.log"
+PID_FILE="$ROOT/RUNTIME/core_guard.pid"
+HEARTBEAT_FILE="$ROOT/RUNTIME/state/core_guard_heartbeat_state.json"
+
+HEARTBEAT_TIMEOUT_SEC=12
+
+log() {
+  echo "[core_guard_ctl] $1"
+}
+
+session_exists() {
+  tmux has-session -t "$SESSION_NAME" 2>/dev/null
+}
+
+find_pid() {
+  if [[ -f "$PID_FILE" ]]; then
+    local pid
+    pid="$(tr -d '[:space:]' < "$PID_FILE" 2>/dev/null || true)"
+    if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
+      printf '%s\n' "$pid"
+      return 0
+    fi
+  fi
+
+  pgrep -af 'python3? .*CORE_ROOT\.core_guard|python3? -m CORE_ROOT\.core_guard' \
+    | awk '{print $1}' \
+    | head -n 1
+}
+
+process_exists() {
+  local pid
+  pid="$(find_pid || true)"
+  [[ -n "${pid:-}" ]]
+}
+
+heartbeat_age() {
+  python3 - "$HEARTBEAT_FILE" <<'PY'
+import json
+import sys
+import time
+from pathlib import Path
+
+path = Path(sys.argv[1])
+if not path.exists():
+    print("missing")
+    raise SystemExit(0)
+
+try:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+except Exception:
+    print("invalid")
+    raise SystemExit(0)
+
+ts = payload.get("ts")
+if not isinstance(ts, (int, float)):
+    print("invalid")
+    raise SystemExit(0)
+
+print(f"{time.time() - ts:.2f}")
+PY
+}
+
+heartbeat_is_fresh() {
+  local age
+  age="$(heartbeat_age)"
+  if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
+    return 1
+  fi
+
+  python3 - "$age" "$HEARTBEAT_TIMEOUT_SEC" <<'PY'
+import sys
+
+age = float(sys.argv[1])
+limit = float(sys.argv[2])
+raise SystemExit(0 if age <= limit else 1)
+PY
+}
+
+truth() {
+  session_exists && process_exists && heartbeat_is_fresh
+}
+
+write_pid_file() {
+  local pid
+  pid="$(find_pid || true)"
+  mkdir -p "$ROOT/RUNTIME"
+  if [[ -n "${pid:-}" ]]; then
+    printf '%s\n' "$pid" > "$PID_FILE"
+  fi
+}
+
+remove_pid_file() {
+  rm -f "$PID_FILE"
+}
+
+start() {
+  if truth; then
+    log "already running (truthful)"
+    status
+    return 0
+  fi
+
+  if session_exists; then
+    log "removing stale tmux session: $SESSION_NAME"
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+
+  remove_pid_file
+  mkdir -p "$ROOT/RUNTIME" "$ROOT/RUNTIME/state" "$(dirname "$LOG_FILE")"
+
+  log "starting core guard tmux session: $SESSION_NAME"
+  tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
+  tmux send-keys -t "$SESSION_NAME" \
+    "cd '$ROOT' && python3 -m CORE_ROOT.core_guard 2>&1 | tee -a '$LOG_FILE'" C-m
+
+  sleep 2
+  write_pid_file
+
+  if truth; then
+    log "started ($SESSION_NAME)"
+    return 0
+  fi
+
+  log "started tmux session, but core guard is not yet truthful"
+  status
+  return 1
+}
+
+stop() {
+  log "stopping..."
+
+  if session_exists; then
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+
+  local pid
+  pid="$(find_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    kill "$pid" 2>/dev/null || true
+    sleep 1
+  fi
+
+  pid="$(find_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    kill -9 "$pid" 2>/dev/null || true
+  fi
+
+  remove_pid_file
+  log "done"
+}
+
+status() {
+  if session_exists; then
+    log "tmux:"
+    echo "  RUNNING (session: $SESSION_NAME)"
+  else
+    log "tmux:"
+    echo "  STOPPED"
+  fi
+
+  local pid
+  pid="$(find_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    log "process:"
+    echo "  RUNNING (pid=$pid, module=CORE_ROOT.core_guard)"
+  else
+    log "process:"
+    echo "  STOPPED"
+  fi
+
+  log "heartbeat:"
+  if [[ ! -f "$HEARTBEAT_FILE" ]]; then
+    echo "  missing"
+  else
+    local age
+    age="$(heartbeat_age)"
+    if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
+      echo "  $age"
+    else
+      echo "  age=$age"
+    fi
+  fi
+
+  log "truth:"
+  if truth; then
+    echo "  ALIVE"
+  else
+    echo "  NOT_ALIVE"
+  fi
+}
+
+attach() {
+  if ! session_exists; then
+    log "no session: $SESSION_NAME"
+    return 1
+  fi
+  tmux attach -t "$SESSION_NAME"
+}
+
+usage() {
+  echo "Usage: ./tools/core_guard_ctl {start|stop|status|attach}"
+}
+
+main() {
+  local cmd="${1:-}"
+  case "$cmd" in
+    start) start ;;
+    stop) stop ;;
+    status) status ;;
+    attach) attach ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

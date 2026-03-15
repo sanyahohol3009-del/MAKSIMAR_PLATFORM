@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+TOOLS_DIR="$ROOT/tools"
+RUNTIME_STATE_DIR="$ROOT/RUNTIME/state"
+
+RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
+GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
+CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
+KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
+
+log() {
+    echo "[rest] $1"
+}
+
+remove_stale_state_files() {
+    log "removing stale state files"
+    rm -f \
+        "$RUNTIME_HEARTBEAT_FILE" \
+        "$GUARD_HEARTBEAT_FILE" \
+        "$CORE_GUARD_HEARTBEAT_FILE" \
+        "$KERNEL_HEARTBEAT_FILE"
+}
+
+main() {
+    log "stopping kernel watchdog..."
+    "$TOOLS_DIR/kernel_guard_ctl" stop || true
+
+    log "stopping core guard..."
+    "$TOOLS_DIR/core_guard_ctl" stop || true
+
+    log "stopping supervisor guard..."
+    "$TOOLS_DIR/guard_ctl" stop || true
+
+    log "stopping runtime..."
+    "$TOOLS_DIR/ctl" stop || true
+
+    remove_stale_state_files
+    log "done"
+}
+
+main "$@"

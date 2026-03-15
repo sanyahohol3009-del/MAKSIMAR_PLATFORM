@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+CORE_ROOT="$ROOT/CORE_ROOT"
+
+IMMUTABLE_TARGETS=(
+  "$CORE_ROOT/stop_gate.py"
+  "$CORE_ROOT/stop_gate_watcher.py"
+  "$CORE_ROOT/core_guard.py"
+  "$CORE_ROOT/core_integrity_verifier.py"
+  "$CORE_ROOT/genesis_hash.bin"
+)
+
+log() {
+  echo "[core_unlock] $1"
+}
+
+require_chattr() {
+  if ! command -v chattr >/dev/null 2>&1; then
+    log "chattr not found. Install e2fsprogs first."
+    exit 1
+  fi
+}
+
+main() {
+  require_chattr
+
+  log "unlocking immutable core targets"
+  for target in "${IMMUTABLE_TARGETS[@]}"; do
+    if [[ -e "$target" ]]; then
+      sudo chattr -i "$target"
+      log "unlocked: $target"
+    else
+      log "missing target, skipped: $target"
+    fi
+  done
+
+  log "done"
+}
+
+main "$@"
