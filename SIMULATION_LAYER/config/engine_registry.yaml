@@ -1,0 +1,28 @@
+schema_version: simulation_engine_registry.v1
+description: Canonical engine registry for supported simulation backends.
+
+engines:
+  pybullet:
+    enabled: true
+    class: physics_general
+    gpu_required: false
+
+  mujoco:
+    enabled: true
+    class: physics_control
+    gpu_required: false
+
+  genesis:
+    enabled: true
+    class: advanced_physics
+    gpu_required: true
+
+  isaac:
+    enabled: true
+    class: industrial_robotics
+    gpu_required: true
+
+rules:
+  - enabled engines must remain explicit
+  - engine selection must be routed through registry and policy
+  - backend-specific settings must not leak into portable contracts

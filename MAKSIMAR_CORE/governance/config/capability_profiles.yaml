@@ -1,0 +1,84 @@
+schema_version: governance_capability_profiles.v1
+description: Canonical capability profile definitions for portable-core deployments and products.
+
+profiles:
+  core_profile_full_platform:
+    enabled_capabilities:
+      - memory_full
+      - knowledge_full
+      - research
+      - workflow
+      - actions
+      - packaging
+      - federation
+      - codegen
+      - evaluation
+      - simulation
+      - robotics
+      - visual_engineering
+      - energy
+      - compute_fleet
+      - vpn
+      - industrial
+      - dialogue
+      - voice
+    disabled_capabilities: []
+    target_products:
+      - jarvis_full_platform
+
+  core_profile_mobile_consumer:
+    enabled_capabilities:
+      - memory_light
+      - knowledge_basic
+      - workflow
+      - actions_mobile
+      - vpn
+      - dialogue
+      - voice
+    disabled_capabilities:
+      - codegen
+      - simulation
+      - robotics
+      - industrial
+      - compute_fleet
+    target_products:
+      - jarvis_mobile_consumer
+
+  core_profile_desktop_consumer:
+    enabled_capabilities:
+      - memory_light
+      - knowledge_basic
+      - workflow
+      - actions_desktop
+      - vpn
+      - dialogue
+      - voice
+    disabled_capabilities:
+      - codegen
+      - robotics
+      - industrial
+    target_products:
+      - jarvis_desktop_consumer
+
+  core_profile_engineering:
+    enabled_capabilities:
+      - memory_full
+      - knowledge_full
+      - research
+      - workflow
+      - actions
+      - codegen
+      - evaluation
+      - simulation
+      - visual_engineering
+      - dialogue
+      - voice
+    disabled_capabilities:
+      - industrial_hardware_control
+    target_products:
+      - jarvis_engineering
+
+rules:
+  - enabled and disabled capability sets must not overlap
+  - capability profiles cannot override blocked governance rules
+  - productization must happen by profile selection, not by core fork

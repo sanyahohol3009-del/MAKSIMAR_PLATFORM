@@ -1,0 +1,15 @@
+schema_version: robotics_safety_constraints.v1
+description: Canonical safety constraints for robotics and machine motion.
+
+constraints:
+
+  max_velocity_check: true
+  max_torque_check: true
+  workspace_limit_check: true
+  collision_detection_required: true
+  emergency_stop_supported: true
+
+rules:
+  - constraint violation must block execution
+  - safety constraints must remain active even in testing
+  - constraints must be evaluated before hardware command dispatch

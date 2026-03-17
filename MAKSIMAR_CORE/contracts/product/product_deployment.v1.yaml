@@ -1,0 +1,40 @@
+contract_name: product_deployment
+schema_version: product_deployment.v1
+description: Deployment record of a product instance.
+
+required:
+  - deployment_id
+  - product_id
+  - node_id
+
+fields:
+  deployment_id:
+    type: string
+    description: Unique deployment identifier.
+
+  product_id:
+    type: string
+    description: Product deployed on the node.
+
+  node_id:
+    type: string
+    description: Node running the product instance.
+
+  deployed_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of deployment.
+
+  deployment_mode:
+    type: string
+    description: Deployment mode applied.
+
+validation_rules:
+  - product_id required
+  - node_id required
+  - deployment_id must be unique
+
+security_rules:
+  - deployment does not bypass node trust policy
+  - deployment must respect module lifecycle state
+  - deployment records must remain auditable

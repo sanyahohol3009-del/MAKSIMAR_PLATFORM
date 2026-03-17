@@ -1,0 +1,40 @@
+contract_name: industrial_constraint
+schema_version: industrial_constraint.v1
+description: Industrial safety constraint model.
+
+required:
+  - constraint_id
+  - severity
+  - rule
+
+fields:
+  constraint_id:
+    type: string
+    description: Unique industrial constraint identifier.
+
+  severity:
+    type: string
+    enum:
+      - warning
+      - critical
+      - hard_stop
+    description: Severity class of the industrial constraint.
+
+  rule:
+    type: string
+    description: Human-readable or machine-evaluable rule definition.
+
+  applies_to:
+    type: string
+    description: Target subsystem, twin, adapter, or industrial scope this constraint applies to.
+
+validation_rules:
+  - constraint_id required
+  - severity must match allowed enum
+  - rule required
+  - applies_to should be explicit
+
+security_rules:
+  - hard_stop constraints are highest priority
+  - constraints must not be bypassed by shell, workflow, or adapter layers
+  - constraint violations must remain visible and blocking where policy requires

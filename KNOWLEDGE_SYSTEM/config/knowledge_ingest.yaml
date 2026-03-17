@@ -1,0 +1,25 @@
+schema_version: knowledge_ingest_config.v1
+description: Canonical ingest policy for knowledge objects, sources, and packs.
+
+ingest_sources:
+  local_doc_enabled: true
+  web_enabled: true
+  connector_enabled: true
+  manual_entry_enabled: true
+  benchmark_enabled: true
+
+classification_policy:
+  require_source_descriptor: true
+  require_object_type: true
+  require_provenance_level: true
+  auto_reject_untyped_objects: true
+
+review_policy:
+  imported_verified_auto_admit: false
+  imported_unverified_requires_review: true
+  benchmark_sources_require_labeling: true
+
+rules:
+  - every ingested knowledge object must carry source_ref
+  - provenance must be explicit at ingest time
+  - unreviewed external imports must not silently become trusted knowledge

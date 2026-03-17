@@ -1,0 +1,44 @@
+schema_version: module_lifecycle_policy.v1
+description: Canonical lifecycle policy for installation, enablement, disablement, and removal of modules.
+
+states:
+  - registered
+  - installed
+  - enabled
+  - disabled
+  - removed
+
+transitions:
+  registered:
+    allowed_to:
+      - installed
+      - removed
+
+  installed:
+    allowed_to:
+      - enabled
+      - disabled
+      - removed
+
+  enabled:
+    allowed_to:
+      - disabled
+      - removed
+
+  disabled:
+    allowed_to:
+      - enabled
+      - removed
+
+  removed:
+    allowed_to: []
+
+requirements:
+  permission_check_required: true
+  compatibility_check_required: true
+  dashboard_manifest_check_required: true
+
+rules:
+  - lifecycle transitions must be explicit
+  - incompatible modules must not be enabled
+  - removal must not leave orphaned privileged bindings

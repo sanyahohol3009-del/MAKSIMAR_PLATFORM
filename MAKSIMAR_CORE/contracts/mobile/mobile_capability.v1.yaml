@@ -1,0 +1,42 @@
+contract_name: mobile_capability
+schema_version: mobile_capability.v1
+description: Mobile capability declaration for Android and iOS products.
+
+required:
+  - capability_id
+  - platform
+  - supported_actions
+
+fields:
+  capability_id:
+    type: string
+    description: Unique mobile capability identifier.
+
+  platform:
+    type: string
+    enum:
+      - android
+      - ios
+    description: Mobile platform for which this capability is defined.
+
+  supported_actions:
+    type: array
+    items:
+      type: string
+    description: Explicit list of portable actions supported on this mobile platform.
+
+  local_only:
+    type: boolean
+    description: Whether the capability is restricted to fully local execution.
+
+validation_rules:
+  - capability_id required
+  - platform must match allowed enum
+  - supported_actions required
+  - supported_actions must not be empty
+  - local_only should be explicit
+
+security_rules:
+  - mobile capability set must respect shell boundary
+  - declared capability does not grant authority by itself
+  - local_only capabilities must not be silently rerouted to privileged backends

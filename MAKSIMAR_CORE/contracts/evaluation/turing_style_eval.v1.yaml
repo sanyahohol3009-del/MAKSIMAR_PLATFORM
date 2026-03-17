@@ -1,0 +1,44 @@
+contract_name: turing_style_eval
+schema_version: turing_style_eval.v1
+description: Human-likeness conversational evaluation signal.
+
+required:
+  - eval_id
+  - dialogue_ref
+  - score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique Turing-style evaluation identifier.
+
+  dialogue_ref:
+    type: string
+    description: Reference to dialogue session or transcript under evaluation.
+
+  score:
+    type: number
+    description: Human-likeness score assigned by rubric, human, or model judge.
+
+  evaluator_type:
+    type: string
+    enum:
+      - human
+      - rubric
+      - model
+    description: Type of evaluator that produced the score.
+
+  notes:
+    type: string
+    description: Optional evaluator notes.
+
+validation_rules:
+  - eval_id required
+  - dialogue_ref required
+  - evaluator_type must match allowed enum
+  - turing-style eval is one signal only
+
+security_rules:
+  - cannot be sole deployment gate
+  - conversational realism must not override safety evaluation
+  - turing-style result is advisory only

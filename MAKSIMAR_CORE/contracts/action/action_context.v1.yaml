@@ -1,0 +1,39 @@
+contract_name: action_context
+schema_version: action_context.v1
+description: Runtime execution context for actions.
+
+required:
+  - context_id
+  - shell_type
+  - device_id
+
+fields:
+  context_id:
+    type: string
+    description: Unique action execution context identifier.
+
+  shell_type:
+    type: string
+    description: Shell type hosting the execution path.
+
+  device_id:
+    type: string
+    description: Device or node identifier bound to this execution context.
+
+  mode:
+    type: string
+    description: Active operating mode, such as engineering, family, or mobile mode.
+
+  capability_profile_ref:
+    type: string
+    description: Reference to capability profile active in this context.
+
+validation_rules:
+  - shell_type and device_id required
+  - context_id must be unique
+  - shell_type should map to a known shell contract
+
+security_rules:
+  - context does not bypass policy
+  - capability profile does not override forbidden actions
+  - action context is descriptive, not authoritative

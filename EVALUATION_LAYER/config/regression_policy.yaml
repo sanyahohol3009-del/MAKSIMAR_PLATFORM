@@ -1,0 +1,18 @@
+schema_version: evaluation_regression_policy.v1
+description: Canonical regression policy for preserving platform quality over time.
+
+tracking:
+  benchmark_regression_tracking_enabled: true
+  workflow_regression_tracking_enabled: true
+  codegen_regression_tracking_enabled: true
+  knowledge_regression_tracking_enabled: true
+
+thresholds:
+  hard_fail_on_critical_regression: true
+  warn_on_minor_regression: true
+  preserve_baseline_required: true
+
+rules:
+  - regression checks must compare against explicit baseline
+  - critical regressions must block promotion
+  - regression history must remain auditable

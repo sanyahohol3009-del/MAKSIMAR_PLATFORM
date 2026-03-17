@@ -1,0 +1,41 @@
+contract_name: inverter_state
+schema_version: inverter_state.v1
+description: Canonical inverter telemetry and control-boundary record.
+
+required:
+  - inverter_id
+  - state
+
+fields:
+  inverter_id:
+    type: string
+    description: Unique inverter identifier.
+
+  state:
+    type: string
+    description: Current inverter state classification.
+
+  power_in_w:
+    type: number
+    description: Current measured input power in watts.
+
+  power_out_w:
+    type: number
+    description: Current measured output power in watts.
+
+  alarms:
+    type: array
+    items:
+      type: string
+    description: Explicit inverter alarms or warnings.
+
+validation_rules:
+  - inverter_id required
+  - state required
+  - alarms should be explicit even when empty
+  - power values should be numeric when present
+
+security_rules:
+  - alarms preserved
+  - inverter telemetry does not imply direct control authority
+  - state records must remain reviewable and traceable

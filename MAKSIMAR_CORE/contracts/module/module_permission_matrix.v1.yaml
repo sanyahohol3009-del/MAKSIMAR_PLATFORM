@@ -1,0 +1,27 @@
+contract_name: module_permission_matrix
+schema_version: module_permission_matrix.v1
+description: Permission matrix scoped to one module.
+
+required:
+  - module_id
+  - permissions
+
+fields:
+  module_id:
+    type: string
+    description: Module governed by this permission matrix.
+
+  permissions:
+    type: object
+    additional_properties: true
+    description: Structured permission mapping for module resources, actions, and contexts.
+
+validation_rules:
+  - module_id required
+  - permissions must be explicit object
+  - permission keys should map only to declared module surfaces or actions
+
+security_rules:
+  - module permissions cannot exceed global permission matrix
+  - deny by default for undeclared resources
+  - permission scope must remain bounded to module contract

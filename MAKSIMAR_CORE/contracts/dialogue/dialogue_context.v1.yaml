@@ -1,0 +1,41 @@
+contract_name: dialogue_context
+schema_version: dialogue_context.v1
+description: Structured context package for dialogue manager.
+
+required:
+  - context_id
+  - source_refs
+
+fields:
+  context_id:
+    type: string
+    description: Unique dialogue context package identifier.
+
+  source_refs:
+    type: array
+    items:
+      type: string
+    description: Explicit source references used to assemble this context package.
+
+  active_project_ref:
+    type: string
+    description: Reference to active project context when applicable.
+
+  active_workflow_ref:
+    type: string
+    description: Reference to active workflow context when applicable.
+
+  memory_snapshot_ref:
+    type: string
+    description: Reference to memory snapshot used to build the dialogue context.
+
+validation_rules:
+  - context_id required
+  - source_refs required
+  - source_refs must not be empty
+  - active_project_ref and active_workflow_ref should be explicit when relevant
+
+security_rules:
+  - restricted context must be filtered by access policy
+  - context packaging does not imply execution rights
+  - source traceability must be preserved

@@ -1,0 +1,32 @@
+contract_name: bundle_selector
+schema_version: bundle_selector.v1
+description: Selector rules for choosing bundle variants.
+
+required:
+  - selector_id
+  - conditions
+  - target_bundle
+
+fields:
+  selector_id:
+    type: string
+    description: Unique selector identifier.
+
+  conditions:
+    type: object
+    additional_properties: true
+    description: Structured conditions used to choose a bundle.
+
+  target_bundle:
+    type: string
+    description: Bundle identifier selected when conditions match.
+
+validation_rules:
+  - selector_id required
+  - target_bundle required
+  - conditions must be explicit
+
+security_rules:
+  - selector cannot override policy constraints
+  - selector logic must remain auditable
+  - selector does not grant capability expansion

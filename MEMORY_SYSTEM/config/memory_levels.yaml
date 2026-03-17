@@ -1,0 +1,33 @@
+schema_version: memory_levels.v1
+description: Canonical memory level definitions for retention and access control.
+
+levels:
+  L0_ephemeral:
+    description: Current-session or extremely short-lived contextual memory.
+    retention: session_bound
+    restricted: false
+
+  L1_operational:
+    description: Recent workflows, actions, execution context, and short-term continuity.
+    retention: short_term
+    restricted: false
+
+  L2_project:
+    description: Project phases, tasks, decisions, milestones, and long-running work context.
+    retention: medium_term
+    restricted: false
+
+  L3_stable_personal:
+    description: Durable user preferences and persistent personal context approved for long-term use.
+    retention: long_term
+    restricted: false
+
+  L4_restricted:
+    description: Sensitive memory requiring explicit policy and permission context.
+    retention: policy_bound
+    restricted: true
+
+rules:
+  - every persisted memory object must map to one level
+  - restricted level must never be treated as default-readable
+  - level assignment affects both retention and access evaluation

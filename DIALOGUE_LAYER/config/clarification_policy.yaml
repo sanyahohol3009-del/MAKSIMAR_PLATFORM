@@ -1,0 +1,18 @@
+schema_version: dialogue_clarification_policy.v1
+description: Canonical policy for clarification requests in ambiguous or risky situations.
+
+clarification:
+  required_for_ambiguous_intent: true
+  required_for_missing_critical_context: true
+  required_for_risk_sensitive_requests: true
+  options_should_be_explicit: true
+
+safety:
+  must_not_hide_risk: true
+  must_not_fake_certainty: true
+  must_preserve_operator_control: true
+
+rules:
+  - clarification is mandatory when ambiguity affects safety or correctness
+  - dialogue must ask instead of guessing in risk-critical paths
+  - clarification options must remain explicit and reviewable

@@ -1,0 +1,17 @@
+schema_version: energy_load_balancing_policy.v1
+description: Canonical policy for energy-aware balancing decisions and rules.
+
+ruleset:
+  trigger_conditions_required: true
+  approved_actions_only: true
+  priority_required_for_overlapping_rules: true
+
+execution:
+  simulation_or_preview_recommended: true
+  direct_hardware_execution_forbidden_by_default: true
+  approval_required_for_sensitive_actions: true
+
+rules:
+  - balancing rules do not bypass action policy
+  - sensitive balancing actions remain approval-gated
+  - hidden or implicit control paths are forbidden

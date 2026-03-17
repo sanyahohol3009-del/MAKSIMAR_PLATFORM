@@ -1,0 +1,17 @@
+schema_version: knowledge_provenance_policy.v1
+description: Canonical provenance requirements for all knowledge objects and retrieval outputs.
+
+requirements:
+  source_id_required: true
+  provenance_record_required_for_imports: true
+  transformation_chain_required_for_derived_objects: true
+  verification_status_required: true
+
+immutability:
+  provenance_append_only: true
+  source_traceability_mandatory: true
+
+rules:
+  - provenance must survive indexing and retrieval
+  - derived knowledge must keep transformation lineage
+  - missing provenance blocks promotion to trusted knowledge

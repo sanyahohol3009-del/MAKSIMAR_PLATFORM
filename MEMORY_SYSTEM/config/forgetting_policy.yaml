@@ -1,0 +1,21 @@
+schema_version: memory_forgetting_policy.v1
+description: Canonical forgetting and cleanup policy for weak, stale, and noisy memory.
+
+forgetting_rules:
+  remove_unconfirmed_noise: true
+  remove_stale_low_value_ephemeral: true
+  prune_weak_inferred_relations: true
+  preserve_confirmed_project_memory: true
+  preserve_stable_personal_memory: true
+
+thresholds:
+  weak_relation_confidence_below: 0.40
+  low_value_event_importance:
+    - low
+  stale_ephemeral_days: 7
+  stale_inferred_relation_days: 30
+
+rules:
+  - forgetting must never silently delete restricted memory outside policy
+  - confirmed project and stable personal memory require stronger retention bias
+  - destructive forgetting actions must be auditable

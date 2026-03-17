@@ -1,0 +1,37 @@
+contract_name: permission_matrix
+schema_version: permission_matrix.v1
+description: Canonical permission matrix for roles, modules, and actions.
+
+required:
+  - roles
+  - resources
+  - permissions
+
+fields:
+  roles:
+    type: array
+    items:
+      type: string
+    description: Explicit list of roles recognized by the permission system.
+
+  resources:
+    type: array
+    items:
+      type: string
+    description: Explicit list of protected resources, domains, or action groups.
+
+  permissions:
+    type: object
+    additional_properties: true
+    description: Structured permission bindings between roles and resources.
+
+validation_rules:
+  - roles and resources must be explicit
+  - no wildcard global write by default
+  - every permission entry should map to declared roles and resources
+  - deny-by-default assumption must hold for unspecified combinations
+
+security_rules:
+  - deny by default
+  - permissions do not override immutable restrictions
+  - no implicit privileged escalation allowed

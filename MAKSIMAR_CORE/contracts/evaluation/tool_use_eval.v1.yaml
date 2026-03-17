@@ -1,0 +1,38 @@
+contract_name: tool_use_eval
+schema_version: tool_use_eval.v1
+description: Evaluation of tool calling and action selection behavior.
+
+required:
+  - eval_id
+  - tool_path_ref
+  - score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique tool-use evaluation identifier.
+
+  tool_path_ref:
+    type: string
+    description: Reference to evaluated tool invocation path or execution trace.
+
+  score:
+    type: number
+    description: Aggregate tool-use quality score.
+
+  misuse_events:
+    type: array
+    items:
+      type: string
+    description: Explicit list of tool misuse or unsafe selection events.
+
+validation_rules:
+  - eval_id required
+  - tool_path_ref required
+  - score must be explicit
+  - misuse_events should be explicit even when empty
+
+security_rules:
+  - unsafe tool use must be flagged
+  - tool-use evaluation is evidence only
+  - dangerous misuse events must remain visible in downstream review

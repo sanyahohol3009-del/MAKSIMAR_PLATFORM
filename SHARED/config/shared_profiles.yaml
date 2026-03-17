@@ -1,0 +1,20 @@
+schema_version: shared_profiles.v1
+description: Canonical shared profile registry for cross-platform portable-core coordination.
+
+profiles:
+  default_shared:
+    enabled: true
+    description: Baseline shared profile for all shells.
+
+  engineering_shared:
+    enabled: true
+    description: Shared profile for engineering-oriented products and nodes.
+
+  family_shared:
+    enabled: true
+    description: Shared profile for family-oriented products and assistants.
+
+rules:
+  - shared profiles must remain explicit
+  - shared profiles do not override governance
+  - cross-platform coordination must remain auditable

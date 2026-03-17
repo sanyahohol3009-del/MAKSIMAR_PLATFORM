@@ -1,0 +1,49 @@
+contract_name: trust_policy
+schema_version: trust_policy.v1
+description: Canonical trust policy for nodes and sync relationships.
+
+required:
+  - trust_policy_id
+  - trust_level
+  - applies_to
+
+fields:
+  trust_policy_id:
+    type: string
+    description: Unique trust policy identifier.
+
+  trust_level:
+    type: string
+    enum:
+      - personal_trusted
+      - personal_limited
+      - client_detached
+      - unknown
+      - denied
+    description: Trust tier assigned to a node, link, or sync relationship.
+
+  applies_to:
+    type: string
+    description: Exact target scope this trust policy applies to.
+
+  sync_allowed:
+    type: boolean
+    description: Whether synchronization is allowed.
+
+  secrets_access_allowed:
+    type: boolean
+    description: Whether secrets access is allowed.
+
+  restricted_memory_access_allowed:
+    type: boolean
+    description: Whether restricted memory access is allowed.
+
+validation_rules:
+  - denied trust level must disable all sensitive access
+  - trust_level must match allowed enum
+  - applies_to must be explicit
+
+security_rules:
+  - trust does not bypass approval rules
+  - denied remains strongest effective state
+  - secrets and restricted memory require explicit separate allowance

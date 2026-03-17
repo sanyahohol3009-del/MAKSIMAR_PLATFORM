@@ -1,0 +1,46 @@
+contract_name: deployment_mode
+schema_version: deployment_mode.v1
+description: Canonical deployment mode definition.
+
+required:
+  - mode_id
+  - mode_name
+  - shell_targets
+  - capability_profile_ref
+
+fields:
+  mode_id:
+    type: string
+    description: Unique deployment mode identifier.
+
+  mode_name:
+    type: string
+    description: Human-readable deployment mode name.
+
+  shell_targets:
+    type: array
+    items:
+      type: string
+    description: Explicit shells targeted by this deployment mode.
+
+  capability_profile_ref:
+    type: string
+    description: Reference to the capability profile used by this mode.
+
+  standalone:
+    type: boolean
+    description: Whether the deployment may operate standalone.
+
+  backend_required:
+    type: boolean
+    description: Whether backend support is mandatory for this mode.
+
+validation_rules:
+  - shell_targets must be explicit
+  - capability_profile_ref required
+  - shell_targets should not contain duplicates
+
+security_rules:
+  - mode cannot grant forbidden core rights
+  - deployment mode does not bypass shell boundaries
+  - standalone mode does not imply unrestricted local authority

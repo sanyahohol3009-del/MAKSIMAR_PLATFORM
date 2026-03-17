@@ -1,0 +1,22 @@
+contract_name: task_to_spec
+schema_version: task_to_spec.v1
+description: Canonical contract for task_to_spec.
+
+required:
+  - id
+
+fields:
+  id:
+    type: string
+
+metadata:
+  created_by: MAKSIMAR_PLATFORM
+  layer: portable_core
+  status: draft
+
+validation_rules:
+  - id required
+
+security_rules:
+  - no implicit authority
+  - execution requires approval policy

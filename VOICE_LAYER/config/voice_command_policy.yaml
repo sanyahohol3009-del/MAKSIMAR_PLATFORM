@@ -1,0 +1,17 @@
+schema_version: voice_command_policy.v1
+description: Canonical policy for voice command parsing and routing.
+
+commands:
+  intent_mapping_required: true
+  workflow_binding_allowed: true
+  direct_action_binding_forbidden: true
+
+validation:
+  command_trace_required: true
+  context_reference_required: true
+  ambiguous_command_requires_clarification: true
+
+rules:
+  - voice commands must resolve to intents, not direct execution
+  - command routing must remain auditable
+  - ambiguous commands must trigger clarification

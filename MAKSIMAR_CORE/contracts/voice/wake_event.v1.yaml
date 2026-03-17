@@ -1,0 +1,37 @@
+contract_name: wake_event
+schema_version: wake_event.v1
+description: Wake phrase activation event.
+
+required:
+  - wake_event_id
+  - detected_at
+  - device_ref
+
+fields:
+  wake_event_id:
+    type: string
+    description: Unique wake event identifier.
+
+  detected_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of wake phrase detection.
+
+  device_ref:
+    type: string
+    description: Reference to device that detected the wake phrase.
+
+  confidence:
+    type: number
+    description: Confidence score for wake phrase detection.
+
+validation_rules:
+  - wake_event_id required
+  - detected_at required
+  - device_ref required
+  - confidence should be explicit when available
+
+security_rules:
+  - wake event alone grants no execution
+  - wake detection remains subject to privacy and routing policy
+  - false positive handling must remain possible downstream

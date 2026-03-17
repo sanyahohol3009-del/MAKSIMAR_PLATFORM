@@ -1,0 +1,19 @@
+schema_version: module_registry_config.v1
+description: Canonical registry configuration for platform modules and cubes.
+
+registry:
+  manifest_registry_enabled: true
+  permission_registry_enabled: true
+  compatibility_registry_enabled: true
+  dashboard_registry_enabled: true
+  workflow_binding_registry_enabled: true
+
+defaults:
+  modules_disabled_by_default: true
+  manual_registration_required: true
+  registry_audit_enabled: true
+
+rules:
+  - every module must be manifest-declared
+  - hidden modules are forbidden
+  - registry mutations must remain auditable

@@ -1,0 +1,80 @@
+contract_name: optimization_suggestion
+schema_version: optimization_suggestion.v1
+description: Suggestion record generated from repeated execution patterns.
+
+required:
+  - suggestion_id
+  - suggested_name
+  - suggested_steps
+  - confidence
+  - risk_level
+  - status
+
+fields:
+  suggestion_id:
+    type: string
+    description: Unique optimization suggestion identifier.
+
+  based_on_executions:
+    type: array
+    items:
+      type: string
+    description: Supporting execution identifiers used to derive the suggestion.
+
+  suggested_name:
+    type: string
+    description: Proposed human-readable workflow name.
+
+  suggested_trigger_phrase:
+    type: string
+    description: Proposed trigger phrase for accepted workflow creation.
+
+  suggested_steps:
+    type: array
+    items:
+      type: object
+    description: Proposed workflow steps inferred from repeated behavior.
+
+  confidence:
+    type: number
+    minimum: 0.0
+    maximum: 1.0
+    description: Confidence score assigned to the suggestion.
+
+  risk_level:
+    type: string
+    enum:
+      - safe
+      - sensitive
+      - dangerous
+      - blocked
+    description: Risk level of the proposed optimization.
+
+  requires_human_confirmation:
+    type: boolean
+    description: Whether explicit human confirmation is required before promotion.
+
+  status:
+    type: string
+    enum:
+      - pending
+      - accepted
+      - rejected
+      - expired
+    description: Suggestion lifecycle state.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC creation timestamp.
+
+validation_rules:
+  - suggested_steps required
+  - confidence must remain within 0.0..1.0
+  - risk_level must match allowed enum
+  - blocked suggestions must not be auto-promoted
+
+security_rules:
+  - suggestions do not create workflows automatically
+  - human confirmation required where policy demands
+  - inferred suggestions must preserve supporting execution lineage

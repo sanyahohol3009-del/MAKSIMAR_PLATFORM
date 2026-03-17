@@ -1,0 +1,46 @@
+contract_name: image_transform
+schema_version: image_transform.v1
+description: Canonical visual transformation request.
+
+required:
+  - transform_id
+  - input_image_ref
+  - transform_type
+
+fields:
+  transform_id:
+    type: string
+    description: Unique transform request identifier.
+
+  input_image_ref:
+    type: string
+    description: Reference to input image asset.
+
+  transform_type:
+    type: string
+    enum:
+      - cleanup
+      - crop
+      - threshold
+      - vectorize
+      - background_remove
+      - machine_prepare
+      - image_to_depth
+      - image_to_model_hint
+    description: Requested transformation class.
+
+  parameters:
+    type: object
+    additional_properties: true
+    description: Structured transform parameters.
+
+validation_rules:
+  - transform_id required
+  - input_image_ref required
+  - transform_type must match allowed enum
+  - transform parameters should be explicit for non-default processing
+
+security_rules:
+  - destructive transforms require output snapshot
+  - transform request does not imply production use authority
+  - input and output lineage must remain reviewable

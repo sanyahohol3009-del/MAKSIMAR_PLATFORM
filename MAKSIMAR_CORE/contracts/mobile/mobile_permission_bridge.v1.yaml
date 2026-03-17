@@ -1,0 +1,45 @@
+contract_name: mobile_permission_bridge
+schema_version: mobile_permission_bridge.v1
+description: Bridge between portable-core permissions and mobile OS permissions.
+
+required:
+  - bridge_id
+  - platform
+  - core_permission
+  - os_permission
+
+fields:
+  bridge_id:
+    type: string
+    description: Unique permission bridge identifier.
+
+  platform:
+    type: string
+    enum:
+      - android
+      - ios
+    description: Mobile platform governed by this permission bridge.
+
+  core_permission:
+    type: string
+    description: Portable-core permission identifier.
+
+  os_permission:
+    type: string
+    description: Operating-system permission identifier.
+
+  granted:
+    type: boolean
+    description: Current bridge state between OS permission and core permission usability.
+
+validation_rules:
+  - bridge_id required
+  - platform must match allowed enum
+  - core_permission required
+  - os_permission required
+  - granted should be explicit
+
+security_rules:
+  - OS permission is not equal to core authority automatically
+  - bridge records do not bypass governance or approval policy
+  - permission mapping must remain explicit and auditable

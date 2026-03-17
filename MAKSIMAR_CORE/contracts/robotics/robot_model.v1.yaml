@@ -1,0 +1,42 @@
+contract_name: robot_model
+schema_version: robot_model.v1
+description: Canonical robot model descriptor.
+
+required:
+  - robot_model_id
+  - robot_type
+  - kinematic_profile_ref
+
+fields:
+  robot_model_id:
+    type: string
+    description: Unique robot model identifier.
+
+  robot_type:
+    type: string
+    description: Canonical robot class or mechanism type.
+
+  kinematic_profile_ref:
+    type: string
+    description: Reference to kinematic profile definition.
+
+  dynamic_profile_ref:
+    type: string
+    description: Reference to dynamic profile definition.
+
+  constraint_refs:
+    type: array
+    items:
+      type: string
+    description: References to applicable robotics constraints.
+
+validation_rules:
+  - robot_model_id required
+  - robot_type required
+  - kinematic_profile_ref required
+  - constraint_refs should be explicit even when empty
+
+security_rules:
+  - model metadata only
+  - robot model does not imply hardware execution authority
+  - model references must remain explicit and reviewable

@@ -1,0 +1,19 @@
+schema_version: action_permissions.v1
+description: Permission mapping for action execution.
+
+permission_levels:
+  public:
+    description: available without special permissions
+
+  user:
+    description: requires authenticated user context
+
+  privileged:
+    description: requires elevated permission and approval
+
+  restricted:
+    description: requires explicit policy approval
+
+rules:
+  - permission level must be declared in action manifest
+  - privileged and restricted actions require approval policy

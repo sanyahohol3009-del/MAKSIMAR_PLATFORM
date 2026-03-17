@@ -1,0 +1,39 @@
+schema_version: simulation_routing_rules.v1
+description: Canonical routing rules for selecting simulation engine by scenario and constraints.
+
+routes:
+  cartpole:
+    preferred_engines:
+      - pybullet
+      - mujoco
+
+  quadruped_locomotion:
+    preferred_engines:
+      - mujoco
+      - genesis
+      - isaac
+
+  manipulator_pick_place:
+    preferred_engines:
+      - mujoco
+      - isaac
+
+  cnc_motion:
+    preferred_engines:
+      - pybullet
+      - genesis
+
+  printer_motion:
+    preferred_engines:
+      - pybullet
+      - genesis
+
+  digital_twin_validation:
+    preferred_engines:
+      - isaac
+      - genesis
+
+rules:
+  - route must choose from registered engines only
+  - unavailable engine must fall back to next allowed engine
+  - routing remains bounded by sandbox and runtime policy

@@ -1,0 +1,23 @@
+schema_version: robotics_layer_config.v1
+description: Canonical top-level configuration for robotics and hardware control layer.
+
+registry:
+  robot_registry_enabled: true
+  controller_registry_enabled: true
+  kinematics_registry_enabled: true
+  hardware_adapter_registry_enabled: true
+
+execution:
+  simulation_required_for_validation: true
+  direct_hardware_execution_forbidden: true
+  approval_required_for_real_hardware: true
+
+defaults:
+  safety_constraints_enabled: true
+  telemetry_required: true
+  command_logging_required: true
+
+rules:
+  - robotics layer must not execute hardware commands without approval
+  - robotics modules must pass simulation validation before proposal
+  - robotics layer must not mutate CORE_ROOT

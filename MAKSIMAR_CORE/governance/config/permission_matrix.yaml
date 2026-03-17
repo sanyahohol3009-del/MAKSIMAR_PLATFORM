@@ -1,0 +1,226 @@
+schema_version: governance_permission_matrix.v1
+description: Canonical deny-by-default permission matrix for core roles, domains, and execution scopes.
+
+roles:
+  - operator
+  - owner
+  - platform_service
+  - shell_adapter
+  - module_runtime
+  - ai_service
+  - monitoring
+  - sandbox_runtime
+
+resources:
+  - contracts
+  - configs
+  - workflows
+  - actions
+  - memory
+  - knowledge
+  - research
+  - products
+  - packaging
+  - simulation
+  - robotics
+  - visual_engineering
+  - energy
+  - compute_fleet
+  - vpn
+  - industrial
+  - voice
+  - dialogue
+  - shell
+  - core_root
+  - safety_foundation
+
+permissions:
+  operator:
+    contracts: read
+    configs: read
+    workflows: read_write
+    actions: read
+    memory: read_write
+    knowledge: read_write
+    research: read_write
+    products: read_write
+    packaging: read_write
+    simulation: read_write
+    robotics: read_write
+    visual_engineering: read_write
+    energy: read_write
+    compute_fleet: read_write
+    vpn: read_write
+    industrial: read_write
+    voice: read_write
+    dialogue: read_write
+    shell: read_write
+    core_root: none
+    safety_foundation: read
+
+  owner:
+    contracts: read_write
+    configs: read_write
+    workflows: read_write
+    actions: read_write
+    memory: read_write
+    knowledge: read_write
+    research: read_write
+    products: read_write
+    packaging: read_write
+    simulation: read_write
+    robotics: read_write
+    visual_engineering: read_write
+    energy: read_write
+    compute_fleet: read_write
+    vpn: read_write
+    industrial: read_write
+    voice: read_write
+    dialogue: read_write
+    shell: read_write
+    core_root: none
+    safety_foundation: read
+
+  platform_service:
+    contracts: read
+    configs: read
+    workflows: read_write
+    actions: read
+    memory: read_write
+    knowledge: read_write
+    research: read_write
+    products: read
+    packaging: read
+    simulation: read_write
+    robotics: read
+    visual_engineering: read_write
+    energy: read_write
+    compute_fleet: read_write
+    vpn: read_write
+    industrial: read
+    voice: read_write
+    dialogue: read_write
+    shell: read
+    core_root: none
+    safety_foundation: none
+
+  shell_adapter:
+    contracts: read
+    configs: read
+    workflows: read
+    actions: read
+    memory: read_write
+    knowledge: read
+    research: read
+    products: read
+    packaging: read
+    simulation: none
+    robotics: none
+    visual_engineering: read
+    energy: read
+    compute_fleet: read
+    vpn: read_write
+    industrial: none
+    voice: read_write
+    dialogue: read_write
+    shell: read_write
+    core_root: none
+    safety_foundation: none
+
+  module_runtime:
+    contracts: read
+    configs: read
+    workflows: read_write
+    actions: read
+    memory: read_write
+    knowledge: read
+    research: read
+    products: read
+    packaging: read
+    simulation: read
+    robotics: read
+    visual_engineering: read
+    energy: read
+    compute_fleet: read
+    vpn: read
+    industrial: read
+    voice: none
+    dialogue: none
+    shell: none
+    core_root: none
+    safety_foundation: none
+
+  ai_service:
+    contracts: read
+    configs: read
+    workflows: read
+    actions: read
+    memory: read_write
+    knowledge: read_write
+    research: read_write
+    products: read
+    packaging: read
+    simulation: read
+    robotics: read
+    visual_engineering: read
+    energy: read
+    compute_fleet: read
+    vpn: read
+    industrial: read
+    voice: read
+    dialogue: read_write
+    shell: none
+    core_root: none
+    safety_foundation: none
+
+  monitoring:
+    contracts: read
+    configs: read
+    workflows: read
+    actions: read
+    memory: read
+    knowledge: read
+    research: read
+    products: read
+    packaging: read
+    simulation: read
+    robotics: read
+    visual_engineering: read
+    energy: read
+    compute_fleet: read
+    vpn: read
+    industrial: read
+    voice: read
+    dialogue: read
+    shell: read
+    core_root: none
+    safety_foundation: read
+
+  sandbox_runtime:
+    contracts: read
+    configs: read
+    workflows: read
+    actions: read
+    memory: read_write
+    knowledge: read
+    research: read
+    products: none
+    packaging: none
+    simulation: read_write
+    robotics: read
+    visual_engineering: read_write
+    energy: read
+    compute_fleet: read
+    vpn: none
+    industrial: none
+    voice: none
+    dialogue: none
+    shell: none
+    core_root: none
+    safety_foundation: none
+
+rules:
+  - deny by default
+  - no wildcard write permissions
+  - core_root write is forbidden across all standard roles
+  - safety_foundation mutation requires separate immutable path outside this matrix

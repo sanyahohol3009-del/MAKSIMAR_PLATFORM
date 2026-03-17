@@ -1,0 +1,33 @@
+contract_name: thermal_profile
+schema_version: thermal_profile.v1
+description: Thermal constraints for compute nodes.
+
+required:
+  - profile_id
+  - limits
+
+fields:
+  profile_id:
+    type: string
+    description: Unique thermal profile identifier.
+
+  limits:
+    type: object
+    additional_properties: true
+    description: Structured thermal limits and operating thresholds.
+
+  fan_policy:
+    type: object
+    additional_properties: true
+    description: Structured fan behavior policy associated with this profile.
+
+validation_rules:
+  - profile_id required
+  - limits required
+  - thermal thresholds should be explicit
+  - fan_policy should be explicit when thermal automation is supported
+
+security_rules:
+  - unsafe thermal states must trigger alerts
+  - thermal profiles do not directly authorize hardware writes
+  - threshold changes may require approval depending on governance policy

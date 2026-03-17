@@ -1,0 +1,97 @@
+contract_name: memory_relation
+schema_version: memory_relation.v1
+description: Canonical typed relation between two memory entities.
+
+required:
+  - relation_id
+  - from_entity_id
+  - relation_type
+  - to_entity_id
+  - created_at
+  - source
+  - status
+
+fields:
+  relation_id:
+    type: string
+    description: Unique stable relation identifier.
+
+  from_entity_id:
+    type: string
+    description: Source entity identifier.
+
+  relation_type:
+    type: string
+    enum:
+      - owns
+      - has_task
+      - depends_on
+      - belongs_to
+      - activates
+      - runs_on
+      - continues
+      - affects
+      - prefers
+      - gates
+      - applies_to
+      - related_to
+      - references
+      - part_of
+    description: Typed relation connecting two entities.
+
+  to_entity_id:
+    type: string
+    description: Target entity identifier.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of relation creation.
+
+  updated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of latest relation update.
+
+  source:
+    type: string
+    enum:
+      - confirmed_user_context
+      - system_observed
+      - workflow_generated
+      - imported
+      - inferred
+      - operator_confirmed
+    description: Source category for the relation.
+
+  confidence:
+    type: number
+    minimum: 0.0
+    maximum: 1.0
+    description: Confidence in correctness of the relation.
+
+  status:
+    type: string
+    enum:
+      - active
+      - inactive
+      - archived
+      - deleted
+    description: Relation lifecycle state.
+
+  metadata:
+    type: object
+    additional_properties: true
+    description: Structured relation metadata.
+
+validation_rules:
+  - relation_id must be unique
+  - from_entity_id must exist
+  - to_entity_id must exist
+  - if source=inferred then confidence should be present
+  - updated_at should not be earlier than created_at when both exist
+
+security_rules:
+  - relation does not imply execution authority
+  - restricted relations require policy-gated access
+  - relations may affect ranking and context only, not direct privileged execution

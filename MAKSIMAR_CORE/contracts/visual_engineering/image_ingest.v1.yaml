@@ -1,0 +1,43 @@
+contract_name: image_ingest
+schema_version: image_ingest.v1
+description: Canonical image ingest request.
+
+required:
+  - image_id
+  - source_type
+  - source_ref
+
+fields:
+  image_id:
+    type: string
+    description: Unique ingested image identifier.
+
+  source_type:
+    type: string
+    enum:
+      - file
+      - camera
+      - screenshot
+      - imported_dataset
+    description: Origin type of the image asset.
+
+  source_ref:
+    type: string
+    description: Reference to the source file, stream, or dataset artifact.
+
+  tags:
+    type: array
+    items:
+      type: string
+    description: Semantic tags attached to the ingested image.
+
+validation_rules:
+  - image_id required
+  - source_type must match allowed enum
+  - source_ref required
+  - tags should be explicit even when empty
+
+security_rules:
+  - imported datasets follow provenance policy
+  - ingest metadata does not imply transform authority
+  - source traceability must be preserved

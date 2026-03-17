@@ -1,0 +1,34 @@
+contract_name: product_bundle
+schema_version: product_bundle.v1
+description: Bundle definition grouping products for distribution.
+
+required:
+  - bundle_id
+  - products
+
+fields:
+  bundle_id:
+    type: string
+    description: Unique bundle identifier.
+
+  products:
+    type: array
+    items:
+      type: string
+    description: Product identifiers included in the bundle.
+
+  distribution_targets:
+    type: array
+    items:
+      type: string
+    description: Target platforms or markets.
+
+validation_rules:
+  - bundle_id required
+  - products must not be empty
+  - products should reference known product identifiers
+
+security_rules:
+  - bundle does not grant module execution authority
+  - distribution targets must respect regional policy constraints
+  - bundle composition must remain auditable

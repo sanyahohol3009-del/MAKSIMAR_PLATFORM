@@ -1,0 +1,37 @@
+contract_name: widget_schema
+schema_version: widget_schema.v1
+description: Canonical widget contract for dashboard composition.
+
+required:
+  - widget_id
+  - widget_type
+  - data_binding
+
+fields:
+  widget_id:
+    type: string
+    description: Unique widget identifier.
+
+  widget_type:
+    type: string
+    description: Canonical widget category.
+
+  data_binding:
+    type: string
+    description: Bound data source, metric source, or contract reference.
+
+  display_policy:
+    type: object
+    additional_properties: true
+    description: Structured widget display rules, visibility, and layout hints.
+
+validation_rules:
+  - widget_id must be unique
+  - data_binding required
+  - widget_type required
+  - display_policy should remain structured when present
+
+security_rules:
+  - widget visibility follows access policy
+  - widgets do not grant execution rights
+  - widget bindings must not expose restricted data outside policy

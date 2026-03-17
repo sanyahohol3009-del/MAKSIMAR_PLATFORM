@@ -1,0 +1,43 @@
+contract_name: publishing_job
+schema_version: publishing_job.v1
+description: Publishing job descriptor.
+
+required:
+  - job_id
+  - target_channels
+  - content_ref
+
+fields:
+  job_id:
+    type: string
+    description: Unique publishing job identifier.
+
+  target_channels:
+    type: array
+    items:
+      type: string
+    description: Explicit list of target publishing channels.
+
+  content_ref:
+    type: string
+    description: Reference to content artifact being published.
+
+  schedule_ref:
+    type: string
+    description: Optional reference to schedule or timing policy.
+
+  approval_required:
+    type: boolean
+    description: Whether explicit approval is required before publication.
+
+validation_rules:
+  - job_id required
+  - target_channels required
+  - target_channels must not be empty
+  - content_ref required
+  - approval_required should be explicit
+
+security_rules:
+  - publish authority requires approval
+  - publishing jobs do not bypass governance or channel policy
+  - scheduling does not imply automatic publishing authority

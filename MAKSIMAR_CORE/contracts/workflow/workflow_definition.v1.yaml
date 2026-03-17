@@ -1,0 +1,102 @@
+contract_name: workflow_definition
+schema_version: workflow_definition.v1
+description: Canonical workflow definition for orchestration layer.
+
+required:
+  - workflow_id
+  - name
+  - source
+  - steps
+  - risk_level
+  - approval_required
+  - status
+
+fields:
+  workflow_id:
+    type: string
+    description: Unique workflow identifier.
+
+  name:
+    type: string
+    description: Human-readable workflow name.
+
+  description:
+    type: string
+    description: Short semantic description of workflow purpose.
+
+  source:
+    type: string
+    enum:
+      - voice_generated
+      - text_generated
+      - manual_debug
+      - optimization_suggested
+      - imported
+    description: Origin of workflow creation.
+
+  trigger_phrases:
+    type: array
+    items:
+      type: string
+    description: Bound trigger phrases or aliases for workflow activation.
+
+  steps:
+    type: array
+    items:
+      type: object
+    description: Ordered action-step sequence executed by the workflow.
+
+  risk_level:
+    type: string
+    enum:
+      - safe
+      - sensitive
+      - dangerous
+      - blocked
+    description: Aggregate workflow risk classification.
+
+  approval_required:
+    type: boolean
+    description: Whether approval is required before workflow execution.
+
+  contexts:
+    type: array
+    items:
+      type: string
+    description: Supported execution contexts for the workflow.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC creation timestamp.
+
+  last_used_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of last successful or attempted use.
+
+  usage_count:
+    type: integer
+    minimum: 0
+    description: Execution count tracked for analytics and optimization.
+
+  status:
+    type: string
+    enum:
+      - draft
+      - active
+      - disabled
+      - archived
+    description: Workflow lifecycle status.
+
+validation_rules:
+  - workflow_id must be unique
+  - steps must contain at least one element
+  - risk_level must match allowed enum
+  - blocked workflows must not be executable
+  - usage_count must not be negative
+
+security_rules:
+  - workflow definition is not execution authority by itself
+  - workflow risk must not override action-level blocking
+  - workflow metadata must not embed hidden privileged commands

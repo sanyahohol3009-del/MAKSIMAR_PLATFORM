@@ -1,0 +1,44 @@
+contract_name: visual_approval
+schema_version: visual_approval.v1
+description: Approval contract for visual outputs going to machine or product use.
+
+required:
+  - approval_id
+  - target_ref
+  - decision
+
+fields:
+  approval_id:
+    type: string
+    description: Unique visual approval identifier.
+
+  target_ref:
+    type: string
+    description: Reference to visual artifact under review.
+
+  decision:
+    type: string
+    enum:
+      - approved
+      - rejected
+      - needs_review
+    description: Approval decision.
+
+  reviewer:
+    type: string
+    description: Reviewer or operator responsible for the decision.
+
+  rationale:
+    type: string
+    description: Human-readable explanation for the decision.
+
+validation_rules:
+  - approval_id required
+  - target_ref required
+  - decision must match allowed enum
+  - reviewer should be explicit for approved outputs
+
+security_rules:
+  - approval required before hardware or production use
+  - approval does not bypass machine-specific safeguards
+  - rejected or needs_review outputs must remain blocked downstream

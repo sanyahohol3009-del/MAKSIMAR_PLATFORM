@@ -1,0 +1,98 @@
+contract_name: memory_event
+schema_version: memory_event.v1
+description: Canonical episodic event for memory timeline and recency-based reasoning.
+
+required:
+  - event_id
+  - event_type
+  - timestamp
+  - source
+  - importance
+
+fields:
+  event_id:
+    type: string
+    description: Unique event identifier.
+
+  event_type:
+    type: string
+    enum:
+      - workflow_executed
+      - workflow_created
+      - workflow_suggested
+      - project_phase_updated
+      - incident_detected
+      - task_completed
+      - task_created
+      - preference_confirmed
+      - suggestion_accepted
+      - suggestion_rejected
+      - session_started
+      - session_closed
+      - device_used
+      - module_changed
+    description: Canonical episodic event type.
+
+  session_id:
+    type: string
+    description: Optional associated session identifier.
+
+  timestamp:
+    type: string
+    format: date-time
+    description: UTC timestamp of event creation.
+
+  related_entities:
+    type: array
+    items:
+      type: string
+    description: Entity identifiers associated with this event.
+
+  summary:
+    type: string
+    description: Short human-readable event summary.
+
+  details:
+    type: object
+    additional_properties: true
+    description: Structured event payload details.
+
+  importance:
+    type: string
+    enum:
+      - low
+      - medium
+      - high
+      - critical
+    description: Event importance level.
+
+  source:
+    type: string
+    enum:
+      - system_observed
+      - workflow_generated
+      - operator_confirmed
+      - imported
+      - inferred
+    description: Source category of event creation.
+
+  memory_level:
+    type: string
+    enum:
+      - L0_ephemeral
+      - L1_operational
+      - L2_project
+      - L3_stable_personal
+      - L4_restricted
+    description: Memory level assigned to the event.
+
+validation_rules:
+  - event_id must be unique
+  - related_entities should reference existing entities where applicable
+  - critical events should include summary
+  - timestamp is mandatory for ordering
+
+security_rules:
+  - event log is append-oriented
+  - restricted events require gated access
+  - event records do not imply execution authority

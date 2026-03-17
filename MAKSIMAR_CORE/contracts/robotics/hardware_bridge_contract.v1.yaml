@@ -1,0 +1,40 @@
+contract_name: hardware_bridge_contract
+schema_version: hardware_bridge_contract.v1
+description: Boundary contract between simulated or proposed control and real hardware.
+
+required:
+  - bridge_id
+  - robot_model_id
+  - bridge_mode
+
+fields:
+  bridge_id:
+    type: string
+    description: Unique hardware bridge identifier.
+
+  robot_model_id:
+    type: string
+    description: Target robot model for this bridge boundary.
+
+  bridge_mode:
+    type: string
+    enum:
+      - sandbox
+      - limited_hardware_test
+      - blocked
+    description: Allowed execution boundary mode for this bridge.
+
+  approval_required:
+    type: boolean
+    description: Whether explicit approval is required before any bridge usage.
+
+validation_rules:
+  - bridge_id required
+  - robot_model_id required
+  - bridge_mode must match allowed enum
+  - limited_hardware_test must imply approval_required=true
+
+security_rules:
+  - sandbox default
+  - no direct production deploy
+  - hardware bridge never bypasses approval or immutable safety rules

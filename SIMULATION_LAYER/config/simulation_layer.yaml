@@ -1,0 +1,26 @@
+schema_version: simulation_layer_config.v1
+description: Canonical top-level configuration for backend-agnostic simulation layer.
+
+registry:
+  engine_registry_enabled: true
+  environment_registry_enabled: true
+  evaluator_registry_enabled: true
+  artifact_registry_enabled: true
+
+execution:
+  sandbox_required: true
+  queue_enabled: true
+  evidence_retention_required: true
+  direct_hardware_execution_forbidden: true
+
+defaults:
+  default_engine: pybullet
+  default_timeout_sec: 300
+  default_save_logs: true
+  default_save_metrics: true
+  default_save_failure_snapshot: true
+
+rules:
+  - simulation layer is evidence-producing, not deployment authority
+  - simulation must not write to CORE_ROOT
+  - real hardware execution is outside simulation authority

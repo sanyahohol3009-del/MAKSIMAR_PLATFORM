@@ -1,0 +1,25 @@
+schema_version: action_contexts.v1
+description: Allowed execution contexts for portable actions.
+
+contexts:
+  desktop:
+    allowed: true
+
+  android:
+    allowed: true
+
+  ios:
+    allowed: true
+
+  server:
+    allowed: true
+
+  family_mode:
+    restricted_actions: true
+
+  engineering_mode:
+    extended_actions: true
+
+rules:
+  - context restrictions must remain explicit
+  - actions must declare supported contexts

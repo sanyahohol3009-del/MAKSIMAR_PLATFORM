@@ -1,0 +1,35 @@
+contract_name: module_dependency
+schema_version: module_dependency.v1
+description: Canonical module dependency declaration.
+
+required:
+  - module_id
+  - depends_on
+
+fields:
+  module_id:
+    type: string
+    description: Module declaring dependencies.
+
+  depends_on:
+    type: array
+    items:
+      type: string
+    description: Required module dependencies.
+
+  optional_dependencies:
+    type: array
+    items:
+      type: string
+    description: Optional dependencies that enhance behavior but are not required.
+
+validation_rules:
+  - circular dependencies not allowed
+  - module_id required
+  - depends_on should be explicit even when empty
+  - dependency references should target known module identifiers
+
+security_rules:
+  - dependencies do not imply trust
+  - optional dependencies must not silently elevate module permissions
+  - dependency loading must remain policy-governed

@@ -1,0 +1,54 @@
+contract_name: environment_contract
+schema_version: environment_contract.v1
+description: Canonical backend-agnostic environment descriptor used by simulation layer.
+
+required:
+  - environment_id
+  - scenario_type
+  - model_type
+
+fields:
+  environment_id:
+    type: string
+    description: Unique environment identifier.
+
+  scenario_type:
+    type: string
+    description: Scenario type implemented by this environment.
+
+  model_type:
+    type: string
+    description: Abstract model class for the environment, such as control_benchmark or industrial_twin.
+
+  required_inputs:
+    type: array
+    items:
+      type: string
+    description: Inputs required to instantiate or execute the environment.
+
+  supported_metrics:
+    type: array
+    items:
+      type: string
+    description: Metrics natively supported by the environment.
+
+  default_constraints:
+    type: object
+    additional_properties: true
+    description: Default constraints applied unless overridden by request.
+
+  default_stop_conditions:
+    type: object
+    additional_properties: true
+    description: Default stop conditions applied unless overridden by request.
+
+validation_rules:
+  - environment_id required
+  - scenario_type required
+  - model_type required
+  - environment contract must remain backend-agnostic
+
+security_rules:
+  - environment contract does not imply runtime authority
+  - backend-specific leakage into core contract is forbidden
+  - environment defaults must still respect governance and safety policies

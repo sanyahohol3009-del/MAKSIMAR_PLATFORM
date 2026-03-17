@@ -1,0 +1,50 @@
+contract_name: knowledge_source
+schema_version: knowledge_source.v1
+description: Canonical source descriptor for knowledge ingestion.
+
+required:
+  - source_id
+  - source_type
+  - trust_level
+
+fields:
+  source_id:
+    type: string
+    description: Unique source identifier.
+
+  source_type:
+    type: string
+    enum:
+      - local_doc
+      - web
+      - connector
+      - manual_entry
+      - benchmark
+    description: Source category used by ingest and retrieval systems.
+
+  trust_level:
+    type: string
+    enum:
+      - high
+      - medium
+      - low
+      - unverified
+    description: Trust score bucket assigned to the source.
+
+  origin:
+    type: string
+    description: Human-readable or machine-readable origin reference.
+
+  citation_required:
+    type: boolean
+    description: Whether downstream use of this source requires citations.
+
+validation_rules:
+  - web sources must carry origin
+  - source_type must match allowed enum
+  - trust_level must match allowed enum
+
+security_rules:
+  - source trust affects retrieval ranking only
+  - source metadata does not bypass review or approval policy
+  - unverified sources must remain marked as such

@@ -1,0 +1,17 @@
+schema_version: module_compatibility_policy.v1
+description: Canonical compatibility policy across shells, products, and deployment modes.
+
+checks:
+  shell_compatibility_required: true
+  product_compatibility_required: true
+  capability_profile_compatibility_required: true
+  backend_requirement_check_required: true
+
+defaults:
+  incompatible_modules_block_activation: true
+  standalone_incompatible_modules_block_packaging: true
+
+rules:
+  - module compatibility must be explicit
+  - backend-required modules must not be activated in unsupported standalone contexts
+  - compatibility does not imply automatic enablement

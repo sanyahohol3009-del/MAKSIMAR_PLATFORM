@@ -1,0 +1,26 @@
+schema_version: shared_product_profiles.v1
+description: Canonical shared product profile bindings for packaging and shells.
+
+products:
+  jarvis_full_platform:
+    enabled: true
+
+  jarvis_family:
+    enabled: true
+
+  jarvis_engineering:
+    enabled: true
+
+  jarvis_mobile_consumer:
+    enabled: true
+
+  jarvis_desktop_consumer:
+    enabled: true
+
+  jarvis_industrial:
+    enabled: true
+
+rules:
+  - product profile identifiers must remain explicit
+  - shared product profiles are references, not authority
+  - shell and capability bindings must stay consistent

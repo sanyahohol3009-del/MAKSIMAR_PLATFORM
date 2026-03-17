@@ -1,0 +1,113 @@
+contract_name: memory_entity
+schema_version: memory_entity.v1
+description: Canonical entity object for Persistent Personal AI Memory Graph.
+
+required:
+  - entity_id
+  - entity_type
+  - name
+  - created_at
+  - status
+  - source
+
+fields:
+  entity_id:
+    type: string
+    description: Unique stable entity identifier.
+
+  entity_type:
+    type: string
+    enum:
+      - User
+      - Project
+      - Task
+      - Workflow
+      - Trigger
+      - Device
+      - Module
+      - Document
+      - Session
+      - Preference
+      - Permission
+      - Incident
+      - Goal
+      - Mode
+    description: Canonical memory entity type.
+
+  name:
+    type: string
+    description: Human-readable primary entity name.
+
+  summary:
+    type: string
+    description: Short semantic summary of the entity.
+
+  labels:
+    type: array
+    items:
+      type: string
+    description: Freeform semantic tags.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of entity creation.
+
+  updated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of latest update.
+
+  status:
+    type: string
+    enum:
+      - active
+      - inactive
+      - archived
+      - draft
+      - deleted
+    description: Entity lifecycle status.
+
+  confidence:
+    type: number
+    minimum: 0.0
+    maximum: 1.0
+    description: Confidence in correctness of the entity.
+
+  source:
+    type: string
+    enum:
+      - confirmed_user_context
+      - system_observed
+      - workflow_generated
+      - imported
+      - inferred
+      - operator_confirmed
+    description: Source category of entity creation.
+
+  memory_level:
+    type: string
+    enum:
+      - L0_ephemeral
+      - L1_operational
+      - L2_project
+      - L3_stable_personal
+      - L4_restricted
+    description: Memory sensitivity and retention tier.
+
+  metadata:
+    type: object
+    additional_properties: true
+    description: Structured domain-specific metadata.
+
+validation_rules:
+  - entity_id must be globally unique within graph
+  - entity_type must be one of the allowed enum values
+  - if source=inferred then confidence must be present
+  - L4_restricted entities must be marked explicitly
+  - updated_at should not be earlier than created_at when both exist
+
+security_rules:
+  - entity does not grant execution authority
+  - restricted entities require policy-gated access
+  - entity metadata must not embed hidden privileged commands

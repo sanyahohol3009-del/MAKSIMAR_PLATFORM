@@ -1,0 +1,18 @@
+schema_version: ui_module_dashboard_router.v1
+description: Canonical routing policy for module dashboards.
+
+router:
+  module_dashboard_registration_required: true
+  supported_shells_required: true
+  settings_schema_required: true
+  status_widget_binding_required: true
+
+navigation:
+  unified_navigation_required: true
+  hidden_module_panels_forbidden: true
+  access_filtered_listing_required: true
+
+rules:
+  - every visible module dashboard must be explicitly registered
+  - router must respect module compatibility and access policy
+  - dashboard routing must remain deterministic and auditable

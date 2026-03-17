@@ -1,0 +1,55 @@
+contract_name: product_manifest
+schema_version: product_manifest.v1
+description: Canonical definition of a deployable JARVIS product configuration.
+
+required:
+  - product_id
+  - name
+  - supported_nodes
+  - modules
+
+fields:
+  product_id:
+    type: string
+    description: Unique product identifier.
+
+  name:
+    type: string
+    description: Human-readable product name.
+
+  description:
+    type: string
+    description: Short description of the product configuration.
+
+  supported_nodes:
+    type: array
+    items:
+      type: string
+    description: Node types capable of running this product.
+
+  modules:
+    type: array
+    items:
+      type: string
+    description: Module identifiers bundled in the product.
+
+  workflows:
+    type: array
+    items:
+      type: string
+    description: Workflow identifiers included in the product.
+
+  capability_profile_ref:
+    type: string
+    description: Capability profile applied to this product.
+
+validation_rules:
+  - product_id must be unique
+  - modules must not be empty
+  - supported_nodes must be explicit
+  - workflows should be explicit even when empty
+
+security_rules:
+  - product manifest does not grant permissions by itself
+  - modules must still obey module permission matrices
+  - workflows must obey approval policies

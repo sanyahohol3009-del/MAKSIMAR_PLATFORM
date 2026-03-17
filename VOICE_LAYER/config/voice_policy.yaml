@@ -1,0 +1,18 @@
+schema_version: voice_policy.v1
+description: Canonical top-level policy for voice interaction layer.
+
+voice:
+  wake_word_enabled: true
+  continuous_listening_optional: true
+  voice_session_tracking_required: true
+  multi_language_support_allowed: true
+
+safety:
+  voice_execution_authority_forbidden: true
+  approval_required_for_sensitive_commands: true
+  voice_identity_verification_supported: true
+
+rules:
+  - voice layer converts speech to intent only
+  - voice must not execute actions directly
+  - sensitive commands must remain approval-gated

@@ -1,0 +1,39 @@
+contract_name: image_to_3d
+schema_version: image_to_3d.v1
+description: Request and result contract for image-derived 3D preparation.
+
+required:
+  - conversion_id
+  - input_image_ref
+
+fields:
+  conversion_id:
+    type: string
+    description: Unique image-to-3D conversion identifier.
+
+  input_image_ref:
+    type: string
+    description: Reference to source image asset.
+
+  target_geometry_type:
+    type: string
+    description: Requested target geometry class.
+
+  output_geometry_ref:
+    type: string
+    description: Reference to generated geometry artifact.
+
+  confidence:
+    type: number
+    description: Confidence estimate of the generated result.
+
+validation_rules:
+  - conversion_id required
+  - input_image_ref required
+  - confidence should be explicit when output is generated
+  - output_geometry_ref should exist for completed conversion records
+
+security_rules:
+  - output requires validation before manufacturing
+  - conversion output does not imply geometry approval
+  - generated geometry must remain linked to source image lineage

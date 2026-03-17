@@ -1,0 +1,49 @@
+contract_name: codegen_eval
+schema_version: codegen_eval.v1
+description: Evaluation of generated code quality.
+
+required:
+  - eval_id
+  - spec_ref
+  - diff_ref
+  - score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique code generation evaluation identifier.
+
+  spec_ref:
+    type: string
+    description: Reference to source specification used for generation.
+
+  diff_ref:
+    type: string
+    description: Reference to generated diff package under evaluation.
+
+  score:
+    type: number
+    description: Aggregate code quality score.
+
+  test_status:
+    type: string
+    description: Structured summary of test outcome.
+
+  lint_status:
+    type: string
+    description: Structured summary of lint outcome.
+
+  typecheck_status:
+    type: string
+    description: Structured summary of typecheck outcome.
+
+validation_rules:
+  - eval_id required
+  - spec_ref required
+  - diff_ref required
+  - score must be explicit
+
+security_rules:
+  - failing eval blocks proposal promotion
+  - codegen eval is evidence only
+  - evaluation results must not bypass review and approval flow

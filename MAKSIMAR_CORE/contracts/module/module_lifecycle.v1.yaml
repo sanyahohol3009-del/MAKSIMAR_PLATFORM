@@ -1,0 +1,42 @@
+contract_name: module_lifecycle
+schema_version: module_lifecycle.v1
+description: Module lifecycle state contract.
+
+required:
+  - module_id
+  - lifecycle_state
+
+fields:
+  module_id:
+    type: string
+    description: Module whose lifecycle is being tracked.
+
+  lifecycle_state:
+    type: string
+    enum:
+      - registered
+      - installed
+      - enabled
+      - disabled
+      - removed
+    description: Current lifecycle state of the module.
+
+  installed_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of install registration.
+
+  last_changed_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of latest lifecycle transition.
+
+validation_rules:
+  - lifecycle_state required
+  - lifecycle_state must match allowed enum
+  - last_changed_at should not be earlier than installed_at when both exist
+
+security_rules:
+  - lifecycle transitions require policy
+  - enabled state does not bypass approval or action governance
+  - removed modules must not remain executable

@@ -1,0 +1,18 @@
+schema_version: industrial_constraint_policy.v1
+description: Canonical policy for industrial safety constraints and blocking rules.
+
+constraints:
+  warning_enabled: true
+  critical_enabled: true
+  hard_stop_enabled: true
+  hard_stop_highest_priority: true
+
+validation:
+  applies_to_required: true
+  rule_definition_required: true
+  constraint_visibility_required: true
+
+rules:
+  - hard-stop constraints override lower-priority paths
+  - constraint violations must remain visible and blocking where defined
+  - no workflow, shell, or adapter may silently weaken industrial constraints

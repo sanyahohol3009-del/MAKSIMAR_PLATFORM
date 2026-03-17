@@ -1,0 +1,26 @@
+contract_name: memory_retention
+schema_version: memory_retention.v1
+description: Retention and pruning policy for memory levels.
+
+required:
+  - levels
+
+fields:
+  levels:
+    type: object
+    additional_properties: true
+    description: Retention policy map for all active memory levels.
+
+  pruning_rules:
+    type: object
+    additional_properties: true
+    description: Explicit pruning and archival rules.
+
+validation_rules:
+  - all active memory levels must be covered
+  - pruning rules should be explicit for inferred or low-confidence records
+
+security_rules:
+  - restricted memory pruning must be policy-gated
+  - retention policy does not override legal or compliance holds
+  - deletion actions require approved path where policy demands

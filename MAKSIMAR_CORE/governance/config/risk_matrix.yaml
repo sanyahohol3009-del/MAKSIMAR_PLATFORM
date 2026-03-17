@@ -1,0 +1,37 @@
+schema_version: governance_risk_matrix.v1
+description: Canonical risk classification matrix for actions, workflows, proposals, and domain operations.
+
+levels:
+  safe:
+    description: Low-risk operations that do not affect privileged state or safety boundaries.
+    approval_required: false
+    voice_confirmation_required: false
+    hardware_key_required: false
+    execution_forbidden: false
+
+  sensitive:
+    description: Operations affecting user state, device state, network behavior, or business-significant flows.
+    approval_required: true
+    voice_confirmation_required: true
+    hardware_key_required: false
+    execution_forbidden: false
+
+  dangerous:
+    description: Operations affecting critical services, hardware actions, industrial flows, or destructive state transitions.
+    approval_required: true
+    voice_confirmation_required: true
+    hardware_key_required: true
+    execution_forbidden: false
+
+  blocked:
+    description: Explicitly forbidden operations that must never be executed by platform orchestration.
+    approval_required: false
+    voice_confirmation_required: false
+    hardware_key_required: false
+    execution_forbidden: true
+
+rules:
+  - blocked overrides all lower-level decisions
+  - action-level block cannot be weakened by workflow-level safe classification
+  - dangerous operations must remain human-gated
+  - no domain may redefine blocked as executable

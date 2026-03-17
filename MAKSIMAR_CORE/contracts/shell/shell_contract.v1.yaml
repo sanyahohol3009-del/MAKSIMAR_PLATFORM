@@ -1,0 +1,43 @@
+contract_name: shell_contract
+schema_version: shell_contract.v1
+description: Generic shell boundary contract.
+
+required:
+  - shell_id
+  - shell_type
+  - supported_capabilities
+
+fields:
+  shell_id:
+    type: string
+    description: Unique shell identifier.
+
+  shell_type:
+    type: string
+    enum:
+      - server
+      - desktop
+      - android
+      - ios
+    description: Canonical shell type.
+
+  supported_capabilities:
+    type: array
+    items:
+      type: string
+    description: Explicit list of capabilities exposed by this shell.
+
+  shell_policy_ref:
+    type: string
+    description: Reference to governing shell policy.
+
+validation_rules:
+  - shell_id required
+  - shell_type must match allowed enum
+  - supported_capabilities required
+  - supported_capabilities must not be empty
+
+security_rules:
+  - shell must not exceed portable core governance
+  - shell declaration does not grant authority by itself
+  - shell boundaries must remain explicit and auditable

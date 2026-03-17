@@ -1,0 +1,17 @@
+schema_version: shell_security_policy.v1
+description: Canonical security policy for runtime shells.
+
+security:
+  permission_model_required: true
+  sandbox_required_when_supported: true
+  audit_logging_required: true
+
+restrictions:
+  hidden_privileged_shells_forbidden: true
+  unauthorized_capability_escalation_forbidden: true
+  policy_bypass_forbidden: true
+
+rules:
+  - shell execution must remain bounded by platform governance
+  - shell privileges must remain explicit
+  - shell security must remain auditable

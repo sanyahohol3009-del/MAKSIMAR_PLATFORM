@@ -1,0 +1,56 @@
+contract_name: preflight_contract
+schema_version: preflight_contract.v1
+description: Canonical preflight validation snapshot before runtime startup.
+
+required:
+  - preflight_id
+  - checked_at
+  - stale_tmux_found
+  - stale_pid_found
+  - stale_heartbeat_found
+  - port_conflict_found
+
+fields:
+  preflight_id:
+    type: string
+    description: Unique preflight snapshot identifier.
+
+  checked_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of preflight execution.
+
+  stale_tmux_found:
+    type: boolean
+    description: Whether stale tmux sessions were detected.
+
+  stale_pid_found:
+    type: boolean
+    description: Whether stale PID files or mismatched PIDs were detected.
+
+  stale_heartbeat_found:
+    type: boolean
+    description: Whether stale heartbeat state was detected.
+
+  port_conflict_found:
+    type: boolean
+    description: Whether required ports were already occupied.
+
+  previous_crash_found:
+    type: boolean
+    description: Whether evidence of previous abnormal termination was detected.
+
+  details:
+    type: object
+    additional_properties: true
+    description: Structured diagnostic details for preflight findings.
+
+validation_rules:
+  - checked_at is mandatory
+  - all required findings must be explicit booleans
+  - details should remain structured and serializable
+
+security_rules:
+  - no cleanup authority implied
+  - preflight findings are diagnostic evidence only
+  - destructive cleanup requires separate approved path

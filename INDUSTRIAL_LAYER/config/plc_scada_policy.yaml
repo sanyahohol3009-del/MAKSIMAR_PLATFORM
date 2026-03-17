@@ -1,0 +1,18 @@
+schema_version: industrial_plc_scada_policy.v1
+description: Canonical policy for PLC and SCADA boundary adapters.
+
+defaults:
+  plc_read_only_default: true
+  scada_read_only_default: true
+  limited_control_requires_policy: true
+  blocked_mode_supported: true
+
+validation:
+  protocol_whitelist_required: true
+  signal_map_reference_required: true
+  adapter_audit_required: true
+
+rules:
+  - PLC and SCADA adapters default to read-only
+  - limited control must remain explicit and policy-gated
+  - industrial adapters must not bypass safety constraints

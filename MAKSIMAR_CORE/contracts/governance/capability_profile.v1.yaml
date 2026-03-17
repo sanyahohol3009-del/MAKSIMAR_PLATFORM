@@ -1,0 +1,45 @@
+contract_name: capability_profile
+schema_version: capability_profile.v1
+description: Capability subset contract for portable core deployments.
+
+required:
+  - profile_id
+  - profile_name
+  - enabled_capabilities
+
+fields:
+  profile_id:
+    type: string
+    description: Unique capability profile identifier.
+
+  profile_name:
+    type: string
+    description: Human-readable profile name.
+
+  enabled_capabilities:
+    type: array
+    items:
+      type: string
+    description: Explicit set of capabilities enabled in this profile.
+
+  disabled_capabilities:
+    type: array
+    items:
+      type: string
+    description: Explicit set of capabilities disabled in this profile.
+
+  target_products:
+    type: array
+    items:
+      type: string
+    description: Product families or bundles intended to use this profile.
+
+validation_rules:
+  - enabled and disabled sets must not conflict
+  - enabled_capabilities must not be empty
+  - target_products should be explicit when profile is product-bound
+
+security_rules:
+  - capability profile cannot override immutable governance
+  - forbidden capabilities must remain forbidden even if listed accidentally
+  - profile selection does not bypass approval policy

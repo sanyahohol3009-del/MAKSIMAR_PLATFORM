@@ -1,0 +1,33 @@
+schema_version: shell_capabilities.v1
+description: Canonical mapping of shell capabilities.
+
+capabilities:
+
+  server:
+    network_services: true
+    long_running_tasks: true
+    local_storage: true
+
+  desktop:
+    local_ui: true
+    local_storage: true
+    system_integration: true
+
+  android:
+    mobile_ui: true
+    sensors: true
+    push_notifications: true
+
+  ios:
+    mobile_ui: true
+    sensors: true
+    push_notifications: true
+
+  cli:
+    terminal_io: true
+    automation_scripts: true
+
+rules:
+  - capability definitions must remain explicit
+  - shells must not claim unsupported capabilities
+  - capability mapping must remain auditable

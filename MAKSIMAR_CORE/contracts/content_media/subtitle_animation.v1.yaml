@@ -1,0 +1,31 @@
+contract_name: subtitle_animation
+schema_version: subtitle_animation.v1
+description: Subtitle animation profile contract.
+
+required:
+  - profile_id
+  - style
+
+fields:
+  profile_id:
+    type: string
+    description: Unique subtitle animation profile identifier.
+
+  style:
+    type: string
+    description: Canonical subtitle animation style.
+
+  timing_policy:
+    type: object
+    additional_properties: true
+    description: Structured timing and animation policy settings.
+
+validation_rules:
+  - profile_id required
+  - style required
+  - timing_policy should be explicit when animation timing is customized
+
+security_rules:
+  - style metadata only
+  - subtitle animation profiles do not imply rendering or publishing authority
+  - timing policy must remain bounded by content pipeline rules

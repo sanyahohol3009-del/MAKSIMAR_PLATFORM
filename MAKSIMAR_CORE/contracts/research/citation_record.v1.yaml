@@ -1,0 +1,39 @@
+contract_name: citation_record
+schema_version: citation_record.v1
+description: Canonical citation mapping for research-backed answers.
+
+required:
+  - citation_id
+  - source_id
+  - context_ref
+
+fields:
+  citation_id:
+    type: string
+    description: Unique citation identifier.
+
+  source_id:
+    type: string
+    description: Source referenced by this citation.
+
+  context_ref:
+    type: string
+    description: Context, answer, or retrieval item this citation supports.
+
+  quoted_span_ref:
+    type: string
+    description: Optional reference to quoted or excerpted source span.
+
+  summary_span:
+    type: string
+    description: Optional summarized supporting passage or rationale span.
+
+validation_rules:
+  - source_id required
+  - context_ref required
+  - citation_id must be unique
+
+security_rules:
+  - preserve source traceability
+  - citation metadata must not be stripped from grounded answers
+  - citations do not imply source approval for import

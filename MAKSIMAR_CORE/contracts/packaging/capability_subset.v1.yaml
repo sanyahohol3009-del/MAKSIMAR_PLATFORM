@@ -1,0 +1,35 @@
+contract_name: capability_subset
+schema_version: capability_subset.v1
+description: Explicit subset of capabilities included in one package.
+
+required:
+  - subset_id
+  - included_capabilities
+
+fields:
+  subset_id:
+    type: string
+    description: Unique capability subset identifier.
+
+  included_capabilities:
+    type: array
+    items:
+      type: string
+    description: Capabilities explicitly included in this package.
+
+  excluded_capabilities:
+    type: array
+    items:
+      type: string
+    description: Capabilities explicitly excluded from this package.
+
+validation_rules:
+  - subset_id required
+  - included_capabilities required
+  - included_capabilities must be explicit
+  - excluded_capabilities must not overlap included_capabilities
+
+security_rules:
+  - forbidden capabilities may not be reintroduced by subset
+  - subset selection must respect governance and product limits
+  - capability subsets do not grant authority by themselves

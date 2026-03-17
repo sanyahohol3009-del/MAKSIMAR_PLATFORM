@@ -1,0 +1,19 @@
+schema_version: workflow_optimization_policy.v1
+description: Canonical policy for workflow suggestion and optimization generation.
+
+suggestion_rules:
+  suggestion_engine_enabled: true
+  min_pattern_repetition: 5
+  min_confidence: 0.70
+  require_human_confirmation: true
+  auto_register_new_workflows: false
+
+pattern_sources:
+  execution_history_enabled: true
+  trigger_usage_enabled: true
+  accepted_suggestions_feedback_enabled: true
+
+rules:
+  - optimization suggestions are advisory only
+  - no suggestion may auto-promote itself into executable workflow
+  - low-confidence patterns must remain non-binding

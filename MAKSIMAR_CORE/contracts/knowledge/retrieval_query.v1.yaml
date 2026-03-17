@@ -1,0 +1,44 @@
+contract_name: retrieval_query
+schema_version: retrieval_query.v1
+description: Canonical retrieval request to knowledge layer.
+
+required:
+  - query_id
+  - requester
+  - query_text
+
+fields:
+  query_id:
+    type: string
+    description: Unique retrieval query identifier.
+
+  requester:
+    type: string
+    description: Requesting subsystem or operator role.
+
+  query_text:
+    type: string
+    description: Natural-language or structured query payload.
+
+  filters:
+    type: object
+    additional_properties: true
+    description: Optional structured filters applied before ranking.
+
+  max_results:
+    type: integer
+    description: Maximum number of results requested.
+
+  citation_required:
+    type: boolean
+    description: Whether the caller requires citation-bearing results.
+
+validation_rules:
+  - query_text must not be empty
+  - max_results must be positive when present
+  - requester must be explicit
+
+security_rules:
+  - restricted knowledge requires access check
+  - retrieval request does not imply export or write rights
+  - caller constraints must be preserved in result generation

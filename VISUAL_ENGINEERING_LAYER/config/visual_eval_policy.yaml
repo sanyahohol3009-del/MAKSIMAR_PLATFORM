@@ -1,0 +1,18 @@
+schema_version: visual_eval_policy.v1
+description: Canonical evaluation policy for visual outputs and machine-ready assets.
+
+evaluation:
+  artifact_quality_check_required: true
+  machine_readiness_check_required: true
+  confidence_reporting_required: true
+  reviewer_notes_recommended: true
+
+thresholds:
+  minimum_quality_score_for_promotion: 0.80
+  minimum_machine_readiness_for_export: 0.85
+  hard_block_on_critical_visual_failure: true
+
+rules:
+  - weak visual outputs must not silently promote downstream
+  - evaluation must remain attached to visual artifacts
+  - approval remains separate from evaluation

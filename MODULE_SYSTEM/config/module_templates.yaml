@@ -1,0 +1,35 @@
+schema_version: module_templates_policy.v1
+description: Canonical template policy for scaffolded module families and cube generation.
+
+templates:
+  family_assistant:
+    enabled: true
+
+  engineering_assistant:
+    enabled: true
+
+  knowledge_assistant:
+    enabled: true
+
+  automation_cube:
+    enabled: true
+
+  vpn_cube:
+    enabled: true
+
+  energy_cube:
+    enabled: true
+
+  compute_fleet_cube:
+    enabled: true
+
+  visual_engineering_cube:
+    enabled: true
+
+  robotics_cube:
+    enabled: true
+
+rules:
+  - templates are scaffolding aids, not active modules
+  - generated modules must still pass manifest and compatibility checks
+  - template use must not bypass governance or module lifecycle policy

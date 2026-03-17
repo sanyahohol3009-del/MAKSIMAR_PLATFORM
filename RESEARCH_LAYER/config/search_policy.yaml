@@ -1,0 +1,19 @@
+schema_version: research_search_policy.v1
+description: Canonical search policy for web, local, connector, and hybrid research flows.
+
+search_scopes:
+  web_enabled: true
+  local_enabled: true
+  connectors_enabled: true
+  hybrid_enabled: true
+
+defaults:
+  default_scope: hybrid
+  citation_required_by_default: true
+  import_candidate_default: false
+  max_results_default: 10
+
+rules:
+  - every research search must declare requester and query
+  - web search must remain policy-bounded
+  - search results do not imply automatic import

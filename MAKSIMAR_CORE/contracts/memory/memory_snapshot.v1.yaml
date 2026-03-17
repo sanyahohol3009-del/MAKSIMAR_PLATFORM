@@ -1,0 +1,94 @@
+contract_name: memory_snapshot
+schema_version: memory_snapshot.v1
+description: Compact structured snapshot produced from graph memory for fast contextual reasoning.
+
+required:
+  - snapshot_id
+  - snapshot_type
+  - created_at
+  - source_query_id
+  - entities
+  - relations
+  - summary
+
+fields:
+  snapshot_id:
+    type: string
+    description: Unique memory snapshot identifier.
+
+  snapshot_type:
+    type: string
+    enum:
+      - active_project_context
+      - workflow_context
+      - session_context
+      - user_context
+      - device_context
+      - incident_context
+      - optimization_context
+    description: Canonical snapshot category.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of snapshot creation.
+
+  source_query_id:
+    type: string
+    description: Query identifier that produced this snapshot.
+
+  entities:
+    type: array
+    items:
+      type: string
+    description: Included entity identifiers.
+
+  relations:
+    type: array
+    items:
+      type: string
+    description: Included relation identifiers.
+
+  recent_events:
+    type: array
+    items:
+      type: string
+    description: Included recent event identifiers.
+
+  summary:
+    type: object
+    properties:
+      primary_focus:
+        type: string
+      active_project:
+        type: string
+      active_task:
+        type: string
+      active_workflow:
+        type: string
+      key_preferences:
+        type: array
+        items:
+          type: string
+      unresolved_items:
+        type: array
+        items:
+          type: string
+    description: Compact structured summary of snapshot context.
+
+  confidence:
+    type: number
+    minimum: 0.0
+    maximum: 1.0
+    description: Confidence score for snapshot relevance/completeness.
+
+validation_rules:
+  - snapshot_id must be unique
+  - source_query_id must reference an existing query
+  - summary.primary_focus should be present for active contexts
+  - entities and relations should be explicitly listed even if empty arrays are used
+
+security_rules:
+  - snapshot inherits access restrictions from underlying entities and relations
+  - no privileged authority is implied by snapshot contents
+  - restricted items must remain filtered unless policy permits access

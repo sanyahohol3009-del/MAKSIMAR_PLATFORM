@@ -1,0 +1,18 @@
+schema_version: cnc_pipeline_config.v1
+description: Canonical CNC preparation and toolpath policy.
+
+validation:
+  geometry_required: true
+  toolpath_required: true
+  machine_profile_required: true
+  bounds_verification_required: true
+  approval_required_before_machine_use: true
+
+defaults:
+  preview_required: true
+  machine_start_forbidden: true
+
+rules:
+  - unsafe or out-of-bounds toolpaths must be blocked
+  - CNC pipeline prepares jobs but does not start machines
+  - machine-specific output remains approval-gated

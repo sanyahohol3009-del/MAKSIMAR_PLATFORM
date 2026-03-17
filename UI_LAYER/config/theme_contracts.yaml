@@ -1,0 +1,17 @@
+schema_version: ui_theme_contracts.v1
+description: Canonical theme and token policy for unified UI rendering.
+
+theme:
+  design_tokens_required: true
+  module_ui_token_binding_required: true
+  shell_theming_allowed: true
+  branding_profile_binding_allowed: true
+
+validation:
+  token_reference_required: true
+  unsupported_theme_fallback_required: true
+
+rules:
+  - theming must remain compatible with shared UI tokens
+  - visual customization must not affect authority or access rules
+  - theme selection must remain explicit and reviewable

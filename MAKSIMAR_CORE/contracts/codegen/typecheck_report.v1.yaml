@@ -1,0 +1,22 @@
+contract_name: typecheck_report
+schema_version: typecheck_report.v1
+description: Canonical contract for typecheck_report.
+
+required:
+  - id
+
+fields:
+  id:
+    type: string
+
+metadata:
+  created_by: MAKSIMAR_PLATFORM
+  layer: portable_core
+  status: draft
+
+validation_rules:
+  - id required
+
+security_rules:
+  - no implicit authority
+  - execution requires approval policy

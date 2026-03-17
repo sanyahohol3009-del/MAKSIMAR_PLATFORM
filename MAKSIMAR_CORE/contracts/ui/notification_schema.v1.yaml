@@ -1,0 +1,46 @@
+contract_name: notification_schema
+schema_version: notification_schema.v1
+description: Canonical notification payload for system and module surfaces.
+
+required:
+  - notification_id
+  - severity
+  - message
+
+fields:
+  notification_id:
+    type: string
+    description: Unique notification identifier.
+
+  severity:
+    type: string
+    enum:
+      - info
+      - warning
+      - critical
+    description: Notification severity level.
+
+  message:
+    type: string
+    description: Human-readable notification message.
+
+  source_ref:
+    type: string
+    description: Source component, module, or subsystem producing the notification.
+
+  action_refs:
+    type: array
+    items:
+      type: string
+    description: Optional references to allowed follow-up actions.
+
+validation_rules:
+  - notification_id must be unique
+  - message required
+  - severity must match allowed enum
+  - action_refs should reference approved actions only when present
+
+security_rules:
+  - notifications cannot trigger execution without policy
+  - critical notifications must remain visible to authorized surfaces
+  - notifications must not embed hidden command payloads

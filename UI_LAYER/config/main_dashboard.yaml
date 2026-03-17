@@ -1,0 +1,19 @@
+schema_version: ui_main_dashboard.v1
+description: Canonical policy for main system dashboard.
+
+dashboard:
+  system_state_visible: true
+  assistant_state_visible: true
+  connected_nodes_visible: true
+  active_modules_visible: true
+  alerts_visible: true
+
+requirements:
+  widget_contract_required: true
+  access_policy_filtering_required: true
+  shell_compatibility_required: true
+
+rules:
+  - main dashboard must remain bounded by access policy
+  - critical alerts must stay visible
+  - dashboard does not imply execution authority

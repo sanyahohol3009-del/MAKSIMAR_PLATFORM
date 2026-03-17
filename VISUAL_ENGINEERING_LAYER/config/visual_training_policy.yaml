@@ -1,0 +1,17 @@
+schema_version: visual_training_policy.v1
+description: Canonical policy for learning from approved visual examples.
+
+training_examples:
+  approved_examples_only: true
+  unreviewed_dataset_forbidden_for_trusted_learning: true
+  provenance_required: true
+  label_required: true
+
+safety:
+  restricted_examples_require_policy: true
+  export_of_training_examples_policy_gated: true
+
+rules:
+  - learning must use approved examples only for trusted paths
+  - provenance of training examples must remain visible
+  - training policy must not bypass review and approval layers

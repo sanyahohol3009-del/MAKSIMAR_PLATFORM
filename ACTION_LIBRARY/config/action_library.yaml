@@ -1,0 +1,24 @@
+schema_version: action_library_config.v1
+description: Canonical configuration for the portable action library.
+
+registry:
+  manifest_registry_enabled: true
+  handler_registry_enabled: true
+  permission_registry_enabled: true
+
+execution_policy:
+  shell_execution_forbidden: true
+  direct_core_write_forbidden: true
+  hidden_actions_forbidden: true
+  approval_bridge_required: true
+
+resolution:
+  strict_manifest_lookup: true
+  handler_binding_required: true
+  explicit_parameter_schema_required: true
+
+rules:
+  - every action must have manifest
+  - every action must resolve to handler
+  - action library must remain explicit and auditable
+  - no action may bypass governance approval

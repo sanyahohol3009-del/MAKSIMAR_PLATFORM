@@ -1,0 +1,23 @@
+schema_version: knowledge_indexing_config.v1
+description: Canonical indexing policy for knowledge stores.
+
+index_types:
+  lexical_enabled: true
+  vector_enabled: true
+  graph_enabled: true
+  hybrid_enabled: true
+
+indexing_policy:
+  default_index_type: hybrid
+  reindex_on_update: true
+  preserve_provenance_links: true
+  shard_large_packs: true
+
+limits:
+  max_objects_per_pack_before_sharding: 1000
+  max_index_refresh_batch: 500
+
+rules:
+  - index contents must preserve source and provenance traceability
+  - indexing must not strip access boundaries
+  - hybrid indexing should remain preferred unless explicitly overridden

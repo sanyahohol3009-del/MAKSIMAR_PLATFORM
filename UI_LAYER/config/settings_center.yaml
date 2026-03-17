@@ -1,0 +1,18 @@
+schema_version: ui_settings_center.v1
+description: Canonical settings center policy for system and module configuration.
+
+settings:
+  owner_reference_required: true
+  settings_schema_required: true
+  sensitive_settings_policy_gated: true
+  shell_specific_rendering_allowed: true
+
+validation:
+  explicit_field_definitions_required: true
+  audit_required_for_sensitive_changes: true
+  forbidden_hidden_settings: true
+
+rules:
+  - settings center must not expose hidden privileged controls
+  - sensitive settings require policy-gated visibility and changes
+  - settings changes must remain auditable

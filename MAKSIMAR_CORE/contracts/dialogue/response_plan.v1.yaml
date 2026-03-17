@@ -1,0 +1,45 @@
+contract_name: response_plan
+schema_version: response_plan.v1
+description: Planned response structure before final answer generation.
+
+required:
+  - response_plan_id
+  - intent_ref
+  - action_path
+
+fields:
+  response_plan_id:
+    type: string
+    description: Unique response plan identifier.
+
+  intent_ref:
+    type: string
+    description: Reference to interpreted intent driving the response.
+
+  action_path:
+    type: array
+    items:
+      type: string
+    description: Planned reasoning or tool path for forming the response.
+
+  requires_clarification:
+    type: boolean
+    description: Whether clarification is required before safe completion.
+
+  references:
+    type: array
+    items:
+      type: string
+    description: Supporting references used by the response plan.
+
+validation_rules:
+  - response_plan_id required
+  - intent_ref required
+  - action_path required
+  - action_path must not be empty
+  - requires_clarification should be explicit
+
+security_rules:
+  - response plan does not directly execute
+  - response planning must not bypass approval or action policy
+  - references must preserve access boundaries

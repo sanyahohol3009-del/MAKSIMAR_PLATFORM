@@ -1,0 +1,33 @@
+contract_name: rig_inventory
+schema_version: rig_inventory.v1
+description: Inventory of compute or mining rigs.
+
+required:
+  - inventory_id
+  - nodes
+
+fields:
+  inventory_id:
+    type: string
+    description: Unique inventory identifier.
+
+  nodes:
+    type: array
+    items:
+      type: string
+    description: Explicit list of node references included in the inventory.
+
+  owner_scope:
+    type: string
+    description: Ownership or tenancy scope of the inventory.
+
+validation_rules:
+  - inventory_id required
+  - nodes required
+  - nodes must not contain duplicates
+  - owner_scope should be explicit for shared or federated inventories
+
+security_rules:
+  - inventory visibility follows product trust and access policy
+  - inventory records do not grant node control rights
+  - node membership must remain auditable

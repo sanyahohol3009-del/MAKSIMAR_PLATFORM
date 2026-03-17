@@ -1,0 +1,20 @@
+schema_version: trigger_policy.v1
+description: Canonical policy for workflow trigger phrases and aliases.
+
+trigger_rules:
+  allow_multiple_aliases: true
+  max_alias_count: 10
+  language_required: true
+  disabled_triggers_must_not_execute: true
+  case_normalization_enabled: true
+  whitespace_normalization_enabled: true
+
+validation:
+  min_phrase_length: 2
+  max_phrase_length: 120
+  unique_trigger_phrase_per_scope: true
+
+rules:
+  - disabled triggers must never activate workflows
+  - trigger aliases must remain explicit and auditable
+  - normalized trigger matching must not change intended meaning silently

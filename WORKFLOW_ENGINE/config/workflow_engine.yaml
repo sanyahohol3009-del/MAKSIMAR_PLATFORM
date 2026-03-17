@@ -1,0 +1,33 @@
+schema_version: workflow_engine_config.v1
+description: Canonical top-level configuration for workflow orchestration layer.
+
+registry_policy:
+  workflow_registry_enabled: true
+  trigger_registry_enabled: true
+  suggestion_registry_enabled: true
+  execution_log_enabled: true
+  template_registry_enabled: true
+
+execution_policy:
+  max_steps_per_workflow: 50
+  default_step_timeout_sec: 15
+  fail_fast: true
+  allow_partial_success: false
+  require_ordered_step_execution: true
+
+optimization_policy:
+  suggestion_engine_enabled: true
+  min_repetition_count: 5
+  min_confidence: 0.70
+  auto_apply_suggestions: false
+
+logging:
+  level: INFO
+  structured_logging: true
+  execution_audit_enabled: true
+
+rules:
+  - workflow engine provides orchestration, not ultimate authority
+  - workflow engine must not mutate CORE_ROOT
+  - workflow execution remains bounded by action library and approval bridge
+  - suggestions must remain human-confirmed

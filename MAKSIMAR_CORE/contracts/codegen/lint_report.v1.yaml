@@ -1,0 +1,22 @@
+contract_name: lint_report
+schema_version: lint_report.v1
+description: Canonical contract for lint_report.
+
+required:
+  - id
+
+fields:
+  id:
+    type: string
+
+metadata:
+  created_by: MAKSIMAR_PLATFORM
+  layer: portable_core
+  status: draft
+
+validation_rules:
+  - id required
+
+security_rules:
+  - no implicit authority
+  - execution requires approval policy

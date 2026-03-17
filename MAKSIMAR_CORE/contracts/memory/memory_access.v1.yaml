@@ -1,0 +1,45 @@
+contract_name: memory_access
+schema_version: memory_access.v1
+description: Access policy for querying and mutating memory graph.
+
+required:
+  - requester
+  - target_level
+  - operation
+
+fields:
+  requester:
+    type: string
+    description: Requesting subsystem or operator role.
+
+  target_level:
+    type: string
+    description: Memory level targeted by this access decision.
+
+  operation:
+    type: string
+    enum:
+      - read
+      - write
+      - link
+      - prune
+      - export
+    description: Requested memory operation.
+
+  allowed:
+    type: boolean
+    description: Whether the operation is allowed.
+
+  reason:
+    type: string
+    description: Structured or human-readable reason for the decision.
+
+validation_rules:
+  - requester and operation must be explicit
+  - operation must match allowed enum
+  - target_level must be present
+
+security_rules:
+  - L4 restricted access requires explicit permission context
+  - denied access must remain denied unless separately re-evaluated
+  - access decision does not override immutable governance

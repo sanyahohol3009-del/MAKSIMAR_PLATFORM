@@ -1,0 +1,17 @@
+schema_version: action_validation_policy.v1
+description: Validation rules for action manifests and handlers.
+
+manifest_rules:
+  require_action_id: true
+  require_parameter_schema: true
+  require_handler_reference: true
+  require_permission_level: true
+
+handler_rules:
+  handler_must_exist: true
+  handler_must_declare_supported_contexts: true
+  handler_must_not_execute_unbounded_shell: true
+
+rules:
+  - invalid manifest must block action registration
+  - handler validation must occur before activation

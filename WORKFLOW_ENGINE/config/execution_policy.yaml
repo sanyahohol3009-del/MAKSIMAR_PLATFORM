@@ -1,0 +1,24 @@
+schema_version: workflow_execution_policy.v1
+description: Canonical execution behavior policy for workflow runs.
+
+defaults:
+  fail_fast: true
+  allow_partial_success: false
+  require_execution_log: true
+  require_action_result_tracking: true
+  max_concurrent_workflows: 5
+
+timeouts:
+  default_step_timeout_sec: 15
+  max_step_timeout_sec: 300
+  default_workflow_timeout_sec: 900
+
+recovery:
+  rollback_when_supported: best_effort
+  preserve_failed_step_context: true
+  preserve_execution_trace: true
+
+rules:
+  - every workflow run must produce execution evidence
+  - failed and blocked steps must remain visible in logs
+  - execution timeout must remain bounded and explicit

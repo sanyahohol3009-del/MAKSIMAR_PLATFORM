@@ -4,7 +4,6 @@ import hashlib
 import time
 from pathlib import Path
 
-
 CORE_DIR = Path("CORE_ROOT")
 CHECK_INTERVAL = 5
 

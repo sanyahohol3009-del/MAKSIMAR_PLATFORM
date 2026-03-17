@@ -1,0 +1,40 @@
+contract_name: product_profile
+schema_version: product_profile.v1
+description: Canonical product capability profile.
+
+required:
+  - profile_id
+  - allowed_modules
+
+fields:
+  profile_id:
+    type: string
+    description: Unique capability profile identifier.
+
+  allowed_modules:
+    type: array
+    items:
+      type: string
+    description: Modules allowed in this product profile.
+
+  forbidden_modules:
+    type: array
+    items:
+      type: string
+    description: Explicitly forbidden modules.
+
+  allowed_actions:
+    type: array
+    items:
+      type: string
+    description: Actions permitted under this profile.
+
+validation_rules:
+  - profile_id required
+  - allowed_modules must be explicit
+  - forbidden_modules must not overlap allowed_modules
+
+security_rules:
+  - forbidden modules must never activate
+  - capability profiles must not bypass governance
+  - profiles must remain auditable

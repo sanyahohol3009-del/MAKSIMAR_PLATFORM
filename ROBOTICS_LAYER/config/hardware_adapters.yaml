@@ -1,0 +1,21 @@
+schema_version: robotics_hardware_adapter_registry.v1
+description: Canonical registry for robotics hardware adapters.
+
+adapters:
+
+  ros2_adapter:
+    enabled: true
+
+  serial_motion_adapter:
+    enabled: true
+
+  ethernet_robot_adapter:
+    enabled: true
+
+  plc_bridge_adapter:
+    enabled: true
+
+rules:
+  - adapters must not bypass safety constraints
+  - hardware adapters must remain policy bounded
+  - adapter configuration must remain auditable

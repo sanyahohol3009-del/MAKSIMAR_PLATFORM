@@ -1,0 +1,18 @@
+schema_version: module_dashboard_policy.v1
+description: Canonical dashboard policy for modules and cube UI surfaces.
+
+dashboard_rules:
+  module_dashboard_required: true
+  settings_schema_required: true
+  status_widgets_required: true
+  supported_shells_required: true
+
+ui_rules:
+  unified_style_required: true
+  dashboard_router_integration_required: true
+  hidden_admin_panels_forbidden: true
+
+rules:
+  - every user-facing module must declare dashboard surface
+  - dashboard visibility must follow access policy
+  - module dashboards must remain within unified UI contract

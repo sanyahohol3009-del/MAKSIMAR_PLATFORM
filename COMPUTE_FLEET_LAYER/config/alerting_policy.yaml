@@ -1,0 +1,18 @@
+schema_version: compute_fleet_alerting_policy.v1
+description: Canonical alerting policy for compute fleet monitoring.
+
+alerts:
+  info_enabled: true
+  warning_enabled: true
+  critical_enabled: true
+  recommended_actions_included: true
+
+requirements:
+  node_reference_required: true
+  severity_required: true
+  message_required: true
+
+rules:
+  - alerts are informational until approved action path is chosen
+  - critical alerts must remain visible
+  - recommended actions must remain policy-bounded

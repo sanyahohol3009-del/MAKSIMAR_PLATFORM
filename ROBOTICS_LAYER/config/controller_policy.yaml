@@ -1,0 +1,22 @@
+schema_version: robotics_controller_policy.v1
+description: Canonical policy for robot controllers and control algorithms.
+
+controllers:
+
+  pid_controller:
+    enabled: true
+
+  model_predictive_controller:
+    enabled: true
+
+  rl_policy_controller:
+    enabled: true
+
+requirements:
+  safety_check_required: true
+  constraint_validation_required: true
+
+rules:
+  - controllers must respect safety constraints
+  - controller outputs must remain bounded
+  - controller policy must remain simulation-verifiable

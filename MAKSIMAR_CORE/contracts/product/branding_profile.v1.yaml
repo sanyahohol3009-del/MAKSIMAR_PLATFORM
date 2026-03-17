@@ -1,0 +1,39 @@
+contract_name: branding_profile
+schema_version: branding_profile.v1
+description: Branding and presentation profile for a product.
+
+required:
+  - branding_id
+  - display_name
+
+fields:
+  branding_id:
+    type: string
+    description: Unique branding profile identifier.
+
+  display_name:
+    type: string
+    description: Human-readable product display name.
+
+  icon_set_ref:
+    type: string
+    description: Reference to icon pack or icon asset group.
+
+  theme_ref:
+    type: string
+    description: Reference to UI theme or token profile.
+
+  voice_persona_ref:
+    type: string
+    description: Reference to allowed voice persona profile for this product.
+
+validation_rules:
+  - branding_id required
+  - display_name required
+  - display_name must not be empty
+  - referenced assets should exist when provided
+
+security_rules:
+  - branding does not affect core authority
+  - branding profiles must not override governance or approval policy
+  - voice persona selection must respect allowed persona policy

@@ -1,0 +1,40 @@
+contract_name: cnc_job
+schema_version: cnc_job.v1
+description: Canonical CNC job contract.
+
+required:
+  - cnc_job_id
+  - geometry_ref
+  - toolpath_ref
+
+fields:
+  cnc_job_id:
+    type: string
+    description: Unique CNC job identifier.
+
+  geometry_ref:
+    type: string
+    description: Reference to source geometry used for machining.
+
+  toolpath_ref:
+    type: string
+    description: Reference to generated toolpath artifact.
+
+  machine_profile_ref:
+    type: string
+    description: Reference to machine profile or machine capability definition.
+
+  material_profile:
+    type: string
+    description: Material profile selected for machining.
+
+validation_rules:
+  - cnc_job_id required
+  - geometry_ref required
+  - toolpath_ref required
+  - machine_profile_ref should be explicit for machine-bound jobs
+
+security_rules:
+  - machine execution requires separate approval
+  - cnc job contract does not authorize machine motion
+  - unsafe toolpaths must remain blocked by downstream validation and approval

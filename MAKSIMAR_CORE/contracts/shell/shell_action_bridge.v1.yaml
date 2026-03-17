@@ -1,0 +1,49 @@
+contract_name: shell_action_bridge
+schema_version: shell_action_bridge.v1
+description: Mapping between portable action primitives and shell implementations.
+
+required:
+  - bridge_id
+  - action_type
+  - shell_type
+  - handler_ref
+
+fields:
+  bridge_id:
+    type: string
+    description: Unique shell action bridge identifier.
+
+  action_type:
+    type: string
+    description: Portable action primitive being bridged.
+
+  shell_type:
+    type: string
+    enum:
+      - server
+      - desktop
+      - android
+      - ios
+    description: Shell type implementing the action.
+
+  handler_ref:
+    type: string
+    description: Reference to shell-side handler implementation.
+
+  supported_parameters:
+    type: array
+    items:
+      type: string
+    description: Explicit parameter set supported by this shell handler.
+
+validation_rules:
+  - bridge_id required
+  - action_type required
+  - shell_type must match allowed enum
+  - handler_ref required
+  - supported_parameters should be explicit even when empty
+
+security_rules:
+  - bridge does not bypass action permission policy
+  - shell implementation remains bounded by governance and approval
+  - handler bindings must not embed hidden privileged paths

@@ -1,0 +1,34 @@
+schema_version: retention_policy.v1
+description: Retention and archival policy for all memory levels.
+
+retention:
+  L0_ephemeral:
+    ttl_days: 1
+    archive_before_delete: false
+
+  L1_operational:
+    ttl_days: 30
+    archive_before_delete: true
+
+  L2_project:
+    ttl_days: 3650
+    archive_before_delete: true
+
+  L3_stable_personal:
+    ttl_days: 3650
+    archive_before_delete: true
+
+  L4_restricted:
+    ttl_days: policy_managed
+    archive_before_delete: policy_managed
+
+pruning:
+  remove_low_confidence_inferred_relations_after_days: 30
+  archive_inactive_sessions_after_days: 14
+  archive_old_execution_patterns_after_days: 90
+  remove_unlinked_ephemeral_objects_after_days: 7
+
+rules:
+  - active memory levels must all have retention policy
+  - restricted memory retention is policy-managed only
+  - pruning must remain auditable

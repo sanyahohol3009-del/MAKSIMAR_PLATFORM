@@ -1,0 +1,51 @@
+contract_name: dashboard_manifest
+schema_version: dashboard_manifest.v1
+description: Canonical dashboard declaration for a module or platform layer.
+
+required:
+  - dashboard_id
+  - owner_ref
+  - dashboard_type
+  - sections
+
+fields:
+  dashboard_id:
+    type: string
+    description: Unique dashboard identifier.
+
+  owner_ref:
+    type: string
+    description: Reference to owning module, layer, or product surface.
+
+  dashboard_type:
+    type: string
+    description: Canonical dashboard category or surface type.
+
+  sections:
+    type: array
+    items:
+      type: string
+    description: Ordered list of dashboard sections.
+
+  widgets:
+    type: array
+    items:
+      type: string
+    description: Widget identifiers rendered within this dashboard.
+
+  supported_shells:
+    type: array
+    items:
+      type: string
+    description: Explicit list of shells allowed to render this dashboard.
+
+validation_rules:
+  - dashboard_id must be unique
+  - sections must not be empty
+  - supported_shells should be explicit even when limited
+  - owner_ref must reference a known module, layer, or product surface
+
+security_rules:
+  - UI does not imply permission escalation
+  - dashboard visibility must follow access policy
+  - dashboard manifest must not embed hidden action authority

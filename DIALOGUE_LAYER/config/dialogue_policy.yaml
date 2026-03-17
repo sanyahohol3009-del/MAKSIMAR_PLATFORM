@@ -1,0 +1,18 @@
+schema_version: dialogue_policy.v1
+description: Canonical top-level policy for dialogue layer.
+
+dialogue:
+  multi_turn_enabled: true
+  context_tracking_required: true
+  intent_persistence_enabled: true
+  project_awareness_enabled: true
+
+safety:
+  execution_authority_forbidden: true
+  risk_critical_ambiguity_must_surface: true
+  restricted_context_requires_filtering: true
+
+rules:
+  - dialogue layer manages context and response planning, not execution authority
+  - dialogue must preserve access boundaries on referenced context
+  - hidden action triggering from dialogue alone is forbidden

@@ -1,0 +1,34 @@
+contract_name: shell_surface
+schema_version: shell_surface.v1
+description: User-visible surfaces exposed by a shell.
+
+required:
+  - surface_id
+  - shell_ref
+  - surfaces
+
+fields:
+  surface_id:
+    type: string
+    description: Unique shell surface identifier.
+
+  shell_ref:
+    type: string
+    description: Reference to owning shell contract.
+
+  surfaces:
+    type: array
+    items:
+      type: string
+    description: Explicit list of user-visible surfaces exposed by the shell.
+
+validation_rules:
+  - surface_id required
+  - shell_ref required
+  - surfaces required
+  - surfaces must not be empty
+
+security_rules:
+  - surfaces obey access policies
+  - visible surfaces do not imply hidden capabilities
+  - shell UI exposure must remain bounded by governance

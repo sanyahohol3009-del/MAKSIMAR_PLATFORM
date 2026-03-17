@@ -1,0 +1,24 @@
+schema_version: cad_pipeline_config.v1
+description: Canonical top-level configuration for CAD, 3D, and CAM pipeline layer.
+
+registry:
+  geometry_registry_enabled: true
+  mesh_registry_enabled: true
+  print_job_registry_enabled: true
+  cnc_job_registry_enabled: true
+  toolpath_registry_enabled: true
+
+execution:
+  validation_required_before_export: true
+  direct_machine_execution_forbidden: true
+  approval_required_for_machine_bound_jobs: true
+
+defaults:
+  geometry_validation_enabled: true
+  mesh_validation_enabled: true
+  artifact_logging_required: true
+
+rules:
+  - CAD/3D/CAM layer produces validated manufacturing artifacts, not machine authority
+  - machine-bound outputs require approval before downstream execution
+  - layer must not mutate CORE_ROOT

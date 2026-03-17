@@ -1,0 +1,38 @@
+schema_version: memory_access_policy.v1
+description: Access policy for reading, writing, linking, pruning, and exporting memory.
+
+access_rules:
+  unrestricted_query_levels:
+    - L0_ephemeral
+    - L1_operational
+    - L2_project
+    - L3_stable_personal
+
+  restricted_query_levels:
+    - L4_restricted
+
+  restricted_access_requires:
+    - policy_check
+    - permission_context
+    - explicit_request_scope
+
+write_rules:
+  entity_write_allowed: true
+  relation_write_allowed: true
+  event_write_allowed: true
+  restricted_write_requires_policy: true
+
+export_rules:
+  unrestricted_export_allowed: true
+  restricted_export_requires_policy: true
+
+forbidden:
+  - write_to_CORE_ROOT
+  - mutate_security_state
+  - privileged_execution
+  - unrestricted_export_of_L4_restricted
+
+rules:
+  - L4 restricted memory must not be returned without explicit permission context
+  - export policy must preserve memory level boundaries
+  - access decisions must be explainable and auditable

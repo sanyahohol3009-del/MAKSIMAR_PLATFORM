@@ -1,0 +1,36 @@
+contract_name: constraint_contract
+schema_version: constraint_contract.v1
+description: Safety and physical constraints for robotics execution.
+
+required:
+  - constraint_id
+  - constraint_type
+
+fields:
+  constraint_id:
+    type: string
+    description: Unique constraint identifier.
+
+  constraint_type:
+    type: string
+    description: Canonical type of physical or safety constraint.
+
+  values:
+    type: object
+    additional_properties: true
+    description: Structured constraint values and bounds.
+
+  severity:
+    type: string
+    description: Severity level associated with violating this constraint.
+
+validation_rules:
+  - constraint_id required
+  - constraint_type required
+  - values required
+  - severity should be explicit
+
+security_rules:
+  - constraint violations must be blocking where policy demands
+  - constraints do not authorize execution
+  - unsafe bounds must remain visible in downstream review

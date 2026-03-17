@@ -1,0 +1,38 @@
+contract_name: retrieval_result
+schema_version: retrieval_result.v1
+description: Retrieval result package for knowledge queries.
+
+required:
+  - query_id
+  - results
+
+fields:
+  query_id:
+    type: string
+    description: Retrieval query identifier this result answers.
+
+  results:
+    type: array
+    items:
+      type: object
+    description: Structured list of retrieved result items.
+
+  summary:
+    type: string
+    description: Optional summary over the result set.
+
+  citations:
+    type: array
+    items:
+      type: string
+    description: Explicit citation references attached to the result set.
+
+validation_rules:
+  - every cited result must map to known source
+  - results must exist even when empty
+  - query_id required
+
+security_rules:
+  - result must preserve provenance
+  - filtered results must respect access policy
+  - result package does not imply import or execution authority

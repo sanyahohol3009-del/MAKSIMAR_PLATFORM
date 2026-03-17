@@ -1,0 +1,105 @@
+contract_name: memory_query
+schema_version: memory_query.v1
+description: Query contract for retrieving structured context from memory graph.
+
+required:
+  - query_id
+  - query_type
+  - issued_at
+  - requester
+  - target_scope
+
+fields:
+  query_id:
+    type: string
+    description: Unique memory query identifier.
+
+  query_type:
+    type: string
+    enum:
+      - entity_lookup
+      - relation_expansion
+      - project_context
+      - workflow_context
+      - session_context
+      - preference_lookup
+      - recent_events
+      - incident_context
+      - active_context
+      - optimization_candidates
+    description: Type of memory query requested.
+
+  issued_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of query creation.
+
+  requester:
+    type: string
+    enum:
+      - DIALOGUE_MANAGER
+      - WORKFLOW_ENGINE
+      - CONTROL_PLANE
+      - AI_ROUTER
+      - OPERATOR
+      - MONITORING
+    description: Requesting subsystem.
+
+  target_scope:
+    type: object
+    properties:
+      entity_ids:
+        type: array
+        items:
+          type: string
+      project_id:
+        type: string
+      workflow_id:
+        type: string
+      session_id:
+        type: string
+      device_id:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+    description: Explicit target scope for the memory query.
+
+  ranking_policy:
+    type: object
+    properties:
+      use_recency:
+        type: boolean
+      use_frequency:
+        type: boolean
+      use_project_relevance:
+        type: boolean
+      use_confirmation_weight:
+        type: boolean
+      max_results:
+        type: integer
+        minimum: 1
+    description: Ranking and result-limiting settings.
+
+  access_context:
+    type: object
+    properties:
+      mode:
+        type: string
+      permission_level:
+        type: string
+      restricted_access_allowed:
+        type: boolean
+    description: Access context used for policy evaluation.
+
+validation_rules:
+  - query_id must be unique per query request
+  - requester must be specified
+  - target_scope must not be empty
+  - max_results must be positive when present
+
+security_rules:
+  - query result must respect access policy
+  - restricted memory must not be returned without permission
+  - query contract does not imply write or mutation rights

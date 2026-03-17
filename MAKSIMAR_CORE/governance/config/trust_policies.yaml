@@ -1,0 +1,34 @@
+schema_version: governance_trust_policies.v1
+description: Canonical trust policy definitions for federation links and node scopes.
+
+policies:
+  personal_trusted:
+    sync_allowed: true
+    secrets_access_allowed: false
+    restricted_memory_access_allowed: false
+
+  personal_limited:
+    sync_allowed: true
+    secrets_access_allowed: false
+    restricted_memory_access_allowed: false
+
+  client_detached:
+    sync_allowed: false
+    secrets_access_allowed: false
+    restricted_memory_access_allowed: false
+
+  unknown:
+    sync_allowed: false
+    secrets_access_allowed: false
+    restricted_memory_access_allowed: false
+
+  denied:
+    sync_allowed: false
+    secrets_access_allowed: false
+    restricted_memory_access_allowed: false
+
+rules:
+  - denied trust level must disable all sensitive access
+  - trust never bypasses approval rules
+  - runtime state sync remains forbidden even between trusted nodes
+  - secrets access is separately governed and disabled by default

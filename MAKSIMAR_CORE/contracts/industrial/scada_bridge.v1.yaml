@@ -1,0 +1,34 @@
+contract_name: scada_bridge
+schema_version: scada_bridge.v1
+description: SCADA bridge contract.
+
+required:
+  - bridge_id
+  - mode
+
+fields:
+  bridge_id:
+    type: string
+    description: Unique SCADA bridge identifier.
+
+  mode:
+    type: string
+    enum:
+      - read_only
+      - limited_control
+      - blocked
+    description: Allowed SCADA bridge operating mode.
+
+  signal_map_ref:
+    type: string
+    description: Reference to signal mapping configuration or artifact.
+
+validation_rules:
+  - bridge_id required
+  - mode must match allowed enum
+  - signal_map_ref should be explicit for connected bridges
+
+security_rules:
+  - write and control remain restricted by policy
+  - read_only is the safe baseline
+  - bridge metadata does not authorize industrial actuation

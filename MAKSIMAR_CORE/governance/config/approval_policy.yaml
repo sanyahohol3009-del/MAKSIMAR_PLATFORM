@@ -1,0 +1,60 @@
+schema_version: governance_approval_policy.v1
+description: Canonical approval requirements for actions, workflows, proposals, and deployment paths.
+
+policies:
+  safe_default:
+    applies_to:
+      - action
+      - workflow
+    risk_level: safe
+    approval_required: false
+    approval_type: none
+    voice_confirmation_required: false
+    hardware_key_required: false
+    delay_buffer_sec: 0
+
+  sensitive_default:
+    applies_to:
+      - action
+      - workflow
+      - product_change
+      - packaging_change
+    risk_level: sensitive
+    approval_required: true
+    approval_type: confirm_once
+    voice_confirmation_required: true
+    hardware_key_required: false
+    delay_buffer_sec: 5
+
+  dangerous_default:
+    applies_to:
+      - action
+      - workflow
+      - hardware_bridge
+      - industrial_control
+      - deployment
+    risk_level: dangerous
+    approval_required: true
+    approval_type: hardware_key
+    voice_confirmation_required: true
+    hardware_key_required: true
+    delay_buffer_sec: 15
+
+  blocked_default:
+    applies_to:
+      - forbidden_action
+      - forbidden_workflow
+      - forbidden_deploy
+    risk_level: blocked
+    approval_required: false
+    approval_type: none
+    voice_confirmation_required: false
+    hardware_key_required: false
+    delay_buffer_sec: 0
+    execution_forbidden: true
+
+rules:
+  - blocked policies must not authorize execution
+  - stricter approval requirements must not be weakened downstream
+  - deployment into privileged or hardware-adjacent layers must remain gated
+  - approval evidence must be auditable

@@ -1,0 +1,19 @@
+schema_version: codegen_policy.v1
+description: Canonical top-level policy for code generation layer.
+
+pipeline:
+  task_to_spec_enabled: true
+  spec_to_module_enabled: true
+  diff_generation_enabled: true
+  proposal_packaging_enabled: true
+
+defaults:
+  direct_apply_forbidden: true
+  human_review_required: true
+  manifest_generation_required: true
+  tests_required_before_promotion: true
+
+rules:
+  - code generation is proposal-oriented, not direct authority
+  - generated code must remain bounded by module and governance contracts
+  - codegen must not write to CORE_ROOT

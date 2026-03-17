@@ -1,0 +1,67 @@
+contract_name: module_manifest
+schema_version: module_manifest.v1
+description: Canonical module declaration for cubes and domain modules.
+
+required:
+  - module_id
+  - module_name
+  - version
+  - supported_platforms
+
+fields:
+  module_id:
+    type: string
+    description: Unique module identifier.
+
+  module_name:
+    type: string
+    description: Human-readable module name.
+
+  version:
+    type: string
+    description: Version string of the module manifest.
+
+  description:
+    type: string
+    description: Short semantic description of module purpose.
+
+  supported_platforms:
+    type: array
+    items:
+      type: string
+    description: Explicit list of supported shells or platforms.
+
+  requires_backend:
+    type: boolean
+    description: Whether this module requires external backend or server support.
+
+  can_run_standalone:
+    type: boolean
+    description: Whether this module can run without backend federation support.
+
+  actions:
+    type: array
+    items:
+      type: string
+    description: Action primitives exposed or required by this module.
+
+  workflows:
+    type: array
+    items:
+      type: string
+    description: Workflow identifiers bundled with or referenced by this module.
+
+  dashboard_ref:
+    type: string
+    description: Reference to dashboard manifest bound to this module.
+
+validation_rules:
+  - module_id must be unique
+  - version required
+  - supported_platforms must not be empty
+  - actions and workflows should be explicit even when empty
+
+security_rules:
+  - module capabilities must be bounded by permission matrix
+  - module manifest does not grant execution authority by itself
+  - module metadata must not contain hidden privileged commands

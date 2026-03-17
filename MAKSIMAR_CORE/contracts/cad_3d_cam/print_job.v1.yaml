@@ -1,0 +1,40 @@
+contract_name: print_job
+schema_version: print_job.v1
+description: Canonical print job contract for additive manufacturing workflows.
+
+required:
+  - print_job_id
+  - mesh_ref
+  - material_profile
+
+fields:
+  print_job_id:
+    type: string
+    description: Unique print job identifier.
+
+  mesh_ref:
+    type: string
+    description: Reference to mesh asset used for printing.
+
+  material_profile:
+    type: string
+    description: Material profile selected for the print.
+
+  slicer_profile_ref:
+    type: string
+    description: Reference to slicer profile or slicing preset.
+
+  approval_required:
+    type: boolean
+    description: Whether explicit approval is required before any real print execution.
+
+validation_rules:
+  - print_job_id required
+  - mesh_ref required
+  - material_profile required
+  - approval_required must be explicit for real-world print paths
+
+security_rules:
+  - no direct hardware start without approval policy
+  - print job contract is planning metadata, not machine authority
+  - unsafe or unvalidated mesh use must remain reviewable

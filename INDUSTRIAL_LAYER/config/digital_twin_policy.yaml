@@ -1,0 +1,18 @@
+schema_version: industrial_digital_twin_policy.v1
+description: Canonical policy for industrial digital twin operation and validation.
+
+twin_policy:
+  model_reference_required: true
+  telemetry_binding_required: true
+  simulation_alignment_required: true
+  direct_hardware_control_forbidden: true
+
+validation:
+  twin_consistency_check_required: true
+  source_model_traceability_required: true
+  update_audit_required: true
+
+rules:
+  - digital twin is evidence and modeling layer, not plant authority
+  - twin updates must preserve provenance
+  - digital twin outputs must not bypass industrial approval paths

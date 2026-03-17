@@ -1,0 +1,23 @@
+schema_version: simulation_backend_genesis.v1
+description: Backend-specific operational defaults for Genesis adapter.
+
+backend:
+  enabled: true
+  sandbox_profile: sim_gpu_small
+  gpu_allowed: true
+  headless_default: true
+
+limits:
+  default_timeout_sec: 600
+  cpu_limit: 4
+  memory_limit_mb: 8192
+
+artifacts:
+  save_logs: true
+  save_metrics: true
+  save_video: true
+  save_failure_snapshot: true
+
+rules:
+  - backend settings remain adapter-local
+  - genesis runs must remain sandbox-bounded

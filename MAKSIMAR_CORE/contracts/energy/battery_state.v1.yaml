@@ -1,0 +1,41 @@
+contract_name: battery_state
+schema_version: battery_state.v1
+description: Canonical battery state record.
+
+required:
+  - battery_id
+  - charge_percent
+  - health_state
+
+fields:
+  battery_id:
+    type: string
+    description: Unique battery state identifier or battery asset identifier.
+
+  charge_percent:
+    type: number
+    description: Current state of charge in percent.
+
+  health_state:
+    type: string
+    description: Human-readable or normalized health classification.
+
+  temperature_c:
+    type: number
+    description: Current battery temperature in Celsius.
+
+  last_updated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of the latest battery state update.
+
+validation_rules:
+  - battery_id required
+  - charge_percent must be bounded by policy
+  - health_state required
+  - last_updated_at should be explicit for persisted telemetry records
+
+security_rules:
+  - telemetry only unless separately approved for control
+  - battery state records do not imply actuator control rights
+  - dangerous state visibility must not be suppressed

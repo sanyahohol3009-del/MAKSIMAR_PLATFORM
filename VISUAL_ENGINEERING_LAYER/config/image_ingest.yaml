@@ -1,0 +1,19 @@
+schema_version: visual_image_ingest_config.v1
+description: Canonical ingest policy for images and visual source assets.
+
+sources:
+  file_enabled: true
+  camera_enabled: true
+  screenshot_enabled: true
+  imported_dataset_enabled: true
+
+validation:
+  source_ref_required: true
+  source_type_required: true
+  provenance_required_for_dataset_imports: true
+  normalize_metadata_on_ingest: true
+
+rules:
+  - all visual inputs must preserve provenance
+  - dataset imports must not become trusted examples without review
+  - ingest does not imply transformation authority

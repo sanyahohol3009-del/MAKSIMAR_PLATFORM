@@ -1,0 +1,23 @@
+schema_version: shell_registry.v1
+description: Canonical registry of supported runtime shells.
+
+shells:
+  server:
+    enabled: true
+
+  desktop:
+    enabled: true
+
+  android:
+    enabled: true
+
+  ios:
+    enabled: true
+
+  cli:
+    enabled: true
+
+rules:
+  - shells must be explicitly registered
+  - disabled shells must not silently activate
+  - shell registry defines supported runtime environments

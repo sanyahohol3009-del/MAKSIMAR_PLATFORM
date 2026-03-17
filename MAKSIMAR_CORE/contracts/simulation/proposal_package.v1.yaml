@@ -1,0 +1,155 @@
+contract_name: proposal_package
+schema_version: proposal_package.v1
+description: Upward-facing simulation proposal package carrying validated evidence into human review.
+
+required:
+  - proposal_id
+  - created_at
+  - origin
+  - candidate_id
+  - request_id
+  - selected_runs
+  - executive_summary
+  - technical_summary
+  - risk_summary
+  - recommended_action
+  - approval_requirements
+
+fields:
+  proposal_id:
+    type: string
+    description: Unique proposal identifier.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when proposal package was created.
+
+  origin:
+    type: string
+    enum:
+      - EVOLUTION_ENGINE
+      - ROBOTICS_MODULE
+      - SIMULATION_LAYER
+    description: Originating subsystem that assembled this proposal package.
+
+  candidate_id:
+    type: string
+    description: Candidate identifier promoted into proposal form.
+
+  request_id:
+    type: string
+    description: Parent simulation request identifier.
+
+  selected_runs:
+    type: array
+    items:
+      type: string
+    description: Run identifiers selected as evidence base for the proposal.
+
+  executive_summary:
+    type: object
+    description: Human-facing high-level summary.
+    required:
+      - what_was_tested
+      - best_result
+      - why_selected
+      - high_level_recommendation
+    properties:
+      what_was_tested:
+        type: string
+      best_result:
+        type: string
+      why_selected:
+        type: string
+      high_level_recommendation:
+        type: string
+
+  technical_summary:
+    type: object
+    description: Technical summary for engineering review.
+    properties:
+      environment:
+        type: string
+      controller_version:
+        type: string
+      constraint_status:
+        type: string
+      metrics_summary:
+        type: object
+        additional_properties: true
+      comparison_with_baseline:
+        type: string
+
+  risk_summary:
+    type: object
+    description: Structured risk framing of the proposal.
+    properties:
+      known_risks:
+        type: array
+        items:
+          type: string
+      unknowns:
+        type: array
+        items:
+          type: string
+      hardware_risk:
+        type: string
+      safety_risk:
+        type: string
+      sim_to_real_risk:
+        type: string
+
+  recommended_action:
+    type: string
+    enum:
+      - approve_hardware_sandbox_test
+      - approve_limited_deployment
+      - request_more_simulation
+      - reject_candidate
+    description: Recommended next action for human-controlled approval path.
+
+  approval_requirements:
+    type: object
+    description: Required gates before any promotion beyond proposal.
+    required:
+      - human_review_required
+      - hardware_key_required
+      - voice_confirmation_required
+    properties:
+      human_review_required:
+        type: boolean
+      hardware_key_required:
+        type: boolean
+      voice_confirmation_required:
+        type: boolean
+      second_operator_required:
+        type: boolean
+
+  attachments:
+    type: object
+    description: Optional structured references to supporting artifacts.
+    properties:
+      simulation_report:
+        type: string
+      evaluator_result:
+        type: string
+      comparison_chart:
+        type: string
+      video:
+        type: string
+      failure_snapshot:
+        type: string
+
+validation_rules:
+  - selected_runs must reference existing simulation_result entries
+  - recommended_action must be compatible with risk_summary
+  - proposal_package does not equal approval
+  - approval_requirements must be present for every proposal
+  - origin must be explicit
+
+security_rules:
+  - proposal is the only upward-facing simulation artifact
+  - no direct deploy authority
+  - human approval remains mandatory
+  - no write to immutable core

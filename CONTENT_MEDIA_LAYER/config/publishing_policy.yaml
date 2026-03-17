@@ -1,0 +1,18 @@
+schema_version: content_media_publishing_policy.v1
+description: Canonical policy for media publishing jobs and channel-bound publication paths.
+
+publishing:
+  target_channels_required: true
+  content_reference_required: true
+  approval_required_before_publish: true
+  scheduling_allowed: true
+
+restrictions:
+  hidden_autopublish_forbidden: true
+  channel_policy_required: true
+  publish_without_content_ref_forbidden: true
+
+rules:
+  - publishing jobs do not bypass governance or approval policy
+  - scheduling does not imply automatic publish authority
+  - publication paths must remain explicit and reviewable

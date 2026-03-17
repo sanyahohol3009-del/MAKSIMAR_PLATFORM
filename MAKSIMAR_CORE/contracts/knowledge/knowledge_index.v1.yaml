@@ -1,0 +1,43 @@
+contract_name: knowledge_index
+schema_version: knowledge_index.v1
+description: Canonical index manifest for searchable knowledge stores.
+
+required:
+  - index_id
+  - index_type
+  - object_refs
+
+fields:
+  index_id:
+    type: string
+    description: Unique knowledge index identifier.
+
+  index_type:
+    type: string
+    enum:
+      - vector
+      - lexical
+      - graph
+      - hybrid
+    description: Search/indexing strategy used by this index.
+
+  object_refs:
+    type: array
+    items:
+      type: string
+    description: Explicit list of knowledge object identifiers included in the index.
+
+  shard_policy:
+    type: object
+    additional_properties: true
+    description: Structured sharding or partitioning metadata.
+
+validation_rules:
+  - object_refs must not be empty
+  - index_type must match allowed enum
+  - object_refs should not contain duplicates
+
+security_rules:
+  - index contents inherit source access policy
+  - index metadata does not grant unrestricted retrieval rights
+  - restricted knowledge must remain filtered by access policy

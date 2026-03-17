@@ -1,0 +1,61 @@
+contract_name: pid_contract
+schema_version: pid_contract.v1
+description: Canonical process identity contract.
+
+required:
+  - pid_id
+  - component_name
+  - pid
+  - session_name
+  - status
+
+fields:
+  pid_id:
+    type: string
+    description: Unique PID record identifier.
+
+  component_name:
+    type: string
+    description: Logical component name bound to the PID.
+
+  pid:
+    type: integer
+    description: Operating system process identifier.
+
+  session_name:
+    type: string
+    description: Session or tmux session associated with the process.
+
+  command_signature:
+    type: string
+    description: Stable normalized command signature for process identity checks.
+
+  status:
+    type: string
+    enum:
+      - running
+      - stale
+      - missing
+      - stopped
+    description: Current interpreted process state.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when PID record was created.
+
+  updated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of latest record update.
+
+validation_rules:
+  - pid must be positive integer
+  - component_name must be unique within runtime role
+  - status must match allowed enum
+  - updated_at should not be earlier than created_at when both exist
+
+security_rules:
+  - no kill authority implied
+  - pid record is evidence only
+  - process identity does not grant control privileges

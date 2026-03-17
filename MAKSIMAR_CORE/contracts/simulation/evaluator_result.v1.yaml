@@ -1,0 +1,127 @@
+contract_name: evaluator_result
+schema_version: evaluator_result.v1
+description: Engineering interpretation of a simulation result.
+
+required:
+  - request_id
+  - run_id
+  - evaluator_id
+  - evaluated_at
+  - decision
+  - score_breakdown
+  - recommended_next_action
+
+fields:
+  request_id:
+    type: string
+    description: Parent simulation request identifier.
+
+  run_id:
+    type: string
+    description: Simulation run identifier being evaluated.
+
+  evaluator_id:
+    type: string
+    description: Identifier of evaluator or evaluator composition used.
+
+  evaluated_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of evaluation.
+
+  decision:
+    type: string
+    enum:
+      - accept
+      - reject
+      - needs_review
+      - rerun_required
+      - candidate_promising
+      - candidate_unsafe
+    description: Evaluator decision for the candidate and run.
+
+  score_breakdown:
+    type: object
+    description: Structured score components for the run.
+    required:
+      - overall_score
+    properties:
+      stability_score:
+        type: number
+      safety_score:
+        type: number
+      efficiency_score:
+        type: number
+      task_success_score:
+        type: number
+      overall_score:
+        type: number
+
+  risk_assessment:
+    type: object
+    description: Risk-oriented interpretation of simulation evidence.
+    properties:
+      risk_level:
+        type: string
+        enum:
+          - low
+          - medium
+          - high
+          - critical
+      risk_tags:
+        type: array
+        items:
+          type: string
+      critical_issues:
+        type: array
+        items:
+          type: string
+
+  readiness:
+    type: string
+    enum:
+      - simulation_only
+      - ready_for_human_review
+      - ready_for_limited_hardware_test
+      - not_ready
+    description: Readiness class derived from evaluation evidence.
+
+  explanations:
+    type: object
+    description: Human-readable explanation package.
+    properties:
+      top_positive_factors:
+        type: array
+        items:
+          type: string
+      top_negative_factors:
+        type: array
+        items:
+          type: string
+      first_failure_reason:
+        type: string
+      dominant_constraint:
+        type: string
+
+  recommended_next_action:
+    type: string
+    enum:
+      - promote_to_proposal
+      - discard_candidate
+      - run_more_seeds
+      - tighten_constraints
+      - test_on_hardware_sandbox
+      - request_human_review
+    description: Recommended next step in the engineering pipeline.
+
+validation_rules:
+  - overall_score must be present
+  - if decision=accept then recommended_next_action must not be discard_candidate
+  - if risk_level=critical then readiness must not be ready_for_limited_hardware_test
+  - evaluator_id must be explicit
+
+security_rules:
+  - evaluator output is advisory only
+  - evaluator cannot approve deployment
+  - evaluator cannot modify core state
+  - high-risk assessment must remain visible in downstream review

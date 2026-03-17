@@ -1,0 +1,51 @@
+contract_name: event_journal_contract
+schema_version: event_journal_contract.v1
+description: Append-only journal for runtime events.
+
+required:
+  - event_id
+  - timestamp
+  - component
+  - event_type
+  - severity
+
+fields:
+  event_id:
+    type: string
+    description: Unique journal event identifier.
+
+  timestamp:
+    type: string
+    format: date-time
+    description: UTC timestamp of event emission.
+
+  component:
+    type: string
+    description: Component that emitted or owns the event.
+
+  event_type:
+    type: string
+    description: Normalized event type label.
+
+  severity:
+    type: string
+    enum:
+      - info
+      - warning
+      - critical
+    description: Event severity level.
+
+  details:
+    type: object
+    additional_properties: true
+    description: Structured event metadata payload.
+
+validation_rules:
+  - component must be present
+  - event_type must be present
+  - severity must match allowed enum
+
+security_rules:
+  - append only
+  - journal entries are immutable audit evidence
+  - event journal does not authorize action by itself

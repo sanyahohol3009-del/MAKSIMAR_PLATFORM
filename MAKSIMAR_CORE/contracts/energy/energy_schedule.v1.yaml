@@ -1,0 +1,35 @@
+contract_name: energy_schedule
+schema_version: energy_schedule.v1
+description: Schedule for energy-aware compute and load planning.
+
+required:
+  - schedule_id
+  - time_windows
+
+fields:
+  schedule_id:
+    type: string
+    description: Unique energy schedule identifier.
+
+  time_windows:
+    type: array
+    items:
+      type: object
+    description: Explicit time windows for planned energy behavior.
+
+  linked_assets:
+    type: array
+    items:
+      type: string
+    description: Linked assets or nodes participating in the schedule.
+
+validation_rules:
+  - schedule_id required
+  - time_windows required
+  - time_windows must not be empty
+  - linked_assets should be explicit even when empty
+
+security_rules:
+  - schedule changes may require operator approval
+  - schedule definition does not imply execution authority
+  - energy schedules must remain bounded by governance and safety policy

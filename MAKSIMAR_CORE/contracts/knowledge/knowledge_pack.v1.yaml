@@ -1,0 +1,45 @@
+contract_name: knowledge_pack
+schema_version: knowledge_pack.v1
+description: Versioned pack of curated knowledge objects.
+
+required:
+  - pack_id
+  - version
+  - title
+  - included_objects
+
+fields:
+  pack_id:
+    type: string
+    description: Unique knowledge pack identifier.
+
+  version:
+    type: string
+    description: Explicit version string for the curated pack.
+
+  title:
+    type: string
+    description: Human-readable title of the pack.
+
+  included_objects:
+    type: array
+    items:
+      type: string
+    description: Explicit set of included knowledge object identifiers.
+
+  target_profiles:
+    type: array
+    items:
+      type: string
+    description: Capability or product profiles that may consume this pack.
+
+validation_rules:
+  - version required
+  - included_objects must be explicit
+  - included_objects should not contain duplicates
+  - title must not be empty
+
+security_rules:
+  - pack import must follow review policy
+  - knowledge pack does not bypass provenance requirements
+  - restricted content remains restricted after packing

@@ -1,0 +1,36 @@
+contract_name: tts_request
+schema_version: tts_request.v1
+description: Text-to-speech request.
+
+required:
+  - request_id
+  - text
+  - voice_profile
+
+fields:
+  request_id:
+    type: string
+    description: Unique TTS request identifier.
+
+  text:
+    type: string
+    description: Text content to be synthesized.
+
+  voice_profile:
+    type: string
+    description: Allowed voice profile or persona reference.
+
+  target_device:
+    type: string
+    description: Target output device or shell reference.
+
+validation_rules:
+  - request_id required
+  - text required
+  - voice_profile required
+  - target_device should be explicit for routed output
+
+security_rules:
+  - voice profile selection follows allowed personas
+  - TTS request does not imply authority beyond output generation
+  - sensitive output remains subject to privacy policy

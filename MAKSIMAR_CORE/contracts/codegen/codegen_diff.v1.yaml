@@ -1,0 +1,22 @@
+contract_name: codegen_diff
+schema_version: codegen_diff.v1
+description: Canonical contract for codegen_diff.
+
+required:
+  - id
+
+fields:
+  id:
+    type: string
+
+metadata:
+  created_by: MAKSIMAR_PLATFORM
+  layer: portable_core
+  status: draft
+
+validation_rules:
+  - id required
+
+security_rules:
+  - no implicit authority
+  - execution requires approval policy

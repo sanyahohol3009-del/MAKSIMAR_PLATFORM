@@ -1,0 +1,50 @@
+schema_version: governance_node_roles.v1
+description: Canonical role definitions for JARVIS federation nodes.
+
+roles:
+  primary_personal_core:
+    execution_scope: platform_root
+    may_host_voice_layer: true
+    may_host_full_memory: true
+    may_host_codegen: true
+    may_host_simulation: true
+
+  desktop_companion:
+    execution_scope: desktop_assist
+    may_host_voice_layer: true
+    may_host_full_memory: false
+    may_host_codegen: true
+    may_host_simulation: false
+
+  android_personal_node:
+    execution_scope: mobile_assist
+    may_host_voice_layer: true
+    may_host_full_memory: false
+    may_host_codegen: false
+    may_host_simulation: false
+
+  ios_personal_node:
+    execution_scope: mobile_assist
+    may_host_voice_layer: true
+    may_host_full_memory: false
+    may_host_codegen: false
+    may_host_simulation: false
+
+  client_standalone_mobile:
+    execution_scope: detached_mobile_product
+    may_host_voice_layer: true
+    may_host_full_memory: false
+    may_host_codegen: false
+    may_host_simulation: false
+
+  server_control_node:
+    execution_scope: backend_services
+    may_host_voice_layer: false
+    may_host_full_memory: true
+    may_host_codegen: true
+    may_host_simulation: true
+
+rules:
+  - node role does not imply automatic trust
+  - simulation and codegen hosting remain separately governed
+  - mobile roles must remain capability-bounded

@@ -1,0 +1,12 @@
+schema_version: execution_contract.v1
+description: Canonical execution contract for action execution boundaries.
+
+execution:
+  authority_required: true
+  approval_required_for_sensitive_actions: true
+  audit_logging_required: true
+
+rules:
+  - execution must remain bounded by governance
+  - execution authority must remain auditable
+  - execution must not bypass approval policy

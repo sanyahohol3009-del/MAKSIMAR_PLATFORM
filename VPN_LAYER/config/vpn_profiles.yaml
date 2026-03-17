@@ -1,0 +1,24 @@
+schema_version: vpn_profiles_config.v1
+description: Canonical VPN profile configuration for optional secure routing modes.
+
+profiles:
+  off:
+    enabled: true
+    mode: off
+
+  on_demand:
+    enabled: true
+    mode: on_demand
+
+  always_on:
+    enabled: true
+    mode: always_on
+
+  node_link:
+    enabled: true
+    mode: node_link
+
+rules:
+  - VPN remains optional by design
+  - profile selection must remain explicit
+  - profile config does not imply trust escalation

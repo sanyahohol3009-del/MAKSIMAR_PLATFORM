@@ -1,0 +1,17 @@
+schema_version: compute_fleet_power_policy.v1
+description: Canonical policy for power limits and operating envelopes of compute nodes.
+
+monitoring:
+  power_tracking_required: true
+  efficiency_tracking_required: true
+  profile_reference_required: true
+
+control:
+  direct_power_profile_change_requires_policy: true
+  unsafe_power_states_must_trigger_alert: true
+  unrestricted_power_override_forbidden: true
+
+rules:
+  - power policy must preserve explicit profile references
+  - unsafe power states must remain visible
+  - power control changes remain approval-gated

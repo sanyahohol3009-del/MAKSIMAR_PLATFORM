@@ -1,0 +1,18 @@
+schema_version: content_media_pipeline.v1
+description: Canonical policy for content generation and media assembly pipeline.
+
+pipeline:
+  subtitle_animation_enabled: true
+  beat_sync_enabled: true
+  montage_feedback_enabled: true
+  template_binding_required: true
+
+validation:
+  content_ref_required: true
+  stage_traceability_required: true
+  render_artifact_logging_required: true
+
+rules:
+  - media pipeline produces content artifacts, not publishing authority
+  - all generation stages must remain auditable
+  - pipeline outputs must preserve provenance and template binding

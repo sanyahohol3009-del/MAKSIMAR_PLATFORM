@@ -1,0 +1,71 @@
+contract_name: incident_contract
+schema_version: incident_contract.v1
+description: First-failure oriented runtime incident record.
+
+required:
+  - incident_id
+  - timestamp
+  - primary_failure
+  - affected_layer
+  - severity
+
+fields:
+  incident_id:
+    type: string
+    description: Unique incident identifier.
+
+  timestamp:
+    type: string
+    format: date-time
+    description: UTC timestamp of incident creation.
+
+  primary_failure:
+    type: string
+    description: First identified failure cause.
+
+  affected_layer:
+    type: string
+    description: Platform layer primarily affected by the incident.
+
+  severity:
+    type: string
+    enum:
+      - info
+      - warning
+      - critical
+    description: Incident severity level.
+
+  cascade_failures:
+    type: array
+    items:
+      type: string
+    description: Downstream failures caused by the primary failure.
+
+  related_logs:
+    type: array
+    items:
+      type: string
+    description: References to relevant logs or log files.
+
+  snapshot_ref:
+    type: string
+    description: Reference to supporting incident snapshot if present.
+
+  resolution_status:
+    type: string
+    enum:
+      - open
+      - mitigated
+      - resolved
+      - archived
+    description: Current incident lifecycle state.
+
+validation_rules:
+  - primary_failure must be populated
+  - severity must match allowed enum
+  - resolution_status must match allowed enum when present
+
+security_rules:
+  - incident records are append-oriented
+  - incident record does not authorize remediation by itself
+  - incident severity must not be silently downgraded without audit

@@ -1,0 +1,57 @@
+contract_name: sync_contract
+schema_version: sync_contract.v1
+description: Canonical sync policy between nodes.
+
+required:
+  - sync_id
+  - source_node
+  - target_node
+  - allowed_objects
+
+fields:
+  sync_id:
+    type: string
+    description: Unique synchronization contract identifier.
+
+  source_node:
+    type: string
+    description: Source node identifier.
+
+  target_node:
+    type: string
+    description: Target node identifier.
+
+  allowed_objects:
+    type: array
+    items:
+      type: string
+    description: Object categories allowed to be synchronized.
+
+  forbidden_objects:
+    type: array
+    items:
+      type: string
+    description: Object categories explicitly forbidden from synchronization.
+
+  mode:
+    type: string
+    enum:
+      - one_way
+      - bidirectional
+      - offline_pack
+    description: Synchronization direction and transport mode.
+
+  trust_ref:
+    type: string
+    description: Reference to trust policy governing this sync path.
+
+validation_rules:
+  - source_node and target_node required
+  - source_node and target_node must not be identical
+  - allowed_objects should be explicit even when narrow
+  - mode must match allowed enum
+
+security_rules:
+  - runtime state sync forbidden
+  - sync contract does not imply unrestricted data exchange
+  - restricted objects require explicit policy gate

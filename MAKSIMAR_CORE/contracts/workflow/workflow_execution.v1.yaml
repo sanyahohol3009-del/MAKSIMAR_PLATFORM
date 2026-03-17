@@ -1,0 +1,85 @@
+contract_name: workflow_execution
+schema_version: workflow_execution.v1
+description: Canonical execution record for workflow runs.
+
+required:
+  - execution_id
+  - workflow_id
+  - started_at
+  - status
+
+fields:
+  execution_id:
+    type: string
+    description: Unique workflow execution identifier.
+
+  workflow_id:
+    type: string
+    description: Workflow being executed.
+
+  trigger_source:
+    type: string
+    enum:
+      - voice
+      - text
+      - manual_run
+      - scheduled
+      - api
+    description: Source of activation for this workflow run.
+
+  started_at:
+    type: string
+    format: date-time
+    description: UTC start timestamp.
+
+  finished_at:
+    type: string
+    format: date-time
+    description: UTC finish timestamp.
+
+  status:
+    type: string
+    enum:
+      - success
+      - failed
+      - cancelled
+      - blocked_by_policy
+      - awaiting_approval
+      - partial_success
+    description: Final or current execution status.
+
+  executed_steps:
+    type: array
+    items:
+      type: string
+    description: Step identifiers that executed before terminal state.
+
+  failed_step:
+    type: string
+    description: Step identifier that caused failure or halt.
+
+  failure_reason:
+    type: string
+    description: Human-readable or structured failure reason.
+
+  approval_path:
+    type: object
+    additional_properties: true
+    description: Approval trace used for this execution.
+
+  operator_context:
+    type: object
+    additional_properties: true
+    description: Runtime operator or shell context associated with the run.
+
+validation_rules:
+  - workflow_id required
+  - status must match allowed enum
+  - started_at required
+  - failed and blocked statuses should carry reason
+  - executed_steps should preserve execution order
+
+security_rules:
+  - execution record is evidence only
+  - blocked_by_policy status must remain visible
+  - approval trace must not be silently dropped

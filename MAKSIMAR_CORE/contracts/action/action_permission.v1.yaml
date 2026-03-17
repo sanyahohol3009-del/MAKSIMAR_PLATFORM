@@ -1,0 +1,36 @@
+contract_name: action_permission
+schema_version: action_permission.v1
+description: Permission binding for action execution.
+
+required:
+  - action_type
+  - requester_role
+  - allowed
+
+fields:
+  action_type:
+    type: string
+    description: Action primitive governed by this permission rule.
+
+  requester_role:
+    type: string
+    description: Role or actor category requesting the action.
+
+  allowed:
+    type: boolean
+    description: Whether the action is permitted for the requester role.
+
+  conditions:
+    type: object
+    additional_properties: true
+    description: Optional structured constraints required for permission to apply.
+
+validation_rules:
+  - requester_role required
+  - action_type required
+  - allowed must be explicit boolean
+
+security_rules:
+  - deny by default
+  - permission binding cannot exceed global permission matrix
+  - conditions must not silently weaken blocked classifications

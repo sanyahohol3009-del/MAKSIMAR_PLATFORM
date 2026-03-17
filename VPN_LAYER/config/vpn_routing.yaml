@@ -1,0 +1,18 @@
+schema_version: vpn_routing_config.v1
+description: Canonical routing configuration for VPN-mediated node traffic.
+
+routing:
+  node_to_node_routes_enabled: true
+  split_tunnel_allowed: true
+  full_tunnel_allowed: true
+  routing_scope_must_be_explicit: true
+
+validation:
+  source_scope_required: true
+  target_scope_required: true
+  route_enablement_explicit: true
+
+rules:
+  - route declarations must remain explicit
+  - routing config does not imply automatic activation
+  - routing must remain bounded by trust and policy

@@ -1,0 +1,42 @@
+contract_name: benchmark_case
+schema_version: benchmark_case.v1
+description: Canonical benchmark test case.
+
+required:
+  - case_id
+  - domain
+  - prompt_or_input
+  - expected_behavior
+
+fields:
+  case_id:
+    type: string
+    description: Unique benchmark case identifier.
+
+  domain:
+    type: string
+    description: Evaluation domain this case belongs to.
+
+  prompt_or_input:
+    type: object
+    additional_properties: true
+    description: Structured prompt, request, or input payload used by the benchmark.
+
+  expected_behavior:
+    type: string
+    description: Expected outcome or rubric-aligned target behavior.
+
+  grading_policy_ref:
+    type: string
+    description: Reference to grading policy or rubric used for scoring.
+
+validation_rules:
+  - case_id required
+  - domain required
+  - expected_behavior required
+  - prompt_or_input must be explicit
+
+security_rules:
+  - benchmark input may include restricted fixtures only under policy
+  - benchmark case does not grant execution authority
+  - grading policy reference must remain explicit

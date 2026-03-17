@@ -1,0 +1,45 @@
+contract_name: benchmark_result
+schema_version: benchmark_result.v1
+description: Benchmark execution result.
+
+required:
+  - result_id
+  - case_id
+  - status
+  - score
+
+fields:
+  result_id:
+    type: string
+    description: Unique benchmark result identifier.
+
+  case_id:
+    type: string
+    description: Reference to benchmark case that produced this result.
+
+  status:
+    type: string
+    enum:
+      - pass
+      - fail
+      - partial
+    description: Final benchmark status.
+
+  score:
+    type: number
+    description: Numeric score assigned to the result.
+
+  notes:
+    type: string
+    description: Optional human-readable notes for the result.
+
+validation_rules:
+  - result_id required
+  - case_id required
+  - status must match allowed enum
+  - score must be explicit
+
+security_rules:
+  - result is evidence only
+  - result must not imply deployment authority
+  - benchmark outputs must preserve evaluation traceability

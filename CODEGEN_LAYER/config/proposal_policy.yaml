@@ -1,0 +1,20 @@
+schema_version: codegen_proposal_policy.v1
+description: Canonical policy for proposal creation and promotion of generated code.
+
+proposal:
+  diff_required: true
+  spec_reference_required: true
+  review_summary_required: true
+  approval_required: true
+
+promotion:
+  auto_promote_forbidden: true
+  failing_eval_blocks_promotion: true
+  failing_tests_block_promotion: true
+  lint_fail_blocks_promotion: true
+  typecheck_fail_blocks_promotion: true
+
+rules:
+  - no generated diff may bypass proposal stage
+  - approval remains mandatory before any promotion
+  - failed validation artifacts must remain visible

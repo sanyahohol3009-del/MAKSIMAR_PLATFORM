@@ -1,0 +1,44 @@
+contract_name: federation_snapshot
+schema_version: federation_snapshot.v1
+description: Snapshot of node topology and current known statuses.
+
+required:
+  - snapshot_id
+  - federation_id
+  - nodes
+
+fields:
+  snapshot_id:
+    type: string
+    description: Unique federation snapshot identifier.
+
+  federation_id:
+    type: string
+    description: Federation identifier for this snapshot.
+
+  nodes:
+    type: array
+    items:
+      type: string
+    description: Explicit list of nodes visible in this snapshot.
+
+  statuses:
+    type: object
+    additional_properties: true
+    description: Structured node-status mapping captured at snapshot time.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the snapshot was created.
+
+validation_rules:
+  - nodes required
+  - snapshot_id must be unique
+  - created_at required
+  - statuses should map only to nodes listed in nodes
+
+security_rules:
+  - snapshot visibility follows trust policy
+  - snapshot is evidence only
+  - snapshot must not expose restricted node metadata outside policy

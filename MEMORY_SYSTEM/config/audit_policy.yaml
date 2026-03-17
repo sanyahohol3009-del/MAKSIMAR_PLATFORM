@@ -1,0 +1,24 @@
+schema_version: memory_audit_policy.v1
+description: Audit requirements for memory mutations and policy-relevant operations.
+
+audit_events:
+  entity_created: true
+  entity_updated: true
+  relation_created: true
+  relation_updated: true
+  event_ingested: true
+  snapshot_exported: true
+  prune_executed: true
+  restricted_access_attempted: true
+
+requirements:
+  include_actor: true
+  include_timestamp: true
+  include_target_ref: true
+  include_reason: true
+  include_policy_ref_when_applicable: true
+
+rules:
+  - restricted access attempts must always be logged
+  - destructive pruning actions must always be logged
+  - audit trail is append-oriented

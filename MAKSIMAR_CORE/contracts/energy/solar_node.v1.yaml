@@ -1,0 +1,38 @@
+contract_name: solar_node
+schema_version: solar_node.v1
+description: Canonical solar telemetry node.
+
+required:
+  - solar_node_id
+  - node_name
+  - telemetry_fields
+
+fields:
+  solar_node_id:
+    type: string
+    description: Unique solar node identifier.
+
+  node_name:
+    type: string
+    description: Human-readable solar node name.
+
+  telemetry_fields:
+    type: array
+    items:
+      type: string
+    description: Explicit telemetry fields emitted by this solar node.
+
+  update_interval_sec:
+    type: integer
+    description: Expected telemetry update interval in seconds.
+
+validation_rules:
+  - solar_node_id required
+  - node_name required
+  - telemetry_fields required
+  - update_interval_sec should be positive when present
+
+security_rules:
+  - telemetry node does not imply control authority
+  - source telemetry must remain explicit and auditable
+  - solar node metadata must not embed hidden control actions

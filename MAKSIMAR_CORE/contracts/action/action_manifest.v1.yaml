@@ -1,0 +1,57 @@
+contract_name: action_manifest
+schema_version: action_manifest.v1
+description: Canonical declaration of approved action primitive.
+
+required:
+  - action_type
+  - supported_contexts
+  - risk_level
+
+fields:
+  action_type:
+    type: string
+    description: Unique action primitive identifier.
+
+  supported_contexts:
+    type: array
+    items:
+      type: string
+    description: Explicit list of contexts in which the action may be used.
+
+  required_parameters:
+    type: array
+    items:
+      type: string
+    description: Explicit list of required parameters for valid action execution.
+
+  risk_level:
+    type: string
+    enum:
+      - safe
+      - sensitive
+      - dangerous
+      - blocked
+    description: Governance risk level assigned to the action.
+
+  approval_policy:
+    type: string
+    description: Reference or name of approval policy required for this action.
+
+  is_repeatable:
+    type: boolean
+    description: Whether the action may be safely executed multiple times.
+
+  is_reversible:
+    type: boolean
+    description: Whether the action has a supported reversal path.
+
+validation_rules:
+  - action_type must be unique
+  - risk_level must match allowed enum
+  - supported_contexts must not be empty
+  - required_parameters should be explicit even when empty
+
+security_rules:
+  - blocked actions are non-executable
+  - action manifests do not grant execution rights by themselves
+  - action definitions must not contain hidden shell authority

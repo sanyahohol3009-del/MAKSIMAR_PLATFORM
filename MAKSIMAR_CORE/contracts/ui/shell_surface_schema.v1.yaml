@@ -1,0 +1,40 @@
+contract_name: shell_surface_schema
+schema_version: shell_surface_schema.v1
+description: Canonical UI surface contract per shell.
+
+required:
+  - surface_id
+  - shell_type
+  - supported_dashboards
+
+fields:
+  surface_id:
+    type: string
+    description: Unique shell surface identifier.
+
+  shell_type:
+    type: string
+    description: Shell type associated with this UI surface.
+
+  supported_dashboards:
+    type: array
+    items:
+      type: string
+    description: Dashboard identifiers supported by this shell surface.
+
+  capabilities:
+    type: array
+    items:
+      type: string
+    description: UI capabilities supported on this shell surface.
+
+validation_rules:
+  - surface_id must be unique
+  - shell_type required
+  - supported_dashboards must be explicit
+  - capabilities should remain bounded to shell contract
+
+security_rules:
+  - shell surface follows shell permissions
+  - shell surface does not grant action authority by itself
+  - restricted dashboards must remain filtered by access policy

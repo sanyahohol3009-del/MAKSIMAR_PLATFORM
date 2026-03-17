@@ -1,0 +1,182 @@
+contract_name: simulation_request
+schema_version: simulation_request.v1
+description: Canonical simulation request entering backend-agnostic simulation layer.
+
+required:
+  - request_id
+  - created_at
+  - source_module
+  - scenario_type
+  - environment_id
+  - robot_model_id
+  - candidate_id
+  - controller_ref
+  - metrics_required
+  - stop_conditions
+  - runtime_policy
+
+fields:
+  request_id:
+    type: string
+    description: Unique simulation request identifier.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the request was created.
+
+  source_module:
+    type: string
+    enum:
+      - EVOLUTION_ENGINE
+      - ROBOTICS_MODULE
+      - ENGINEERING_INTERPRETER
+      - CONTROL_PLANE
+    description: Originating module for the simulation request.
+
+  scenario_type:
+    type: string
+    enum:
+      - cartpole
+      - quadruped_locomotion
+      - manipulator_pick_place
+      - cnc_motion
+      - printer_motion
+      - digital_twin_validation
+    description: High-level scenario type requested for execution.
+
+  environment_id:
+    type: string
+    description: Identifier of the simulation environment contract.
+
+  robot_model_id:
+    type: string
+    description: Identifier of the robot or mechanism model used in the run.
+
+  candidate_id:
+    type: string
+    description: Identifier of controller, policy, or candidate artifact under evaluation.
+
+  controller_ref:
+    type: object
+    description: Structured reference to controller or policy artifact.
+    required:
+      - type
+      - location
+      - format
+    properties:
+      type:
+        type: string
+        enum:
+          - policy
+          - controller
+          - trajectory_profile
+          - motion_profile
+      location:
+        type: string
+      hash:
+        type: string
+      format:
+        type: string
+        enum:
+          - json
+          - yaml
+          - npz
+          - pkl
+          - onnx
+          - pt
+
+  input_payload:
+    type: object
+    additional_properties: true
+    description: Scenario-specific structured input parameters.
+
+  constraints:
+    type: object
+    additional_properties: true
+    description: Explicit physical, safety, or engineering constraints for simulation.
+
+  metrics_required:
+    type: array
+    items:
+      type: string
+    description: Required metrics to be produced by the simulation pipeline.
+
+  stop_conditions:
+    type: object
+    description: Explicit stop conditions for the run.
+    required:
+      - timeout_sec
+    properties:
+      timeout_sec:
+        type: number
+      max_steps:
+        type: integer
+      first_collision:
+        type: boolean
+      first_fall:
+        type: boolean
+      goal_reached:
+        type: boolean
+
+  runtime_policy:
+    type: object
+    description: Runtime sandbox policy for execution.
+    required:
+      - timeout_sec
+      - sandbox_profile
+      - gpu_allowed
+    properties:
+      priority:
+        type: string
+        enum:
+          - low
+          - normal
+          - high
+      timeout_sec:
+        type: number
+      retries:
+        type: integer
+      sandbox_profile:
+        type: string
+        enum:
+          - sim_cpu_small
+          - sim_cpu_large
+          - sim_gpu_small
+          - sim_gpu_large
+      gpu_allowed:
+        type: boolean
+      cpu_limit:
+        type: number
+      memory_limit_mb:
+        type: integer
+
+  artifacts_policy:
+    type: object
+    description: Policy describing which artifacts should be retained.
+    properties:
+      save_logs:
+        type: boolean
+      save_trace:
+        type: boolean
+      save_video:
+        type: boolean
+      save_metrics:
+        type: boolean
+      save_failure_snapshot:
+        type: boolean
+
+validation_rules:
+  - request_id must be unique within simulation queue
+  - stop_conditions.timeout_sec must be defined
+  - controller_ref.location must point to existing artifact before execution
+  - metrics_required must not be empty
+  - runtime_policy.gpu_allowed=false must be respected by backend
+  - no engine-specific fields may leak into portable simulation request
+
+security_rules:
+  - no direct deploy authority
+  - sandbox only
+  - no write to CORE_ROOT
+  - no write to approval state
+  - request is execution intent, not execution permission

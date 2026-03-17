@@ -1,0 +1,36 @@
+contract_name: vpn_route
+schema_version: vpn_route.v1
+description: Route declaration for VPN node traffic.
+
+required:
+  - route_id
+  - source_scope
+  - target_scope
+
+fields:
+  route_id:
+    type: string
+    description: Unique VPN route identifier.
+
+  source_scope:
+    type: string
+    description: Source node, group, or federation scope.
+
+  target_scope:
+    type: string
+    description: Target node, group, or federation scope.
+
+  enabled:
+    type: boolean
+    description: Whether this route is currently enabled.
+
+validation_rules:
+  - route_id required
+  - source_scope required
+  - target_scope required
+  - enabled must be explicit
+
+security_rules:
+  - route changes may require approval
+  - routing does not imply trust escalation
+  - route definitions remain bounded by policy and federation trust

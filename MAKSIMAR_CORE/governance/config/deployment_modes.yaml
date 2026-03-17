@@ -1,0 +1,41 @@
+schema_version: governance_deployment_modes.v1
+description: Canonical deployment mode definitions for platform and product assembly.
+
+modes:
+  full_platform:
+    shell_targets:
+      - server
+      - desktop
+      - android
+      - ios
+    capability_profile_ref: core_profile_full_platform
+    standalone: false
+    backend_required: true
+
+  personal_mobile_node:
+    shell_targets:
+      - android
+      - ios
+    capability_profile_ref: core_profile_mobile_consumer
+    standalone: true
+    backend_required: false
+
+  standalone_desktop:
+    shell_targets:
+      - desktop
+    capability_profile_ref: core_profile_desktop_consumer
+    standalone: true
+    backend_required: false
+
+  engineering_station:
+    shell_targets:
+      - desktop
+      - server
+    capability_profile_ref: core_profile_engineering
+    standalone: false
+    backend_required: true
+
+rules:
+  - shell targets must be explicit
+  - deployment mode cannot grant forbidden rights
+  - backend-required modes must not degrade silently into standalone privileged behavior

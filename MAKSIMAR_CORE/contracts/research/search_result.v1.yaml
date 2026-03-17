@@ -1,0 +1,38 @@
+contract_name: search_result
+schema_version: search_result.v1
+description: Canonical result set for research search.
+
+required:
+  - request_id
+  - entries
+
+fields:
+  request_id:
+    type: string
+    description: Identifier of the originating search request.
+
+  entries:
+    type: array
+    items:
+      type: object
+    description: Ranked or unranked result entries returned by the search layer.
+
+  ranked_by:
+    type: string
+    description: Ranking policy or engine used to order results.
+
+  selected_entries:
+    type: array
+    items:
+      type: string
+    description: Explicit subset of entries selected for follow-up inspection or review.
+
+validation_rules:
+  - entries may be empty but must exist
+  - request_id required
+  - selected_entries must reference known result entries when present
+
+security_rules:
+  - no import happens automatically from search_result
+  - result visibility follows source access policy
+  - result ranking must not suppress provenance metadata

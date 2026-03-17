@@ -1,0 +1,39 @@
+contract_name: load_balancing_rule
+schema_version: load_balancing_rule.v1
+description: Rule for energy-aware balancing.
+
+required:
+  - rule_id
+  - trigger_conditions
+  - actions
+
+fields:
+  rule_id:
+    type: string
+    description: Unique load balancing rule identifier.
+
+  trigger_conditions:
+    type: object
+    additional_properties: true
+    description: Structured trigger conditions for rule activation.
+
+  actions:
+    type: array
+    items:
+      type: string
+    description: Approved actions or action references used by the rule.
+
+  priority:
+    type: integer
+    description: Relative rule priority.
+
+validation_rules:
+  - rule_id required
+  - trigger_conditions required
+  - actions required
+  - priority should be explicit for overlapping rules
+
+security_rules:
+  - rule execution goes through approval and governance if control is sensitive
+  - rules do not bypass action policy
+  - rule metadata must not embed hidden privileged execution

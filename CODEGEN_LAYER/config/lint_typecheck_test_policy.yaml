@@ -1,0 +1,19 @@
+schema_version: codegen_validation_policy.v1
+description: Canonical validation policy for generated code quality gates.
+
+validation:
+  lint_required: true
+  typecheck_required: true
+  tests_required: true
+  structured_reports_required: true
+
+gates:
+  lint_must_pass: true
+  typecheck_must_pass: true
+  tests_must_pass: true
+  partial_success_not_sufficient: true
+
+rules:
+  - generated code must pass all declared validation gates
+  - reports must remain attached to proposal package
+  - validation cannot be silently skipped

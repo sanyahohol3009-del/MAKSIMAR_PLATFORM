@@ -15,7 +15,6 @@ from CORE_ROOT.run_context import read_run_metadata
 from CORE_ROOT.run_context import run_id as metadata_run_id
 from CORE_ROOT.runtime_paths import ensure_runtime_layout
 
-
 HEARTBEAT_SCHEMA_VERSION = 1
 
 
@@ -156,6 +155,8 @@ def heartbeat_monotonic_time(payload: dict[str, Any] | None) -> float | None:
         return None
 
     return float(value)
+
+
 def heartbeat_age_seconds(payload: dict[str, Any] | None) -> float | None:
     """Return heartbeat age in seconds using monotonic time when available."""
     monotonic_value = heartbeat_monotonic_time(payload)

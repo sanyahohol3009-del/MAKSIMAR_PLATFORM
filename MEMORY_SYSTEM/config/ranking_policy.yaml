@@ -1,0 +1,28 @@
+schema_version: memory_ranking_policy.v1
+description: Ranking policy for memory retrieval and context assembly.
+
+signals:
+  recency:
+    enabled: true
+    weight: 0.30
+
+  frequency:
+    enabled: true
+    weight: 0.15
+
+  project_relevance:
+    enabled: true
+    weight: 0.25
+
+  confirmation_weight:
+    enabled: true
+    weight: 0.20
+
+  task_proximity:
+    enabled: true
+    weight: 0.10
+
+rules:
+  - ranking weights should sum conceptually to full retrieval influence
+  - restricted memory must not outrank access policy
+  - ranking is advisory and cannot override filtering

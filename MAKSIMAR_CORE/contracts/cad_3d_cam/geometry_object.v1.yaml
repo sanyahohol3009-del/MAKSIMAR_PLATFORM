@@ -1,0 +1,39 @@
+contract_name: geometry_object
+schema_version: geometry_object.v1
+description: Canonical geometry object descriptor.
+
+required:
+  - geometry_id
+  - geometry_type
+
+fields:
+  geometry_id:
+    type: string
+    description: Unique geometry object identifier.
+
+  geometry_type:
+    type: string
+    enum:
+      - sketch
+      - mesh
+      - solid
+      - toolpath
+    description: Canonical type of geometry asset.
+
+  source_ref:
+    type: string
+    description: Reference to source object, image, or upstream artifact.
+
+  format:
+    type: string
+    description: Native or exchange format of the geometry object.
+
+validation_rules:
+  - geometry_id required
+  - geometry_type must match allowed enum
+  - format should be explicit for persisted objects
+
+security_rules:
+  - object metadata only
+  - geometry object does not imply manufacturing authority
+  - source references must remain traceable

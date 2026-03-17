@@ -1,0 +1,25 @@
+schema_version: action_risk_mapping.v1
+description: Mapping between action categories and governance risk levels.
+
+categories:
+  informational:
+    risk_level: safe
+
+  device_control:
+    risk_level: sensitive
+
+  system_operation:
+    risk_level: sensitive
+
+  hardware_operation:
+    risk_level: dangerous
+
+  industrial_operation:
+    risk_level: dangerous
+
+  forbidden_operation:
+    risk_level: blocked
+
+rules:
+  - action category must map to governance risk level
+  - blocked actions must never resolve

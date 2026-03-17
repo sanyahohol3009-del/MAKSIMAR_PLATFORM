@@ -1,0 +1,51 @@
+contract_name: module_compatibility
+schema_version: module_compatibility.v1
+description: Compatibility matrix for module across shells and products.
+
+required:
+  - module_id
+  - supports_server
+  - supports_desktop
+  - supports_android
+  - supports_ios
+
+fields:
+  module_id:
+    type: string
+    description: Module being described.
+
+  supports_server:
+    type: boolean
+    description: Whether module supports server shell.
+
+  supports_desktop:
+    type: boolean
+    description: Whether module supports desktop shell.
+
+  supports_android:
+    type: boolean
+    description: Whether module supports Android shell.
+
+  supports_ios:
+    type: boolean
+    description: Whether module supports iOS shell.
+
+  requires_backend:
+    type: boolean
+    description: Whether module requires backend service even when shell is supported.
+
+  supported_products:
+    type: array
+    items:
+      type: string
+    description: Product identifiers in which this module may be bundled.
+
+validation_rules:
+  - module_id required
+  - compatibility booleans must be explicit
+  - supported_products should be explicit for distributable modules
+
+security_rules:
+  - compatibility does not imply automatic activation
+  - backend-required modules must not be promoted to standalone mode silently
+  - shell support must still obey capability profiles and governance

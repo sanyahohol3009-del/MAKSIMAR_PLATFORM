@@ -1,0 +1,32 @@
+contract_name: node_registry
+schema_version: node_registry.v1
+description: Registry of known nodes in a federation.
+
+required:
+  - federation_id
+  - nodes
+
+fields:
+  federation_id:
+    type: string
+    description: Unique federation identifier.
+
+  nodes:
+    type: array
+    items:
+      type: string
+    description: Explicit list of node identifiers in this federation.
+
+  primary_node_ref:
+    type: string
+    description: Optional reference to the primary node of the federation.
+
+validation_rules:
+  - federation_id required
+  - nodes may not contain duplicates
+  - primary_node_ref should reference one of nodes when present
+
+security_rules:
+  - registry access policy required
+  - registry membership does not imply full synchronization rights
+  - node registry changes must remain auditable

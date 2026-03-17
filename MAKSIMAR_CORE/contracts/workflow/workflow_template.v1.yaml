@@ -1,0 +1,43 @@
+contract_name: workflow_template
+schema_version: workflow_template.v1
+description: Reusable template for workflow creation.
+
+required:
+  - template_id
+  - name
+  - steps
+
+fields:
+  template_id:
+    type: string
+    description: Unique workflow template identifier.
+
+  name:
+    type: string
+    description: Human-readable template name.
+
+  description:
+    type: string
+    description: Short semantic description of template purpose.
+
+  steps:
+    type: array
+    items:
+      type: object
+    description: Ordered template steps used to create workflow instances.
+
+  target_contexts:
+    type: array
+    items:
+      type: string
+    description: Execution contexts this template is designed for.
+
+validation_rules:
+  - steps required
+  - template_id must be unique
+  - target_contexts should be explicit when template is context-bound
+
+security_rules:
+  - template itself does not execute
+  - template must still pass workflow validation before activation
+  - templates do not bypass approval requirements

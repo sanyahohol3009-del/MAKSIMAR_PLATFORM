@@ -1,0 +1,58 @@
+contract_name: trigger_phrase
+schema_version: trigger_phrase.v1
+description: Canonical trigger phrase record for workflow activation.
+
+required:
+  - trigger_id
+  - phrase
+  - language
+  - enabled
+  - linked_workflow_id
+
+fields:
+  trigger_id:
+    type: string
+    description: Unique trigger identifier.
+
+  phrase:
+    type: string
+    description: Primary activation phrase.
+
+  aliases:
+    type: array
+    items:
+      type: string
+    description: Optional alternative phrases mapped to the same workflow.
+
+  language:
+    type: string
+    description: Language code associated with this trigger.
+
+  enabled:
+    type: boolean
+    description: Whether the trigger is currently allowed to resolve.
+
+  linked_workflow_id:
+    type: string
+    description: Workflow identifier bound to this trigger.
+
+  created_at:
+    type: string
+    format: date-time
+    description: UTC creation timestamp.
+
+  last_used_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of most recent trigger use.
+
+validation_rules:
+  - phrase must not be empty
+  - linked_workflow_id required
+  - disabled triggers must not execute
+  - aliases should not duplicate phrase or each other
+
+security_rules:
+  - trigger phrases do not bypass approval policy
+  - disabled triggers must remain non-executable
+  - trigger resolution must respect context and trust policies

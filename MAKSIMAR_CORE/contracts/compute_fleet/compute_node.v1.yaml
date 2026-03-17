@@ -1,0 +1,47 @@
+contract_name: compute_node
+schema_version: compute_node.v1
+description: Canonical compute node descriptor.
+
+required:
+  - node_id
+  - node_type
+  - telemetry_fields
+
+fields:
+  node_id:
+    type: string
+    description: Unique compute node identifier.
+
+  node_type:
+    type: string
+    enum:
+      - gpu
+      - asic
+      - cpu
+      - hybrid
+    description: Canonical compute node class.
+
+  telemetry_fields:
+    type: array
+    items:
+      type: string
+    description: Explicit telemetry fields emitted by the compute node.
+
+  power_profile_ref:
+    type: string
+    description: Reference to assigned power profile.
+
+  thermal_profile_ref:
+    type: string
+    description: Reference to assigned thermal profile.
+
+validation_rules:
+  - node_id required
+  - node_type must match allowed enum
+  - telemetry_fields required
+  - power_profile_ref and thermal_profile_ref should be explicit for managed nodes
+
+security_rules:
+  - telemetry and control boundary explicit
+  - compute node metadata does not imply control authority
+  - profile bindings must remain reviewable

@@ -1,0 +1,44 @@
+contract_name: packaging_profile
+schema_version: packaging_profile.v1
+description: Packaging profile for assembly of deliverables.
+
+required:
+  - packaging_id
+  - target_product
+  - shell_targets
+
+fields:
+  packaging_id:
+    type: string
+    description: Unique packaging profile identifier.
+
+  target_product:
+    type: string
+    description: Target product identifier assembled by this packaging profile.
+
+  shell_targets:
+    type: array
+    items:
+      type: string
+    description: Explicit shells included in the packaging output.
+
+  asset_groups:
+    type: array
+    items:
+      type: string
+    description: Asset groups included in the package.
+
+  include_debug_tools:
+    type: boolean
+    description: Whether debug or operator tooling is included in the package.
+
+validation_rules:
+  - packaging_id required
+  - target_product required
+  - shell_targets must not be empty
+  - asset_groups should be explicit even when empty
+
+security_rules:
+  - debug tools excluded by default in client bundles
+  - packaging profile does not grant execution authority
+  - packaging must respect product and governance constraints

@@ -1,0 +1,16 @@
+schema_version: energy_schedule_policy.v1
+description: Canonical schedule policy for energy-aware compute and load planning.
+
+scheduling:
+  explicit_time_windows_required: true
+  linked_assets_required: true
+  policy_review_required_for_critical_assets: true
+
+execution:
+  schedule_is_advisory_until_approved: true
+  automatic_high_risk_changes_forbidden: true
+
+rules:
+  - energy schedules do not imply execution authority
+  - critical-asset schedule changes must remain reviewable
+  - schedule provenance must remain visible

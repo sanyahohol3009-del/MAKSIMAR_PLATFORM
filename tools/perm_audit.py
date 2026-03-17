@@ -17,8 +17,10 @@ EXECUTABLE_PY = {
 
 DATA_EXT = {".json", ".bin", ".log"}
 
+
 def perm_str(mode):
     return oct(mode & 0o777)
+
 
 def check_file(path: Path, fix=False):
 
@@ -42,14 +44,12 @@ def check_file(path: Path, fix=False):
 
     if current != expected:
 
-        print(
-            f"[PERM] {path} "
-            f"{perm_str(current)} -> expected {perm_str(expected)}"
-        )
+        print(f"[PERM] {path} " f"{perm_str(current)} -> expected {perm_str(expected)}")
 
         if fix:
             os.chmod(path, expected)
             print(f"[FIX ] applied {perm_str(expected)}")
+
 
 def scan(fix=False):
 
@@ -57,6 +57,7 @@ def scan(fix=False):
 
         if path.is_file():
             check_file(path, fix)
+
 
 def main():
 
@@ -69,6 +70,7 @@ def main():
     scan(fix)
 
     print("[PERM] done")
+
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,20 @@
+schema_version: evaluation_registry.v1
+description: Canonical registry configuration for evaluation domains and evaluators.
+
+registry:
+  benchmark_registry_enabled: true
+  workflow_eval_enabled: true
+  tool_use_eval_enabled: true
+  knowledge_eval_enabled: true
+  codegen_eval_enabled: true
+  turing_style_eval_enabled: true
+
+defaults:
+  structured_results_required: true
+  evaluator_trace_required: true
+  audit_enabled: true
+
+rules:
+  - every evaluation must produce structured evidence
+  - evaluation registry is source of truth for enabled eval families
+  - disabled eval family must not silently run in production gates

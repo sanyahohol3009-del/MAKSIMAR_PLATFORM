@@ -1,0 +1,16 @@
+schema_version: energy_solar_policy.v1
+description: Canonical telemetry and control-boundary policy for solar inputs.
+
+telemetry:
+  telemetry_required: true
+  power_input_tracking_enabled: true
+  source_identity_required: true
+
+control:
+  direct_control_forbidden_by_default: true
+  approval_required_for_control_change: true
+
+rules:
+  - solar telemetry does not imply control authority
+  - solar source identity must remain explicit
+  - control changes remain policy-gated

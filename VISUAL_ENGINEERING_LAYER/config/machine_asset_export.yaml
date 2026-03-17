@@ -1,0 +1,19 @@
+schema_version: visual_machine_asset_export_config.v1
+description: Canonical export policy for machine-ready visual assets.
+
+targets:
+  laser_enabled: true
+  cnc_enabled: true
+  print_enabled: true
+  vinyl_enabled: true
+
+validation:
+  target_machine_type_required: true
+  export_format_required: true
+  machine_readiness_check_required: true
+  approval_required_before_machine_use: true
+
+rules:
+  - machine-ready export is not machine-start authority
+  - outputs must remain target-specific and validated
+  - unsafe outputs must remain blocked

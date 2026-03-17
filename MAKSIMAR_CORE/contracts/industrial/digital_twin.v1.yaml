@@ -1,0 +1,41 @@
+contract_name: digital_twin
+schema_version: digital_twin.v1
+description: Canonical digital twin descriptor.
+
+required:
+  - twin_id
+  - twin_type
+  - source_model_refs
+
+fields:
+  twin_id:
+    type: string
+    description: Unique digital twin identifier.
+
+  twin_type:
+    type: string
+    description: Canonical type or domain class of the digital twin.
+
+  source_model_refs:
+    type: array
+    items:
+      type: string
+    description: References to source models or engineering artifacts used to build the twin.
+
+  telemetry_bindings:
+    type: array
+    items:
+      type: string
+    description: Explicit telemetry bindings associated with the digital twin.
+
+validation_rules:
+  - twin_id required
+  - twin_type required
+  - source_model_refs required
+  - source_model_refs must not be empty
+  - telemetry_bindings should be explicit even when empty
+
+security_rules:
+  - digital twin does not directly control plant hardware
+  - twin metadata must remain traceable to source artifacts
+  - telemetry bindings do not imply write authority

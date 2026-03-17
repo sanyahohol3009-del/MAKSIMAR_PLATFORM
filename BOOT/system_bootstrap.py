@@ -67,7 +67,9 @@ def verify_genesis_signature(trust_dir: Path) -> None:
 
 
 def run_core_integrity(repo_root: Path) -> None:
-    verifier = _resolve_under(repo_root, repo_root / "CORE_ROOT" / "core_integrity_verifier.py")
+    verifier = _resolve_under(
+        repo_root, repo_root / "CORE_ROOT" / "core_integrity_verifier.py"
+    )
     if not verifier.exists():
         _fail(f"[BOOT] Missing verifier: {verifier}", 1)
 

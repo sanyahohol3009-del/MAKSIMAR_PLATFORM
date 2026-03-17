@@ -1,0 +1,19 @@
+schema_version: codegen_sandbox_policy.v1
+description: Canonical sandbox policy for generated code execution and validation.
+
+sandbox:
+  isolated_workspace_required: true
+  no_upward_write: true
+  artifact_export_only: true
+  network_disabled_by_default: true
+  resource_limits_required: true
+
+limits:
+  cpu_limit_required: true
+  memory_limit_required: true
+  timeout_required: true
+
+rules:
+  - generated code must execute only inside sandbox
+  - sandbox outputs are evidence and artifacts, not deployment
+  - sandbox must not mutate privileged runtime state

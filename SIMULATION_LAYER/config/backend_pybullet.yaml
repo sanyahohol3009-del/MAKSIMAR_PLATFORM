@@ -1,0 +1,23 @@
+schema_version: simulation_backend_pybullet.v1
+description: Backend-specific operational defaults for PyBullet adapter.
+
+backend:
+  enabled: true
+  sandbox_profile: sim_cpu_small
+  gpu_allowed: false
+  headless_default: true
+
+limits:
+  default_timeout_sec: 300
+  cpu_limit: 2
+  memory_limit_mb: 2048
+
+artifacts:
+  save_logs: true
+  save_metrics: true
+  save_video: false
+  save_failure_snapshot: true
+
+rules:
+  - backend settings remain adapter-local
+  - backend config must not override portable simulation contracts

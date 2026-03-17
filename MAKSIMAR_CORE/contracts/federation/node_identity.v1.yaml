@@ -1,0 +1,60 @@
+contract_name: node_identity
+schema_version: node_identity.v1
+description: Canonical identity record for one JARVIS node.
+
+required:
+  - node_id
+  - node_name
+  - node_type
+  - role
+  - deployment_mode
+
+fields:
+  node_id:
+    type: string
+    description: Unique node identifier.
+
+  node_name:
+    type: string
+    description: Human-readable node name.
+
+  node_type:
+    type: string
+    enum:
+      - server
+      - desktop
+      - android
+      - ios
+      - edge
+    description: Canonical platform type of the node.
+
+  role:
+    type: string
+    description: Node role within the federation.
+
+  deployment_mode:
+    type: string
+    description: Deployment mode assigned to this node.
+
+  capability_profile_ref:
+    type: string
+    description: Reference to capability profile assigned to the node.
+
+  owner_scope:
+    type: string
+    description: Ownership or federation scope of the node.
+
+  trust_policy_ref:
+    type: string
+    description: Reference to trust policy governing this node.
+
+validation_rules:
+  - node_id must be unique
+  - node_type must match allowed enum
+  - role must be explicit
+  - deployment_mode must be explicit
+
+security_rules:
+  - identity does not imply sync rights
+  - node identity does not imply trust by itself
+  - identity metadata must not carry hidden authority

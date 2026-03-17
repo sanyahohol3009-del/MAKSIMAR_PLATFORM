@@ -1,0 +1,19 @@
+schema_version: research_online_access_policy.v1
+description: Canonical online access policy for controlled internet research.
+
+access:
+  web_access_enabled: true
+  connector_access_enabled: true
+  unrestricted_background_browsing: false
+  policy_gated_sensitive_searches: true
+
+restrictions:
+  no_direct_core_write_from_research: true
+  no_automatic_library_import: true
+  no_unbounded_shell_commands: true
+  no_privileged_execution_from_search_results: true
+
+rules:
+  - research is controlled input, not authority
+  - internet access must remain bounded by policy
+  - external findings require review before becoming trusted knowledge

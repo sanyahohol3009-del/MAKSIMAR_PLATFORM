@@ -1,0 +1,39 @@
+contract_name: controller_contract
+schema_version: controller_contract.v1
+description: Controller definition for robotics policies and control loops.
+
+required:
+  - controller_id
+  - controller_type
+
+fields:
+  controller_id:
+    type: string
+    description: Unique controller identifier.
+
+  controller_type:
+    type: string
+    description: Canonical controller type.
+
+  target_robot_model:
+    type: string
+    description: Reference to target robot model.
+
+  parameter_schema:
+    type: object
+    additional_properties: true
+    description: Structured parameter schema for controller configuration.
+
+  safety_limits_ref:
+    type: string
+    description: Reference to safety limits applied to this controller.
+
+validation_rules:
+  - controller_id required
+  - controller_type required
+  - target_robot_model should be explicit for concrete controllers
+
+security_rules:
+  - no direct deployment authority
+  - controller definitions do not bypass approval policy
+  - safety limits must remain externally reviewable

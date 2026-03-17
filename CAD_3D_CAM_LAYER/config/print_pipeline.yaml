@@ -1,0 +1,17 @@
+schema_version: print_pipeline_config.v1
+description: Canonical additive manufacturing pipeline policy.
+
+validation:
+  mesh_required: true
+  slicer_profile_required: true
+  material_profile_required: true
+  approval_required_before_machine_use: true
+
+defaults:
+  dry_run_preview_enabled: true
+  machine_start_forbidden: true
+
+rules:
+  - print jobs are preparation artifacts only until approved
+  - slicer and material profile must remain explicit
+  - print pipeline does not imply printer control authority

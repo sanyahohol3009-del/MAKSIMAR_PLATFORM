@@ -1,0 +1,26 @@
+schema_version: shared_shell_compatibility.v1
+description: Canonical shell compatibility policy across server, desktop, android, and ios.
+
+shells:
+  server:
+    enabled: true
+
+  desktop:
+    enabled: true
+
+  android:
+    enabled: true
+
+  ios:
+    enabled: true
+
+compatibility_rules:
+  shared_contracts_required: true
+  shared_action_definitions_required: true
+  shared_workflow_schemas_required: true
+  shared_ui_tokens_required: true
+
+rules:
+  - shells must remain compatible through shared contracts
+  - shell compatibility does not imply equal capability
+  - shared layer is coordination layer, not privileged execution layer

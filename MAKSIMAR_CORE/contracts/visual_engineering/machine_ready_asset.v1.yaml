@@ -1,0 +1,46 @@
+contract_name: machine_ready_asset
+schema_version: machine_ready_asset.v1
+description: Prepared asset for machine workflow.
+
+required:
+  - asset_id
+  - source_image_ref
+  - target_machine_type
+
+fields:
+  asset_id:
+    type: string
+    description: Unique machine-ready asset identifier.
+
+  source_image_ref:
+    type: string
+    description: Reference to source image asset.
+
+  target_machine_type:
+    type: string
+    enum:
+      - laser
+      - cnc
+      - print
+      - vinyl
+    description: Target machine class for prepared output.
+
+  export_format:
+    type: string
+    description: Output format used by the machine-ready asset.
+
+  validation_status:
+    type: string
+    description: Validation state of the asset for downstream use.
+
+validation_rules:
+  - asset_id required
+  - source_image_ref required
+  - target_machine_type must match allowed enum
+  - export_format should be explicit
+  - validation_status required for downstream machine-facing artifacts
+
+security_rules:
+  - machine-ready does not imply machine-start authority
+  - output must remain subject to visual approval policy
+  - asset lineage must remain traceable to source image

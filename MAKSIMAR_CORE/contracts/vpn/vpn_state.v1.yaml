@@ -1,0 +1,43 @@
+contract_name: vpn_state
+schema_version: vpn_state.v1
+description: Current state of VPN layer or module.
+
+required:
+  - state_id
+  - profile_ref
+  - status
+
+fields:
+  state_id:
+    type: string
+    description: Unique VPN state record identifier.
+
+  profile_ref:
+    type: string
+    description: Reference to active or selected VPN profile.
+
+  status:
+    type: string
+    enum:
+      - disabled
+      - connecting
+      - connected
+      - failed
+    description: Current runtime state of VPN connectivity.
+
+  connected_peers:
+    type: array
+    items:
+      type: string
+    description: Explicit list of connected peer nodes or endpoints.
+
+validation_rules:
+  - state_id required
+  - profile_ref required
+  - status must match allowed enum
+  - connected_peers should be explicit even when empty
+
+security_rules:
+  - no implied trust escalation
+  - vpn state records do not authorize route or profile mutation
+  - peer visibility follows trust and access policy

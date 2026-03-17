@@ -1,0 +1,22 @@
+schema_version: compute_fleet_recovery_policy.v1
+description: Canonical recovery policy for compute node faults and degraded fleet states.
+
+recovery:
+  automatic_recovery_allowed_for_low_risk_faults: true
+  automatic_recovery_for_high_risk_faults: false
+  recovery_audit_required: true
+  root_cause_capture_required: true
+
+classification:
+  low_risk_faults:
+    - transient_telemetry_gap
+    - recoverable_worker_crash
+  high_risk_faults:
+    - repeated_overheat
+    - repeated_power_fault
+    - hardware_instability
+
+rules:
+  - high-risk faults must not auto-recover without policy
+  - recovery actions must preserve incident visibility
+  - recovery does not bypass safety or governance

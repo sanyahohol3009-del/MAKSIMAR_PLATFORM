@@ -1,0 +1,40 @@
+contract_name: toolpath_contract
+schema_version: toolpath_contract.v1
+description: Canonical toolpath descriptor for CNC or related machine execution planning.
+
+required:
+  - toolpath_id
+  - source_geometry_ref
+  - machine_type
+
+fields:
+  toolpath_id:
+    type: string
+    description: Unique toolpath identifier.
+
+  source_geometry_ref:
+    type: string
+    description: Reference to source geometry object used to generate the toolpath.
+
+  machine_type:
+    type: string
+    description: Canonical machine type targeted by the toolpath.
+
+  format:
+    type: string
+    description: Toolpath format or postprocessor output format.
+
+  bounds_verified:
+    type: boolean
+    description: Whether machine bounds and movement envelope were verified.
+
+validation_rules:
+  - toolpath_id required
+  - source_geometry_ref required
+  - machine_type required
+  - bounds_verified must be explicit for machine-bound toolpaths
+
+security_rules:
+  - unsafe toolpaths must be flagged
+  - toolpath artifacts do not imply execution permission
+  - machine-specific outputs remain subject to approval and validation

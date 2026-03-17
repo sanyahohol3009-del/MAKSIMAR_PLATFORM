@@ -1,0 +1,40 @@
+contract_name: knowledge_eval
+schema_version: knowledge_eval.v1
+description: Evaluation of retrieval quality, grounding, and citation fidelity.
+
+required:
+  - eval_id
+  - retrieval_ref
+  - grounding_score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique knowledge evaluation identifier.
+
+  retrieval_ref:
+    type: string
+    description: Reference to evaluated retrieval result or query trace.
+
+  grounding_score:
+    type: number
+    description: Score for groundedness against approved sources.
+
+  citation_fidelity_score:
+    type: number
+    description: Score for correctness and fidelity of citation use.
+
+  hallucination_detected:
+    type: boolean
+    description: Whether unsupported or hallucinated content was detected.
+
+validation_rules:
+  - eval_id required
+  - retrieval_ref required
+  - grounding_score must be explicit
+  - hallucination_detected must be explicit
+
+security_rules:
+  - hallucination flag must be preserved
+  - knowledge eval does not authorize promotion by itself
+  - poor grounding must block unsafe downstream automation where policy applies

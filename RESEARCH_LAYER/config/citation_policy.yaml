@@ -1,0 +1,18 @@
+schema_version: research_citation_policy.v1
+description: Canonical citation requirements for research-backed outputs.
+
+requirements:
+  citations_required_by_default: true
+  source_traceability_required: true
+  quoted_span_tracking_enabled: true
+  summary_span_tracking_enabled: true
+
+output_rules:
+  every_supported_claim_should_have_source: true
+  citation_records_must_map_to_known_source_ids: true
+  preserve_context_refs: true
+
+rules:
+  - citation fidelity must survive summarization
+  - unsupported claims must not be presented as sourced
+  - citation records are part of grounding evidence

@@ -1,0 +1,36 @@
+contract_name: media_template
+schema_version: media_template.v1
+description: Template definition for media generation workflows.
+
+required:
+  - template_id
+  - template_type
+
+fields:
+  template_id:
+    type: string
+    description: Unique media template identifier.
+
+  template_type:
+    type: string
+    description: Canonical template class or family.
+
+  assets:
+    type: array
+    items:
+      type: string
+    description: Explicit asset references used by this template.
+
+  style_profile:
+    type: string
+    description: Style profile bound to the template.
+
+validation_rules:
+  - template_id required
+  - template_type required
+  - assets should be explicit even when empty
+
+security_rules:
+  - templates are assets, not publishing authority
+  - template metadata must not embed hidden execution logic
+  - asset references must remain traceable

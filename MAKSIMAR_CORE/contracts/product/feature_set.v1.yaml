@@ -1,0 +1,35 @@
+contract_name: feature_set
+schema_version: feature_set.v1
+description: Declared feature set for one product variant.
+
+required:
+  - feature_set_id
+  - features
+
+fields:
+  feature_set_id:
+    type: string
+    description: Unique feature set identifier.
+
+  features:
+    type: array
+    items:
+      type: string
+    description: Explicitly enabled feature identifiers for this product variant.
+
+  disabled_features:
+    type: array
+    items:
+      type: string
+    description: Explicitly disabled feature identifiers.
+
+validation_rules:
+  - feature_set_id required
+  - features required
+  - features should be explicit
+  - disabled_features must not overlap enabled features
+
+security_rules:
+  - no hidden premium or admin features without manifest
+  - feature sets must not re-enable forbidden capabilities
+  - feature declarations do not grant execution authority by themselves

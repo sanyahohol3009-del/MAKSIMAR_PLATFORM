@@ -1,0 +1,21 @@
+schema_version: mesh_pipeline_config.v1
+description: Canonical mesh processing policy for manufacturing-ready geometry assets.
+
+processing:
+  watertight_check_required: true
+  manifold_check_required: true
+  normals_check_required: true
+  format_validation_required: true
+
+export:
+  supported_formats:
+    - stl
+    - obj
+    - ply
+    - step
+  default_format: stl
+
+rules:
+  - mesh exports must remain explicit
+  - invalid meshes must not be promoted as production-ready
+  - mesh processing must preserve provenance

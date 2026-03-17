@@ -1,0 +1,68 @@
+contract_name: action_step
+schema_version: action_step.v1
+description: Canonical action step inside a workflow definition.
+
+required:
+  - step_id
+  - action_type
+  - parameters
+  - risk_level
+
+fields:
+  step_id:
+    type: string
+    description: Unique workflow-local step identifier.
+
+  action_type:
+    type: string
+    description: Action primitive referenced from action library.
+
+  parameters:
+    type: object
+    additional_properties: true
+    description: Structured parameter payload for this step.
+
+  preconditions:
+    type: array
+    items:
+      type: string
+    description: Preconditions that should hold before execution.
+
+  postconditions:
+    type: array
+    items:
+      type: string
+    description: Expected state assertions after execution.
+
+  timeout_sec:
+    type: number
+    minimum: 0.1
+    description: Maximum allowed runtime for this step.
+
+  rollback_policy:
+    type: string
+    enum:
+      - none
+      - best_effort
+      - strict
+    description: Rollback policy if step fails or chain aborts.
+
+  risk_level:
+    type: string
+    enum:
+      - safe
+      - sensitive
+      - dangerous
+      - blocked
+    description: Step-level risk classification.
+
+validation_rules:
+  - action_type must reference approved action library entry
+  - timeout_sec must be positive when present
+  - risk_level must match allowed enum
+  - blocked steps must not be executable
+
+security_rules:
+  - step must remain bounded by action permission policy
+  - parameters must not contain freeform hidden shell authority
+  - rollback policy does not bypass governance

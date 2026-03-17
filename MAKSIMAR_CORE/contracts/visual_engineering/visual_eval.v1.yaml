@@ -1,0 +1,44 @@
+contract_name: visual_eval
+schema_version: visual_eval.v1
+description: Evaluation of visual transform or prepared asset.
+
+required:
+  - eval_id
+  - target_ref
+  - score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique visual evaluation identifier.
+
+  target_ref:
+    type: string
+    description: Reference to evaluated transform output or machine-ready asset.
+
+  score:
+    type: number
+    description: Aggregate evaluation score.
+
+  artifact_quality:
+    type: string
+    description: Human-readable quality classification.
+
+  machine_readiness:
+    type: string
+    description: Human-readable machine readiness classification.
+
+  notes:
+    type: string
+    description: Additional evaluation notes.
+
+validation_rules:
+  - eval_id required
+  - target_ref required
+  - score must be explicit
+  - machine_readiness should be explicit for machine-facing outputs
+
+security_rules:
+  - poor eval blocks downstream proposal promotion where policy applies
+  - evaluation is evidence only
+  - unsafe outputs must remain visibly flagged

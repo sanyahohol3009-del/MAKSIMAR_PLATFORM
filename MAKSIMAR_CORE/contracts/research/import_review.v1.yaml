@@ -1,0 +1,47 @@
+contract_name: import_review
+schema_version: import_review.v1
+description: Review record for importing external knowledge into approved library.
+
+required:
+  - review_id
+  - source_id
+  - decision
+
+fields:
+  review_id:
+    type: string
+    description: Unique import review identifier.
+
+  source_id:
+    type: string
+    description: Source under review for import.
+
+  decision:
+    type: string
+    enum:
+      - approved
+      - rejected
+      - needs_review
+    description: Final or intermediate review decision.
+
+  rationale:
+    type: string
+    description: Human-readable review rationale.
+
+  reviewer:
+    type: string
+    description: Reviewer identity or subsystem role.
+
+  imported_pack_ref:
+    type: string
+    description: Reference to resulting knowledge pack when import is approved.
+
+validation_rules:
+  - approved imports should reference imported_pack_ref
+  - decision must match allowed enum
+  - source_id required
+
+security_rules:
+  - approval required for library import
+  - rejected imports must remain non-imported
+  - review records are auditable governance artifacts

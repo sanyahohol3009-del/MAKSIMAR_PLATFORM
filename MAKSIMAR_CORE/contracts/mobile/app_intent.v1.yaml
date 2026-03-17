@@ -1,0 +1,37 @@
+contract_name: app_intent
+schema_version: app_intent.v1
+description: iOS-oriented App Intents bridge contract.
+
+required:
+  - intent_id
+  - intent_name
+  - target_handler
+
+fields:
+  intent_id:
+    type: string
+    description: Unique iOS App Intent identifier.
+
+  intent_name:
+    type: string
+    description: App Intent name exposed by the iOS shell bridge.
+
+  target_handler:
+    type: string
+    description: Portable-core or shell handler bound to this intent.
+
+  parameter_schema:
+    type: object
+    additional_properties: true
+    description: Structured parameter schema for the iOS intent bridge.
+
+validation_rules:
+  - intent_id required
+  - intent_name required
+  - target_handler required
+  - parameter_schema should be explicit when parameters are supported
+
+security_rules:
+  - app intents remain within approved mobile action library
+  - intent bridge does not bypass workflow, approval, or shell policy
+  - iOS integration must stay bounded by portable-core governance

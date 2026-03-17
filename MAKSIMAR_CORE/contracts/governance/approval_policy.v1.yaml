@@ -1,0 +1,60 @@
+contract_name: approval_policy
+schema_version: approval_policy.v1
+description: Canonical approval rules for actions, workflows, proposals, and deploys.
+
+required:
+  - policy_id
+  - applies_to
+  - approval_required
+
+fields:
+  policy_id:
+    type: string
+    description: Unique approval policy identifier.
+
+  applies_to:
+    type: string
+    description: Exact target scope this policy applies to, such as action, workflow, proposal, or deploy path.
+
+  approval_required:
+    type: boolean
+    description: Whether explicit approval is required before execution or promotion.
+
+  approval_type:
+    type: string
+    enum:
+      - none
+      - confirm_once
+      - strict
+      - hardware_key
+      - operator_pair
+    description: Type of approval mechanism required.
+
+  voice_confirmation_required:
+    type: boolean
+    description: Whether voice confirmation is mandatory.
+
+  hardware_key_required:
+    type: boolean
+    description: Whether hardware key confirmation is mandatory.
+
+  delay_buffer_sec:
+    type: integer
+    description: Delay buffer in seconds before execution may proceed.
+
+  allowed_contexts:
+    type: array
+    items:
+      type: string
+    description: Explicit contexts in which this approval policy may apply.
+
+validation_rules:
+  - blocked policies must not authorize execution
+  - approval_type must match allowed enum when present
+  - delay_buffer_sec must be non-negative when present
+  - allowed_contexts should be explicit for non-global policies
+
+security_rules:
+  - approval policy is authoritative
+  - approval rules do not grant execution by themselves
+  - stricter approval requirements must not be silently weakened downstream

@@ -1,0 +1,17 @@
+schema_version: energy_inverter_policy.v1
+description: Canonical inverter telemetry and control-boundary policy.
+
+monitoring:
+  state_tracking_required: true
+  power_in_tracking_required: true
+  power_out_tracking_required: true
+  alarms_required: true
+
+control:
+  direct_mode_switch_forbidden_by_default: true
+  approval_required_for_control_actions: true
+
+rules:
+  - inverter alarms must remain visible
+  - telemetry must be preserved even when control is blocked
+  - inverter policy remains bounded by governance

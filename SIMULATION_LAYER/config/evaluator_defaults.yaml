@@ -1,0 +1,19 @@
+schema_version: simulation_evaluator_defaults.v1
+description: Canonical default evaluator policy for simulation result interpretation.
+
+evaluators:
+  safety_score_enabled: true
+  stability_score_enabled: true
+  task_success_enabled: true
+  constraint_violation_check_enabled: true
+  artifact_quality_check_enabled: true
+
+thresholds:
+  minimum_safety_score_for_promotion: 0.80
+  minimum_stability_score_for_promotion: 0.75
+  hard_block_on_constraint_violation: true
+
+rules:
+  - evaluator results are mandatory for proposal generation
+  - constraint violations must remain visible and blocking when configured
+  - evaluator defaults may be tightened per scenario, not weakened silently

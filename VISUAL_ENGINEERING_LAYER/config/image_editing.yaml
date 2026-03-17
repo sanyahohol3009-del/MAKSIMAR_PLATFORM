@@ -1,0 +1,22 @@
+schema_version: visual_image_editing_config.v1
+description: Canonical transformation and editing policy for visual engineering workflows.
+
+transforms:
+  cleanup_enabled: true
+  crop_enabled: true
+  threshold_enabled: true
+  vectorize_enabled: true
+  background_remove_enabled: true
+  machine_prepare_enabled: true
+  image_to_depth_enabled: true
+  image_to_model_hint_enabled: true
+
+validation:
+  output_snapshot_required_for_destructive_edits: true
+  parameters_must_be_explicit: true
+  transform_trace_required: true
+
+rules:
+  - destructive visual edits must remain auditable
+  - every transformation must preserve input-output traceability
+  - editing does not imply downstream manufacturing approval

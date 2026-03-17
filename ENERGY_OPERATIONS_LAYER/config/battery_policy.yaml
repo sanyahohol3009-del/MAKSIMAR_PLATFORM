@@ -1,0 +1,17 @@
+schema_version: energy_battery_policy.v1
+description: Canonical policy for battery monitoring and bounded control flows.
+
+monitoring:
+  charge_tracking_required: true
+  temperature_tracking_required: true
+  health_tracking_required: true
+
+control:
+  charging_control_policy_gated: true
+  unsafe_state_must_trigger_alert: true
+  direct_hardware_override_forbidden: true
+
+rules:
+  - unsafe battery state must remain visible
+  - monitoring is default, control is gated
+  - battery policy must not bypass governance

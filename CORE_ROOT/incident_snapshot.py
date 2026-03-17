@@ -17,7 +17,6 @@ from CORE_ROOT.runtime_paths import (
 from CORE_ROOT.heartbeat_io import atomic_write_json
 from CORE_ROOT.run_context import read_run_metadata
 
-
 SNAPSHOT_SCHEMA_VERSION = 1
 
 

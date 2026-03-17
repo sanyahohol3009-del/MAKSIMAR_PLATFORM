@@ -1,0 +1,29 @@
+schema_version: robotics_robot_registry.v1
+description: Canonical registry for robot model definitions.
+
+robots:
+
+  quadruped:
+    enabled: true
+    class: locomotion
+
+  manipulator:
+    enabled: true
+    class: industrial_arm
+
+  mobile_base:
+    enabled: true
+    class: wheeled_robot
+
+  cnc_machine:
+    enabled: true
+    class: industrial_motion
+
+  printer_3d:
+    enabled: true
+    class: additive_manufacturing
+
+rules:
+  - robot models must remain explicit
+  - robot registry must not contain hidden devices
+  - registry must remain auditable

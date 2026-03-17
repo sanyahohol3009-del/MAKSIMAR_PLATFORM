@@ -1,0 +1,42 @@
+contract_name: trust_link
+schema_version: trust_link.v1
+description: Explicit trust relation between two nodes.
+
+required:
+  - trust_link_id
+  - source_node
+  - target_node
+  - trust_level
+
+fields:
+  trust_link_id:
+    type: string
+    description: Unique trust-link identifier.
+
+  source_node:
+    type: string
+    description: Origin node of trust relation.
+
+  target_node:
+    type: string
+    description: Target node of trust relation.
+
+  trust_level:
+    type: string
+    description: Effective trust level between source and target.
+
+  capabilities_granted:
+    type: array
+    items:
+      type: string
+    description: Capability categories permitted under this trust link.
+
+validation_rules:
+  - source_node and target_node required
+  - source_node and target_node must not be identical
+  - capabilities_granted should be explicit even when empty
+
+security_rules:
+  - trust link cannot override denied categories
+  - trust link does not bypass approval policy
+  - granted capabilities must remain bounded by governance

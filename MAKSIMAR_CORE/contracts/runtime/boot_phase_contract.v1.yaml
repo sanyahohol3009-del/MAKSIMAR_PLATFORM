@@ -1,0 +1,55 @@
+contract_name: boot_phase_contract
+schema_version: boot_phase_contract.v1
+description: Canonical boot phase state record.
+
+required:
+  - phase_id
+  - phase_name
+  - status
+  - started_at
+
+fields:
+  phase_id:
+    type: string
+    description: Unique boot phase identifier.
+
+  phase_name:
+    type: string
+    description: Human-readable boot phase name.
+
+  status:
+    type: string
+    enum:
+      - pending
+      - running
+      - done
+      - failed
+    description: Current boot phase status.
+
+  started_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the phase started.
+
+  finished_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the phase finished.
+
+  duration_sec:
+    type: number
+    description: Computed phase duration in seconds.
+
+  message:
+    type: string
+    description: Optional human-readable status message.
+
+validation_rules:
+  - phase_name must be unique inside one boot sequence
+  - status must match allowed enum
+  - finished_at should exist when status is done or failed
+
+security_rules:
+  - informational only
+  - boot phase record does not imply transition authority
+  - failed phases must remain visible for diagnostics

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 ROOT = Path.home() / "MAKSIMAR_PLATFORM"
 
 CORE_ROOT_DIR = ROOT / "CORE_ROOT"
@@ -38,6 +37,7 @@ STOP_GATE_SCRIPT = CORE_ROOT_DIR / "stop_gate.py"
 STOP_GATE_WATCHER_SCRIPT = CORE_ROOT_DIR / "stop_gate_watcher.py"
 CORE_GUARD_SCRIPT = CORE_ROOT_DIR / "core_guard.py"
 KERNEL_WATCHDOG_SCRIPT = CORE_ROOT_DIR / "kernel_watchdog.py"
+PROCESS_SUPERVISOR_SCRIPT = SUPERVISOR_DIR / "process_supervisor.py"
 
 RUNTIME_SESSION_NAME = "maksimar"
 GUARD_SESSION_NAME = "maksimar_guard"

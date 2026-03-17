@@ -1,0 +1,32 @@
+schema_version: workflow_risk_matrix.v1
+description: Canonical workflow risk matrix aligned with governance risk levels.
+
+risk_levels:
+  safe:
+    approval_required: false
+    voice_confirmation_required: false
+    hardware_key_required: false
+    execution_forbidden: false
+
+  sensitive:
+    approval_required: true
+    voice_confirmation_required: true
+    hardware_key_required: false
+    execution_forbidden: false
+
+  dangerous:
+    approval_required: true
+    voice_confirmation_required: true
+    hardware_key_required: true
+    execution_forbidden: false
+
+  blocked:
+    approval_required: false
+    voice_confirmation_required: false
+    hardware_key_required: false
+    execution_forbidden: true
+
+rules:
+  - blocked workflows and steps must never execute
+  - action-level blocking overrides workflow-level aggregation
+  - dangerous workflows must remain human-gated

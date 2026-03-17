@@ -8,7 +8,6 @@ from typing import Any
 
 from CORE_ROOT.runtime_paths import INCIDENT_HISTORY_FILE, ensure_runtime_layout
 
-
 INCIDENT_HISTORY_MAX_RECORDS = 200
 
 

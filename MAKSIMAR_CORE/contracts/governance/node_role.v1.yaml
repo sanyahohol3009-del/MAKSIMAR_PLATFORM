@@ -1,0 +1,47 @@
+contract_name: node_role
+schema_version: node_role.v1
+description: Canonical role definition for JARVIS nodes.
+
+required:
+  - role_id
+  - role_name
+  - execution_scope
+
+fields:
+  role_id:
+    type: string
+    description: Unique node role identifier.
+
+  role_name:
+    type: string
+    description: Human-readable node role name.
+
+  execution_scope:
+    type: string
+    description: Declared scope of execution authority or operational responsibility.
+
+  may_host_voice_layer:
+    type: boolean
+    description: Whether this role may host a voice layer.
+
+  may_host_full_memory:
+    type: boolean
+    description: Whether this role may host full memory system features.
+
+  may_host_codegen:
+    type: boolean
+    description: Whether this role may host code generation features.
+
+  may_host_simulation:
+    type: boolean
+    description: Whether this role may host simulation features.
+
+validation_rules:
+  - role_name must be unique
+  - execution_scope must be explicit
+  - hosting flags must be explicit booleans when present
+
+security_rules:
+  - node role does not imply automatic trust
+  - node role does not override approval or permission policy
+  - privileged hosting flags remain bounded by governance

@@ -1,0 +1,30 @@
+contract_name: tts_result
+schema_version: tts_result.v1
+description: Text-to-speech result metadata.
+
+required:
+  - request_id
+  - audio_ref
+
+fields:
+  request_id:
+    type: string
+    description: Reference to originating TTS request.
+
+  audio_ref:
+    type: string
+    description: Reference to synthesized audio artifact.
+
+  duration_sec:
+    type: number
+    description: Duration of generated audio in seconds.
+
+validation_rules:
+  - request_id required
+  - audio_ref required
+  - duration_sec should be explicit when known
+
+security_rules:
+  - audio output follows privacy policy
+  - result metadata does not imply playback authority by itself
+  - audio artifacts must remain traceable to request

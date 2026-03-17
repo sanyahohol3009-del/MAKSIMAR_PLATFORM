@@ -1,0 +1,23 @@
+schema_version: simulation_backend_mujoco.v1
+description: Backend-specific operational defaults for MuJoCo adapter.
+
+backend:
+  enabled: true
+  sandbox_profile: sim_cpu_large
+  gpu_allowed: false
+  headless_default: true
+
+limits:
+  default_timeout_sec: 300
+  cpu_limit: 4
+  memory_limit_mb: 4096
+
+artifacts:
+  save_logs: true
+  save_metrics: true
+  save_video: false
+  save_failure_snapshot: true
+
+rules:
+  - backend settings remain adapter-local
+  - mujoco backend is preferred for control-oriented evaluation where routed

@@ -1,0 +1,28 @@
+contract_name: engine_registry
+schema_version: engine_registry.v1
+description: Canonical registry of simulation backends and declared capabilities.
+
+required:
+  - default_engine
+  - engines
+
+fields:
+  default_engine:
+    type: string
+    description: Default simulation backend identifier.
+
+  engines:
+    type: object
+    additional_properties: true
+    description: Mapping of engine identifiers to engine capability declarations.
+
+validation_rules:
+  - default_engine required
+  - engines must not be empty
+  - default_engine must exist inside engines registry
+  - engine registry must remain backend metadata, not execution authority
+
+security_rules:
+  - registry does not grant backend execution rights by itself
+  - disabled engines must not be selected automatically
+  - backend capabilities must not override governance or sandbox policy

@@ -1,0 +1,40 @@
+schema_version: memory_system_config.v1
+description: Canonical top-level configuration for persistent memory system.
+
+storage_policy:
+  graph_store_enabled: true
+  episodic_store_enabled: true
+  workflow_memory_enabled: true
+  preference_memory_enabled: true
+  permission_memory_enabled: true
+
+snapshot_policy:
+  enable_snapshots: true
+  max_snapshot_entities: 100
+  max_snapshot_relations: 200
+  max_recent_events: 50
+
+query_policy:
+  default_max_results: 25
+  enable_recency_ranking: true
+  enable_frequency_ranking: true
+  enable_project_relevance: true
+  enable_confirmation_weight: true
+
+audit_policy:
+  audit_entity_changes: true
+  audit_relation_changes: true
+  audit_event_ingest: true
+  audit_pruning_actions: true
+
+security_policy:
+  restricted_memory_enabled: true
+  direct_core_write_forbidden: true
+  execution_authority_forbidden: true
+  restricted_export_requires_policy: true
+
+rules:
+  - memory provides context and continuity, not authority
+  - memory system must not mutate CORE_ROOT
+  - restricted memory requires policy-gated access
+  - memory-derived suggestions do not imply automatic execution

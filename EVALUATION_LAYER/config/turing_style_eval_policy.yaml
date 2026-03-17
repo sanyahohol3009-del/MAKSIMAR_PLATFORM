@@ -1,0 +1,19 @@
+schema_version: turing_style_eval_policy.v1
+description: Canonical policy for conversational human-likeness evaluation.
+
+policy:
+  enabled: true
+  human_review_allowed: true
+  rubric_eval_allowed: true
+  model_eval_allowed: true
+  sole_gate_for_deployment_forbidden: true
+
+requirements:
+  dialogue_ref_required: true
+  score_required: true
+  notes_recommended: true
+
+rules:
+  - turing-style eval is one signal only
+  - human-likeness must not override safety, grounding, or correctness
+  - turing-style score alone cannot promote deployment

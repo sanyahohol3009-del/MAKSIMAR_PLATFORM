@@ -1,0 +1,44 @@
+contract_name: source_rank
+schema_version: source_rank.v1
+description: Ranked trust and relevance score for sources.
+
+required:
+  - rank_id
+  - source_id
+  - trust_score
+  - relevance_score
+
+fields:
+  rank_id:
+    type: string
+    description: Unique source ranking record identifier.
+
+  source_id:
+    type: string
+    description: Source being ranked.
+
+  trust_score:
+    type: number
+    description: Normalized trust score for the source.
+
+  relevance_score:
+    type: number
+    description: Normalized relevance score for the current request or domain.
+
+  freshness_score:
+    type: number
+    description: Optional freshness score based on recency and temporal utility.
+
+  overall_score:
+    type: number
+    description: Combined ranking score used for ordering or filtering.
+
+validation_rules:
+  - scores should be normalized within policy
+  - source_id required
+  - trust_score and relevance_score required
+
+security_rules:
+  - ranking does not bypass import review
+  - low-ranked sources may still require explicit review rather than silent discard
+  - ranking must not conceal trust classification

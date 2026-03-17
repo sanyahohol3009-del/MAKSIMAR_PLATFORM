@@ -1,0 +1,40 @@
+contract_name: calibration_contract
+schema_version: calibration_contract.v1
+description: Calibration dataset or record for robot hardware.
+
+required:
+  - calibration_id
+  - robot_model_id
+  - calibration_type
+
+fields:
+  calibration_id:
+    type: string
+    description: Unique calibration record identifier.
+
+  robot_model_id:
+    type: string
+    description: Reference to robot model being calibrated.
+
+  calibration_type:
+    type: string
+    description: Type of calibration process or dataset.
+
+  calibration_data_ref:
+    type: string
+    description: Reference to calibration data asset.
+
+  verified:
+    type: boolean
+    description: Whether calibration has been verified by approved process.
+
+validation_rules:
+  - calibration_id required
+  - robot_model_id required
+  - calibration_type required
+  - calibration_data_ref required for persistent calibration records
+
+security_rules:
+  - calibration updates require approval
+  - unverified calibration must not be treated as production-safe
+  - calibration records do not imply hardware activation rights

@@ -1,0 +1,22 @@
+contract_name: spec_to_module
+schema_version: spec_to_module.v1
+description: Canonical contract for spec_to_module.
+
+required:
+  - id
+
+fields:
+  id:
+    type: string
+
+metadata:
+  created_by: MAKSIMAR_PLATFORM
+  layer: portable_core
+  status: draft
+
+validation_rules:
+  - id required
+
+security_rules:
+  - no implicit authority
+  - execution requires approval policy

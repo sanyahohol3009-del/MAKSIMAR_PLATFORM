@@ -1,0 +1,47 @@
+contract_name: vpn_profile
+schema_version: vpn_profile.v1
+description: Canonical VPN profile declaration.
+
+required:
+  - profile_id
+  - profile_name
+  - mode
+
+fields:
+  profile_id:
+    type: string
+    description: Unique VPN profile identifier.
+
+  profile_name:
+    type: string
+    description: Human-readable VPN profile name.
+
+  mode:
+    type: string
+    enum:
+      - off
+      - on_demand
+      - always_on
+      - node_link
+    description: VPN operating mode for this profile.
+
+  allowed_nodes:
+    type: array
+    items:
+      type: string
+    description: Explicit node references allowed by this VPN profile.
+
+  routing_policy_ref:
+    type: string
+    description: Reference to routing policy bound to this profile.
+
+validation_rules:
+  - profile_id required
+  - profile_name required
+  - mode must match allowed enum
+  - allowed_nodes should be explicit even when empty
+
+security_rules:
+  - VPN remains optional
+  - profile declaration does not imply automatic trust escalation
+  - routing behavior remains bounded by node trust and governance policy

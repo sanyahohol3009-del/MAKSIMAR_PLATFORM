@@ -1,0 +1,17 @@
+schema_version: compute_fleet_thermal_policy.v1
+description: Canonical policy for thermal monitoring and protection of compute fleet nodes.
+
+monitoring:
+  temperature_tracking_required: true
+  thermal_alerts_required: true
+  fan_policy_tracking_required: true
+
+protection:
+  unsafe_temperature_must_trigger_alert: true
+  unsafe_temperature_must_trigger_throttle_recommendation: true
+  direct_emergency_control_requires_policy: true
+
+rules:
+  - unsafe thermal state must remain visible
+  - thermal policy is protective, not unrestricted control authority
+  - thermal actions must remain bounded by governance

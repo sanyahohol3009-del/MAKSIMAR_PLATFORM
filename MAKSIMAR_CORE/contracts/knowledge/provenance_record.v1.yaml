@@ -1,0 +1,50 @@
+contract_name: provenance_record
+schema_version: provenance_record.v1
+description: Canonical provenance metadata for knowledge object lineage.
+
+required:
+  - provenance_id
+  - knowledge_id
+  - source_id
+
+fields:
+  provenance_id:
+    type: string
+    description: Unique provenance record identifier.
+
+  knowledge_id:
+    type: string
+    description: Referenced knowledge object identifier.
+
+  source_id:
+    type: string
+    description: Referenced knowledge source identifier.
+
+  imported_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when the knowledge object was imported or registered.
+
+  transformation_chain:
+    type: array
+    items:
+      type: string
+    description: Ordered list of transformations or processing steps applied to the source.
+
+  verification_status:
+    type: string
+    enum:
+      - verified
+      - unverified
+      - user_confirmed
+    description: Verification state of the knowledge lineage.
+
+validation_rules:
+  - knowledge_id and source_id must exist
+  - verification_status must match allowed enum
+  - provenance chain should remain ordered when present
+
+security_rules:
+  - provenance is immutable metadata
+  - lineage must remain auditable
+  - provenance records must not be silently dropped during retrieval or export

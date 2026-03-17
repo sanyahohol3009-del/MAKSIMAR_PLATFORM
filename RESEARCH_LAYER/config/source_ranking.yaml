@@ -1,0 +1,18 @@
+schema_version: research_source_ranking.v1
+description: Canonical source ranking policy for trust, relevance, and freshness.
+
+weights:
+  trust_score: 0.40
+  relevance_score: 0.30
+  freshness_score: 0.20
+  provenance_score: 0.10
+
+filters:
+  downrank_unverified_sources: true
+  downrank_stale_sources: true
+  prefer_authoritative_sources: true
+
+rules:
+  - ranking must remain explainable
+  - ranking cannot override access or import policy
+  - authoritative and recent sources should dominate when relevance is comparable

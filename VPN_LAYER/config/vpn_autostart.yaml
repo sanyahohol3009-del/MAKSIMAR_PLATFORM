@@ -1,0 +1,20 @@
+schema_version: vpn_autostart_config.v1
+description: Canonical autostart policy for VPN behavior across products, shells, and contexts.
+
+autostart:
+  desktop_allowed: true
+  android_allowed: true
+  ios_allowed: true
+  server_allowed: true
+  family_mode_default: false
+  engineering_mode_default: false
+
+requirements:
+  explicit_profile_required: true
+  policy_check_required: true
+  user_override_allowed: true
+
+rules:
+  - autostart must remain optional
+  - autostart must not silently force always-on mode
+  - product defaults must remain overridable where policy allows

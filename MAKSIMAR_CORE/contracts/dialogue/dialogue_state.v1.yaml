@@ -1,0 +1,45 @@
+contract_name: dialogue_state
+schema_version: dialogue_state.v1
+description: Canonical multi-turn dialogue state.
+
+required:
+  - dialogue_id
+  - active_intent
+  - active_context
+
+fields:
+  dialogue_id:
+    type: string
+    description: Unique dialogue session identifier.
+
+  active_intent:
+    type: string
+    description: Currently active interpreted intent.
+
+  active_context:
+    type: string
+    description: Current dialogue context label or context reference.
+
+  unresolved_questions:
+    type: array
+    items:
+      type: string
+    description: Outstanding clarification points still unresolved.
+
+  referenced_entities:
+    type: array
+    items:
+      type: string
+    description: Entity references currently active in the dialogue state.
+
+validation_rules:
+  - dialogue_id required
+  - active_intent required
+  - active_context required
+  - unresolved_questions should be explicit even when empty
+  - referenced_entities should be explicit even when empty
+
+security_rules:
+  - no execution authority
+  - dialogue state must not embed hidden privileged commands
+  - restricted references must be filtered by access policy

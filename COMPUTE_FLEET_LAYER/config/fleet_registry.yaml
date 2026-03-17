@@ -1,0 +1,19 @@
+schema_version: compute_fleet_registry.v1
+description: Canonical registry configuration for compute fleet nodes and inventories.
+
+registry:
+  gpu_nodes_enabled: true
+  asic_nodes_enabled: true
+  cpu_nodes_enabled: true
+  hybrid_nodes_enabled: true
+  inventory_tracking_enabled: true
+
+defaults:
+  explicit_node_registration_required: true
+  hidden_nodes_forbidden: true
+  audit_enabled: true
+
+rules:
+  - every compute node must be explicitly registered
+  - hidden fleet nodes are forbidden
+  - registry mutations must remain auditable

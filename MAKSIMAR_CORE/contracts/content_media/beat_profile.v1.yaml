@@ -1,0 +1,30 @@
+contract_name: beat_profile
+schema_version: beat_profile.v1
+description: Beat or rhythm profile for media synchronization.
+
+required:
+  - beat_profile_id
+  - bpm_or_timing_ref
+
+fields:
+  beat_profile_id:
+    type: string
+    description: Unique beat profile identifier.
+
+  bpm_or_timing_ref:
+    type: string
+    description: Reference to BPM data, timing map, or rhythm artifact.
+
+  source_audio_ref:
+    type: string
+    description: Optional reference to source audio asset.
+
+validation_rules:
+  - beat_profile_id required
+  - bpm_or_timing_ref required
+  - source_audio_ref should be explicit when derived from audio
+
+security_rules:
+  - informational only
+  - beat profiles do not imply rendering or publishing authority
+  - rhythm metadata must remain traceable to source artifacts

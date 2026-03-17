@@ -1,0 +1,42 @@
+contract_name: workflow_eval
+schema_version: workflow_eval.v1
+description: Evaluation of workflow correctness and safety.
+
+required:
+  - eval_id
+  - workflow_id
+  - correctness_score
+
+fields:
+  eval_id:
+    type: string
+    description: Unique workflow evaluation identifier.
+
+  workflow_id:
+    type: string
+    description: Reference to evaluated workflow.
+
+  correctness_score:
+    type: number
+    description: Score describing whether workflow behavior matches intended logic.
+
+  safety_score:
+    type: number
+    description: Score describing workflow safety and policy compliance.
+
+  policy_violations:
+    type: array
+    items:
+      type: string
+    description: Explicit list of policy violations detected during workflow evaluation.
+
+validation_rules:
+  - eval_id required
+  - workflow_id required
+  - correctness_score must be explicit
+  - policy_violations should be explicit even when empty
+
+security_rules:
+  - policy violations block promotion
+  - workflow evaluation does not grant execution authority
+  - safety score must not be omitted in high-risk workflows

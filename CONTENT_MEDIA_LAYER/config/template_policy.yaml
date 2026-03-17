@@ -1,0 +1,18 @@
+schema_version: content_media_template_policy.v1
+description: Canonical policy for media templates and reusable content generation assets.
+
+templates:
+  visual_templates_enabled: true
+  subtitle_templates_enabled: true
+  beat_templates_enabled: true
+  reusable_asset_groups_enabled: true
+
+validation:
+  template_id_required: true
+  template_type_required: true
+  asset_reference_tracking_required: true
+
+rules:
+  - templates are reusable assets, not publishing authority
+  - template provenance must remain visible
+  - hidden template-side execution authority is forbidden

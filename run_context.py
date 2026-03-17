@@ -9,7 +9,6 @@ from typing import Any
 
 from CORE_ROOT.runtime_paths import RUN_METADATA_FILE, ensure_runtime_layout
 
-
 RUN_METADATA_SCHEMA_VERSION = 1
 
 RUN_STATUS_BOOTING = "booting"

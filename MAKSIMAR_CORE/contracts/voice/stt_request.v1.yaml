@@ -1,0 +1,36 @@
+contract_name: stt_request
+schema_version: stt_request.v1
+description: Speech-to-text request contract.
+
+required:
+  - request_id
+  - audio_ref
+  - language
+
+fields:
+  request_id:
+    type: string
+    description: Unique STT request identifier.
+
+  audio_ref:
+    type: string
+    description: Reference to input audio artifact or stream.
+
+  language:
+    type: string
+    description: Expected language of the input audio.
+
+  device_ref:
+    type: string
+    description: Reference to originating device or shell.
+
+validation_rules:
+  - request_id required
+  - audio_ref required
+  - language required
+  - device_ref should be explicit for routed voice requests
+
+security_rules:
+  - audio handling follows privacy policy
+  - request metadata does not imply execution authority
+  - source device context must remain traceable

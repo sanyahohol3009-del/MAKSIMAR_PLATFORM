@@ -1,0 +1,20 @@
+schema_version: shared_capability_profiles.v1
+description: Canonical shared capability profiles for portable-core deployments.
+
+profiles:
+  core_profile_full_platform:
+    enabled: true
+
+  core_profile_mobile_consumer:
+    enabled: true
+
+  core_profile_desktop_consumer:
+    enabled: true
+
+  core_profile_industrial:
+    enabled: true
+
+rules:
+  - capability profiles must remain explicit and versionable
+  - shared capability profiles do not bypass governance restrictions
+  - disabled capabilities must not silently reactivate downstream

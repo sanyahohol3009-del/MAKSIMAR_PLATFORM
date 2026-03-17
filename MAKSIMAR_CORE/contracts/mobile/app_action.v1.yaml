@@ -1,0 +1,37 @@
+contract_name: app_action
+schema_version: app_action.v1
+description: Android-oriented App Actions bridge contract.
+
+required:
+  - action_id
+  - intent_name
+  - target_handler
+
+fields:
+  action_id:
+    type: string
+    description: Unique Android app action identifier.
+
+  intent_name:
+    type: string
+    description: Android intent or App Action name exposed by the shell bridge.
+
+  target_handler:
+    type: string
+    description: Portable-core or shell handler bound to this action.
+
+  parameter_schema:
+    type: object
+    additional_properties: true
+    description: Structured parameter schema for the action bridge.
+
+validation_rules:
+  - action_id required
+  - intent_name required
+  - target_handler required
+  - parameter_schema should be explicit when parameters are supported
+
+security_rules:
+  - app actions remain within approved mobile action library
+  - action bridge does not bypass workflow, approval, or shell policy
+  - Android integration must stay bounded by portable-core governance

@@ -1,0 +1,18 @@
+schema_version: knowledge_pack_policy.v1
+description: Canonical policy for curated and versioned knowledge packs.
+
+packaging:
+  version_required: true
+  included_objects_explicit: true
+  target_profiles_explicit: true
+  import_review_required_for_external_packs: true
+
+promotion_policy:
+  draft_pack_allowed: true
+  trusted_pack_requires_review: true
+  deprecated_pack_hidden_by_default: true
+
+rules:
+  - pack versioning is mandatory
+  - packs must not include hidden objects
+  - external packs require explicit review before trusted use

@@ -1,0 +1,38 @@
+contract_name: vpn_policy
+schema_version: vpn_policy.v1
+description: Policy controlling VPN usage in different contexts.
+
+required:
+  - policy_id
+  - applies_to
+
+fields:
+  policy_id:
+    type: string
+    description: Unique VPN policy identifier.
+
+  applies_to:
+    type: string
+    description: Context, profile, product, or shell scope this policy applies to.
+
+  auto_enable_allowed:
+    type: boolean
+    description: Whether VPN may auto-enable in this scope.
+
+  auto_disable_allowed:
+    type: boolean
+    description: Whether VPN may auto-disable in this scope.
+
+  user_confirmation_required:
+    type: boolean
+    description: Whether explicit user confirmation is required for policy-driven changes.
+
+validation_rules:
+  - policy_id required
+  - applies_to required
+  - policy booleans should be explicit
+
+security_rules:
+  - VPN policy cannot override node trust policy
+  - policy does not bypass approval requirements for sensitive route changes
+  - auto behavior remains bounded by governance

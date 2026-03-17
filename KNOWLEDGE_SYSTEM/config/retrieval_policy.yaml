@@ -1,0 +1,24 @@
+schema_version: knowledge_retrieval_policy.v1
+description: Canonical retrieval policy for grounded knowledge access.
+
+retrieval_defaults:
+  default_max_results: 10
+  citation_required_by_default: true
+  grounding_required_by_default: true
+  allow_hybrid_retrieval: true
+
+ranking_signals:
+  trust_level_weight: 0.35
+  relevance_weight: 0.30
+  freshness_weight: 0.15
+  provenance_weight: 0.20
+
+filters:
+  exclude_deprecated_by_default: true
+  exclude_unverified_when_verified_exists: true
+  restricted_knowledge_requires_policy: true
+
+rules:
+  - retrieval must preserve citations and provenance
+  - ranking must not override access controls
+  - deprecated or weakly trusted knowledge should be downranked or filtered

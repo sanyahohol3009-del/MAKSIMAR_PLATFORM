@@ -1,0 +1,56 @@
+contract_name: action_result
+schema_version: action_result.v1
+description: Canonical result of one workflow action step.
+
+required:
+  - action_result_id
+  - step_id
+  - status
+
+fields:
+  action_result_id:
+    type: string
+    description: Unique action-result identifier.
+
+  step_id:
+    type: string
+    description: Workflow step identifier this result belongs to.
+
+  status:
+    type: string
+    enum:
+      - success
+      - failed
+      - skipped
+      - blocked
+    description: Step result status.
+
+  started_at:
+    type: string
+    format: date-time
+    description: UTC step start timestamp.
+
+  finished_at:
+    type: string
+    format: date-time
+    description: UTC step finish timestamp.
+
+  output:
+    type: object
+    additional_properties: true
+    description: Structured step output payload.
+
+  error:
+    type: string
+    description: Human-readable or structured error reason when step fails.
+
+validation_rules:
+  - blocked and failed should carry reason
+  - status must match allowed enum
+  - step_id required
+  - finished_at should not be earlier than started_at when both exist
+
+security_rules:
+  - output must not include secrets unless allowed by policy
+  - blocked step results must remain visible to diagnostics
+  - action results do not imply future approval reuse

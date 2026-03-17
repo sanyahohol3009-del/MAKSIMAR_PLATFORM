@@ -1,0 +1,37 @@
+contract_name: plc_adapter
+schema_version: plc_adapter.v1
+description: PLC interface contract boundary.
+
+required:
+  - adapter_id
+  - supported_protocols
+
+fields:
+  adapter_id:
+    type: string
+    description: Unique PLC adapter identifier.
+
+  supported_protocols:
+    type: array
+    items:
+      type: string
+    description: Explicit list of supported PLC communication protocols.
+
+  control_mode:
+    type: string
+    enum:
+      - read_only
+      - limited_control
+      - blocked
+    description: Allowed control boundary for this PLC adapter.
+
+validation_rules:
+  - adapter_id required
+  - supported_protocols required
+  - supported_protocols must not be empty
+  - control_mode must match allowed enum
+
+security_rules:
+  - read_only default
+  - control authority must remain policy-gated
+  - adapter boundary must not bypass industrial safety constraints

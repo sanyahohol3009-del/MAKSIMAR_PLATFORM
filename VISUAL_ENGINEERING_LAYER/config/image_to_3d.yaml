@@ -1,0 +1,17 @@
+schema_version: visual_image_to_3d_config.v1
+description: Canonical policy for image-derived 3D preparation.
+
+conversion:
+  image_to_depth_enabled: true
+  image_to_model_hint_enabled: true
+  confidence_required: true
+  output_geometry_validation_required: true
+
+promotion:
+  unvalidated_geometry_blocked_for_manufacturing: true
+  simulation_recommended_before_hardware_path: true
+
+rules:
+  - image-derived geometry requires downstream validation
+  - confidence must remain explicit
+  - conversion output is proposal/evidence, not manufacturing authority

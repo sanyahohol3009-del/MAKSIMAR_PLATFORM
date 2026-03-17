@@ -1,0 +1,50 @@
+contract_name: action_execution
+schema_version: action_execution.v1
+description: Canonical record for action execution.
+
+required:
+  - execution_id
+  - action_type
+  - status
+
+fields:
+  execution_id:
+    type: string
+    description: Unique action execution identifier.
+
+  action_type:
+    type: string
+    description: Action primitive that was requested or executed.
+
+  status:
+    type: string
+    enum:
+      - success
+      - failed
+      - blocked
+      - cancelled
+    description: Final or terminal action execution state.
+
+  parameters:
+    type: object
+    additional_properties: true
+    description: Structured parameters supplied for the action.
+
+  context_ref:
+    type: string
+    description: Reference to the action context used for execution.
+
+  approval_ref:
+    type: string
+    description: Reference to approval artifact or approval path when required.
+
+validation_rules:
+  - action_type required
+  - status must match allowed enum
+  - blocked status should carry linked approval or policy reason through execution metadata
+  - context_ref should be present for non-simulated executions
+
+security_rules:
+  - blocked status must preserve reason
+  - execution record does not imply future permission reuse
+  - action execution artifacts must respect secrets and privacy policy

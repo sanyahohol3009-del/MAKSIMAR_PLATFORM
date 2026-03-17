@@ -1,0 +1,40 @@
+contract_name: mesh_contract
+schema_version: mesh_contract.v1
+description: Mesh descriptor for STL, OBJ, or similar manufacturing-ready assets.
+
+required:
+  - mesh_id
+  - source_geometry_ref
+  - format
+
+fields:
+  mesh_id:
+    type: string
+    description: Unique mesh asset identifier.
+
+  source_geometry_ref:
+    type: string
+    description: Reference to source geometry object.
+
+  format:
+    type: string
+    description: Mesh file format or canonical representation.
+
+  watertight:
+    type: boolean
+    description: Whether the mesh is watertight.
+
+  validated:
+    type: boolean
+    description: Whether mesh validation has been completed.
+
+validation_rules:
+  - mesh_id required
+  - source_geometry_ref required
+  - format required
+  - validated must be explicit for production-facing meshes
+
+security_rules:
+  - validation state must be explicit
+  - mesh assets do not authorize print or machine start
+  - non-validated meshes must not be treated as production-safe by default

@@ -1,0 +1,48 @@
+contract_name: fleet_alert
+schema_version: fleet_alert.v1
+description: Canonical alert for compute fleet operations.
+
+required:
+  - alert_id
+  - node_ref
+  - severity
+  - message
+
+fields:
+  alert_id:
+    type: string
+    description: Unique fleet alert identifier.
+
+  node_ref:
+    type: string
+    description: Reference to the affected compute node.
+
+  severity:
+    type: string
+    enum:
+      - info
+      - warning
+      - critical
+    description: Alert severity level.
+
+  message:
+    type: string
+    description: Human-readable alert message.
+
+  recommended_actions:
+    type: array
+    items:
+      type: string
+    description: Suggested approved actions for remediation.
+
+validation_rules:
+  - alert_id required
+  - node_ref required
+  - severity must match allowed enum
+  - message required
+  - recommended_actions should be explicit even when empty
+
+security_rules:
+  - alerts are informational until approved action path is chosen
+  - alerts must not conceal critical fleet state
+  - recommended actions remain subject to approval and action policy

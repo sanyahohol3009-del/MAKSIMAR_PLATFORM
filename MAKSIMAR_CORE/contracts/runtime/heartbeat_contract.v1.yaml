@@ -1,0 +1,61 @@
+contract_name: heartbeat_contract
+schema_version: heartbeat_contract.v1
+description: Canonical heartbeat payload for monitored services.
+
+required:
+  - heartbeat_id
+  - source
+  - pid
+  - wall_time
+  - monotonic_time
+  - status
+
+fields:
+  heartbeat_id:
+    type: string
+    description: Unique heartbeat record identifier.
+
+  source:
+    type: string
+    description: Exact logical component emitting the heartbeat.
+
+  pid:
+    type: integer
+    description: PID of the heartbeat-emitting process.
+
+  wall_time:
+    type: number
+    description: Wall-clock time associated with heartbeat emission.
+
+  monotonic_time:
+    type: number
+    description: Monotonic time associated with heartbeat emission.
+
+  status:
+    type: string
+    enum:
+      - warming_up
+      - alive
+      - stopped
+      - degraded
+    description: Health state reported by the source.
+
+  sequence:
+    type: integer
+    description: Monotonic heartbeat sequence counter.
+
+  metadata:
+    type: object
+    additional_properties: true
+    description: Extra structured heartbeat metadata.
+
+validation_rules:
+  - monotonic_time must exist
+  - source must identify exact component
+  - pid must be positive integer
+  - sequence should increase monotonically per source when present
+
+security_rules:
+  - heartbeat is evidence only
+  - heartbeat does not authorize recovery or restart by itself
+  - heartbeat metadata must not embed privileged commands

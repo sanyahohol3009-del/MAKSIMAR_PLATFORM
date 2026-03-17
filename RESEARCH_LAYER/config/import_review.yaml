@@ -1,0 +1,18 @@
+schema_version: research_import_review.v1
+description: Canonical review policy for importing external research into approved knowledge.
+
+review_requirements:
+  external_web_review_required: true
+  unverified_source_review_required: true
+  reviewer_required: true
+  rationale_required_for_approval: true
+
+promotion:
+  approved_import_creates_pack: true
+  rejected_import_remains_nontrusted: true
+  needs_review_blocks_promotion: true
+
+rules:
+  - no external source becomes trusted without review
+  - import review must preserve source traceability
+  - approved imports must remain auditable

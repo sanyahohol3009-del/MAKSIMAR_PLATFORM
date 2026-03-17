@@ -1,0 +1,40 @@
+contract_name: voice_routing
+schema_version: voice_routing.v1
+description: Routing decision for voice handling across local, hybrid, or server-assisted modes.
+
+required:
+  - routing_id
+  - mode
+  - target_service
+
+fields:
+  routing_id:
+    type: string
+    description: Unique voice routing decision identifier.
+
+  mode:
+    type: string
+    enum:
+      - local
+      - hybrid
+      - server_assisted
+    description: Voice routing mode selected for this request.
+
+  target_service:
+    type: string
+    description: Target service or adapter selected to process the voice operation.
+
+  policy_ref:
+    type: string
+    description: Reference to routing or privacy policy used for the decision.
+
+validation_rules:
+  - routing_id required
+  - mode must match allowed enum
+  - target_service required
+  - policy_ref should be explicit for governed routing
+
+security_rules:
+  - routing respects privacy and trust policy
+  - routing does not bypass shell or governance boundaries
+  - server-assisted routing must remain policy-gated

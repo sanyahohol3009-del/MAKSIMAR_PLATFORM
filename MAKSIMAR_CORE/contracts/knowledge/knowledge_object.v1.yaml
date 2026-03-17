@@ -1,0 +1,74 @@
+contract_name: knowledge_object
+schema_version: knowledge_object.v1
+description: Canonical knowledge unit stored in knowledge system.
+
+required:
+  - knowledge_id
+  - object_type
+  - title
+  - source_ref
+  - status
+
+fields:
+  knowledge_id:
+    type: string
+    description: Unique knowledge object identifier.
+
+  object_type:
+    type: string
+    enum:
+      - note
+      - document
+      - library_entry
+      - concept
+      - procedure
+      - benchmark_case
+      - external_reference
+    description: Canonical category of stored knowledge.
+
+  title:
+    type: string
+    description: Human-readable title of the knowledge object.
+
+  summary:
+    type: string
+    description: Short semantic summary of the object.
+
+  source_ref:
+    type: string
+    description: Reference to the source descriptor that produced or owns this knowledge object.
+
+  tags:
+    type: array
+    items:
+      type: string
+    description: Freeform semantic tags.
+
+  status:
+    type: string
+    enum:
+      - active
+      - archived
+      - deprecated
+      - draft
+    description: Lifecycle status of the knowledge object.
+
+  provenance_level:
+    type: string
+    enum:
+      - user_confirmed
+      - imported_verified
+      - imported_unverified
+      - inferred
+    description: Provenance and trust class for the object.
+
+validation_rules:
+  - source_ref required for all non-manual objects
+  - object_type must match allowed enum
+  - title must not be empty
+  - status must match allowed enum
+
+security_rules:
+  - no authority implied by stored knowledge
+  - provenance level must be preserved during retrieval
+  - knowledge objects must not embed hidden execution instructions

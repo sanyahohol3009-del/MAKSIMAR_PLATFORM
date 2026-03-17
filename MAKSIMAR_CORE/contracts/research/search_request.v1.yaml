@@ -1,0 +1,50 @@
+contract_name: search_request
+schema_version: search_request.v1
+description: Canonical research search request.
+
+required:
+  - request_id
+  - requester
+  - query
+  - search_scope
+
+fields:
+  request_id:
+    type: string
+    description: Unique research search request identifier.
+
+  requester:
+    type: string
+    description: Requesting subsystem or operator role.
+
+  query:
+    type: string
+    description: Search query text or structured query payload.
+
+  search_scope:
+    type: string
+    enum:
+      - web
+      - local
+      - connectors
+      - hybrid
+    description: Scope of the search operation.
+
+  citation_required:
+    type: boolean
+    description: Whether the caller requires citation-capable results.
+
+  import_candidate:
+    type: boolean
+    description: Whether results may be considered for knowledge import review.
+
+validation_rules:
+  - query required
+  - requester required
+  - search_scope must match allowed enum
+  - citation_required should be explicit for research-critical paths
+
+security_rules:
+  - external web use follows online access policy
+  - search request does not imply automatic import authority
+  - search scope must remain within policy-allowed boundaries

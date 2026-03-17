@@ -1,0 +1,67 @@
+contract_name: runtime_contract
+schema_version: runtime_contract.v1
+description: Canonical runtime state contract for foundation services.
+
+required:
+  - run_id
+  - boot_id
+  - runtime_state
+  - started_at
+  - schema_version
+
+fields:
+  run_id:
+    type: string
+    description: Unique runtime identifier for one active runtime lifecycle.
+
+  boot_id:
+    type: string
+    description: Unique boot sequence identifier.
+
+  runtime_state:
+    type: string
+    enum:
+      - booting
+      - healthy
+      - degraded
+      - shutdown_initiated
+      - stopped
+    description: Current runtime state.
+
+  started_at:
+    type: string
+    format: date-time
+    description: UTC timestamp when runtime started.
+
+  last_transition_at:
+    type: string
+    format: date-time
+    description: UTC timestamp of latest runtime state transition.
+
+  active_components:
+    type: array
+    items:
+      type: string
+    description: Explicit list of active components currently expected to be running.
+
+  runtime_paths_ref:
+    type: string
+    description: Reference to runtime paths contract or runtime path resolver source.
+
+  source_of_truth:
+    type: array
+    items:
+      type: string
+    description: Ordered list of authoritative state sources used for runtime truth.
+
+validation_rules:
+  - run_id must be unique per boot cycle
+  - runtime_state must match allowed enum
+  - started_at must exist for every runtime instance
+  - source_of_truth should list explicit evidence sources
+  - active_components should not contain duplicates
+
+security_rules:
+  - no execution authority
+  - no direct process control implied
+  - runtime state is evidence and coordination metadata only
