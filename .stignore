@@ -1,0 +1,37 @@
+# Python / virtualenv
+venv
+.venv
+_pycache_
+*.pyc
+*.pyo
+*.pyd
+
+# Git internals
+.git
+
+# Runtime / logs / state
+logs
+runtime
+state
+RUNTIME
+SAFETY_FOUNDATION/RUNTIME
+SAFETY_FOUNDATION/logs
+
+# Service artifacts
+*.pid
+*.lock
+*.sock
+*.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Build / caches
+.pytest_cache
+.mypy_cache
+.ruff_cache
+dist
+build
