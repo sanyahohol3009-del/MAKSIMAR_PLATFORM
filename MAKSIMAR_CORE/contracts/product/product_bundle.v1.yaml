@@ -1,4 +1,5 @@
 contract_name: product_bundle
+product_id: product_bundle
 schema_version: product_bundle.v1
 description: Bundle definition grouping products for distribution.
 

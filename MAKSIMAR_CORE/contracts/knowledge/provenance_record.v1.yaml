@@ -1,4 +1,5 @@
 contract_name: provenance_record
+object_id: knowledge_provenance_record
 schema_version: provenance_record.v1
 description: Canonical provenance metadata for knowledge object lineage.
 

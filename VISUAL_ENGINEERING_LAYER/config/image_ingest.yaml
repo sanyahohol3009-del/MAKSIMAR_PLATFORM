@@ -1,4 +1,4 @@
-schema_version: visual_image_ingest_config.v1
+schema_version: image_ingest.v1
 description: Canonical ingest policy for images and visual source assets.
 
 sources:

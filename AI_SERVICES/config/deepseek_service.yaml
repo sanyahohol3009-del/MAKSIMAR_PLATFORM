@@ -1,0 +1,9 @@
+schema_version: deepseek_service.v1
+service_id: deepseek_service
+description: Canonical local vision analysis service definition.
+
+service:
+  role: vision_analysis
+  transport: http
+  isolation_required: true
+  write_to_core_forbidden: true

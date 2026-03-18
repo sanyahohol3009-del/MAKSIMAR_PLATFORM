@@ -1,4 +1,4 @@
-schema_version: visual_machine_asset_export_config.v1
+schema_version: machine_asset_export.v1
 description: Canonical export policy for machine-ready visual assets.
 
 targets:

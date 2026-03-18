@@ -1,4 +1,4 @@
-schema_version: visual_image_editing_config.v1
+schema_version: image_editing.v1
 description: Canonical transformation and editing policy for visual engineering workflows.
 
 transforms:

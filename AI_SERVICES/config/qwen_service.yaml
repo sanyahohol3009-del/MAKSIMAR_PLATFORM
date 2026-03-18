@@ -1,0 +1,9 @@
+schema_version: qwen_service.v1
+service_id: qwen_service
+description: Canonical local code generation service definition.
+
+service:
+  role: code_generation
+  transport: http
+  isolation_required: true
+  write_to_core_forbidden: true

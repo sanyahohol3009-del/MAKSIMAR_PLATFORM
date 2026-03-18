@@ -1,4 +1,5 @@
 contract_name: product_manifest
+product_id: product_manifest
 schema_version: product_manifest.v1
 description: Canonical definition of a deployable JARVIS product configuration.
 

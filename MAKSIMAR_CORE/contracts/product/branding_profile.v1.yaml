@@ -1,4 +1,5 @@
 contract_name: branding_profile
+product_id: product_branding_profile
 schema_version: branding_profile.v1
 description: Branding and presentation profile for a product.
 

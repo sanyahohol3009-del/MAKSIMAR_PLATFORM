@@ -1,4 +1,5 @@
 contract_name: feature_set
+product_id: product_feature_set
 schema_version: feature_set.v1
 description: Declared feature set for one product variant.
 

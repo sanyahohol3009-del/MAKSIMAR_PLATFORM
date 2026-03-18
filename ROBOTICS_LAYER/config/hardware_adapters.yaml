@@ -1,4 +1,4 @@
-schema_version: robotics_hardware_adapter_registry.v1
+schema_version: hardware_adapters.v1
 description: Canonical registry for robotics hardware adapters.
 
 adapters:

@@ -1,0 +1,9 @@
+schema_version: glm_service.v1
+service_id: glm_service
+description: Canonical local reasoning and planning service definition.
+
+service:
+  role: reasoning_planning
+  transport: http
+  isolation_required: true
+  write_to_core_forbidden: true

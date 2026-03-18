@@ -1,4 +1,5 @@
 contract_name: environment_contract
+request_id: simulation_environment_contract
 schema_version: environment_contract.v1
 description: Canonical backend-agnostic environment descriptor used by simulation layer.
 

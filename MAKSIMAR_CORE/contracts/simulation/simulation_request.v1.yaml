@@ -1,4 +1,5 @@
 contract_name: simulation_request
+request_id: simulation_request
 schema_version: simulation_request.v1
 description: Canonical simulation request entering backend-agnostic simulation layer.
 

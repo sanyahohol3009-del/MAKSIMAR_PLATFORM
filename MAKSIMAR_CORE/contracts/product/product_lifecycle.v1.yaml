@@ -1,4 +1,5 @@
 contract_name: product_lifecycle
+product_id: product_lifecycle
 schema_version: product_lifecycle.v1
 description: Lifecycle state of product configuration.
 

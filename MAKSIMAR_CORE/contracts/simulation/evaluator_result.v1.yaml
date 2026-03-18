@@ -1,4 +1,5 @@
 contract_name: evaluator_result
+request_id: simulation_evaluator_result
 schema_version: evaluator_result.v1
 description: Engineering interpretation of a simulation result.
 

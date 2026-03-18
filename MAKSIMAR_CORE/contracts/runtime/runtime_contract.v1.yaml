@@ -10,9 +10,13 @@ required:
   - schema_version
 
 fields:
+  schema_version:
+    type: string
+    description: Contract schema version of the runtime document.
+
   run_id:
     type: string
-    description: Unique runtime identifier for one active runtime lifecycle.
+    description: Unique runtime identifier for one active runtime lifecycle
 
   boot_id:
     type: string

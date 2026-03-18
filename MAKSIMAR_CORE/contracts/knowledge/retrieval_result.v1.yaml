@@ -1,4 +1,5 @@
 contract_name: retrieval_result
+object_id: knowledge_retrieval_result
 schema_version: retrieval_result.v1
 description: Retrieval result package for knowledge queries.
 

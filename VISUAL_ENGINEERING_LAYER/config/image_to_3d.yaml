@@ -1,4 +1,4 @@
-schema_version: visual_image_to_3d_config.v1
+schema_version: image_to_3d.v1
 description: Canonical policy for image-derived 3D preparation.
 
 conversion:

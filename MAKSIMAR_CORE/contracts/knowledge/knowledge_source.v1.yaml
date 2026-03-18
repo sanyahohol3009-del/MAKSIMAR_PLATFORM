@@ -1,4 +1,5 @@
 contract_name: knowledge_source
+object_id: knowledge_source
 schema_version: knowledge_source.v1
 description: Canonical source descriptor for knowledge ingestion.
 

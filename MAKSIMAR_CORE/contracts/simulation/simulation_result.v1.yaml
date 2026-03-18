@@ -1,4 +1,5 @@
 contract_name: simulation_result
+request_id: simulation_result
 schema_version: simulation_result.v1
 description: Canonical result contract for one concrete simulation run.
 

@@ -1,4 +1,4 @@
-schema_version: codegen_validation_policy.v1
+schema_version: lint_typecheck_test_policy.v1
 description: Canonical validation policy for generated code quality gates.
 
 validation:

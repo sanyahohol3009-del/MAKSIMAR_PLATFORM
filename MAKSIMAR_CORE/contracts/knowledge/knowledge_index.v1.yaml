@@ -1,4 +1,5 @@
 contract_name: knowledge_index
+object_id: knowledge_index
 schema_version: knowledge_index.v1
 description: Canonical index manifest for searchable knowledge stores.
 

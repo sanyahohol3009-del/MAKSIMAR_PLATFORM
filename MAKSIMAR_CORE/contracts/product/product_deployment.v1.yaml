@@ -1,4 +1,5 @@
 contract_name: product_deployment
+product_id: product_deployment
 schema_version: product_deployment.v1
 description: Deployment record of a product instance.
 

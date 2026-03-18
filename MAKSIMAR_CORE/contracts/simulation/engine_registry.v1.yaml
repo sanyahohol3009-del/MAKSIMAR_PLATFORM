@@ -1,4 +1,5 @@
 contract_name: engine_registry
+request_id: simulation_engine_registry
 schema_version: engine_registry.v1
 description: Canonical registry of simulation backends and declared capabilities.
 

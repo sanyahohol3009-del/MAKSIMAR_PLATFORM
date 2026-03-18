@@ -1,4 +1,5 @@
 contract_name: product_profile
+product_id: product_profile
 schema_version: product_profile.v1
 description: Canonical product capability profile.
 

@@ -1,4 +1,5 @@
 contract_name: proposal_package
+request_id: simulation_proposal_package
 schema_version: proposal_package.v1
 description: Upward-facing simulation proposal package carrying validated evidence into human review.
 

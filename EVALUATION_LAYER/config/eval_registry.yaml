@@ -1,4 +1,4 @@
-schema_version: evaluation_registry.v1
+schema_version: eval_registry.v1
 description: Canonical registry configuration for evaluation domains and evaluators.
 
 registry:

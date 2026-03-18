@@ -1,4 +1,5 @@
 contract_name: knowledge_object
+object_id: knowledge_object
 schema_version: knowledge_object.v1
 description: Canonical knowledge unit stored in knowledge system.
 
