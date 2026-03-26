@@ -9,6 +9,11 @@ HEARTBEAT_FILE="$ROOT/RUNTIME/state/core_guard_heartbeat_state.json"
 
 HEARTBEAT_TIMEOUT_SEC=12
 
+STATE_WARMING_UP="WARMING_UP"
+STATE_ALIVE="ALIVE"
+STATE_DEAD="DEAD"
+STATE_BROKEN="BROKEN"
+
 log() {
   echo "[core_guard_ctl] $1"
 }
@@ -83,6 +88,53 @@ PY
 
 truth() {
   session_exists && process_exists && heartbeat_is_fresh
+}
+
+normalized_state() {
+  local has_session="0"
+  local has_process="0"
+  local hb_age=""
+
+  if session_exists; then
+    has_session="1"
+  fi
+
+  if process_exists; then
+    has_process="1"
+  fi
+
+  hb_age="$(heartbeat_age)"
+
+  if truth; then
+    printf '%s\n' "$STATE_ALIVE"
+    return 0
+  fi
+
+  if [[ "$hb_age" == "missing" ]]; then
+    if [[ "$has_session" == "1" || "$has_process" == "1" ]]; then
+      printf '%s\n' "$STATE_WARMING_UP"
+      return 0
+    fi
+    printf '%s\n' "$STATE_DEAD"
+    return 0
+  fi
+
+  if [[ "$hb_age" == "invalid" ]]; then
+    printf '%s\n' "$STATE_BROKEN"
+    return 0
+  fi
+
+  if [[ "$has_session" == "1" && "$has_process" == "1" ]]; then
+    printf '%s\n' "$STATE_DEAD"
+    return 0
+  fi
+
+  if [[ "$has_session" == "1" || "$has_process" == "1" ]]; then
+    printf '%s\n' "$STATE_BROKEN"
+    return 0
+  fi
+
+  printf '%s\n' "$STATE_DEAD"
 }
 
 write_pid_file() {
@@ -182,9 +234,16 @@ status() {
     if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
       echo "  $age"
     else
-      echo "  age=$age"
+      if heartbeat_is_fresh; then
+        echo "  FRESH (age=${age}s, file=$HEARTBEAT_FILE)"
+      else
+        echo "  STALE (age=${age}s, file=$HEARTBEAT_FILE)"
+      fi
     fi
   fi
+
+  log "state:"
+  echo "  $(normalized_state)"
 
   log "truth:"
   if truth; then
