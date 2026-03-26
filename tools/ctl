@@ -12,6 +12,13 @@ PID_FILE="$RUNTIME_DIR/runtime.pid"
 HEARTBEAT_TIMEOUT_SEC=10
 RUNTIME_PORT=8000
 HEALTH_URL="http://127.0.0.1:${RUNTIME_PORT}/health"
+DEGRADED_FILE="$ROOT/RUNTIME/degraded_mode.flag"
+
+STATE_WARMING_UP="WARMING_UP"
+STATE_ALIVE="ALIVE"
+STATE_DEGRADED="DEGRADED"
+STATE_DEAD="DEAD"
+STATE_BROKEN="BROKEN"
 
 log() {
     echo "[ctl] $1"
@@ -95,8 +102,81 @@ http_health() {
     curl -fsS --max-time 2 "$HEALTH_URL" >/dev/null 2>&1
 }
 
+port_listening() {
+    ss -ltn "( sport = :$RUNTIME_PORT )" 2>/dev/null | grep -q ":$RUNTIME_PORT"
+}
+
+degraded_active() {
+    [[ -f "$DEGRADED_FILE" ]]
+}
+
 runtime_truth() {
     session_exists && process_exists && heartbeat_is_fresh && http_health
+}
+
+normalized_state() {
+    local has_session="0"
+    local has_process="0"
+    local hb_age=""
+    local has_port="0"
+    local has_http="0"
+
+    if session_exists; then
+        has_session="1"
+    fi
+
+    if process_exists; then
+        has_process="1"
+    fi
+
+    if port_listening; then
+        has_port="1"
+    fi
+
+    if http_health; then
+        has_http="1"
+    fi
+
+    hb_age="$(heartbeat_age)"
+
+    if runtime_truth; then
+        if degraded_active; then
+            printf '%s\n' "$STATE_DEGRADED"
+        else
+            printf '%s\n' "$STATE_ALIVE"
+        fi
+        return 0
+    fi
+
+    if [[ "$hb_age" == "invalid" ]]; then
+        printf '%s\n' "$STATE_BROKEN"
+        return 0
+    fi
+
+    if [[ "$hb_age" == "missing" ]]; then
+        if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" ]]; then
+            printf '%s\n' "$STATE_WARMING_UP"
+            return 0
+        fi
+        printf '%s\n' "$STATE_DEAD"
+        return 0
+    fi
+
+    if [[ "$has_http" == "1" && "$has_port" == "1" && "$has_process" == "1" && "$has_session" == "1" ]]; then
+        if degraded_active; then
+            printf '%s\n' "$STATE_DEGRADED"
+        else
+            printf '%s\n' "$STATE_ALIVE"
+        fi
+        return 0
+    fi
+
+    if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" || "$has_http" == "1" ]]; then
+        printf '%s\n' "$STATE_BROKEN"
+        return 0
+    fi
+
+    printf '%s\n' "$STATE_DEAD"
 }
 
 write_pid_file() {
@@ -205,7 +285,7 @@ status() {
     fi
 
     log "port:"
-    if ss -ltn "( sport = :$RUNTIME_PORT )" 2>/dev/null | grep -q ":$RUNTIME_PORT"; then
+    if port_listening; then
         echo "  LISTENING ($RUNTIME_PORT)"
     else
         echo "  CLOSED"
@@ -217,6 +297,16 @@ status() {
     else
         echo "  UNAVAILABLE ($HEALTH_URL)"
     fi
+
+    log "degraded:"
+    if degraded_active; then
+        echo "  ACTIVE ($DEGRADED_FILE)"
+    else
+        echo "  INACTIVE"
+    fi
+
+    log "state:"
+    echo "  $(normalized_state)"
 
     log "truth:"
     if runtime_truth; then
