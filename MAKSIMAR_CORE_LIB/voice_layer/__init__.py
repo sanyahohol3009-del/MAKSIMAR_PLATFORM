@@ -1,21 +1,36 @@
-from MAKSIMAR_CORE_LIB.voice_layer.query_models import (
-    VoiceQuery,
-    VoiceRetrievalItem,
-)
-from MAKSIMAR_CORE_LIB.voice_layer.voice_accessor import (
-    get_voice_definition,
-    list_voice_definitions,
-)
-from MAKSIMAR_CORE_LIB.voice_layer.voice_summary import (
-    VoiceRetrievalSummary,
-    build_voice_summary,
+from MAKSIMAR_CORE_LIB.voice_layer.voice_command_contract import (
+    VoiceCommandContract,
+    VoiceCommandEntry,
+    VoiceCommandId,
+    VoiceCommandIntent,
+    VoiceDisplayRole,
+    VoiceLanguageCode,
+    VoiceLatencyClass,
+    VoiceResponseMode,
+    VoiceScriptName,
+    VoiceTargetViewId,
+    VoiceUtterancePatternId,
+    build_voice_command_contract,
 )
 
+
+def list_voice_definitions() -> tuple[VoiceCommandEntry, ...]:
+    """Return canonical voice command definitions."""
+    return build_voice_command_contract().entries
+
+
 __all__ = [
-    "VoiceQuery",
-    "VoiceRetrievalItem",
-    "VoiceRetrievalSummary",
-    "build_voice_summary",
-    "get_voice_definition",
+    "VoiceCommandContract",
+    "VoiceCommandEntry",
+    "VoiceCommandId",
+    "VoiceCommandIntent",
+    "VoiceDisplayRole",
+    "VoiceLanguageCode",
+    "VoiceLatencyClass",
+    "VoiceResponseMode",
+    "VoiceScriptName",
+    "VoiceTargetViewId",
+    "VoiceUtterancePatternId",
+    "build_voice_command_contract",
     "list_voice_definitions",
 ]
