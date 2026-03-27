@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
+    build_panel_id_vocabulary_normalization_model,
+    normalize_panel_id,
+)
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
     DashboardPanelRegistryContract,
     RegisteredPanel,
@@ -9,52 +13,39 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
 def build_dashboard_panel_registry_contract() -> DashboardPanelRegistryContract:
     """Build unified dashboard panel registry contract."""
 
-    panels = (
+    vocabulary_model = build_panel_id_vocabulary_normalization_model()
+    vocabulary_entries = {
+        entry.canonical_panel_id: entry for entry in vocabulary_model.entries
+    }
+
+    panel_specs = (
+        ("panel_consistency", "core", True),
+        ("panel_snapshot", "core", True),
+        ("panel_incident", "diagnostics", True),
+        ("panel_diagnostics", "diagnostics", True),
+        ("panel_chat", "interaction", True),
+        ("panel_settings", "settings", True),
+        ("panel_gesture_control", "control", True),
+    )
+
+    panels = tuple(
         RegisteredPanel(
-            panel_id="panel_consistency",
-            label="Consistency",
-            category="core",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_snapshot",
-            label="Snapshot",
-            category="core",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_incident",
-            label="Incident",
-            category="diagnostics",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_diagnostics",
-            label="Diagnostics",
-            category="diagnostics",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_chat",
-            label="Chat",
-            category="interaction",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_settings",
-            label="Settings",
-            category="settings",
-            visible_in_sidebar=True,
-        ),
-        RegisteredPanel(
-            panel_id="panel_gesture_control",
-            label="Gesture Control",
-            category="control",
-            visible_in_sidebar=True,
-        ),
+            panel_id=canonical_panel_id,
+            label=vocabulary_entries[canonical_panel_id].display_title,
+            category=category,
+            visible_in_sidebar=visible_in_sidebar,
+            panel_family=vocabulary_entries[canonical_panel_id].panel_family,
+            panel_kind=vocabulary_entries[canonical_panel_id].panel_kind,
+            panel_role=vocabulary_entries[canonical_panel_id].panel_role,
+        )
+        for panel_id, category, visible_in_sidebar in panel_specs
+        for canonical_panel_id in (normalize_panel_id(panel_id),)
     )
 
     return DashboardPanelRegistryContract(
         total_panels=len(panels),
         panels=panels,
+        visible_in_sidebar_panels=sum(
+            1 for panel in panels if panel.visible_in_sidebar
+        ),
     )
