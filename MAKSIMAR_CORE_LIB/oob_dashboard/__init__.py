@@ -655,6 +655,14 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_contract import
     build_visual_first_screen_present_contract,
 )
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_delivery_contract import (
+    build_visual_first_screen_present_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_ready_contract import (
+    build_visual_first_screen_present_ready_contract,
+)
+
 
 
 __all__ = [ "DashboardChatContract", "DashboardChatMessage", "DashboardConsistencyPanel", 
@@ -779,4 +787,6 @@ __all__ = [ "DashboardChatContract", "DashboardChatMessage", "DashboardConsisten
     "build_visual_first_screen_render_delivery_contract",
     "build_visual_first_screen_render_ready_contract",
     "build_visual_first_screen_present_contract",
+    "build_visual_first_screen_present_delivery_contract",
+    "build_visual_first_screen_present_ready_contract",
 ]
