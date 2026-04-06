@@ -1,0 +1,25 @@
+95d4213 Complete document package audit baseline series
+d378149 Clean root hygiene issues and add baseline README
+cf74595 Update documentation and deep docs progress
+20c78c0 Complete project-wide documentation hardening and canonical baseline pass
+de0104d Add visual renderer-screen contracts, concurrency governance docs, monitor tools, and mobile accelerator architecture docs
+9693590 Complete visual operator foundation contracts A-F
+f17e7b2 Fix dashboards_open executable permission
+dd5a27b Complete foundation dashboard hardening stack
+b533be2 Build foundation dashboard monitoring stack
+3b713e6 Fix dashboard shell entrypoint
+0fa1991 Add foundation startup contract v1
+bea2367 Harden runtime status surface
+a7f5f43 Harden kernel guard status surface
+c77b37a Harden guard status surface
+168079e Harden core guard status surface
+49a16dd Add status surface contract v1
+27718ef Add dashboard truth contract v1
+9f01b07 Remove legacy duplicate foundation files
+628e48e Foundation integration and component classification documented
+83c4328 STEP 1-45 completed and verified (645 passed)
+5b5de7c Phase checkpoint: core loaders, registries, query summaries completed
+12cb376 Describe completed block
+b32ca7f Before Syncthing setup
+3636cda Initial MAKSIMAR platform commit
+7c1dcd8 MAKSIMAR Phase0 base architecture

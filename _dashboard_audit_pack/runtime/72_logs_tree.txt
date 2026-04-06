@@ -1,0 +1,6 @@
+logs/README.md
+logs/core_guard.log
+logs/guard.log
+logs/kernel_guard.log
+logs/runtime.log
+logs/system.log

@@ -1,0 +1,612 @@
+===== logs/README.md =====
+
+===== logs/core_guard.log =====
+[CORE-GUARD] 2026-04-04 06:15:25 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:25 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:27 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:27 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:29 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:29 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:15:31 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:31 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:32 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:32 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:34 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:34 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:36 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:15:36 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:15:38 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:15:38 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:15:40 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:40 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:42 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:42 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:44 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:44 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:46 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:46 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:48 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:48 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:50 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:50 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:52 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:52 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:54 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:54 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:15:56 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:56 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:58 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:15:58 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:00 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:00 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:02 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:02 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:03 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:03 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:05 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:05 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:07 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:07 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:09 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:09 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:11 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:11 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:13 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:13 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:15 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:15 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:17 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:17 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:19 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:19 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:21 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:21 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:23 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:23 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:16:25 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:25 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:27 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:27 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:29 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:29 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:31 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:31 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:33 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:33 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:34 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:34 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:36 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:36 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:38 guard heartbeat OK (age=0.05s)
+[CORE-GUARD] 2026-04-04 06:16:38 guard heartbeat OK (age=0.05s)
+[CORE-GUARD] 2026-04-04 06:16:40 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:40 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:42 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:42 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:44 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:44 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:46 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:46 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:48 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:48 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:50 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:50 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:16:52 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:16:52 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:16:54 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:16:54 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:16:56 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:16:56 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:59:32 guard heartbeat OK (age=0.08s)
+[CORE-GUARD] 2026-04-04 06:59:32 guard heartbeat OK (age=0.08s)
+[CORE-GUARD] 2026-04-04 06:59:34 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:34 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:36 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:36 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:38 guard heartbeat OK (age=0.07s)
+[CORE-GUARD] 2026-04-04 06:59:38 guard heartbeat OK (age=0.07s)
+[CORE-GUARD] 2026-04-04 06:59:40 guard heartbeat OK (age=0.07s)
+[CORE-GUARD] 2026-04-04 06:59:40 guard heartbeat OK (age=0.07s)
+[CORE-GUARD] 2026-04-04 06:59:42 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:42 guard heartbeat OK (age=0.06s)
+[CORE-GUARD] 2026-04-04 06:59:44 guard heartbeat OK (age=0.05s)
+[CORE-GUARD] 2026-04-04 06:59:44 guard heartbeat OK (age=0.05s)
+[CORE-GUARD] 2026-04-04 06:59:45 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:59:45 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:59:47 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:59:47 guard heartbeat OK (age=0.04s)
+[CORE-GUARD] 2026-04-04 06:59:49 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:59:49 guard heartbeat OK (age=0.01s)
+[CORE-GUARD] 2026-04-04 06:59:51 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:59:51 guard heartbeat OK (age=0.03s)
+[CORE-GUARD] 2026-04-04 06:59:53 guard heartbeat OK (age=0.02s)
+[CORE-GUARD] 2026-04-04 06:59:53 guard heartbeat OK (age=0.02s)
+
+===== logs/guard.log =====
+[STOP-GATE-WATCHER] 2026-04-04 06:15:25 runtime heartbeat OK (age=1.42s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:25 runtime heartbeat OK (age=1.42s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:27 runtime heartbeat OK (age=1.43s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:27 runtime heartbeat OK (age=1.43s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:29 runtime heartbeat OK (age=1.44s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:29 runtime heartbeat OK (age=1.44s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:31 runtime heartbeat OK (age=1.45s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:31 runtime heartbeat OK (age=1.45s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:32 runtime heartbeat OK (age=1.46s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:32 runtime heartbeat OK (age=1.46s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:34 runtime heartbeat OK (age=1.49s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:34 runtime heartbeat OK (age=1.49s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:36 runtime heartbeat OK (age=1.50s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:36 runtime heartbeat OK (age=1.50s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:38 runtime heartbeat OK (age=1.51s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:38 runtime heartbeat OK (age=1.51s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:40 runtime heartbeat OK (age=1.53s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:40 runtime heartbeat OK (age=1.53s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:42 runtime heartbeat OK (age=1.53s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:42 runtime heartbeat OK (age=1.53s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:44 runtime heartbeat OK (age=1.55s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:44 runtime heartbeat OK (age=1.55s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:46 runtime heartbeat OK (age=1.56s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:46 runtime heartbeat OK (age=1.56s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:48 runtime heartbeat OK (age=1.58s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:48 runtime heartbeat OK (age=1.58s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:50 runtime heartbeat OK (age=1.60s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:50 runtime heartbeat OK (age=1.60s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:52 runtime heartbeat OK (age=1.61s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:52 runtime heartbeat OK (age=1.61s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:54 runtime heartbeat OK (age=1.63s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:54 runtime heartbeat OK (age=1.63s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:56 runtime heartbeat OK (age=1.65s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:56 runtime heartbeat OK (age=1.65s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:58 runtime heartbeat OK (age=1.67s)
+[STOP-GATE-WATCHER] 2026-04-04 06:15:58 runtime heartbeat OK (age=1.67s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:00 runtime heartbeat OK (age=1.69s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:00 runtime heartbeat OK (age=1.69s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:02 runtime heartbeat OK (age=1.71s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:02 runtime heartbeat OK (age=1.71s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:03 runtime heartbeat OK (age=1.74s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:03 runtime heartbeat OK (age=1.74s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:05 runtime heartbeat OK (age=1.76s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:05 runtime heartbeat OK (age=1.76s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:07 runtime heartbeat OK (age=1.77s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:07 runtime heartbeat OK (age=1.77s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:09 runtime heartbeat OK (age=1.80s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:09 runtime heartbeat OK (age=1.80s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:11 runtime heartbeat OK (age=1.83s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:11 runtime heartbeat OK (age=1.83s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:13 runtime heartbeat OK (age=1.84s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:13 runtime heartbeat OK (age=1.84s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:15 runtime heartbeat OK (age=1.87s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:15 runtime heartbeat OK (age=1.87s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:17 runtime heartbeat OK (age=1.88s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:17 runtime heartbeat OK (age=1.88s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:19 runtime heartbeat OK (age=1.90s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:19 runtime heartbeat OK (age=1.90s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:21 runtime heartbeat OK (age=1.91s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:21 runtime heartbeat OK (age=1.91s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:23 runtime heartbeat OK (age=1.93s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:23 runtime heartbeat OK (age=1.93s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:25 runtime heartbeat OK (age=1.94s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:25 runtime heartbeat OK (age=1.94s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:27 runtime heartbeat OK (age=1.97s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:27 runtime heartbeat OK (age=1.97s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:29 runtime heartbeat OK (age=2.00s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:29 runtime heartbeat OK (age=2.00s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:31 runtime heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:31 runtime heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:33 runtime heartbeat OK (age=0.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:33 runtime heartbeat OK (age=0.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:34 runtime heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:34 runtime heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:36 runtime heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:36 runtime heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:38 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:38 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:40 runtime heartbeat OK (age=0.05s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:40 runtime heartbeat OK (age=0.05s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:42 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:42 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:44 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:44 runtime heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:46 runtime heartbeat OK (age=0.08s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:46 runtime heartbeat OK (age=0.08s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:48 runtime heartbeat OK (age=0.09s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:48 runtime heartbeat OK (age=0.09s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:50 runtime heartbeat OK (age=0.10s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:50 runtime heartbeat OK (age=0.10s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:52 runtime heartbeat OK (age=0.11s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:52 runtime heartbeat OK (age=0.11s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:54 runtime heartbeat OK (age=0.12s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:54 runtime heartbeat OK (age=0.12s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:56 runtime heartbeat OK (age=0.13s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:56 runtime heartbeat OK (age=0.13s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:32 runtime heartbeat OK (age=0.18s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:32 runtime heartbeat OK (age=0.18s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:34 runtime heartbeat OK (age=0.21s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:34 runtime heartbeat OK (age=0.21s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:36 runtime heartbeat OK (age=0.22s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:36 runtime heartbeat OK (age=0.22s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:38 runtime heartbeat OK (age=0.26s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:38 runtime heartbeat OK (age=0.26s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:40 runtime heartbeat OK (age=0.28s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:40 runtime heartbeat OK (age=0.28s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:42 runtime heartbeat OK (age=0.31s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:42 runtime heartbeat OK (age=0.31s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:44 runtime heartbeat OK (age=0.33s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:44 runtime heartbeat OK (age=0.33s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:45 runtime heartbeat OK (age=0.36s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:45 runtime heartbeat OK (age=0.36s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:47 runtime heartbeat OK (age=0.38s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:47 runtime heartbeat OK (age=0.38s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:49 runtime heartbeat OK (age=0.41s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:49 runtime heartbeat OK (age=0.41s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:51 runtime heartbeat OK (age=0.44s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:51 runtime heartbeat OK (age=0.44s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:53 runtime heartbeat OK (age=0.47s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:53 runtime heartbeat OK (age=0.47s)
+
+===== logs/kernel_guard.log =====
+[KERNEL-WATCHDOG] 2026-04-04 06:15:25 core guard heartbeat OK (age=1.99s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:25 core guard heartbeat OK (age=1.99s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:27 core guard heartbeat OK (age=2.00s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:27 core guard heartbeat OK (age=2.00s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:29 core guard heartbeat OK (age=2.00s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:29 core guard heartbeat OK (age=2.00s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:31 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:31 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:32 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:32 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:34 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:34 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:36 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:36 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:38 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:38 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:40 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:40 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:42 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:42 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:44 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:44 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:46 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:46 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:48 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:48 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:50 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:50 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:52 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:52 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:54 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:54 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:56 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:56 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:58 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:15:58 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:00 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:00 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:02 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:02 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:03 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:03 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:05 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:05 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:07 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:07 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:09 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:09 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:11 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:11 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:13 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:13 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:15 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:15 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:17 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:17 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:19 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:19 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:21 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:21 core guard heartbeat OK (age=2.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:23 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:23 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:25 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:25 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:27 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:27 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:29 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:29 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:31 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:31 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:33 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:33 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:34 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:34 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:36 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:36 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:38 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:38 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:40 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:40 core guard heartbeat OK (age=2.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:42 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:42 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:44 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:44 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:46 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:46 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:48 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:48 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:50 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:50 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:52 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:52 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:54 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:54 core guard heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:56 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:56 core guard heartbeat OK (age=2.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:32 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:32 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:34 core guard heartbeat OK (age=2.13s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:34 core guard heartbeat OK (age=2.13s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:36 core guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:36 core guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:38 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:38 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:40 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:40 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:42 core guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:42 core guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:44 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:44 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:45 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:45 core guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:47 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:47 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:49 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:49 core guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:51 core guard heartbeat OK (age=0.08s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:51 core guard heartbeat OK (age=0.08s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:54 core guard heartbeat OK (age=0.05s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:54 core guard heartbeat OK (age=0.05s)
+
+===== logs/runtime.log =====
+INFO:     127.0.0.1:55508 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55514 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55518 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55526 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34432 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34438 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34444 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34446 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34456 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34470 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34484 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34490 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34504 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34506 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34510 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34516 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34528 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34530 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34534 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34540 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34552 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34560 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34570 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34572 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34586 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34598 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34602 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34610 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34620 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34624 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34632 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34638 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34640 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34652 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34662 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34664 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39468 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39470 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39484 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39492 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39506 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39520 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39528 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39542 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39556 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39568 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39574 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39576 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39590 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39594 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39598 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39610 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39612 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39622 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39632 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39638 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39644 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39660 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39668 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39674 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53502 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53504 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53514 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53516 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53530 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53542 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53548 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53550 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53554 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53564 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53578 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53588 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53594 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53598 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53610 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53624 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53636 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53652 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53662 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53668 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53682 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53688 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53698 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53712 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54990 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55000 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55010 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55026 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55042 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55044 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55058 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55062 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55068 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55084 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55096 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55106 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55116 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55132 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55144 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55148 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55154 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55170 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55180 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55188 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55190 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55198 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55200 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55204 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55210 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55212 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55222 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55224 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55240 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51450 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51464 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51468 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51476 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51486 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51494 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51506 - "GET /health HTTP/1.1" 200 OK
+
+===== logs/system.log =====
+[KERNEL-WATCHDOG] 2026-04-04 06:16:03 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:03 runtime heartbeat OK (age=1.74s)
+[CORE-GUARD] 2026-04-04 06:16:03 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:05 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:05 runtime heartbeat OK (age=1.76s)
+[CORE-GUARD] 2026-04-04 06:16:05 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:07 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:07 runtime heartbeat OK (age=1.77s)
+[CORE-GUARD] 2026-04-04 06:16:07 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:09 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:09 runtime heartbeat OK (age=1.80s)
+[CORE-GUARD] 2026-04-04 06:16:09 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:11 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:11 runtime heartbeat OK (age=1.83s)
+[CORE-GUARD] 2026-04-04 06:16:11 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:13 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:13 runtime heartbeat OK (age=1.84s)
+[CORE-GUARD] 2026-04-04 06:16:13 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:15 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:15 runtime heartbeat OK (age=1.87s)
+[CORE-GUARD] 2026-04-04 06:16:15 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:17 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:17 runtime heartbeat OK (age=1.88s)
+[CORE-GUARD] 2026-04-04 06:16:17 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:19 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:19 runtime heartbeat OK (age=1.90s)
+[CORE-GUARD] 2026-04-04 06:16:19 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:21 core guard heartbeat OK (age=2.01s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:21 runtime heartbeat OK (age=1.91s)
+[CORE-GUARD] 2026-04-04 06:16:21 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:23 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:23 runtime heartbeat OK (age=1.93s)
+[CORE-GUARD] 2026-04-04 06:16:23 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:25 core guard heartbeat OK (age=2.02s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:25 runtime heartbeat OK (age=1.94s)
+[CORE-GUARD] 2026-04-04 06:16:25 guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:27 core guard heartbeat OK (age=2.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:27 runtime heartbeat OK (age=1.97s)
+[CORE-GUARD] 2026-04-04 06:16:27 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:29 runtime heartbeat OK (age=2.00s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:29 core guard heartbeat OK (age=2.04s)
+[CORE-GUARD] 2026-04-04 06:16:29 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:31 runtime heartbeat OK (age=2.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:31 core guard heartbeat OK (age=2.04s)
+[CORE-GUARD] 2026-04-04 06:16:31 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:33 runtime heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:33 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:33 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:34 runtime heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:34 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:34 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:36 runtime heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:36 core guard heartbeat OK (age=2.02s)
+[CORE-GUARD] 2026-04-04 06:16:36 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:38 runtime heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:38 core guard heartbeat OK (age=2.04s)
+[CORE-GUARD] 2026-04-04 06:16:38 guard heartbeat OK (age=0.05s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:40 runtime heartbeat OK (age=0.05s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:40 core guard heartbeat OK (age=2.04s)
+[CORE-GUARD] 2026-04-04 06:16:40 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:42 runtime heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:42 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:42 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:44 runtime heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:44 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:44 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:46 runtime heartbeat OK (age=0.08s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:46 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:46 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:48 runtime heartbeat OK (age=0.09s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:48 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:48 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:50 runtime heartbeat OK (age=0.10s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:50 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:50 guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:52 runtime heartbeat OK (age=0.11s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:52 core guard heartbeat OK (age=2.02s)
+[CORE-GUARD] 2026-04-04 06:16:52 guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:54 runtime heartbeat OK (age=0.12s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:54 core guard heartbeat OK (age=2.03s)
+[CORE-GUARD] 2026-04-04 06:16:54 guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:16:56 runtime heartbeat OK (age=0.13s)
+[KERNEL-WATCHDOG] 2026-04-04 06:16:56 core guard heartbeat OK (age=2.02s)
+[CORE-GUARD] 2026-04-04 06:16:56 guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:32 runtime heartbeat OK (age=0.18s)
+[CORE-GUARD] 2026-04-04 06:59:32 guard heartbeat OK (age=0.08s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:32 core guard heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:34 runtime heartbeat OK (age=0.21s)
+[CORE-GUARD] 2026-04-04 06:59:34 guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:34 core guard heartbeat OK (age=2.13s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:36 runtime heartbeat OK (age=0.22s)
+[CORE-GUARD] 2026-04-04 06:59:36 guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:36 core guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:38 runtime heartbeat OK (age=0.26s)
+[CORE-GUARD] 2026-04-04 06:59:38 guard heartbeat OK (age=0.07s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:38 core guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:40 runtime heartbeat OK (age=0.28s)
+[CORE-GUARD] 2026-04-04 06:59:40 guard heartbeat OK (age=0.07s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:40 core guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:42 runtime heartbeat OK (age=0.31s)
+[CORE-GUARD] 2026-04-04 06:59:42 guard heartbeat OK (age=0.06s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:42 core guard heartbeat OK (age=0.03s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:44 runtime heartbeat OK (age=0.33s)
+[CORE-GUARD] 2026-04-04 06:59:44 guard heartbeat OK (age=0.05s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:44 core guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:45 runtime heartbeat OK (age=0.36s)
+[CORE-GUARD] 2026-04-04 06:59:45 guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:45 core guard heartbeat OK (age=0.04s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:47 runtime heartbeat OK (age=0.38s)
+[CORE-GUARD] 2026-04-04 06:59:47 guard heartbeat OK (age=0.04s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:47 core guard heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:49 runtime heartbeat OK (age=0.41s)
+[CORE-GUARD] 2026-04-04 06:59:49 guard heartbeat OK (age=0.01s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:49 core guard heartbeat OK (age=0.06s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:51 runtime heartbeat OK (age=0.44s)
+[CORE-GUARD] 2026-04-04 06:59:51 guard heartbeat OK (age=0.03s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:51 core guard heartbeat OK (age=0.08s)
+[STOP-GATE-WATCHER] 2026-04-04 06:59:53 runtime heartbeat OK (age=0.47s)
+[CORE-GUARD] 2026-04-04 06:59:53 guard heartbeat OK (age=0.02s)
+[KERNEL-WATCHDOG] 2026-04-04 06:59:54 core guard heartbeat OK (age=0.05s)
+

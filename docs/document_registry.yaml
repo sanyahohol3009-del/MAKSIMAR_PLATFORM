@@ -1,0 +1,324 @@
+registry_version: 1
+status_model:
+  - active_canonical
+  - draft
+  - superseded
+  - historical_only
+
+document_types:
+  - canonical
+  - audit_closure
+  - continuity_history
+  - draft
+
+authority_levels:
+  - constitutional
+  - operational
+  - reference
+  - historical
+
+interpretation_priorities:
+  - strict
+  - high
+  - medium
+  - historical
+
+packages:
+  - package_id: document_meta_governance_v1
+    title: Document Meta Governance v1
+    path: docs/document_meta_governance
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+    canonical: true
+    audit_closure: false
+    continuity_history: false
+    implementation_ready: false
+    depends_on:
+      - docs/project_documentation_system/DOCUMENTATION_ARCHITECTURE_v1.md
+      - docs/project_documentation_system/DOCUMENTATION_FAMILIES_MATRIX_v1.md
+    used_by:
+      - future_document_registry_expansion
+      - future_doc_to_code_linkage
+      - future_self_reading_jarvis
+
+  - package_id: document_registry_expansion_v1
+    title: Document Registry Expansion v1
+    path: docs/document_registry_expansion
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+    canonical: true
+    audit_closure: false
+    continuity_history: false
+    implementation_ready: false
+    depends_on:
+      - docs/document_meta_governance/05_DOCUMENT_REGISTRY_BASELINE_v1.md
+      - docs/document_meta_governance/07_DOCUMENT_DEPENDENCY_REFERENCE_RULE_v1.md
+    used_by:
+      - future_document_registry_rollout
+      - future_registry_retrofit
+      - future_self_reading_jarvis
+
+  - package_id: document_registry_rollout_v1
+    title: Document Registry Rollout v1
+    path: docs/document_registry_rollout
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+    canonical: true
+    audit_closure: false
+    continuity_history: false
+    implementation_ready: false
+    depends_on:
+      - docs/document_meta_governance/05_DOCUMENT_REGISTRY_BASELINE_v1.md
+      - docs/document_registry_expansion/01_DOCUMENT_REGISTRY_EXPANSION_BASELINE_v1.md
+      - docs/document_registry_expansion/05_REGISTRY_DEPENDENCY_FIELD_BASELINE_v1.md
+    used_by:
+      - future_registry_yaml_expansion
+      - future_package_retrofit
+      - future_self_reading_jarvis
+
+documents:
+  - doc_id: document_meta_governance_01
+    title: 01 DOCUMENT HEADER STANDARD v1
+    path: docs/document_meta_governance/01_DOCUMENT_HEADER_STANDARD_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_02
+    title: 02 DOCUMENT STATUS MODEL v1
+    path: docs/document_meta_governance/02_DOCUMENT_STATUS_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_03
+    title: 03 DOCUMENT TYPE AND AUTHORITY MODEL v1
+    path: docs/document_meta_governance/03_DOCUMENT_TYPE_AND_AUTHORITY_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_04
+    title: 04 INTERPRETATION PRIORITY MODEL v1
+    path: docs/document_meta_governance/04_INTERPRETATION_PRIORITY_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_05
+    title: 05 DOCUMENT REGISTRY BASELINE v1
+    path: docs/document_meta_governance/05_DOCUMENT_REGISTRY_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_06
+    title: 06 CANONICAL AUDIT HISTORY SEPARATION v1
+    path: docs/document_meta_governance/06_CANONICAL_AUDIT_HISTORY_SEPARATION_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_07
+    title: 07 DOCUMENT DEPENDENCY REFERENCE RULE v1
+    path: docs/document_meta_governance/07_DOCUMENT_DEPENDENCY_REFERENCE_RULE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_meta_governance_08
+    title: 08 DOCUMENT TO CODE TEST RUNBOOK LINKAGE BASELINE v1
+    path: docs/document_meta_governance/08_DOCUMENT_TO_CODE_TEST_RUNBOOK_LINKAGE_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_meta_governance_09
+    title: 09 DOCUMENT META GOVERNANCE GAP NOTES v1
+    path: docs/document_meta_governance/09_DOCUMENT_META_GOVERNANCE_GAP_NOTES_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_meta_governance_10
+    title: 10 DOCUMENT META GOVERNANCE COMPLETION NOTE v1
+    path: docs/document_meta_governance/10_DOCUMENT_META_GOVERNANCE_COMPLETION_NOTE_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_registry_expansion_01
+    title: 01 DOCUMENT REGISTRY EXPANSION BASELINE v1
+    path: docs/document_registry_expansion/01_DOCUMENT_REGISTRY_EXPANSION_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_registry_expansion_02
+    title: 02 PACKAGE REGISTRY ENTRY STANDARD v1
+    path: docs/document_registry_expansion/02_PACKAGE_REGISTRY_ENTRY_STANDARD_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_03
+    title: 03 DOCUMENT REGISTRY COVERAGE STRATEGY v1
+    path: docs/document_registry_expansion/03_DOCUMENT_REGISTRY_COVERAGE_STRATEGY_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_04
+    title: 04 REGISTRY NORMALIZATION PRIORITY MODEL v1
+    path: docs/document_registry_expansion/04_REGISTRY_NORMALIZATION_PRIORITY_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_05
+    title: 05 REGISTRY DEPENDENCY FIELD BASELINE v1
+    path: docs/document_registry_expansion/05_REGISTRY_DEPENDENCY_FIELD_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_06
+    title: 06 REGISTRY USED_BY FIELD BASELINE v1
+    path: docs/document_registry_expansion/06_REGISTRY_USED_BY_FIELD_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_07
+    title: 07 REGISTRY CANONICAL AUDIT HISTORY TAGGING v1
+    path: docs/document_registry_expansion/07_REGISTRY_CANONICAL_AUDIT_HISTORY_TAGGING_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_registry_expansion_08
+    title: 08 INCREMENTAL RETROFIT STRATEGY v1
+    path: docs/document_registry_expansion/08_INCREMENTAL_RETROFIT_STRATEGY_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_expansion_09
+    title: 09 DOCUMENT REGISTRY EXPANSION GAP NOTES v1
+    path: docs/document_registry_expansion/09_DOCUMENT_REGISTRY_EXPANSION_GAP_NOTES_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_registry_expansion_10
+    title: 10 DOCUMENT REGISTRY EXPANSION COMPLETION NOTE v1
+    path: docs/document_registry_expansion/10_DOCUMENT_REGISTRY_EXPANSION_COMPLETION_NOTE_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_registry_rollout_01
+    title: 01 DOCUMENT REGISTRY ROLLOUT BASELINE v1
+    path: docs/document_registry_rollout/01_DOCUMENT_REGISTRY_ROLLOUT_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_registry_rollout_02
+    title: 02 PACKAGE SELECTION ORDER v1
+    path: docs/document_registry_rollout/02_PACKAGE_SELECTION_ORDER_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_rollout_03
+    title: 03 CANONICAL FIRST ROLLOUT RULE v1
+    path: docs/document_registry_rollout/03_CANONICAL_FIRST_ROLLOUT_RULE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_registry_rollout_04
+    title: 04 REGISTRY ENTRY MINIMUM FIELDS v1
+    path: docs/document_registry_rollout/04_REGISTRY_ENTRY_MINIMUM_FIELDS_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_rollout_05
+    title: 05 DEPENDENCY CAPTURE DISCIPLINE v1
+    path: docs/document_registry_rollout/05_DEPENDENCY_CAPTURE_DISCIPLINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_rollout_06
+    title: 06 USED BY CAPTURE DISCIPLINE v1
+    path: docs/document_registry_rollout/06_USED_BY_CAPTURE_DISCIPLINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_rollout_07
+    title: 07 RETROFIT WITHOUT REWRITE RULE v1
+    path: docs/document_registry_rollout/07_RETROFIT_WITHOUT_REWRITE_RULE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_registry_rollout_08
+    title: 08 REGISTRY UPDATE SEQUENCE v1
+    path: docs/document_registry_rollout/08_REGISTRY_UPDATE_SEQUENCE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_registry_rollout_09
+    title: 09 DOCUMENT REGISTRY ROLLOUT GAP NOTES v1
+    path: docs/document_registry_rollout/09_DOCUMENT_REGISTRY_ROLLOUT_GAP_NOTES_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_registry_rollout_10
+    title: 10 DOCUMENT REGISTRY ROLLOUT COMPLETION NOTE v1
+    path: docs/document_registry_rollout/10_DOCUMENT_REGISTRY_ROLLOUT_COMPLETION_NOTE_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium

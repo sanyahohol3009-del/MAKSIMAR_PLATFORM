@@ -1,0 +1,150 @@
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:64:    migration_manifest_required: bool
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:104:        if not self.migration_manifest_required:
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:106:                f"migration_manifest_required must be True: {self.persistent_storage_entry_id}"
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:297:            migration_manifest_required=True,
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:314:            migration_manifest_required=True,
+MAKSIMAR_CORE_LIB/persistent_storage_migrations/persistent_storage_migrations_contract.py:331:            migration_manifest_required=True,
+MAKSIMAR_CORE_LIB/products_layer/query_models.py:8:    "manifest",
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:6:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:8:    build_module_manifest_schema_contract,
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:71:                    f"skill manifest must allocate skill_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:77:                    f"skill manifest must allocate worker_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:83:                    f"skill manifest must not allocate memory_tier_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:89:                    f"memory_tier manifest must allocate memory_tier_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:95:                    f"memory_tier manifest must not allocate skill_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:99:                    f"memory_tier manifest must not allocate worker_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:105:                    f"extension_cube manifest must not allocate skill_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:109:                    f"extension_cube manifest must not allocate memory_tier_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:113:                    f"extension_cube manifest must not allocate worker_id: {self.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:196:    """Build canonical ID generation contract from manifest schema."""
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:197:    manifest_contract = build_module_manifest_schema_contract()
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:200:    for manifest in manifest_contract.manifests:
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:201:        module_id = f"module_{manifest.module_kind}_{manifest.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:206:        if manifest.module_kind == "skill":
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:207:            skill_id = f"skill_{manifest.domain_class}_{manifest.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:208:            if manifest.engine_adapter_required and manifest.active:
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:209:                worker_id = f"worker_{manifest.module_slug}_001"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:211:        if manifest.module_kind == "memory_tier":
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:212:            memory_tier_id = f"memory_{manifest.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:216:            for view_id in manifest.dashboard_view_ids
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:219:        artifact_ref_prefix = f"artifact://modules/{manifest.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:220:        trace_id_prefix = f"trace_{manifest.module_slug}"
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:224:                module_kind=manifest.module_kind,
+MAKSIMAR_CORE_LIB/id_generation/canonical_id_generation.py:225:                module_slug=manifest.module_slug,
+MAKSIMAR_CORE_LIB/module_manifest/__init__.py:1:from MAKSIMAR_CORE_LIB.module_manifest.module_manifest_schema import (
+MAKSIMAR_CORE_LIB/module_manifest/__init__.py:9:    build_module_manifest_schema_contract,
+MAKSIMAR_CORE_LIB/module_manifest/__init__.py:20:    "build_module_manifest_schema_contract",
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:69:    """Canonical manifest entry for extensible modules."""
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:89:        """Validate module manifest entry invariants."""
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:137:                    f"skill manifest must define input_contract_ids: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:141:                    f"skill manifest must define output_contract_ids: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:147:                    f"memory_tier manifest must use domain_class='memory': {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:151:                    f"memory_tier manifest must not require engine adapter: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:157:                    f"extension_cube manifest must define dashboard views: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:196:                f"read_only manifest must not require engine adapter: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:201:                f"inactive manifest must not require engine adapter: {self.module_slug}"
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:207:    """Unified canonical module manifest schema contract."""
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:210:    total_manifests: int
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:211:    manifests: tuple[ModuleManifestEntry, ...]
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:214:        """Validate module manifest schema contract invariants."""
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:218:        if self.total_manifests != len(self.manifests):
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:219:            raise ValueError("total_manifests must match manifests length")
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:221:        slugs = tuple(entry.module_slug for entry in self.manifests)
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:223:            raise ValueError("Duplicate module_slug values detected in manifest schema")
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:225:        display_names = tuple(entry.display_name for entry in self.manifests)
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:227:            raise ValueError("Duplicate display_name values detected in manifest schema")
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:230:def build_module_manifest_schema_contract() -> ModuleManifestSchemaContract:
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:231:    """Build canonical module manifest schema contract."""
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:232:    manifests = (
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:346:        total_manifests=len(manifests),
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:347:        manifests=manifests,
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:6:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:7:    build_module_manifest_schema_contract,
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:27:    manifest_contract = build_module_manifest_schema_contract()
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:31:    manifest_by_slug = {
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:33:        for entry in manifest_contract.manifests
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:50:        manifest_entry = manifest_by_slug[module_slug]
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:63:                explanation_available=manifest_entry.explanation_available,
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:65:                supported_languages=manifest_entry.supported_languages,
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:66:                supported_scripts=manifest_entry.supported_scripts,
+MAKSIMAR_SERVER/MEMORY_REGISTRY/memory_registry_contract.py:67:                active=manifest_entry.active,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:6:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:7:    build_module_manifest_schema_contract,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:29:    manifest_contract = build_module_manifest_schema_contract()
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:33:    manifest_by_slug = {
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:35:        for entry in manifest_contract.manifests
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:52:        manifest_entry = manifest_by_slug[module_slug]
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:56:            policy_profile=manifest_entry.policy_profile
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:65:                domain_class=manifest_entry.domain_class,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:66:                input_contract_ids=manifest_entry.input_contract_ids,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:67:                output_contract_ids=manifest_entry.output_contract_ids,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:68:                policy_profile=manifest_entry.policy_profile,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:69:                observability_profile=manifest_entry.observability_profile,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:71:                supported_languages=manifest_entry.supported_languages,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:72:                supported_scripts=manifest_entry.supported_scripts,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:73:                engine_adapter_required=manifest_entry.engine_adapter_required,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_contract.py:76:                active=manifest_entry.active,
+MAKSIMAR_SERVER/SKILL_ADAPTER_REGISTRY/skill_adapter_registry_models.py:7:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:6:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:7:    build_module_manifest_schema_contract,
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:16:    """Build registry auto-enrollment contract from manifest and canonical IDs."""
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:17:    manifest_contract = build_module_manifest_schema_contract()
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:20:    manifest_by_slug = {
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:21:        entry.module_slug: entry for entry in manifest_contract.manifests
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:26:        manifest_entry = manifest_by_slug[id_entry.module_slug]
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:28:        if manifest_entry.module_kind == "skill":
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:30:        elif manifest_entry.module_kind == "memory_tier":
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:35:        enrollment_status = "enrolled" if manifest_entry.active else "skipped_inactive"
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:39:                module_kind=manifest_entry.module_kind,
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:40:                module_slug=manifest_entry.module_slug,
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:47:                active=manifest_entry.active,
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_contract.py:49:                    f"Registry auto-enrollment for module_slug={manifest_entry.module_slug} "
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_models.py:6:from MAKSIMAR_CORE_LIB.module_manifest import (
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_models.py:26:    """Registry auto-enrollment entry derived from manifest and canonical IDs."""
+tests/action_executor/test_dry_run_executor_smoke.py:24:        action_id="action_manifest",
+tests/action_executor/test_action_loader_smoke.py:10:    file_path = tmp_path / "action_manifest.v1.yaml"
+tests/action_executor/test_action_loader_smoke.py:14:                "contract_name: action_manifest",
+tests/action_executor/test_action_loader_smoke.py:30:    file_path = tmp_path / "action_manifest.v1.yaml"
+tests/action_executor/test_action_loader_smoke.py:34:                "contract_name: action_manifest",
+tests/action_executor/test_action_loader_smoke.py:35:                "schema_version: action_manifest.v1",
+tests/action_executor/test_action_loader_smoke.py:46:    assert result.definition.action_id == "action_manifest"
+tests/action_executor/test_action_loader_smoke.py:47:    assert result.definition.version == "action_manifest.v1"
+tests/registry_auto_enrollment/test_registry_auto_enrollment_contract_smoke.py:41:    """Registry auto-enrollment should keep active manifests enrolled."""
+tests/products_layer/test_query_models_smoke.py:14:            product_id="product_manifest",
+tests/products_layer/test_query_models_smoke.py:15:            version="product_manifest.v1",
+tests/products_layer/test_query_models_smoke.py:16:            file_path=Path("product_manifest.v1.yaml"),
+tests/products_layer/test_query_models_smoke.py:27:    query = ProductQuery(query_text="manifest", limit=10)
+tests/products_layer/test_query_models_smoke.py:32:    assert summary.returned_items[0].product_id == "product_manifest"
+tests/products_layer/test_query_models_smoke.py:39:            product_id="product_manifest",
+tests/products_layer/test_query_models_smoke.py:40:            version="product_manifest.v1",
+tests/products_layer/test_query_models_smoke.py:41:            file_path=Path("product_manifest.v1.yaml"),
+tests/products_layer/test_product_loader_smoke.py:10:    file_path = tmp_path / "product_manifest.v1.yaml"
+tests/products_layer/test_product_loader_smoke.py:14:                "contract_name: product_manifest",
+tests/products_layer/test_product_loader_smoke.py:30:    file_path = tmp_path / "product_manifest.v1.yaml"
+tests/products_layer/test_product_loader_smoke.py:34:                "contract_name: product_manifest",
+tests/products_layer/test_product_loader_smoke.py:35:                "schema_version: product_manifest.v1",
+tests/products_layer/test_product_loader_smoke.py:46:    assert result.definition.product_id == "product_manifest"
+tests/products_layer/test_product_loader_smoke.py:47:    assert result.definition.version == "product_manifest.v1"
+tests/skill_adapter_registry/test_skill_adapter_registry_contract_smoke.py:32:    """Skill adapter registry should preserve manifest contracts and metadata."""
+tests/module_manifest/test_module_manifest_schema_smoke.py:3:from MAKSIMAR_CORE_LIB.module_manifest import (
+tests/module_manifest/test_module_manifest_schema_smoke.py:4:    build_module_manifest_schema_contract,
+tests/module_manifest/test_module_manifest_schema_smoke.py:8:def test_module_manifest_schema_contract_builds() -> None:
+tests/module_manifest/test_module_manifest_schema_smoke.py:9:    """Module manifest schema contract should build successfully."""
+tests/module_manifest/test_module_manifest_schema_smoke.py:10:    contract = build_module_manifest_schema_contract()
+tests/module_manifest/test_module_manifest_schema_smoke.py:13:    assert contract.total_manifests == 3
+tests/module_manifest/test_module_manifest_schema_smoke.py:14:    assert len(contract.manifests) == 3
+tests/module_manifest/test_module_manifest_schema_smoke.py:17:def test_module_manifest_schema_contract_contains_expected_module_kinds() -> None:
+tests/module_manifest/test_module_manifest_schema_smoke.py:18:    """Module manifest schema contract should expose expected module kinds."""
+tests/module_manifest/test_module_manifest_schema_smoke.py:19:    contract = build_module_manifest_schema_contract()
+tests/module_manifest/test_module_manifest_schema_smoke.py:21:    assert contract.manifests[0].module_kind == "skill"
+tests/module_manifest/test_module_manifest_schema_smoke.py:22:    assert contract.manifests[1].module_kind == "memory_tier"
+tests/module_manifest/test_module_manifest_schema_smoke.py:23:    assert contract.manifests[2].module_kind == "extension_cube"
+tests/module_manifest/test_module_manifest_schema_smoke.py:25:    assert contract.manifests[0].module_slug == "simulation_analysis"
+tests/module_manifest/test_module_manifest_schema_smoke.py:26:    assert contract.manifests[1].module_slug == "project_architecture"
+tests/module_manifest/test_module_manifest_schema_smoke.py:27:    assert contract.manifests[2].module_slug == "monitoring_panel"
+tests/module_manifest/test_module_manifest_schema_smoke.py:30:def test_module_manifest_schema_contract_preserves_extensibility_fields() -> None:
+tests/module_manifest/test_module_manifest_schema_smoke.py:31:    """Module manifest schema should preserve multilingual and display metadata."""
+tests/module_manifest/test_module_manifest_schema_smoke.py:32:    contract = build_module_manifest_schema_contract()
+tests/module_manifest/test_module_manifest_schema_smoke.py:34:    skill = contract.manifests[0]
+tests/module_manifest/test_module_manifest_schema_smoke.py:35:    memory_tier = contract.manifests[1]
+tests/module_manifest/test_module_manifest_schema_smoke.py:36:    cube = contract.manifests[2]

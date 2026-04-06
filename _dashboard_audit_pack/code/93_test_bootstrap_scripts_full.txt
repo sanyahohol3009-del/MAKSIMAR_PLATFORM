@@ -1,0 +1,303 @@
+===== scripts/bootstrap/README.md =====
+
+===== scripts/bootstrap/bootstrap_env.sh =====
+
+===== scripts/bootstrap/bootstrap_requirements.sh =====
+
+===== scripts/bootstrap/create_giant_tree.sh =====
+#!/usr/bin/env bash
+set -e
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+cd "$ROOT"
+
+echo "Creating top-level layers..."
+
+mkdir -p \
+MAKSIMAR_CORE \
+SAFETY_FOUNDATION \
+OOB_MONITORING \
+OBSERVABILITY_LAYER \
+AI_SERVICES \
+SANDBOX_EXECUTION \
+KNOWLEDGE_SYSTEM \
+RESEARCH_LAYER \
+MEMORY_SYSTEM \
+WORKFLOW_ENGINE \
+ACTION_LIBRARY \
+MODULE_SYSTEM \
+CODEGEN_LAYER \
+EVALUATION_LAYER \
+SIMULATION_LAYER \
+ROBOTICS_LAYER \
+CAD_3D_CAM_LAYER \
+VISUAL_ENGINEERING_LAYER \
+ENERGY_OPERATIONS_LAYER \
+COMPUTE_FLEET_LAYER \
+VPN_LAYER \
+INDUSTRIAL_LAYER \
+CONTENT_MEDIA_LAYER \
+DIALOGUE_LAYER \
+VOICE_LAYER \
+UI_LAYER \
+SHARED \
+SERVER_SHELL \
+DESKTOP_SHELL \
+ANDROID_SHELL \
+IOS_SHELL \
+PACKAGING \
+PRODUCTS \
+DOMAIN_CUBES \
+tests \
+scripts \
+docs \
+assets \
+requirements
+
+echo "Creating requirements files..."
+
+touch requirements/{base.txt,dev.txt,observability.txt,ai.txt,knowledge.txt,codegen.txt,simulation.txt,visual.txt,energy.txt,compute_fleet.txt,mobile_android.txt,mobile_ios.txt,ui.txt,robotics.txt,content_media.txt,industrial.txt}
+
+echo "Creating MAKSIMAR_CORE structure..."
+
+mkdir -p MAKSIMAR_CORE/{contracts,governance,runtime_model,federation,packaging,shared_services,ui_tokens}
+
+mkdir -p MAKSIMAR_CORE/contracts/{runtime,governance,memory,knowledge,research,workflow,action,module,ui,federation,product,packaging,codegen,evaluation,simulation,robotics,cad_3d_cam,visual_engineering,energy,compute_fleet,vpn,industrial,content_media,dialogue,voice,mobile,shell}
+
+echo "Creating config domains..."
+
+mkdir -p \
+MAKSIMAR_CORE/governance/config \
+MEMORY_SYSTEM/config \
+KNOWLEDGE_SYSTEM/config \
+RESEARCH_LAYER/config \
+WORKFLOW_ENGINE/config \
+ACTION_LIBRARY/config \
+MODULE_SYSTEM/config \
+CODEGEN_LAYER/config \
+EVALUATION_LAYER/config \
+SIMULATION_LAYER/config \
+ROBOTICS_LAYER/config \
+CAD_3D_CAM_LAYER/config \
+VISUAL_ENGINEERING_LAYER/config \
+ENERGY_OPERATIONS_LAYER/config \
+COMPUTE_FLEET_LAYER/config \
+VPN_LAYER/config \
+INDUSTRIAL_LAYER/config \
+CONTENT_MEDIA_LAYER/config \
+DIALOGUE_LAYER/config \
+VOICE_LAYER/config \
+UI_LAYER/config \
+SHARED/config
+
+echo "Creating shell boundaries..."
+
+mkdir -p \
+SERVER_SHELL/{shell_contracts,runtime_adapter,system_adapter,monitoring_adapter,server_ui} \
+DESKTOP_SHELL/{shell_contracts,desktop_actions,terminal_adapter,dashboard_adapter,desktop_ui} \
+ANDROID_SHELL/{app,shell_contracts,voice_adapter,permissions_bridge,device_actions,workflow_adapter,memory_adapter,knowledge_adapter,mobile_ui,node_awareness_adapter} \
+IOS_SHELL/{app,shell_contracts,voice_adapter,permissions_bridge,device_actions,workflow_adapter,memory_adapter,knowledge_adapter,mobile_ui,node_awareness_adapter}
+
+echo "Creating domain cube families..."
+
+mkdir -p DOMAIN_CUBES/{family_assistant,engineering_assistant,knowledge_assistant,automation_cube,vpn_cube,energy_cube,compute_fleet_cube,3d_cube,visual_engineering_cube,robotics_cube,industrial_cube,content_cube,education_cube,mobile_assistant_cube,desktop_assistant_cube,module_templates}
+
+echo "Creating Python packages..."
+
+find MAKSIMAR_CORE -type d -exec touch {}/_init_.py \;
+
+echo "Creating shared services stubs..."
+
+touch MAKSIMAR_CORE/shared_services/{config_loader.py,schema_validator.py,policy_loader.py,capability_resolver.py,profile_selector.py,registry_helpers.py,path_resolver.py,atomic_io.py,safe_json.py,ids.py,time_utils.py,logging_utils.py}
+
+echo "Creating README files..."
+
+find . -type d -not -path "./.git*" -exec bash -c 'touch "$0/README.md"' {} \;
+
+echo "Giant skeleton created."
+
+===== scripts/config/validate_config_presence.sh =====
+
+===== scripts/dev/run_tests.sh =====
+
+===== scripts/tests/README.md =====
+
+===== scripts/tests/run_regression_matrix.sh =====
+
+===== scripts/validators/validate_configs.sh =====
+
+===== scripts/validators/validate_contract_domains.sh =====
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${HOME}/MAKSIMAR_PLATFORM"
+BASE="${ROOT}/MAKSIMAR_CORE/contracts"
+
+expected_domains=(
+  runtime
+  governance
+  memory
+  knowledge
+  research
+  workflow
+  action
+  module
+  ui
+  federation
+  product
+  packaging
+  codegen
+  evaluation
+  simulation
+  robotics
+  cad_3d_cam
+  visual_engineering
+  energy
+  compute_fleet
+  vpn
+  industrial
+  content_media
+  dialogue
+  voice
+  mobile
+  shell
+)
+
+echo "== Contract Domains Validator =="
+missing=0
+
+for domain in "${expected_domains[@]}"; do
+  path="${BASE}/${domain}"
+  if [[ -d "${path}" ]]; then
+    echo "OK  ${domain}"
+  else
+    echo "ERR ${domain} missing"
+    missing=$((missing + 1))
+  fi
+done
+
+echo
+echo "Missing domains: ${missing}"
+
+if [[ "${missing}" -ne 0 ]]; then
+  exit 1
+fi
+
+echo "All contract domains exist."
+
+===== scripts/validators/validate_contracts.sh =====
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${HOME}/MAKSIMAR_PLATFORM"
+CONTRACTS_DIR="${ROOT}/MAKSIMAR_CORE/contracts"
+
+if [[ ! -d "${CONTRACTS_DIR}" ]]; then
+  echo "ERROR: contracts directory not found: ${CONTRACTS_DIR}"
+  exit 1
+fi
+
+required_top_keys=(
+  "contract_name:"
+  "schema_version:"
+  "description:"
+  "required:"
+  "fields:"
+  "validation_rules:"
+  "security_rules:"
+)
+
+echo "== Contract Validator =="
+echo "ROOT: ${ROOT}"
+echo "CONTRACTS_DIR: ${CONTRACTS_DIR}"
+echo
+
+yaml_files=$(find "${CONTRACTS_DIR}" -type f -name "*.yaml" | sort)
+
+if [[ -z "${yaml_files}" ]]; then
+  echo "ERROR: no YAML contract files found"
+  exit 1
+fi
+
+total=0
+failed=0
+
+while IFS= read -r file; do
+  total=$((total + 1))
+  rel_path="${file#${ROOT}/}"
+  echo "-- Checking: ${rel_path}"
+
+  if [[ ! -s "${file}" ]]; then
+    echo "   ERROR: file is empty"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  for key in "${required_top_keys[@]}"; do
+    if ! grep -q "^${key}" "${file}"; then
+      echo "   ERROR: missing top-level key: ${key}"
+      failed=$((failed + 1))
+      continue 2
+    fi
+  done
+
+  contract_name="$(grep '^contract_name:' "${file}" | head -n1 | sed 's/^contract_name:[[:space:]]*//')"
+  schema_version="$(grep '^schema_version:' "${file}" | head -n1 | sed 's/^schema_version:[[:space:]]*//')"
+  base_name="$(basename "${file}" .yaml)"
+  expected_schema="${base_name}"
+
+  if [[ "${schema_version}" != "${expected_schema}" ]]; then
+    echo "   ERROR: schema_version mismatch"
+    echo "          expected: ${expected_schema}"
+    echo "          actual:   ${schema_version}"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  if [[ -z "${contract_name}" ]]; then
+    echo "   ERROR: empty contract_name"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  if [[ "${base_name}" != *.v1 ]]; then
+    echo "   ERROR: file name must end with .v1.yaml"
+    failed=$((failed + 1))
+    continue
+  fi
+
+  echo "   OK"
+done <<< "${yaml_files}"
+
+echo
+echo "== Summary =="
+echo "Total checked: ${total}"
+echo "Failures: ${failed}"
+
+if [[ "${failed}" -ne 0 ]]; then
+  exit 1
+fi
+
+echo "All contracts passed."
+
+===== scripts/validators/validate_no_empty_contracts.sh =====
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${HOME}/MAKSIMAR_PLATFORM"
+BASE="${ROOT}/MAKSIMAR_CORE/contracts"
+
+echo "== Empty Contract Files Validator =="
+
+empty_count=$(find "${BASE}" -type f -name "*.yaml" -empty | wc -l)
+
+if [[ "${empty_count}" -ne 0 ]]; then
+  echo "ERROR: found empty YAML contract files"
+  find "${BASE}" -type f -name "*.yaml" -empty | sort
+  exit 1
+fi
+
+echo "No empty YAML contract files found."
+
+===== scripts/validators/validate_structure.sh =====
+

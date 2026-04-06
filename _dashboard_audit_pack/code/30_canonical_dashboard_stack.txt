@@ -1,0 +1,3444 @@
+===== MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
+    build_layout_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_read_model_contract import (
+    build_workspace_read_model_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardEntry:
+    """Canonical main operator dashboard entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    display_target_id: str
+    total_panels: int
+    main_focus_panels: int
+    secondary_panels: int
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardContract:
+    """Canonical main operator dashboard contract."""
+
+    total_entries: int
+    operator_workspace_entries: int
+    read_only_entries: int
+    interactive_entries: int
+    entries: tuple[MainOperatorDashboardEntry, ...]
+
+
+def build_main_operator_dashboard_contract() -> MainOperatorDashboardContract:
+    """Build canonical main operator dashboard contract."""
+    workspace_registry_contract = build_workspace_registry_contract()
+    workspace_read_model_contract = build_workspace_read_model_contract()
+    layout_contract = build_layout_composition_contract()
+
+    workspace_registry_map = {
+        entry.workspace_id: entry for entry in workspace_registry_contract.entries
+    }
+    workspace_read_model_map = {
+        entry.workspace_id: entry for entry in workspace_read_model_contract.entries
+    }
+
+    operator_workspace_ids = tuple(
+        entry.workspace_id
+        for entry in workspace_registry_contract.entries
+        if entry.workspace_role == "operator_surface"
+    )
+
+    entries = tuple(
+        MainOperatorDashboardEntry(
+            dashboard_id="dashboard_main_operator_001",
+            workspace_id=workspace_id,
+            display_target_id=workspace_registry_map[workspace_id].display_target_id,
+            total_panels=workspace_read_model_map[workspace_id].total_panels,
+            main_focus_panels=workspace_read_model_map[workspace_id].main_focus_panels,
+            secondary_panels=workspace_read_model_map[workspace_id].secondary_panels,
+            read_only=workspace_registry_map[workspace_id].read_only,
+            description=(
+                f"Canonical main operator dashboard entry for {workspace_id}."
+            ),
+        )
+        for workspace_id in operator_workspace_ids
+        if any(
+            layout_entry.workspace_id == workspace_id
+            for layout_entry in layout_contract.entries
+        )
+    )
+
+    return MainOperatorDashboardContract(
+        total_entries=len(entries),
+        operator_workspace_entries=len(operator_workspace_ids),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        interactive_entries=sum(1 for entry in entries if not entry.read_only),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
+    build_layout_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_read_model_contract import (
+    build_workspace_read_model_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadModelEntry:
+    """Canonical read-only main operator dashboard entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    display_target_id: str
+    total_panels: int
+    main_focus_panels: int
+    secondary_panels: int
+    diagnostics_panels: int
+    sidebar_panels: int
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadModelContract:
+    """Canonical main operator dashboard read model contract."""
+
+    total_entries: int
+    read_only_entries: int
+    interactive_entries: int
+    entries: tuple[MainOperatorDashboardReadModelEntry, ...]
+
+
+def build_main_operator_dashboard_read_model_contract() -> (
+    MainOperatorDashboardReadModelContract
+):
+    """Build canonical main operator dashboard read model contract."""
+    dashboard_contract = build_main_operator_dashboard_contract()
+    workspace_read_model_contract = build_workspace_read_model_contract()
+    layout_contract = build_layout_composition_contract()
+
+    workspace_read_model_map = {
+        entry.workspace_id: entry for entry in workspace_read_model_contract.entries
+    }
+
+    entries = tuple(
+        MainOperatorDashboardReadModelEntry(
+            dashboard_id=dashboard_entry.dashboard_id,
+            workspace_id=dashboard_entry.workspace_id,
+            display_target_id=dashboard_entry.display_target_id,
+            total_panels=dashboard_entry.total_panels,
+            main_focus_panels=workspace_read_model_map[
+                dashboard_entry.workspace_id
+            ].main_focus_panels,
+            secondary_panels=workspace_read_model_map[
+                dashboard_entry.workspace_id
+            ].secondary_panels,
+            diagnostics_panels=workspace_read_model_map[
+                dashboard_entry.workspace_id
+            ].diagnostics_panels,
+            sidebar_panels=workspace_read_model_map[
+                dashboard_entry.workspace_id
+            ].sidebar_panels,
+            read_only=dashboard_entry.read_only,
+            description=(
+                f"Canonical main operator dashboard read model entry for "
+                f"{dashboard_entry.workspace_id}."
+            ),
+        )
+        for dashboard_entry in dashboard_contract.entries
+        if any(
+            layout_entry.workspace_id == dashboard_entry.workspace_id
+            for layout_entry in layout_contract.entries
+        )
+    )
+
+    return MainOperatorDashboardReadModelContract(
+        total_entries=len(entries),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        interactive_entries=sum(1 for entry in entries if not entry.read_only),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
+    build_main_operator_dashboard_read_model_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorWorkspaceBindingEntry:
+    """Canonical binding between operator dashboard and workspace."""
+
+    dashboard_id: str
+    workspace_id: str
+    workspace_role: str
+    display_target_id: str
+    is_primary_operator_workspace: bool
+    supports_interaction: bool
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorWorkspaceBindingContract:
+    """Canonical operator workspace binding contract."""
+
+    total_entries: int
+    primary_operator_workspace_entries: int
+    interactive_entries: int
+    read_only_entries: int
+    entries: tuple[OperatorWorkspaceBindingEntry, ...]
+
+
+def build_operator_workspace_binding_contract() -> (
+    OperatorWorkspaceBindingContract
+):
+    """Build canonical operator workspace binding contract."""
+    dashboard_contract = build_main_operator_dashboard_contract()
+    dashboard_read_model_contract = build_main_operator_dashboard_read_model_contract()
+    workspace_registry_contract = build_workspace_registry_contract()
+
+    workspace_registry_map = {
+        entry.workspace_id: entry for entry in workspace_registry_contract.entries
+    }
+    dashboard_read_model_map = {
+        entry.workspace_id: entry for entry in dashboard_read_model_contract.entries
+    }
+
+    entries = tuple(
+        OperatorWorkspaceBindingEntry(
+            dashboard_id=dashboard_entry.dashboard_id,
+            workspace_id=dashboard_entry.workspace_id,
+            workspace_role=workspace_registry_map[dashboard_entry.workspace_id].workspace_role,
+            display_target_id=dashboard_entry.display_target_id,
+            is_primary_operator_workspace=(
+                workspace_registry_map[dashboard_entry.workspace_id].workspace_role
+                == "operator_surface"
+            ),
+            supports_interaction=not dashboard_read_model_map[
+                dashboard_entry.workspace_id
+            ].read_only,
+            read_only=dashboard_read_model_map[dashboard_entry.workspace_id].read_only,
+            description=(
+                f"Canonical operator workspace binding entry for "
+                f"{dashboard_entry.workspace_id}."
+            ),
+        )
+        for dashboard_entry in dashboard_contract.entries
+        if dashboard_entry.workspace_id in workspace_registry_map
+        and dashboard_entry.workspace_id in dashboard_read_model_map
+    )
+
+    return OperatorWorkspaceBindingContract(
+        total_entries=len(entries),
+        primary_operator_workspace_entries=sum(
+            1 for entry in entries if entry.is_primary_operator_workspace
+        ),
+        interactive_entries=sum(1 for entry in entries if entry.supports_interaction),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
+    build_main_operator_dashboard_read_model_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_workspace_binding_contract import (
+    build_operator_workspace_binding_contract,
+)
+
+
+GuardDecision = Literal[
+    "allowed_read_only",
+    "allowed_with_approval",
+    "blocked_direct_execution",
+]
+
+InteractionSurface = Literal[
+    "dashboard_read_model",
+    "operator_workspace_binding",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorInteractionGuardEntry:
+    """Canonical operator interaction guard entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    interaction_surface: InteractionSurface
+    guard_decision: GuardDecision
+    direct_execution_allowed: bool
+    approval_required_for_mutation: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorInteractionGuardContract:
+    """Canonical operator interaction guard contract."""
+
+    total_entries: int
+    allowed_read_only_entries: int
+    allowed_with_approval_entries: int
+    blocked_direct_execution_entries: int
+    entries: tuple[OperatorInteractionGuardEntry, ...]
+
+
+def build_operator_interaction_guard_contract() -> (
+    OperatorInteractionGuardContract
+):
+    """Build canonical operator interaction guard contract."""
+    dashboard_read_model_contract = build_main_operator_dashboard_read_model_contract()
+    workspace_binding_contract = build_operator_workspace_binding_contract()
+
+    binding_map = {
+        entry.workspace_id: entry for entry in workspace_binding_contract.entries
+    }
+
+    entries = tuple(
+        OperatorInteractionGuardEntry(
+            dashboard_id=entry.dashboard_id,
+            workspace_id=entry.workspace_id,
+            interaction_surface="dashboard_read_model",
+            guard_decision=(
+                "allowed_with_approval"
+                if binding_map[entry.workspace_id].supports_interaction
+                else "allowed_read_only"
+            ),
+            direct_execution_allowed=False,
+            approval_required_for_mutation=binding_map[
+                entry.workspace_id
+            ].supports_interaction,
+            description=(
+                f"Canonical operator interaction guard entry for {entry.workspace_id}."
+            ),
+        )
+        for entry in dashboard_read_model_contract.entries
+        if entry.workspace_id in binding_map
+    )
+
+    return OperatorInteractionGuardContract(
+        total_entries=len(entries),
+        allowed_read_only_entries=sum(
+            1 for entry in entries if entry.guard_decision == "allowed_read_only"
+        ),
+        allowed_with_approval_entries=sum(
+            1 for entry in entries if entry.guard_decision == "allowed_with_approval"
+        ),
+        blocked_direct_execution_entries=sum(
+            1 for entry in entries if entry.guard_decision == "blocked_direct_execution"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/operator_intent_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_interaction_guard_contract import (
+    build_operator_interaction_guard_contract,
+)
+
+
+IntentKind = Literal[
+    "read_only_navigation",
+    "guarded_operator_mutation",
+]
+
+IntentSource = Literal[
+    "dashboard_operator_surface",
+]
+
+IntentStatus = Literal[
+    "intent_only",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorIntentEntry:
+    """Canonical operator intent entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    intent_kind: IntentKind
+    intent_source: IntentSource
+    intent_status: IntentStatus
+    approval_required: bool
+    direct_execution_allowed: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorIntentContract:
+    """Canonical operator intent contract."""
+
+    total_entries: int
+    read_only_navigation_entries: int
+    guarded_operator_mutation_entries: int
+    approval_required_entries: int
+    entries: tuple[OperatorIntentEntry, ...]
+
+
+def build_operator_intent_contract() -> OperatorIntentContract:
+    """Build canonical operator intent contract."""
+    interaction_guard_contract = build_operator_interaction_guard_contract()
+
+    entries = tuple(
+        OperatorIntentEntry(
+            dashboard_id=entry.dashboard_id,
+            workspace_id=entry.workspace_id,
+            intent_kind=(
+                "guarded_operator_mutation"
+                if entry.approval_required_for_mutation
+                else "read_only_navigation"
+            ),
+            intent_source="dashboard_operator_surface",
+            intent_status="intent_only",
+            approval_required=entry.approval_required_for_mutation,
+            direct_execution_allowed=entry.direct_execution_allowed,
+            description=(
+                f"Canonical operator intent entry for {entry.workspace_id}."
+            ),
+        )
+        for entry in interaction_guard_contract.entries
+    )
+
+    return OperatorIntentContract(
+        total_entries=len(entries),
+        read_only_navigation_entries=sum(
+            1 for entry in entries if entry.intent_kind == "read_only_navigation"
+        ),
+        guarded_operator_mutation_entries=sum(
+            1
+            for entry in entries
+            if entry.intent_kind == "guarded_operator_mutation"
+        ),
+        approval_required_entries=sum(1 for entry in entries if entry.approval_required),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.control_plane_handoff_contract import (
+    build_control_plane_handoff_contract,
+)
+
+
+ActionExposureMode = Literal[
+    "read_only_exposed",
+    "approval_gated_exposed",
+]
+
+ActionExposureStatus = Literal[
+    "visible_but_not_executed",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyAwareActionExposureEntry:
+    """Canonical policy-aware action exposure entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    action_exposure_mode: ActionExposureMode
+    action_exposure_status: ActionExposureStatus
+    direct_execution_allowed: bool
+    approval_required: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyAwareActionExposureContract:
+    """Canonical policy-aware action exposure contract."""
+
+    total_entries: int
+    read_only_exposed_entries: int
+    approval_gated_exposed_entries: int
+    entries: tuple[PolicyAwareActionExposureEntry, ...]
+
+
+def build_policy_aware_action_exposure_contract() -> (
+    PolicyAwareActionExposureContract
+):
+    """Build canonical policy-aware action exposure contract."""
+    handoff_contract = build_control_plane_handoff_contract()
+
+    entries = tuple(
+        PolicyAwareActionExposureEntry(
+            dashboard_id=entry.dashboard_id,
+            workspace_id=entry.workspace_id,
+            action_exposure_mode=(
+                "approval_gated_exposed"
+                if entry.handoff_mode == "approval_gated"
+                else "read_only_exposed"
+            ),
+            action_exposure_status="visible_but_not_executed",
+            direct_execution_allowed=entry.direct_execution_allowed,
+            approval_required=(entry.handoff_mode == "approval_gated"),
+            description=(
+                f"Canonical policy-aware action exposure entry for {entry.workspace_id}."
+            ),
+        )
+        for entry in handoff_contract.entries
+    )
+
+    return PolicyAwareActionExposureContract(
+        total_entries=len(entries),
+        read_only_exposed_entries=sum(
+            1 for entry in entries if entry.action_exposure_mode == "read_only_exposed"
+        ),
+        approval_gated_exposed_entries=sum(
+            1
+            for entry in entries
+            if entry.action_exposure_mode == "approval_gated_exposed"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
+    build_panel_id_vocabulary_normalization_model,
+    normalize_panel_id,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
+    DashboardPanelRegistryContract,
+    RegisteredPanel,
+)
+
+
+def build_dashboard_panel_registry_contract() -> DashboardPanelRegistryContract:
+    """Build unified dashboard panel registry contract."""
+
+    vocabulary_model = build_panel_id_vocabulary_normalization_model()
+    vocabulary_entries = {
+        entry.canonical_panel_id: entry for entry in vocabulary_model.entries
+    }
+
+    panel_specs = (
+        ("panel_consistency", "core", True),
+        ("panel_snapshot", "core", True),
+        ("panel_incident", "diagnostics", True),
+        ("panel_diagnostics", "diagnostics", True),
+        ("panel_chat", "interaction", True),
+        ("panel_settings", "settings", True),
+        ("panel_gesture_control", "control", True),
+    )
+
+    panels = tuple(
+        RegisteredPanel(
+            panel_id=canonical_panel_id,
+            label=vocabulary_entries[canonical_panel_id].display_title,
+            category=category,
+            visible_in_sidebar=visible_in_sidebar,
+            panel_family=vocabulary_entries[canonical_panel_id].panel_family,
+            panel_kind=vocabulary_entries[canonical_panel_id].panel_kind,
+            panel_role=vocabulary_entries[canonical_panel_id].panel_role,
+        )
+        for panel_id, category, visible_in_sidebar in panel_specs
+        for canonical_panel_id in (normalize_panel_id(panel_id),)
+    )
+
+    return DashboardPanelRegistryContract(
+        total_panels=len(panels),
+        panels=panels,
+        visible_in_sidebar_panels=sum(
+            1 for panel in panels if panel.visible_in_sidebar
+        ),
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
+    build_panel_id_vocabulary_normalization_model,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
+    PanelMetadataContract,
+    PanelMetadataEntry,
+)
+
+
+def build_panel_metadata_contract() -> PanelMetadataContract:
+    """Build canonical panel metadata contract."""
+    vocabulary_model = build_panel_id_vocabulary_normalization_model()
+    vocabulary_entries = {
+        entry.canonical_panel_id: entry for entry in vocabulary_model.entries
+    }
+
+    panel_state_class_map = {
+        "panel_consistency": "diagnostics",
+        "panel_snapshot": "foundation",
+        "panel_incident": "diagnostics",
+        "panel_diagnostics": "diagnostics",
+        "panel_chat": "operator",
+        "panel_settings": "admin",
+        "panel_gesture_control": "operator",
+        "panel_queue_load": "topology",
+        "panel_node_topology": "topology",
+        "panel_degraded_mode": "diagnostics",
+        "panel_project_map": "topology",
+        "panel_data_flow": "topology",
+        "panel_dependency_map": "topology",
+        "panel_version_control_dashboard": "admin",
+        "panel_foundation_runtime_status_001": "foundation",
+        "panel_foundation_guard_status_001": "foundation",
+        "panel_foundation_core_guard_status_001": "foundation",
+        "panel_foundation_kernel_guard_status_001": "foundation",
+        "panel_navigation": "operator",
+    }
+
+    read_mode_map = {
+        "panel_consistency": "read_only",
+        "panel_snapshot": "read_only",
+        "panel_incident": "read_only",
+        "panel_diagnostics": "read_only",
+        "panel_chat": "interactive_controlled",
+        "panel_settings": "interactive_restricted",
+        "panel_gesture_control": "interactive_restricted",
+        "panel_queue_load": "read_only",
+        "panel_node_topology": "read_only",
+        "panel_degraded_mode": "read_only",
+        "panel_project_map": "read_only",
+        "panel_data_flow": "read_only",
+        "panel_dependency_map": "read_only",
+        "panel_version_control_dashboard": "read_only",
+        "panel_foundation_runtime_status_001": "read_only",
+        "panel_foundation_guard_status_001": "read_only",
+        "panel_foundation_core_guard_status_001": "read_only",
+        "panel_foundation_kernel_guard_status_001": "read_only",
+        "panel_navigation": "hidden_internal",
+    }
+
+    priority_map = {
+        "panel_consistency": 30,
+        "panel_snapshot": 20,
+        "panel_incident": 10,
+        "panel_diagnostics": 15,
+        "panel_chat": 60,
+        "panel_settings": 90,
+        "panel_gesture_control": 80,
+        "panel_queue_load": 40,
+        "panel_node_topology": 35,
+        "panel_degraded_mode": 12,
+        "panel_project_map": 45,
+        "panel_data_flow": 50,
+        "panel_dependency_map": 55,
+        "panel_version_control_dashboard": 95,
+        "panel_foundation_runtime_status_001": 1,
+        "panel_foundation_guard_status_001": 2,
+        "panel_foundation_core_guard_status_001": 3,
+        "panel_foundation_kernel_guard_status_001": 4,
+        "panel_navigation": 100,
+    }
+
+    source_domain_map = {
+        "panel_consistency": "diagnostics",
+        "panel_snapshot": "foundation",
+        "panel_incident": "diagnostics",
+        "panel_diagnostics": "diagnostics",
+        "panel_chat": "interaction",
+        "panel_settings": "interaction",
+        "panel_gesture_control": "control",
+        "panel_queue_load": "execution_observability",
+        "panel_node_topology": "execution_observability",
+        "panel_degraded_mode": "diagnostics",
+        "panel_project_map": "execution_observability",
+        "panel_data_flow": "execution_observability",
+        "panel_dependency_map": "execution_observability",
+        "panel_version_control_dashboard": "execution_observability",
+        "panel_foundation_runtime_status_001": "foundation",
+        "panel_foundation_guard_status_001": "foundation",
+        "panel_foundation_core_guard_status_001": "foundation",
+        "panel_foundation_kernel_guard_status_001": "foundation",
+        "panel_navigation": "navigation",
+    }
+
+    entries = tuple(
+        PanelMetadataEntry(
+            panel_id=entry.canonical_panel_id,
+            display_title=entry.display_title,
+            description=entry.description,
+            priority=priority_map[entry.canonical_panel_id],
+            source_domain=source_domain_map[entry.canonical_panel_id],
+            read_mode=read_mode_map[entry.canonical_panel_id],
+            panel_state_class=panel_state_class_map[entry.canonical_panel_id],
+            panel_family=entry.panel_family,
+            panel_kind=entry.panel_kind,
+            panel_role=entry.panel_role,
+        )
+        for entry in vocabulary_entries.values()
+    )
+
+    return PanelMetadataContract(
+        total_entries=len(entries),
+        read_only_entries=sum(1 for entry in entries if entry.read_mode == "read_only"),
+        interactive_controlled_entries=sum(
+            1 for entry in entries if entry.read_mode == "interactive_controlled"
+        ),
+        interactive_restricted_entries=sum(
+            1 for entry in entries if entry.read_mode == "interactive_restricted"
+        ),
+        hidden_internal_entries=sum(
+            1 for entry in entries if entry.read_mode == "hidden_internal"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
+    build_panel_exposure_policy_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PanelBindingEntry:
+    """Canonical binding entry between a panel and display target semantics."""
+
+    panel_id: str
+    display_target_id: str
+    binding_reason: str
+    is_default_target: bool
+    eligible_for_main_dashboard: bool
+    eligible_for_oob_dashboard: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PanelBindingContract:
+    """Canonical panel binding contract."""
+
+    total_entries: int
+    primary_operator_bindings: int
+    diagnostics_bindings: int
+    expansion_bindings: int
+    default_target_bindings: int
+    entries: tuple[PanelBindingEntry, ...]
+
+
+def build_panel_binding_contract() -> PanelBindingContract:
+    """Build canonical panel binding contract."""
+    metadata_contract = build_panel_metadata_contract()
+    exposure_contract = build_panel_exposure_policy_contract()
+    display_contract = build_display_target_vocabulary_contract()
+
+    metadata_map = {entry.panel_id: entry for entry in metadata_contract.entries}
+    exposure_map = {entry.panel_id: entry for entry in exposure_contract.entries}
+    display_targets = {entry.display_target_id: entry for entry in display_contract.entries}
+
+    def resolve_display_target_id(panel_id: str) -> str:
+        metadata_entry = metadata_map[panel_id]
+        exposure_entry = exposure_map[panel_id]
+
+        if exposure_entry.exposure_level == "hidden_internal":
+            return "display_tertiary_expansion"
+
+        if metadata_entry.panel_family == "foundation_status":
+            return "display_secondary_diagnostics"
+
+        if metadata_entry.panel_family in ("diagnostics", "read_only_monitoring"):
+            return "display_secondary_diagnostics"
+
+        if metadata_entry.panel_family in ("interaction", "control"):
+            return "display_primary_operator"
+
+        if metadata_entry.panel_family == "execution_observability":
+            return "display_tertiary_expansion"
+
+        if metadata_entry.panel_family == "navigation":
+            return "display_tertiary_expansion"
+
+        return "display_primary_operator"
+
+    def resolve_binding_reason(panel_id: str) -> str:
+        metadata_entry = metadata_map[panel_id]
+        exposure_entry = exposure_map[panel_id]
+
+        if exposure_entry.exposure_level == "hidden_internal":
+            return "hidden_internal_binding"
+        if metadata_entry.panel_family == "foundation_status":
+            return "foundation_monitoring_binding"
+        if metadata_entry.panel_family in ("diagnostics", "read_only_monitoring"):
+            return "diagnostics_monitoring_binding"
+        if metadata_entry.panel_family in ("interaction", "control"):
+            return "operator_surface_binding"
+        if metadata_entry.panel_family == "execution_observability":
+            return "expansion_observability_binding"
+        if metadata_entry.panel_family == "navigation":
+            return "navigation_internal_binding"
+        return "fallback_binding"
+
+    entries = tuple(
+        PanelBindingEntry(
+            panel_id=panel_id,
+            display_target_id=display_target_id,
+            binding_reason=resolve_binding_reason(panel_id),
+            is_default_target=True,
+            eligible_for_main_dashboard=exposure_map[panel_id].visible_in_main_dashboard,
+            eligible_for_oob_dashboard=exposure_map[panel_id].visible_in_oob_dashboard,
+            description=(
+                f"Canonical panel binding entry for {metadata_map[panel_id].display_title} "
+                f"to {display_targets[display_target_id].display_title}."
+            ),
+        )
+        for panel_id in metadata_map
+        for display_target_id in (resolve_display_target_id(panel_id),)
+    )
+
+    return PanelBindingContract(
+        total_entries=len(entries),
+        primary_operator_bindings=sum(
+            1 for entry in entries if entry.display_target_id == "display_primary_operator"
+        ),
+        diagnostics_bindings=sum(
+            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+        ),
+        expansion_bindings=sum(
+            1 for entry in entries if entry.display_target_id == "display_tertiary_expansion"
+        ),
+        default_target_bindings=sum(1 for entry in entries if entry.is_default_target),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
+    PanelMetadataEntry,
+)
+
+
+SourceBindingKind = Literal[
+    "foundation_live_status_adapter",
+    "foundation_status_summary_contract",
+    "foundation_incident_view",
+    "foundation_diagnostics_correlation_view",
+    "gesture_panel_contract",
+    "dashboard_navigation_contract",
+    "dashboard_chat_contract",
+    "dashboard_settings_panel",
+    "execution_panel_contract",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PanelSourceBindingEntry:
+    """Canonical source binding entry for one panel."""
+
+    panel_id: str
+    source_binding: SourceBindingKind
+    source_contract_name: str
+    source_scope: str
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PanelSourceBindingContract:
+    """Canonical source binding contract for normalized panels."""
+
+    total_entries: int
+    read_only_entries: int
+    mutable_entries: int
+    entries: tuple[PanelSourceBindingEntry, ...]
+    metadata_entries: tuple[PanelMetadataEntry, ...]
+
+
+def build_panel_source_binding_contract() -> PanelSourceBindingContract:
+    """Build canonical source binding contract."""
+    metadata_contract = build_panel_metadata_contract()
+    metadata_entries = metadata_contract.entries
+
+    binding_map: dict[str, tuple[SourceBindingKind, str, str, bool, str]] = {
+        "panel_consistency": (
+            "foundation_diagnostics_correlation_view",
+            "foundation_diagnostics_correlation_view",
+            "diagnostics",
+            True,
+            "Consistency panel reads canonical diagnostics correlation output.",
+        ),
+        "panel_snapshot": (
+            "foundation_live_status_adapter",
+            "foundation_live_status_adapter",
+            "foundation",
+            True,
+            "Snapshot panel reads canonical live foundation status adapter output.",
+        ),
+        "panel_incident": (
+            "foundation_incident_view",
+            "foundation_incident_failure_localization_view",
+            "diagnostics",
+            True,
+            "Incident panel reads canonical incident failure localization view.",
+        ),
+        "panel_diagnostics": (
+            "foundation_diagnostics_correlation_view",
+            "foundation_diagnostics_correlation_view",
+            "diagnostics",
+            True,
+            "Diagnostics panel reads canonical diagnostics correlation view.",
+        ),
+        "panel_chat": (
+            "dashboard_chat_contract",
+            "build_dashboard_chat_contract",
+            "interaction",
+            False,
+            "Chat panel reads dashboard chat contract and supports controlled interaction.",
+        ),
+        "panel_settings": (
+            "dashboard_settings_panel",
+            "build_dashboard_settings_panel",
+            "interaction",
+            False,
+            "Settings panel reads canonical dashboard settings contract.",
+        ),
+        "panel_gesture_control": (
+            "gesture_panel_contract",
+            "build_dashboard_gesture_panel",
+            "control",
+            False,
+            "Gesture panel reads canonical gesture panel contract.",
+        ),
+        "panel_queue_load": (
+            "execution_panel_contract",
+            "build_queue_load_panel_contract",
+            "execution_observability",
+            True,
+            "Queue/load panel reads canonical execution panel contract.",
+        ),
+        "panel_node_topology": (
+            "execution_panel_contract",
+            "build_node_topology_panel_contract",
+            "execution_observability",
+            True,
+            "Node topology panel reads canonical node topology contract.",
+        ),
+        "panel_degraded_mode": (
+            "execution_panel_contract",
+            "build_degraded_mode_panel_contract",
+            "execution_observability",
+            True,
+            "Degraded mode panel reads canonical degraded mode contract.",
+        ),
+        "panel_project_map": (
+            "execution_panel_contract",
+            "build_project_map_panel_contract",
+            "execution_observability",
+            True,
+            "Project map panel reads canonical project map contract.",
+        ),
+        "panel_data_flow": (
+            "execution_panel_contract",
+            "build_data_flow_panel_contract",
+            "execution_observability",
+            True,
+            "Data flow panel reads canonical data flow contract.",
+        ),
+        "panel_dependency_map": (
+            "execution_panel_contract",
+            "build_dependency_map_panel_contract",
+            "execution_observability",
+            True,
+            "Dependency map panel reads canonical dependency map contract.",
+        ),
+        "panel_version_control_dashboard": (
+            "execution_panel_contract",
+            "build_version_control_panel_contract",
+            "execution_observability",
+            True,
+            "Version control dashboard reads canonical version control contract.",
+        ),
+        "panel_foundation_runtime_status_001": (
+            "foundation_status_summary_contract",
+            "build_foundation_status_panel_summary_contract",
+            "foundation",
+            True,
+            "Foundation runtime panel reads canonical foundation status summary contract.",
+        ),
+        "panel_foundation_guard_status_001": (
+            "foundation_status_summary_contract",
+            "build_foundation_status_panel_summary_contract",
+            "foundation",
+            True,
+            "Foundation guard panel reads canonical foundation status summary contract.",
+        ),
+        "panel_foundation_core_guard_status_001": (
+            "foundation_status_summary_contract",
+            "build_foundation_status_panel_summary_contract",
+            "foundation",
+            True,
+            "Foundation core guard panel reads canonical foundation status summary contract.",
+        ),
+        "panel_foundation_kernel_guard_status_001": (
+            "foundation_status_summary_contract",
+            "build_foundation_status_panel_summary_contract",
+            "foundation",
+            True,
+            "Foundation kernel guard panel reads canonical foundation status summary contract.",
+        ),
+        "panel_navigation": (
+            "dashboard_navigation_contract",
+            "build_dashboard_navigation_contract",
+            "navigation",
+            True,
+            "Navigation panel reads canonical dashboard navigation contract.",
+        ),
+    }
+
+    entries = tuple(
+        PanelSourceBindingEntry(
+            panel_id=entry.panel_id,
+            source_binding=binding_map[entry.panel_id][0],
+            source_contract_name=binding_map[entry.panel_id][1],
+            source_scope=binding_map[entry.panel_id][2],
+            read_only=binding_map[entry.panel_id][3],
+            description=binding_map[entry.panel_id][4],
+        )
+        for entry in metadata_entries
+    )
+
+    return PanelSourceBindingContract(
+        total_entries=len(entries),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        mutable_entries=sum(1 for entry in entries if not entry.read_only),
+        entries=entries,
+        metadata_entries=metadata_entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
+    PanelMetadataEntry,
+)
+
+
+ExposureLevel = Literal[
+    "oob_only",
+    "main_dashboard_visible",
+    "shared_visible",
+    "hidden_internal",
+]
+
+VisibilityPolicy = Literal[
+    "read_only_public",
+    "restricted_operator",
+    "hidden_internal",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PanelExposureEntry:
+    """Canonical exposure policy entry for one panel."""
+
+    panel_id: str
+    exposure_level: ExposureLevel
+    visibility_policy: VisibilityPolicy
+    visible_in_oob_dashboard: bool
+    visible_in_main_dashboard: bool
+    visible_in_navigation: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PanelExposurePolicyContract:
+    """Canonical exposure/visibility policy contract for panels."""
+
+    total_entries: int
+    oob_only_entries: int
+    main_dashboard_visible_entries: int
+    shared_visible_entries: int
+    hidden_internal_entries: int
+    entries: tuple[PanelExposureEntry, ...]
+    metadata_entries: tuple[PanelMetadataEntry, ...]
+
+
+def build_panel_exposure_policy_contract() -> PanelExposurePolicyContract:
+    """Build canonical panel exposure/visibility policy contract."""
+    metadata_contract = build_panel_metadata_contract()
+    metadata_entries = metadata_contract.entries
+
+    exposure_map: dict[str, tuple[ExposureLevel, VisibilityPolicy, bool, bool, bool, str]] = {
+        "panel_consistency": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Consistency panel is visible in OOB and main dashboard surfaces.",
+        ),
+        "panel_snapshot": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Snapshot panel is visible in OOB and main dashboard surfaces.",
+        ),
+        "panel_incident": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Incident panel is visible in OOB and main dashboard surfaces.",
+        ),
+        "panel_diagnostics": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Diagnostics panel is visible in OOB and main dashboard surfaces.",
+        ),
+        "panel_chat": (
+            "main_dashboard_visible",
+            "restricted_operator",
+            False,
+            True,
+            True,
+            "Chat panel is restricted to main dashboard operator surfaces.",
+        ),
+        "panel_settings": (
+            "main_dashboard_visible",
+            "restricted_operator",
+            False,
+            True,
+            True,
+            "Settings panel is restricted to main dashboard operator surfaces.",
+        ),
+        "panel_gesture_control": (
+            "main_dashboard_visible",
+            "restricted_operator",
+            False,
+            True,
+            True,
+            "Gesture control panel is restricted to main dashboard operator surfaces.",
+        ),
+        "panel_queue_load": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Queue/load panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_node_topology": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Node topology panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_degraded_mode": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Degraded mode panel is visible in OOB and main dashboard surfaces.",
+        ),
+        "panel_project_map": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Project map panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_data_flow": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Data flow panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_dependency_map": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Dependency map panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_version_control_dashboard": (
+            "main_dashboard_visible",
+            "read_only_public",
+            False,
+            True,
+            True,
+            "Version control panel is visible in main dashboard observability surfaces.",
+        ),
+        "panel_foundation_runtime_status_001": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Foundation runtime status panel is visible in both monitoring worlds.",
+        ),
+        "panel_foundation_guard_status_001": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Foundation guard status panel is visible in both monitoring worlds.",
+        ),
+        "panel_foundation_core_guard_status_001": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Foundation core guard status panel is visible in both monitoring worlds.",
+        ),
+        "panel_foundation_kernel_guard_status_001": (
+            "shared_visible",
+            "read_only_public",
+            True,
+            True,
+            True,
+            "Foundation kernel guard status panel is visible in both monitoring worlds.",
+        ),
+        "panel_navigation": (
+            "hidden_internal",
+            "hidden_internal",
+            False,
+            False,
+            False,
+            "Navigation panel remains internal and is not exposed directly.",
+        ),
+    }
+
+    entries = tuple(
+        PanelExposureEntry(
+            panel_id=entry.panel_id,
+            exposure_level=exposure_map[entry.panel_id][0],
+            visibility_policy=exposure_map[entry.panel_id][1],
+            visible_in_oob_dashboard=exposure_map[entry.panel_id][2],
+            visible_in_main_dashboard=exposure_map[entry.panel_id][3],
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_taxonomy_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
+    PanelMetadataEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
+    PanelFamily,
+    PanelKind,
+    PanelRole,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PanelFamilySummary:
+    """Normalized summary for one canonical panel family."""
+
+    panel_family: PanelFamily
+    total_entries: int
+
+
+@dataclass(frozen=True, slots=True)
+class PanelKindSummary:
+    """Normalized summary for one canonical panel kind."""
+
+    panel_kind: PanelKind
+    total_entries: int
+
+
+@dataclass(frozen=True, slots=True)
+class PanelRoleSummary:
+    """Normalized summary for one canonical panel role."""
+
+    panel_role: PanelRole
+    total_entries: int
+
+
+@dataclass(frozen=True, slots=True)
+class PanelTaxonomyContract:
+    """Canonical taxonomy contract for panel family/kind/role."""
+
+    total_entries: int
+    unique_families: int
+    unique_kinds: int
+    unique_roles: int
+    family_summaries: tuple[PanelFamilySummary, ...]
+    kind_summaries: tuple[PanelKindSummary, ...]
+    role_summaries: tuple[PanelRoleSummary, ...]
+    entries: tuple[PanelMetadataEntry, ...]
+
+
+def build_panel_taxonomy_contract() -> PanelTaxonomyContract:
+    """Build canonical taxonomy contract for normalized panels."""
+    metadata_contract = build_panel_metadata_contract()
+    entries = metadata_contract.entries
+
+    family_order: tuple[PanelFamily, ...] = (
+        "foundation_status",
+        "read_only_monitoring",
+        "diagnostics",
+        "interaction",
+        "control",
+        "execution_observability",
+        "navigation",
+    )
+    kind_order: tuple[PanelKind, ...] = (
+        "status",
+        "summary",
+        "incident",
+        "diagnostics",
+        "chat",
+        "settings",
+        "gesture",
+        "queue",
+        "topology",
+        "mode",
+        "map",
+        "flow",
+        "version_control",
+        "navigation",
+    )
+    role_order: tuple[PanelRole, ...] = (
+        "foundation_read_only",
+        "read_only_monitoring",
+        "diagnostics_surface",
+        "interaction_surface",
+        "control_surface",
+        "execution_surface",
+        "navigation_surface",
+    )
+
+    family_summaries = tuple(
+        PanelFamilySummary(
+            panel_family=panel_family,
+            total_entries=sum(
+                1 for entry in entries if entry.panel_family == panel_family
+            ),
+        )
+        for panel_family in family_order
+        if any(entry.panel_family == panel_family for entry in entries)
+    )
+
+    kind_summaries = tuple(
+        PanelKindSummary(
+            panel_kind=panel_kind,
+            total_entries=sum(1 for entry in entries if entry.panel_kind == panel_kind),
+        )
+        for panel_kind in kind_order
+        if any(entry.panel_kind == panel_kind for entry in entries)
+    )
+
+    role_summaries = tuple(
+        PanelRoleSummary(
+            panel_role=panel_role,
+            total_entries=sum(1 for entry in entries if entry.panel_role == panel_role),
+        )
+        for panel_role in role_order
+        if any(entry.panel_role == panel_role for entry in entries)
+    )
+
+    return PanelTaxonomyContract(
+        total_entries=len(entries),
+        unique_families=len(family_summaries),
+        unique_kinds=len(kind_summaries),
+        unique_roles=len(role_summaries),
+        family_summaries=family_summaries,
+        kind_summaries=kind_summaries,
+        role_summaries=role_summaries,
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_theme_contract import (
+    build_visual_theme_contract,
+)
+
+
+VisualCardType = Literal[
+    "status_core_card",
+    "diagnostics_card",
+    "topology_card",
+    "navigation_card",
+    "operator_card",
+    "admin_card",
+]
+
+VisualDensityMode = Literal[
+    "compact",
+    "expanded",
+    "focus",
+]
+
+InteractionClass = Literal[
+    "read_only",
+    "proposal_only",
+    "interactive_controlled",
+]
+
+VisualPriority = Literal[
+    "primary",
+    "secondary",
+    "supporting",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PanelToVisualMappingEntry:
+    """Canonical mapping from panel contract to visual renderer surface."""
+
+    panel_id: str
+    display_title: str
+    visual_card_type: VisualCardType
+    preferred_zone: str
+    visual_priority: VisualPriority
+    density_mode: VisualDensityMode
+    icon_slot: str
+    title_slot: str
+    signal_overlay_participation: bool
+    topology_overlay_participation: bool
+    explainability_binding: bool
+    interaction_class: InteractionClass
+    theme_id: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PanelToVisualMappingContract:
+    """Canonical mapping contract from panels to visual renderer presentation."""
+
+    contract_id: str
+    total_entries: int
+    signal_overlay_entries: int
+    topology_overlay_entries: int
+    explainability_entries: int
+    read_only_entries: int
+    proposal_only_entries: int
+    interactive_controlled_entries: int
+    entries: tuple[PanelToVisualMappingEntry, ...]
+
+
+def _visual_card_type_for_panel(
+    panel_id: str,
+    panel_state_class: str,
+) -> VisualCardType:
+    """Resolve visual card type from canonical panel identity and state class."""
+    if panel_id == "panel_navigation":
+        return "navigation_card"
+    if panel_state_class == "foundation":
+        return "status_core_card"
+    if panel_state_class == "diagnostics":
+        return "diagnostics_card"
+    if panel_state_class == "topology":
+        return "topology_card"
+    if panel_state_class == "operator":
+        return "operator_card"
+    if panel_state_class == "admin":
+        return "admin_card"
+    return "navigation_card"
+
+
+def _priority_for_panel(
+    panel_id: str,
+    panel_state_class: str,
+) -> VisualPriority:
+    """Resolve visual priority from canonical panel identity and state class."""
+    if panel_id == "panel_navigation":
+        return "supporting"
+    if panel_state_class in {"foundation", "operator"}:
+        return "primary"
+    if panel_state_class in {"diagnostics", "topology"}:
+        return "secondary"
+    return "supporting"
+
+
+def _density_for_panel(
+    panel_id: str,
+    panel_state_class: str,
+) -> VisualDensityMode:
+    """Resolve default visual density from canonical panel identity and state class."""
+    if panel_id == "panel_navigation":
+        return "compact"
+    if panel_state_class == "foundation":
+        return "focus"
+    if panel_state_class in {"diagnostics", "operator"}:
+        return "expanded"
+    return "compact"
+
+
+def _interaction_class_for_read_mode(read_mode: str) -> InteractionClass:
+    """Resolve interaction class from canonical read mode."""
+    if read_mode == "read_only":
+        return "read_only"
+    if read_mode == "interactive_controlled":
+        return "interactive_controlled"
+    return "proposal_only"
+
+
+def _icon_slot_for_panel(panel_id: str, panel_state_class: str) -> str:
+    """Resolve icon slot for a panel."""
+    if panel_id.startswith("panel_foundation_"):
+        return "core_status_icon"
+    if panel_state_class == "diagnostics":
+        return "diagnostics_icon"
+    if panel_state_class == "topology":
+        return "topology_icon"
+    if panel_state_class == "operator":
+        return "operator_icon"
+    if panel_state_class == "admin":
+        return "admin_icon"
+    return "navigation_icon"
+
+
+def _zone_for_panel(panel_id: str, panel_state_class: str) -> str:
+    """Resolve preferred visual zone for a panel."""
+    if panel_id == "panel_navigation":
+        return "left_navigation"
+    if panel_state_class == "foundation":
+        return "center_core"
+    if panel_state_class == "operator":
+        return "right_operator"
+    if panel_state_class == "diagnostics":
+        return "right_explainable"
+    if panel_state_class == "topology":
+        return "center_ring"
+    return "bottom_status"
+
+
+def build_panel_to_visual_mapping_contract() -> PanelToVisualMappingContract:
+    """Build canonical panel to visual mapping contract."""
+    panel_metadata_contract = build_panel_metadata_contract()
+    panel_chain_contract = build_panel_view_display_chain_contract()
+    visual_theme_contract = build_visual_theme_contract()
+
+    theme_id = visual_theme_contract.entries[0].theme_id
+    chain_panel_ids = {entry.panel_id for entry in panel_chain_contract.entries}
+
+    entries = tuple(
+        PanelToVisualMappingEntry(
+            panel_id=metadata_entry.panel_id,
+            display_title=metadata_entry.display_title,
+            visual_card_type=_visual_card_type_for_panel(
+                metadata_entry.panel_id,
+                metadata_entry.panel_state_class,
+            ),
+            preferred_zone=_zone_for_panel(
+                metadata_entry.panel_id,
+                metadata_entry.panel_state_class,
+            ),
+            visual_priority=_priority_for_panel(
+                metadata_entry.panel_id,
+                metadata_entry.panel_state_class,
+            ),
+            density_mode=_density_for_panel(
+                metadata_entry.panel_id,
+                metadata_entry.panel_state_class,
+            ),
+            icon_slot=_icon_slot_for_panel(
+                metadata_entry.panel_id,
+                metadata_entry.panel_state_class,
+            ),
+            title_slot="panel_title_primary",
+            signal_overlay_participation=metadata_entry.panel_id in chain_panel_ids,
+            topology_overlay_participation=(
+                metadata_entry.panel_state_class in {"foundation", "topology"}
+            ),
+            explainability_binding=(
+                metadata_entry.panel_state_class
+                in {"foundation", "diagnostics", "operator"}
+            ),
+            interaction_class=_interaction_class_for_read_mode(
+                metadata_entry.read_mode
+            ),
+            theme_id=theme_id,
+            description=(
+                f"Canonical visual mapping entry for {metadata_entry.panel_id}."
+            ),
+        )
+        for metadata_entry in panel_metadata_contract.entries
+    )
+
+    return PanelToVisualMappingContract(
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+    build_panel_binding_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+    build_view_targeting_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PanelViewDisplayChainEntry:
+    """Canonical chain entry connecting panel, view, and display target."""
+
+    panel_id: str
+    view_id: str
+    display_target_id: str
+    display_role: str
+    display_zone: str
+    is_default_chain: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class PanelViewDisplayChainContract:
+    """Canonical panel → view → display chain contract."""
+
+    total_entries: int
+    primary_operator_chains: int
+    diagnostics_chains: int
+    expansion_chains: int
+    default_chains: int
+    entries: tuple[PanelViewDisplayChainEntry, ...]
+
+
+def build_panel_view_display_chain_contract() -> PanelViewDisplayChainContract:
+    """Build canonical panel → view → display chain contract."""
+    panel_binding_contract = build_panel_binding_contract()
+    view_targeting_contract = build_view_targeting_contract()
+    display_contract = build_display_target_vocabulary_contract()
+
+    panel_binding_map = {entry.panel_id: entry for entry in panel_binding_contract.entries}
+    view_targeting_map = {entry.panel_id: entry for entry in view_targeting_contract.entries}
+    display_map = {entry.display_target_id: entry for entry in display_contract.entries}
+
+    entries = tuple(
+        PanelViewDisplayChainEntry(
+            panel_id=panel_id,
+            view_id=view_targeting_map[panel_id].view_id,
+            display_target_id=panel_binding_map[panel_id].display_target_id,
+            display_role=display_map[panel_binding_map[panel_id].display_target_id].display_role,
+            display_zone=display_map[panel_binding_map[panel_id].display_target_id].display_zone,
+            is_default_chain=panel_binding_map[panel_id].is_default_target,
+            description=(
+                f"Canonical panel → view → display chain for {panel_id}."
+            ),
+        )
+        for panel_id in panel_binding_map
+    )
+
+    return PanelViewDisplayChainContract(
+        total_entries=len(entries),
+        primary_operator_chains=sum(
+            1 for entry in entries if entry.display_target_id == "display_primary_operator"
+        ),
+        diagnostics_chains=sum(
+            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+        ),
+        expansion_chains=sum(
+            1 for entry in entries if entry.display_target_id == "display_tertiary_expansion"
+        ),
+        default_chains=sum(1 for entry in entries if entry.is_default_chain),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+    build_panel_binding_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+
+
+ViewId = Literal[
+    "view_foundation_runtime",
+    "view_foundation_guard",
+    "view_foundation_core_guard",
+    "view_foundation_kernel_guard",
+    "view_consistency",
+    "view_snapshot",
+    "view_incident",
+    "view_diagnostics",
+    "view_chat",
+    "view_settings",
+    "view_gesture_control",
+    "view_queue_load",
+    "view_node_topology",
+    "view_degraded_mode",
+    "view_project_map",
+    "view_data_flow",
+    "view_dependency_map",
+    "view_version_control",
+    "view_navigation",
+]
+
+ViewTargetKind = Literal[
+    "foundation_view",
+    "diagnostics_view",
+    "interaction_view",
+    "execution_view",
+    "navigation_view",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class ViewTargetingEntry:
+    """Canonical view-targeting entry for one panel."""
+
+    panel_id: str
+    view_id: ViewId
+    view_target_kind: ViewTargetKind
+    view_scope: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class ViewTargetingContract:
+    """Canonical view-targeting contract."""
+
+    total_entries: int
+    foundation_views: int
+    diagnostics_views: int
+    interaction_views: int
+    execution_views: int
+    navigation_views: int
+    entries: tuple[ViewTargetingEntry, ...]
+
+
+def build_view_targeting_contract() -> ViewTargetingContract:
+    """Build canonical view-targeting contract."""
+    panel_binding_contract = build_panel_binding_contract()
+    metadata_contract = build_panel_metadata_contract()
+
+    metadata_map = {entry.panel_id: entry for entry in metadata_contract.entries}
+
+    view_id_map: dict[str, ViewId] = {
+        "panel_foundation_runtime_status_001": "view_foundation_runtime",
+        "panel_foundation_guard_status_001": "view_foundation_guard",
+        "panel_foundation_core_guard_status_001": "view_foundation_core_guard",
+        "panel_foundation_kernel_guard_status_001": "view_foundation_kernel_guard",
+        "panel_consistency": "view_consistency",
+        "panel_snapshot": "view_snapshot",
+        "panel_incident": "view_incident",
+        "panel_diagnostics": "view_diagnostics",
+        "panel_chat": "view_chat",
+        "panel_settings": "view_settings",
+        "panel_gesture_control": "view_gesture_control",
+        "panel_queue_load": "view_queue_load",
+        "panel_node_topology": "view_node_topology",
+        "panel_degraded_mode": "view_degraded_mode",
+        "panel_project_map": "view_project_map",
+        "panel_data_flow": "view_data_flow",
+        "panel_dependency_map": "view_dependency_map",
+        "panel_version_control_dashboard": "view_version_control",
+        "panel_navigation": "view_navigation",
+    }
+
+    def resolve_view_target_kind(panel_id: str) -> ViewTargetKind:
+        panel_family = metadata_map[panel_id].panel_family
+
+        if panel_family == "foundation_status":
+            return "foundation_view"
+        if panel_family in ("diagnostics", "read_only_monitoring"):
+            return "diagnostics_view"
+        if panel_family in ("interaction", "control"):
+            return "interaction_view"
+        if panel_family == "execution_observability":
+            return "execution_view"
+        return "navigation_view"
+
+    def resolve_view_scope(panel_id: str) -> str:
+        return metadata_map[panel_id].source_domain
+
+    entries = tuple(
+        ViewTargetingEntry(
+            panel_id=entry.panel_id,
+            view_id=view_id_map[entry.panel_id],
+            view_target_kind=resolve_view_target_kind(entry.panel_id),
+            view_scope=resolve_view_scope(entry.panel_id),
+            description=(
+                f"Canonical view-targeting entry for {metadata_map[entry.panel_id].display_title}."
+            ),
+        )
+        for entry in panel_binding_contract.entries
+    )
+
+    return ViewTargetingContract(
+        total_entries=len(entries),
+        foundation_views=sum(
+            1 for entry in entries if entry.view_target_kind == "foundation_view"
+        ),
+        diagnostics_views=sum(
+            1 for entry in entries if entry.view_target_kind == "diagnostics_view"
+        ),
+        interaction_views=sum(
+            1 for entry in entries if entry.view_target_kind == "interaction_view"
+        ),
+        execution_views=sum(
+            1 for entry in entries if entry.view_target_kind == "execution_view"
+        ),
+        navigation_views=sum(
+            1 for entry in entries if entry.view_target_kind == "navigation_view"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/view_composition_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_contract import (
+    build_dashboard_panel_orchestration_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
+    build_dashboard_panel_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_composition_models import (
+    ComposedViewPanel,
+    DashboardViewCompositionContract,
+)
+
+
+def build_dashboard_view_composition_contract() -> DashboardViewCompositionContract:
+    """Build unified dashboard view composition contract."""
+    orchestration = build_dashboard_panel_orchestration_contract()
+    registry = build_dashboard_panel_registry_contract()
+
+    visible_panel_ids = {
+        panel.panel_id
+        for panel in registry.panels
+        if panel.visible_in_sidebar
+    }
+
+    composed_panels = tuple(
+        ComposedViewPanel(
+            panel_id=panel.panel_id,
+            display_id=panel.display_id,
+            zone=panel.zone,
+            visible=panel.panel_id in visible_panel_ids,
+            active=panel.active,
+        )
+        for panel in orchestration.panels
+    )
+
+    return DashboardViewCompositionContract(
+        total_panels=len(composed_panels),
+        composed_panels=composed_panels,
+        active_panel_id=orchestration.active_panel_id,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+
+
+WorkspaceId = Literal[
+    "workspace_foundation_monitoring",
+    "workspace_operator_main",
+    "workspace_expansion_observability",
+]
+
+WorkspaceRole = Literal[
+    "foundation_monitoring",
+    "operator_surface",
+    "expansion_surface",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceRegistryEntry:
+    """Canonical workspace registry entry."""
+
+    workspace_id: WorkspaceId
+    workspace_role: WorkspaceRole
+    display_target_id: str
+    default_panel_count: int
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceRegistryContract:
+    """Canonical workspace registry contract."""
+
+    total_entries: int
+    read_only_entries: int
+    operator_surface_entries: int
+    entries: tuple[WorkspaceRegistryEntry, ...]
+
+
+def build_workspace_registry_contract() -> WorkspaceRegistryContract:
+    """Build canonical workspace registry contract."""
+    display_contract = build_display_target_vocabulary_contract()
+    chain_contract = build_panel_view_display_chain_contract()
+
+    display_ids = {entry.display_target_id for entry in display_contract.entries}
+
+    workspace_specs: tuple[tuple[WorkspaceId, WorkspaceRole, str, bool, str], ...] = (
+        (
+            "workspace_foundation_monitoring",
+            "foundation_monitoring",
+            "display_secondary_diagnostics",
+            True,
+            "Canonical workspace for foundation and diagnostics monitoring surfaces.",
+        ),
+        (
+            "workspace_operator_main",
+            "operator_surface",
+            "display_primary_operator",
+            False,
+            "Canonical workspace for main operator interaction surfaces.",
+        ),
+        (
+            "workspace_expansion_observability",
+            "expansion_surface",
+            "display_tertiary_expansion",
+            True,
+            "Canonical workspace for expansion and observability surfaces.",
+        ),
+    )
+
+    entries = tuple(
+        WorkspaceRegistryEntry(
+            workspace_id=workspace_id,
+            workspace_role=workspace_role,
+            display_target_id=display_target_id,
+            default_panel_count=sum(
+                1
+                for chain_entry in chain_contract.entries
+                if chain_entry.display_target_id == display_target_id
+            ),
+            read_only=read_only,
+            description=description,
+        )
+        for workspace_id, workspace_role, display_target_id, read_only, description in workspace_specs
+        if display_target_id in display_ids
+    )
+
+    return WorkspaceRegistryContract(
+        total_entries=len(entries),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        operator_surface_entries=sum(
+            1 for entry in entries if entry.workspace_role == "operator_surface"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
+    build_layout_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceReadModelEntry:
+    """Canonical read-only workspace entry."""
+
+    workspace_id: str
+    workspace_role: str
+    display_target_id: str
+    total_panels: int
+    main_focus_panels: int
+    diagnostics_panels: int
+    sidebar_panels: int
+    secondary_panels: int
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceReadModelContract:
+    """Canonical workspace read model contract."""
+
+    total_entries: int
+    read_only_entries: int
+    operator_surface_entries: int
+    entries: tuple[WorkspaceReadModelEntry, ...]
+
+
+def build_workspace_read_model_contract() -> WorkspaceReadModelContract:
+    """Build canonical workspace read model contract."""
+    workspace_contract = build_workspace_registry_contract()
+    layout_contract = build_layout_composition_contract()
+    chain_contract = build_panel_view_display_chain_contract()
+
+    chain_panel_ids = {entry.panel_id for entry in chain_contract.entries}
+
+    entries = tuple(
+        WorkspaceReadModelEntry(
+            workspace_id=workspace_entry.workspace_id,
+            workspace_role=workspace_entry.workspace_role,
+            display_target_id=workspace_entry.display_target_id,
+            total_panels=sum(
+                1
+                for layout_entry in layout_contract.entries
+                if layout_entry.workspace_id == workspace_entry.workspace_id
+                and layout_entry.panel_id in chain_panel_ids
+            ),
+            main_focus_panels=sum(
+                1
+                for layout_entry in layout_contract.entries
+                if layout_entry.workspace_id == workspace_entry.workspace_id
+                and layout_entry.layout_zone == "main_focus"
+            ),
+            diagnostics_panels=sum(
+                1
+                for layout_entry in layout_contract.entries
+                if layout_entry.workspace_id == workspace_entry.workspace_id
+                and layout_entry.layout_zone == "diagnostics_strip"
+            ),
+            sidebar_panels=sum(
+                1
+                for layout_entry in layout_contract.entries
+                if layout_entry.workspace_id == workspace_entry.workspace_id
+                and layout_entry.layout_zone == "left_sidebar"
+            ),
+            secondary_panels=sum(
+                1
+                for layout_entry in layout_contract.entries
+                if layout_entry.workspace_id == workspace_entry.workspace_id
+                and layout_entry.layout_zone == "secondary_zone"
+            ),
+            read_only=workspace_entry.read_only,
+            description=(
+                f"Canonical workspace read model entry for {workspace_entry.workspace_id}."
+            ),
+        )
+        for workspace_entry in workspace_contract.entries
+    )
+
+    return WorkspaceReadModelContract(
+        total_entries=len(entries),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        operator_surface_entries=sum(
+            1 for entry in entries if entry.workspace_role == "operator_surface"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+
+
+LayoutZone = Literal[
+    "left_sidebar",
+    "main_focus",
+    "diagnostics_strip",
+    "secondary_zone",
+]
+
+LayoutSlot = Literal[
+    "slot_left_1",
+    "slot_left_2",
+    "slot_main_1",
+    "slot_main_2",
+    "slot_diag_1",
+    "slot_diag_2",
+    "slot_secondary_1",
+    "slot_secondary_2",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class LayoutCompositionEntry:
+    """Canonical layout composition entry for one panel inside a workspace."""
+
+    workspace_id: str
+    panel_id: str
+    layout_zone: LayoutZone
+    layout_slot: LayoutSlot
+    display_target_id: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class LayoutCompositionContract:
+    """Canonical layout composition contract."""
+
+    total_entries: int
+    foundation_monitoring_entries: int
+    operator_surface_entries: int
+    expansion_surface_entries: int
+    entries: tuple[LayoutCompositionEntry, ...]
+
+
+def build_layout_composition_contract() -> LayoutCompositionContract:
+    """Build canonical layout composition contract."""
+    workspace_contract = build_workspace_registry_contract()
+    chain_contract = build_panel_view_display_chain_contract()
+
+    workspace_map = {
+        "display_secondary_diagnostics": "workspace_foundation_monitoring",
+        "display_primary_operator": "workspace_operator_main",
+        "display_tertiary_expansion": "workspace_expansion_observability",
+    }
+
+    valid_workspace_ids = {entry.workspace_id for entry in workspace_contract.entries}
+
+    def resolve_layout_zone(panel_id: str, display_target_id: str) -> LayoutZone:
+        if display_target_id == "display_primary_operator":
+            if panel_id in ("panel_chat", "panel_settings"):
+                return "main_focus"
+            return "secondary_zone"
+        if display_target_id == "display_secondary_diagnostics":
+            if panel_id.startswith("panel_foundation_"):
+                return "main_focus"
+            if panel_id in ("panel_incident", "panel_diagnostics"):
+                return "diagnostics_strip"
+            return "left_sidebar"
+        if panel_id == "panel_navigation":
+            return "secondary_zone"
+        return "secondary_zone"
+
+    def resolve_layout_slot(panel_id: str, display_target_id: str) -> LayoutSlot:
+        if display_target_id == "display_primary_operator":
+            if panel_id == "panel_chat":
+                return "slot_main_1"
+            if panel_id == "panel_settings":
+                return "slot_main_2"
+            return "slot_secondary_1"
+        if display_target_id == "display_secondary_diagnostics":
+            if panel_id == "panel_foundation_runtime_status_001":
+                return "slot_main_1"
+            if panel_id in (
+                "panel_foundation_guard_status_001",
+                "panel_foundation_core_guard_status_001",
+            ):
+                return "slot_main_2"
+            if panel_id in ("panel_incident", "panel_diagnostics"):
+                return "slot_diag_1"
+            return "slot_left_1"
+        if panel_id == "panel_navigation":
+            return "slot_secondary_2"
+        return "slot_secondary_1"
+
+    entries = tuple(
+        LayoutCompositionEntry(
+            workspace_id=workspace_id,
+            panel_id=entry.panel_id,
+            layout_zone=resolve_layout_zone(entry.panel_id, entry.display_target_id),
+            layout_slot=resolve_layout_slot(entry.panel_id, entry.display_target_id),
+            display_target_id=entry.display_target_id,
+            description=(
+                f"Canonical layout composition entry for {entry.panel_id} in {workspace_id}."
+            ),
+        )
+        for entry in chain_contract.entries
+        for workspace_id in (workspace_map[entry.display_target_id],)
+        if workspace_id in valid_workspace_ids
+    )
+
+    return LayoutCompositionContract(
+        total_entries=len(entries),
+        foundation_monitoring_entries=sum(
+            1
+            for entry in entries
+            if entry.workspace_id == "workspace_foundation_monitoring"
+        ),
+        operator_surface_entries=sum(
+            1 for entry in entries if entry.workspace_id == "workspace_operator_main"
+        ),
+        expansion_surface_entries=sum(
+            1
+            for entry in entries
+            if entry.workspace_id == "workspace_expansion_observability"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+
+DisplayTargetId = Literal[
+    "display_primary_operator",
+    "display_secondary_diagnostics",
+    "display_tertiary_expansion",
+]
+
+DisplayRole = Literal[
+    "primary_operator",
+    "diagnostics",
+    "expansion",
+]
+
+DisplayZone = Literal[
+    "left",
+    "center",
+    "right",
+    "overlay",
+]
+
+DisplayTargetType = Literal[
+    "physical_monitor",
+    "logical_surface",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTargetVocabularyEntry:
+    """Canonical display target vocabulary entry."""
+
+    display_target_id: DisplayTargetId
+    display_role: DisplayRole
+    display_zone: DisplayZone
+    display_target_type: DisplayTargetType
+    display_title: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTargetVocabularyContract:
+    """Canonical display target vocabulary / role contract."""
+
+    total_entries: int
+    physical_monitor_entries: int
+    logical_surface_entries: int
+    entries: tuple[DisplayTargetVocabularyEntry, ...]
+
+
+def build_display_target_vocabulary_contract() -> DisplayTargetVocabularyContract:
+    """Build canonical display target vocabulary / role contract."""
+    entries = (
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_primary_operator",
+            display_role="primary_operator",
+            display_zone="center",
+            display_target_type="physical_monitor",
+            display_title="Primary Operator Display",
+            description="Canonical primary operator display target.",
+        ),
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_secondary_diagnostics",
+            display_role="diagnostics",
+            display_zone="right",
+            display_target_type="physical_monitor",
+            display_title="Secondary Diagnostics Display",
+            description="Canonical diagnostics display target.",
+        ),
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_tertiary_expansion",
+            display_role="expansion",
+            display_zone="left",
+            display_target_type="logical_surface",
+            display_title="Tertiary Expansion Display",
+            description="Canonical expandable logical display target.",
+        ),
+    )
+
+    return DisplayTargetVocabularyContract(
+        total_entries=len(entries),
+        physical_monitor_entries=sum(
+            1 for entry in entries if entry.display_target_type == "physical_monitor"
+        ),
+        logical_surface_entries=sum(
+            1 for entry in entries if entry.display_target_type == "logical_surface"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+
+
+ResolverState = Literal[
+    "resolved",
+    "hidden_internal",
+]
+
+DisplayAvailability = Literal[
+    "available",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayRuntimeResolverEntry:
+    """Canonical display runtime / resolver integration entry."""
+
+    panel_id: str
+    view_id: str
+    display_target_id: str
+    resolver_state: ResolverState
+    display_availability: DisplayAvailability
+    participates_in_runtime_resolution: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayRuntimeResolverIntegrationContract:
+    """Canonical display runtime / resolver integration contract."""
+
+    total_entries: int
+    resolved_entries: int
+    hidden_internal_entries: int
+    runtime_resolved_entries: int
+    entries: tuple[DisplayRuntimeResolverEntry, ...]
+
+
+def build_display_runtime_resolver_integration_contract() -> (
+    DisplayRuntimeResolverIntegrationContract
+):
+    """Build canonical display runtime / resolver integration contract."""
+    chain_contract = build_panel_view_display_chain_contract()
+    display_contract = build_display_target_vocabulary_contract()
+
+    valid_display_target_ids = {
+        entry.display_target_id for entry in display_contract.entries
+    }
+
+    def resolve_resolver_state(panel_id: str) -> ResolverState:
+        if panel_id == "panel_navigation":
+            return "hidden_internal"
+        return "resolved"
+
+    entries = tuple(
+        DisplayRuntimeResolverEntry(
+            panel_id=entry.panel_id,
+            view_id=entry.view_id,
+            display_target_id=entry.display_target_id,
+            resolver_state=resolve_resolver_state(entry.panel_id),
+            display_availability="available",
+            participates_in_runtime_resolution=(
+                entry.display_target_id in valid_display_target_ids
+                and resolve_resolver_state(entry.panel_id) == "resolved"
+            ),
+            description=(
+                f"Canonical display runtime/resolver integration entry for {entry.panel_id}."
+            ),
+        )
+        for entry in chain_contract.entries
+    )
+
+    return DisplayRuntimeResolverIntegrationContract(
+        total_entries=len(entries),
+        resolved_entries=sum(
+            1 for entry in entries if entry.resolver_state == "resolved"
+        ),
+        hidden_internal_entries=sum(
+            1 for entry in entries if entry.resolver_state == "hidden_internal"
+        ),
+        runtime_resolved_entries=sum(
+            1 for entry in entries if entry.participates_in_runtime_resolution
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
+    build_main_operator_dashboard_read_model_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_shell_canonical_panel_contract import (
+    build_visual_shell_canonical_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class VisualShellEntry:
+    """Canonical visual-shell entry."""
+
+    shell_id: str
+    dashboard_id: str
+    workspace_id: str
+    display_target_id: str
+    total_panels: int
+    canonical_panel_entries: int
+    renderer_ready: bool
+    read_only: bool
+    interactive: bool
+    visual_mode: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class VisualShellContract:
+    """Canonical visual-shell contract."""
+
+    contract_id: str
+    total_entries: int
+    renderer_ready_entries: int
+    read_only_entries: int
+    interactive_entries: int
+    total_canonical_panel_entries: int
+    entries: tuple[VisualShellEntry, ...]
+
+
+def build_visual_shell_contract() -> VisualShellContract:
+    """Build canonical visual-shell contract."""
+    main_operator_dashboard = build_main_operator_dashboard_contract()
+    main_operator_read_model = build_main_operator_dashboard_read_model_contract()
+    visual_shell_panel_contract = build_visual_shell_canonical_panel_contract()
+    workspace_registry = build_workspace_registry_contract()
+
+    workspace_registry_map = {
+        entry.workspace_id: entry for entry in workspace_registry.entries
+    }
+    read_model_map = {
+        entry.workspace_id: entry for entry in main_operator_read_model.entries
+    }
+
+    entries = tuple(
+        VisualShellEntry(
+            shell_id="visual_shell_001",
+            dashboard_id=dashboard_entry.dashboard_id,
+            workspace_id=dashboard_entry.workspace_id,
+            display_target_id=dashboard_entry.display_target_id,
+            total_panels=read_model_map[dashboard_entry.workspace_id].total_panels,
+            canonical_panel_entries=visual_shell_panel_contract.total_entries,
+            renderer_ready=(
+                visual_shell_panel_contract.legacy_alias_entries == 0
+                and visual_shell_panel_contract.total_entries > 0
+            ),
+            read_only=workspace_registry_map[dashboard_entry.workspace_id].read_only,
+            interactive=not workspace_registry_map[dashboard_entry.workspace_id].read_only,
+            visual_mode="operator_hud",
+            description=(
+                f"Canonical visual shell entry for "
+                f"{dashboard_entry.workspace_id} on "
+                f"{dashboard_entry.display_target_id}."
+            ),
+        )
+        for dashboard_entry in main_operator_dashboard.entries
+        if dashboard_entry.workspace_id in read_model_map
+        and dashboard_entry.workspace_id in workspace_registry_map
+    )
+
+    return VisualShellContract(
+        contract_id="visual_shell_contract_001",
+        total_entries=len(entries),
+        renderer_ready_entries=sum(1 for entry in entries if entry.renderer_ready),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        interactive_entries=sum(1 for entry in entries if entry.interactive),
+        total_canonical_panel_entries=visual_shell_panel_contract.total_entries,
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/visual_renderer_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_render_surface_contract import (
+    build_visual_render_surface_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class VisualRendererEntry:
+    """Canonical visual renderer entry."""
+
+    renderer_id: str
+    render_surface_id: str
+    shell_id: str
+    dashboard_id: str
+    workspace_id: str
+    display_target_id: str
+    primary_visual_mode: str
+    supported_visual_modes: tuple[str, ...]
+    canonical_panel_only: bool
+    signal_flow_overlay_enabled: bool
+    topology_overlay_enabled: bool
+    stalled_path_visibility_enabled: bool
+    degraded_visual_fallback: str
+    read_only_render_paths: bool
+    interactive_render_paths: bool
+    renderer_ready: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class VisualRendererContract:
+    """Canonical visual renderer contract."""
+
+    contract_id: str
+    total_entries: int
+    renderer_ready_entries: int
+    canonical_panel_only_entries: int
+    signal_flow_overlay_entries: int
+    topology_overlay_entries: int
+    stalled_path_visibility_entries: int
+    interactive_render_entries: int
+    read_only_render_entries: int
+    entries: tuple[VisualRendererEntry, ...]
+
+
+def build_visual_renderer_contract() -> VisualRendererContract:
+    """Build canonical visual renderer contract."""
+    render_surface_contract = build_visual_render_surface_contract()
+
+    entries = tuple(
+        VisualRendererEntry(
+            renderer_id="visual_renderer_001",
+            render_surface_id=surface_entry.render_surface_id,
+            shell_id=surface_entry.shell_id,
+            dashboard_id=surface_entry.dashboard_id,
+            workspace_id=surface_entry.workspace_id,
+            display_target_id=surface_entry.display_target_id,
+            primary_visual_mode=surface_entry.hud_mode,
+            supported_visual_modes=(
+                "operator_hud",
+                "diagnostics_overlay",
+                "topology_overlay",
+                "degraded_fallback",
+            ),
+            canonical_panel_only=True,
+            signal_flow_overlay_enabled=True,
+            topology_overlay_enabled=True,
+            stalled_path_visibility_enabled=True,
+            degraded_visual_fallback="safe_minimal_overlay",
+            read_only_render_paths=surface_entry.read_only_render_surface,
+            interactive_render_paths=surface_entry.interactive_render_surface,
+            renderer_ready=(
+                surface_entry.renderer_ready
+                and surface_entry.canonical_render_panels > 0
+                and surface_entry.total_render_panels > 0
+            ),
+            description=(
+                f"Canonical visual renderer entry for "
+                f"{surface_entry.render_surface_id} on "
+                f"{surface_entry.display_target_id}."
+            ),
+        )
+        for surface_entry in render_surface_contract.entries
+    )
+
+    return VisualRendererContract(
+        contract_id="visual_renderer_contract_001",
+        total_entries=len(entries),
+        renderer_ready_entries=sum(1 for entry in entries if entry.renderer_ready),
+        canonical_panel_only_entries=sum(
+            1 for entry in entries if entry.canonical_panel_only
+        ),
+        signal_flow_overlay_entries=sum(
+            1 for entry in entries if entry.signal_flow_overlay_enabled
+        ),
+        topology_overlay_entries=sum(
+            1 for entry in entries if entry.topology_overlay_enabled
+        ),
+        stalled_path_visibility_entries=sum(
+            1 for entry in entries if entry.stalled_path_visibility_enabled
+        ),
+        interactive_render_entries=sum(
+            1 for entry in entries if entry.interactive_render_paths
+        ),
+        read_only_render_entries=sum(
+            1 for entry in entries if entry.read_only_render_paths
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_runtime_resolver_integration_contract import (
+    build_display_runtime_resolver_integration_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
+    build_layout_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
+    build_main_operator_dashboard_read_model_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+    build_panel_binding_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
+    normalize_panel_id,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+    build_view_targeting_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class VisualShellCanonicalPanelEntry:
+    """Canonical visual-shell panel entry."""
+
+    panel_id: str
+    present_in_main_operator_dashboard: bool
+    present_in_main_operator_read_model: bool
+    present_in_panel_binding: bool
+    present_in_view_targeting: bool
+    present_in_panel_view_display_chain: bool
+    present_in_display_runtime_resolver: bool
+    canonical_panel_id_only: bool
+    visual_shell_allowed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class VisualShellCanonicalPanelContract:
+    """Canonical panel contract for the visual shell boundary."""
+
+    contract_id: str
+    total_entries: int
+    canonical_only_entries: int
+    visual_shell_allowed_entries: int
+    legacy_alias_entries: int
+    entries: tuple[VisualShellCanonicalPanelEntry, ...]
+
+
+def _collect_main_operator_panel_ids() -> tuple[set[str], set[str]]:
+    """Collect canonical panel ids reachable from main operator dashboard layers."""
+    layout_contract = build_layout_composition_contract()
+    main_operator_dashboard = build_main_operator_dashboard_contract()
+    main_operator_read_model = build_main_operator_dashboard_read_model_contract()
+
+    dashboard_workspace_ids = {
+        entry.workspace_id for entry in main_operator_dashboard.entries
+    }
+    read_model_workspace_ids = {
+        entry.workspace_id for entry in main_operator_read_model.entries
+    }
+
+    dashboard_panel_ids = {
+        entry.panel_id
+        for entry in layout_contract.entries
+        if entry.workspace_id in dashboard_workspace_ids
+    }
+    read_model_panel_ids = {
+        entry.panel_id
+        for entry in layout_contract.entries
+        if entry.workspace_id in read_model_workspace_ids
+    }
+
+    return dashboard_panel_ids, read_model_panel_ids
+
+
+def _collect_panel_ids() -> dict[str, set[str]]:
+    """Collect panel ids from all visual-shell upstream contracts."""
+    (
+        main_operator_dashboard_panel_ids,
+        main_operator_read_model_panel_ids,
+    ) = _collect_main_operator_panel_ids()
+    panel_binding = build_panel_binding_contract()
+    view_targeting = build_view_targeting_contract()
+    panel_view_display_chain = build_panel_view_display_chain_contract()
+    display_runtime_resolver = build_display_runtime_resolver_integration_contract()
+
+    return {
+        "main_operator_dashboard": main_operator_dashboard_panel_ids,
+        "main_operator_read_model": main_operator_read_model_panel_ids,
+        "panel_binding": {
+            entry.panel_id for entry in panel_binding.entries
+        },
+        "view_targeting": {
+            entry.panel_id for entry in view_targeting.entries
+        },
+        "panel_view_display_chain": {
+            entry.panel_id for entry in panel_view_display_chain.entries
+        },
+        "display_runtime_resolver": {
+            entry.panel_id for entry in display_runtime_resolver.entries
+        },
+    }
+
+
+def build_visual_shell_canonical_panel_contract() -> (
+    VisualShellCanonicalPanelContract
+):
+    """Build canonical visual-shell panel contract."""
+    panel_sources = _collect_panel_ids()
+
+    all_panel_ids = sorted(
+        {
+            panel_id
+            for panel_ids in panel_sources.values()
+            for panel_id in panel_ids
+        }
+    )
+
+    entries = tuple(
+        VisualShellCanonicalPanelEntry(
+            panel_id=panel_id,
+            present_in_main_operator_dashboard=(
+                panel_id in panel_sources["main_operator_dashboard"]
+            ),
+            present_in_main_operator_read_model=(
+                panel_id in panel_sources["main_operator_read_model"]
+            ),
+            present_in_panel_binding=(
+                panel_id in panel_sources["panel_binding"]
+            ),
+            present_in_view_targeting=(
+                panel_id in panel_sources["view_targeting"]
+            ),
+            present_in_panel_view_display_chain=(
+                panel_id in panel_sources["panel_view_display_chain"]
+            ),
+            present_in_display_runtime_resolver=(
+                panel_id in panel_sources["display_runtime_resolver"]
+            ),
+            canonical_panel_id_only=(normalize_panel_id(panel_id) == panel_id),
+            visual_shell_allowed=(normalize_panel_id(panel_id) == panel_id),
+        )
+        for panel_id in all_panel_ids
+    )
+
+    return VisualShellCanonicalPanelContract(
+        contract_id="visual_shell_canonical_panel_contract_001",
+        total_entries=len(entries),
+        canonical_only_entries=sum(
+            1 for entry in entries if entry.canonical_panel_id_only
+        ),
+        visual_shell_allowed_entries=sum(
+            1 for entry in entries if entry.visual_shell_allowed
+        ),
+        legacy_alias_entries=sum(
+            1 for entry in entries if not entry.canonical_panel_id_only
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/foundation_unified_dashboard_view.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_dashboard_layout_read_view_contract import (
+    build_foundation_dashboard_layout_read_view_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_dashboard_workspace_contract import (
+    build_foundation_dashboard_workspace_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_live_status_adapter import (
+    build_foundation_live_status_snapshot,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_status_menu_registry_contract import (
+    build_foundation_status_menu_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_visual_composition_contract import (
+    build_foundation_visual_composition_contract,
+)
+
+
+@dataclass(frozen=True)
+class FoundationUnifiedDashboardPanelView:
+    """Unified read-only panel view for the foundation dashboard."""
+
+    panel_id: str
+    display_title: str
+    menu_label: str
+    short_status_label: str
+    truth_scope: str
+    derived_state: str
+    layout_zone: str
+    visual_layer: str
+    visual_anchor: str
+    startup_stage_index: int
+    left_menu_visible: bool
+    signal_path_visible: bool
+    execution_stage_visible: bool
+    read_only: bool
+
+
+@dataclass(frozen=True)
+class FoundationUnifiedDashboardView:
+    """Unified read-only dashboard view for foundation monitoring."""
+
+    view_id: str
+    view_title: str
+    total_panels: int
+    alive_panels: int
+    dead_panels: int
+    degraded_panels: int
+    broken_panels: int
+    warming_up_panels: int
+    left_menu_panels: int
+    center_core_panels: int
+    guard_ring_panels: int
+    startup_order_valid: bool
+    panels: tuple[FoundationUnifiedDashboardPanelView, ...]
+
+
+def build_foundation_unified_dashboard_view() -> FoundationUnifiedDashboardView:
+    """Build a unified read-only foundation dashboard view."""
+    live_snapshot = build_foundation_live_status_snapshot()
+    menu_registry = build_foundation_status_menu_registry_contract()
+    visual_composition = build_foundation_visual_composition_contract()
+    layout_view = build_foundation_dashboard_layout_read_view_contract()
+    workspace = build_foundation_dashboard_workspace_contract()
+
+    live_by_panel = {record.truth_scope: record for record in live_snapshot.records}
+    menu_by_panel = {entry.panel_id: entry for entry in menu_registry.entries}
+    visual_by_panel = {entry.panel_id: entry for entry in visual_composition.entries}
+    layout_by_panel = {entry.panel_id: entry for entry in layout_view.entries}
+
+    scope_by_panel_id = {
+        "panel_foundation_runtime_status_001": "runtime",
+        "panel_foundation_guard_status_001": "guard",
+        "panel_foundation_core_guard_status_001": "core_guard",
+        "panel_foundation_kernel_guard_status_001": "kernel_guard",
+    }
+
+    panels = []
+    for workspace_entry in workspace.entries:
+        panel_id = workspace_entry.panel_id
+        truth_scope = scope_by_panel_id[panel_id]
+
+        live_record = live_by_panel[truth_scope]
+        menu_entry = menu_by_panel[panel_id]
+        visual_entry = visual_by_panel[panel_id]
+        layout_entry = layout_by_panel[panel_id]
+
+        panels.append(
+            FoundationUnifiedDashboardPanelView(
+                panel_id=panel_id,
+                display_title=workspace_entry.display_title,
+                menu_label=menu_entry.menu_label,
+                short_status_label=menu_entry.short_status_label,
+                truth_scope=truth_scope,
+                derived_state=live_record.derived_state,
+                layout_zone=layout_entry.layout_zone,
+                visual_layer=visual_entry.visual_layer,
+                visual_anchor=visual_entry.visual_anchor,
+                startup_stage_index=workspace_entry.startup_stage_index,
+                left_menu_visible=workspace_entry.left_menu_visible,
+                signal_path_visible=workspace_entry.signal_path_visible,
+                execution_stage_visible=workspace_entry.execution_stage_visible,
+                read_only=workspace_entry.read_only,
+            )
+        )
+
+    panel_tuple = tuple(sorted(panels, key=lambda item: item.startup_stage_index))
+
+    startup_order_valid = [panel.startup_stage_index for panel in panel_tuple] == [1, 2, 3, 4]
+
+    return FoundationUnifiedDashboardView(
+        view_id="foundation_unified_dashboard_view_001",
+        view_title="Foundation Unified Dashboard View",
+        total_panels=len(panel_tuple),
+        alive_panels=sum(1 for panel in panel_tuple if panel.derived_state == "ALIVE"),
+        dead_panels=sum(1 for panel in panel_tuple if panel.derived_state == "DEAD"),
+        degraded_panels=sum(
+            1 for panel in panel_tuple if panel.derived_state == "DEGRADED"
+        ),
+        broken_panels=sum(1 for panel in panel_tuple if panel.derived_state == "BROKEN"),
+        warming_up_panels=sum(
+            1 for panel in panel_tuple if panel.derived_state == "WARMING_UP"
+        ),
+        left_menu_panels=sum(1 for panel in panel_tuple if panel.left_menu_visible),
+        center_core_panels=sum(1 for panel in panel_tuple if panel.layout_zone == "center_core"),
+        guard_ring_panels=sum(
+            1 for panel in panel_tuple if panel.layout_zone in {"inner_ring", "outer_ring"}
+        ),
+        startup_order_valid=startup_order_valid,
+        panels=panel_tuple,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_contract import (
+    build_foundation_truth_consistency_contract,
+)
+
+
+@dataclass(frozen=True)
+class FoundationTruthConsistencyViewEntry:
+    """Read-only dashboard view entry for foundation truth consistency."""
+
+    view_entry_id: str
+    panel_id: str
+    truth_scope: str
+    display_title: str
+    derived_status: str
+    consistency_status: str
+    heartbeat_truth: bool
+    process_truth: bool
+    session_truth: bool
+    api_truth: bool
+    log_truth: bool
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True)
+class FoundationTruthConsistencyView:
+    """Read-only dashboard view for foundation truth consistency."""
+
+    view_id: str
+    total_entries: int
+    consistent_entries: int
+    partial_entries: int
+    mismatch_entries: int
+    unknown_entries: int
+    entries: tuple[FoundationTruthConsistencyViewEntry, ...]
+
+
+_SCOPE_TO_PANEL = {
+    "runtime": "panel_foundation_runtime_status_001",
+    "guard": "panel_foundation_guard_status_001",
+    "core_guard": "panel_foundation_core_guard_status_001",
+    "kernel_guard": "panel_foundation_kernel_guard_status_001",
+}
+
+_SCOPE_TO_TITLE = {
+    "runtime": "Runtime Core",
+    "guard": "Stop-Gate Watcher",
+    "core_guard": "Core Guard",
+    "kernel_guard": "Kernel Watchdog",
+}
+
+
+def build_foundation_truth_consistency_view() -> FoundationTruthConsistencyView:
+    """Build read-only dashboard view from foundation truth consistency contract."""
+    contract = build_foundation_truth_consistency_contract()
+
+    entries = tuple(
+        FoundationTruthConsistencyViewEntry(
+            view_entry_id=f"foundationtruthview_{entry.truth_scope}_001",
+            panel_id=_SCOPE_TO_PANEL[entry.truth_scope],
+            truth_scope=entry.truth_scope,
+            display_title=_SCOPE_TO_TITLE[entry.truth_scope],
+            derived_status=entry.derived_status,
+            consistency_status=entry.consistency_status,
+            heartbeat_truth=entry.heartbeat_truth,
+            process_truth=entry.process_truth,
+            session_truth=entry.session_truth,
+            api_truth=entry.api_truth,
+            log_truth=entry.log_truth,
+            read_only=True,
+            description=(
+                "Read-only foundation truth consistency view entry derived from "
+                f"consistency contract for scope={entry.truth_scope}."
+            ),
+        )
+        for entry in contract.entries
+    )
+
+    return FoundationTruthConsistencyView(
+        view_id="foundation_truth_consistency_view_001",
+        total_entries=len(entries),
+        consistent_entries=sum(
+            1 for entry in entries if entry.consistency_status == "CONSISTENT"
+        ),
+        partial_entries=sum(
+            1 for entry in entries if entry.consistency_status == "PARTIAL"
+        ),
+        mismatch_entries=sum(
+            1 for entry in entries if entry.consistency_status == "MISMATCH"
+        ),
+        unknown_entries=sum(
+            1 for entry in entries if entry.consistency_status == "UNKNOWN"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/foundation_guard_chain_truth_view.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_contract import (
+    build_foundation_truth_consistency_contract,
+)
+
+
+@dataclass(frozen=True)
+class FoundationGuardChainTruthEntry:
+    """Canonical guard-chain truth entry for foundation dashboards."""
+
+    guard_entry_id: str
+    chain_order_index: int
+    truth_scope: str
+    display_title: str
+    heartbeat_truth: bool
+    process_truth: bool
+    session_truth: bool
+    api_truth: bool
+    log_truth: bool
+    derived_status: str
+    consistency_status: str
+    last_seen_label: str
+    reason: str | None
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True)
+class FoundationGuardChainTruthView:
+    """Canonical guard-chain truth view for foundation dashboards."""
+
+    view_id: str
+    total_entries: int
+    consistent_entries: int
+    partial_entries: int
+    mismatch_entries: int
+    unknown_entries: int
+    alive_entries: int
+    degraded_entries: int
+    dead_entries: int
+    broken_entries: int
+    entries: tuple[FoundationGuardChainTruthEntry, ...]
+
+
+_SCOPE_TO_TITLE = {
+    "runtime": "Runtime Core",
+    "guard": "Stop-Gate Watcher",
+    "core_guard": "Core Guard",
+    "kernel_guard": "Kernel Watchdog",
+}
+
+_SCOPE_TO_ORDER = {
+    "runtime": 1,
+    "guard": 2,
+    "core_guard": 3,
+    "kernel_guard": 4,
+}
+
+
+def _reason_for_entry(consistency_status: str, derived_status: str) -> str | None:
+    """Return human-readable reason for current truth/derived combination."""
+    if derived_status == "BROKEN":
+        return "Broken foundation state requires operator investigation."
+    if derived_status == "DEAD":
+        return "Foundation component is currently not alive."
+    if derived_status == "DEGRADED":
+        return "Foundation component is degraded or partially inconsistent."
+    if consistency_status == "PARTIAL":
+        return "Truth sources are only partially aligned."
+    if consistency_status == "MISMATCH":
+        return "Truth sources are mismatched."
+    if consistency_status == "UNKNOWN":
+        return "Truth sources are insufficient for a safe conclusion."
+    return None
+
+
+def build_foundation_guard_chain_truth_view() -> FoundationGuardChainTruthView:
+    """Build canonical guard-chain truth view from truth consistency contract."""
+    contract = build_foundation_truth_consistency_contract()
+
+    ordered_entries = sorted(
+        contract.entries,
+        key=lambda entry: _SCOPE_TO_ORDER[entry.truth_scope],
+    )
+
+    entries = tuple(
+        FoundationGuardChainTruthEntry(
+            guard_entry_id=f"foundation_guard_chain_{entry.truth_scope}_001",
+            chain_order_index=_SCOPE_TO_ORDER[entry.truth_scope],
+            truth_scope=entry.truth_scope,
+            display_title=_SCOPE_TO_TITLE[entry.truth_scope],
+            heartbeat_truth=entry.heartbeat_truth,
+            process_truth=entry.process_truth,
+            session_truth=entry.session_truth,
+            api_truth=entry.api_truth,
+            log_truth=entry.log_truth,
+            derived_status=entry.derived_status,
+            consistency_status=entry.consistency_status,
+            last_seen_label="fresh",
+            reason=_reason_for_entry(
+                entry.consistency_status,
+                entry.derived_status,
+            ),
+            read_only=True,
+            description=(
+                "Canonical guard-chain truth entry derived from foundation truth "
+                f"consistency contract for scope={entry.truth_scope}."
+            ),
+        )
+        for entry in ordered_entries
+    )
+
+    return FoundationGuardChainTruthView(
+        view_id="foundation_guard_chain_truth_view_001",
+        total_entries=len(entries),
+        consistent_entries=sum(
+            1 for entry in entries if entry.consistency_status == "CONSISTENT"
+        ),
+        partial_entries=sum(
+            1 for entry in entries if entry.consistency_status == "PARTIAL"
+        ),
+        mismatch_entries=sum(
+            1 for entry in entries if entry.consistency_status == "MISMATCH"
+        ),
+        unknown_entries=sum(
+            1 for entry in entries if entry.consistency_status == "UNKNOWN"
+        ),
+        alive_entries=sum(1 for entry in entries if entry.derived_status == "ALIVE"),
+        degraded_entries=sum(
+            1 for entry in entries if entry.derived_status == "DEGRADED"
+        ),
+        dead_entries=sum(1 for entry in entries if entry.derived_status == "DEAD"),
+        broken_entries=sum(
+            1 for entry in entries if entry.derived_status == "BROKEN"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_history_contract import (
+    build_foundation_incident_history_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_snapshot_contract import (
+    build_foundation_incident_snapshot_contract,
+)
+
+
+@dataclass(frozen=True)
+class FoundationIncidentDashboardViewEntry:
+    """Read-only dashboard entry for unified foundation incident visibility."""
+
+    dashboard_entry_id: str
+    incident_id: str
+    panel_id: str
+    source_component: str
+    display_title: str
+    failing_stage: str
+    incident_state: str
+    severity: str
+    current_incident: bool
+    history_visible: bool
+    kill_chain_triggered: bool
+    archived: bool
+    recovered: bool
+    read_only: bool
+    description: str
+
+
+@dataclass(frozen=True)
+class FoundationIncidentDashboardView:
+    """Read-only dashboard view for unified foundation incident visibility."""
+
+    view_id: str
+    total_entries: int
+    current_incident_entries: int
+    history_visible_entries: int
+    kill_chain_triggered_entries: int
+    archived_entries: int
+    recovered_entries: int
+    critical_entries: int
+    warning_entries: int
+    info_entries: int
+    entries: tuple[FoundationIncidentDashboardViewEntry, ...]
+
+
+_SCOPE_TO_PANEL = {
+    "runtime": "panel_foundation_runtime_status_001",
+    "guard": "panel_foundation_guard_status_001",
+    "core_guard": "panel_foundation_core_guard_status_001",
+    "kernel_guard": "panel_foundation_kernel_guard_status_001",
+}
+
+_SCOPE_TO_TITLE = {
+    "runtime": "Runtime Core",
+    "guard": "Stop-Gate Watcher",
+    "core_guard": "Core Guard",
+    "kernel_guard": "Kernel Watchdog",
+}
+
+
+def build_foundation_incident_dashboard_view() -> FoundationIncidentDashboardView:
+    """Build unified read-only dashboard view for foundation incidents."""
+    snapshot_contract = build_foundation_incident_snapshot_contract()
+    history_contract = build_foundation_incident_history_contract()
+
+    history_by_incident_id = {
+        entry.incident_id: entry for entry in history_contract.entries
+    }
+
+    entries = tuple(
+        FoundationIncidentDashboardViewEntry(
+            dashboard_entry_id=f"foundation_incident_dashboard_{entry.source_component}_001",
+            incident_id=entry.incident_id,
+            panel_id=_SCOPE_TO_PANEL[entry.source_component],
+            source_component=entry.source_component,
+            display_title=_SCOPE_TO_TITLE[entry.source_component],
+            failing_stage=entry.failing_stage,
+            incident_state=entry.incident_state,
+            severity=entry.severity,
+            current_incident=entry.current_incident,
+            history_visible=history_by_incident_id[entry.incident_id].history_visible,
+            kill_chain_triggered=entry.kill_chain_triggered,
+            archived=history_by_incident_id[entry.incident_id].archived,
+            recovered=history_by_incident_id[entry.incident_id].recovered,
+            read_only=True,
+            description=(
+                "Read-only foundation incident dashboard entry derived from "
+                f"incident snapshot/history for scope={entry.source_component}."
+            ),
+        )
+        for entry in snapshot_contract.entries
+    )
+
+    return FoundationIncidentDashboardView(
+        view_id="foundation_incident_dashboard_view_001",
+        total_entries=len(entries),
+        current_incident_entries=sum(1 for entry in entries if entry.current_incident),
+        history_visible_entries=sum(1 for entry in entries if entry.history_visible),
+        kill_chain_triggered_entries=sum(
+            1 for entry in entries if entry.kill_chain_triggered
+        ),
+        archived_entries=sum(1 for entry in entries if entry.archived),
+        recovered_entries=sum(1 for entry in entries if entry.recovered),
+        critical_entries=sum(1 for entry in entries if entry.severity == "critical"),
+        warning_entries=sum(1 for entry in entries if entry.severity == "warning"),
+        info_entries=sum(1 for entry in entries if entry.severity == "info"),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_failure_localization_view import (
+    build_foundation_incident_failure_localization_view,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_live_status_adapter import (
+    build_foundation_live_status_snapshot,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_stalled_stage_command_flow_view import (
+    build_foundation_stalled_stage_command_flow_view,
+)
+
+
+@dataclass(frozen=True)
+class FoundationDiagnosticsCorrelationEntry:
+    """Canonical correlated diagnostics entry for foundation dashboards."""
+
+    correlation_entry_id: str
+    panel_id: str
+    truth_scope: str
+    display_title: str
+    derived_state: str
+    flow_state: str
+    severity: str
+    failure_stage: str
+    incident_visible: bool
+    failure_visible: bool
+    stalled_stage_visible: bool
+    suspected_source_file: str
+    description: str
+
+
+@dataclass(frozen=True)
+class FoundationDiagnosticsCorrelationView:
+    """Canonical correlated diagnostics view for foundation dashboards."""
+
+    view_id: str
+    total_entries: int
+    alive_entries: int
+    degraded_entries: int
+    dead_entries: int
+    broken_entries: int
+    flowing_entries: int
+    stalled_entries: int
+    incident_visible_entries: int
+    failure_visible_entries: int
+    entries: tuple[FoundationDiagnosticsCorrelationEntry, ...]
+
+
+def build_foundation_diagnostics_correlation_view() -> (
+    FoundationDiagnosticsCorrelationView
+):
+    """Build canonical correlated diagnostics view for foundation dashboards."""
+    live_snapshot = build_foundation_live_status_snapshot()
+    incident_view = build_foundation_incident_failure_localization_view()
+    flow_view = build_foundation_stalled_stage_command_flow_view()
+
+    incident_by_scope = {entry.truth_scope: entry for entry in incident_view.entries}
+    flow_by_scope = {entry.truth_scope: entry for entry in flow_view.entries}
+
+    entries = []
+    for live_record in live_snapshot.records:
+        truth_scope = live_record.truth_scope
+        incident_entry = incident_by_scope[truth_scope]
+        flow_entry = flow_by_scope[truth_scope]
+
+        panel_id = incident_entry.panel_id
+
+        entries.append(
+            FoundationDiagnosticsCorrelationEntry(
+                correlation_entry_id=f"foundationdiagnostics_{truth_scope}_001",
+                panel_id=panel_id,
+                truth_scope=truth_scope,
+                display_title=incident_entry.display_title,
+                derived_state=live_record.derived_state,
+                flow_state=flow_entry.flow_state,
+                severity=incident_entry.severity,
+                failure_stage=incident_entry.failure_stage,
+                incident_visible=incident_entry.incident_visible,
+                failure_visible=incident_entry.failure_visible,
+                stalled_stage_visible=flow_entry.stalled_stage_visible,
+                suspected_source_file=incident_entry.suspected_source_file,
+                description=(
+                    "Canonical correlated diagnostics entry derived from live "
+                    f"state, flow, and failure localization for scope={truth_scope}."
+                ),
+            )
+        )
+
+    entry_tuple = tuple(entries)
+
+    return FoundationDiagnosticsCorrelationView(
+        view_id="foundation_diagnostics_correlation_view_001",
+        total_entries=len(entry_tuple),
+        alive_entries=sum(1 for entry in entry_tuple if entry.derived_state == "ALIVE"),
+        degraded_entries=sum(
+            1 for entry in entry_tuple if entry.derived_state == "DEGRADED"
+        ),
+        dead_entries=sum(1 for entry in entry_tuple if entry.derived_state == "DEAD"),
+        broken_entries=sum(1 for entry in entry_tuple if entry.derived_state == "BROKEN"),
+        flowing_entries=sum(1 for entry in entry_tuple if entry.flow_state == "FLOWING"),
+        stalled_entries=sum(1 for entry in entry_tuple if entry.flow_state == "STALLED"),
+        incident_visible_entries=sum(
+            1 for entry in entry_tuple if entry.incident_visible
+        ),
+        failure_visible_entries=sum(
+            1 for entry in entry_tuple if entry.failure_visible
+        ),
+        entries=entry_tuple,
+    )
+

@@ -1,0 +1,5 @@
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_dashboard_workspace_contract.py:56:def build_foundation_dashboard_workspace_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:42:def build_workspace_read_model_contract() -> WorkspaceReadModelContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_contract.py:10:def build_dashboard_workspace_contract() -> DashboardWorkspaceContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:41:def build_operator_workspace_binding_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:49:def build_workspace_registry_contract() -> WorkspaceRegistryContract:

@@ -1,0 +1,82 @@
+MAKSIMAR_CORE_LIB/oob_dashboard/project_map_panel_contract.py:4:    build_module_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/project_map_panel_contract.py:14:    registry = build_module_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:7:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:58:    workspace_contract = build_workspace_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:11:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:12:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:43:    workspace_registry_contract = build_workspace_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:47:    workspace_registry_map = {
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:48:        entry.workspace_id: entry for entry in workspace_registry_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:56:        for entry in workspace_registry_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:64:            display_target_id=workspace_registry_map[workspace_id].display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:68:            read_only=workspace_registry_map[workspace_id].read_only,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:101:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:102:    build_dashboard_panel_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:104:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:265:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:266:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:681:    "build_dashboard_panel_registry_contract", "ComposedViewPanel", "DashboardViewCompositionContract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:703:    "DisplayRuntimeResolverIntegrationContract", "build_workspace_registry_contract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/view_composition_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/view_composition_contract.py:7:    build_dashboard_panel_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/view_composition_contract.py:18:    registry = build_dashboard_panel_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:11:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:12:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:44:    workspace_contract = build_workspace_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:14:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:15:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:54:    workspace_registry = build_workspace_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:56:    workspace_registry_map = {
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:57:        entry.workspace_id: entry for entry in workspace_registry.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:75:            read_only=workspace_registry_map[dashboard_entry.workspace_id].read_only,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:76:            interactive=not workspace_registry_map[dashboard_entry.workspace_id].read_only,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:86:        and dashboard_entry.workspace_id in workspace_registry_map
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:11:from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:12:    build_workspace_registry_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:47:    workspace_registry_contract = build_workspace_registry_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:49:    workspace_registry_map = {
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:50:        entry.workspace_id: entry for entry in workspace_registry_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:60:            workspace_role=workspace_registry_map[dashboard_entry.workspace_id].workspace_role,
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:63:                workspace_registry_map[dashboard_entry.workspace_id].workspace_role
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:76:        if dashboard_entry.workspace_id in workspace_registry_map
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py:7:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py:13:def build_dashboard_panel_registry_contract() -> DashboardPanelRegistryContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:49:def build_workspace_registry_contract() -> WorkspaceRegistryContract:
+MAKSIMAR_CORE_LIB/architecture_map/__init__.py:15:from MAKSIMAR_CORE_LIB.architecture_map.module_registry_contract import (
+MAKSIMAR_CORE_LIB/architecture_map/__init__.py:16:    build_module_registry_contract,
+MAKSIMAR_CORE_LIB/architecture_map/__init__.py:18:from MAKSIMAR_CORE_LIB.architecture_map.module_registry_models import (
+MAKSIMAR_CORE_LIB/architecture_map/__init__.py:48:    "build_module_registry_contract",
+MAKSIMAR_CORE_LIB/architecture_map/view_contract.py:15:            source_contract="module_registry",
+MAKSIMAR_CORE_LIB/architecture_map/module_registry_contract.py:3:from MAKSIMAR_CORE_LIB.architecture_map.module_registry_models import (
+MAKSIMAR_CORE_LIB/architecture_map/module_registry_contract.py:9:def build_module_registry_contract() -> ModuleRegistryContract:
+MAKSIMAR_SERVER/architecture_map_runtime/module_view_contract.py:4:    build_module_registry_contract,
+MAKSIMAR_SERVER/architecture_map_runtime/module_view_contract.py:14:    registry = build_module_registry_contract()
+MAKSIMAR_SERVER/REGISTRY_AUTO_ENROLLMENT/registry_auto_enrollment_models.py:17:    "module_registry",
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:4:    build_workspace_registry_contract,
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:8:def test_workspace_registry_contract_builds() -> None:
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:10:    contract = build_workspace_registry_contract()
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:17:def test_workspace_registry_foundation_monitoring_entry() -> None:
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:19:    contract = build_workspace_registry_contract()
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:32:def test_workspace_registry_operator_main_entry() -> None:
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:34:    contract = build_workspace_registry_contract()
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:45:def test_workspace_registry_expansion_entry() -> None:
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:47:    contract = build_workspace_registry_contract()
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:4:    build_dashboard_panel_registry_contract,
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:8:def test_panel_registry_contract_builds() -> None:
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:10:    contract = build_dashboard_panel_registry_contract()
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:17:def test_panel_registry_contains_settings_and_gesture() -> None:
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:19:    contract = build_dashboard_panel_registry_contract()
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:27:def test_panel_registry_consistency_entry_uses_canonical_metadata() -> None:
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:29:    contract = build_dashboard_panel_registry_contract()
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:41:def test_panel_registry_gesture_entry_uses_canonical_metadata() -> None:
+tests/oob_dashboard/test_panel_registry_contract_smoke.py:43:    contract = build_dashboard_panel_registry_contract()
+tests/anti_drift/test_canonical_builder_alignment_smoke.py:4:    build_module_registry_contract,
+tests/anti_drift/test_canonical_builder_alignment_smoke.py:34:def test_project_map_panel_matches_canonical_module_registry() -> None:
+tests/anti_drift/test_canonical_builder_alignment_smoke.py:36:    registry = build_module_registry_contract()
+tests/architecture_map/test_module_registry_contract_smoke.py:4:    build_module_registry_contract,
+tests/architecture_map/test_module_registry_contract_smoke.py:8:def test_module_registry_contract_builds() -> None:
+tests/architecture_map/test_module_registry_contract_smoke.py:10:    contract = build_module_registry_contract()
+tests/architecture_map/test_module_registry_contract_smoke.py:16:def test_module_registry_contract_contains_expected_modules() -> None:
+tests/architecture_map/test_module_registry_contract_smoke.py:18:    contract = build_module_registry_contract()
+tests/architecture_map/test_module_registry_models_smoke.py:9:def test_module_registry_models_build() -> None:

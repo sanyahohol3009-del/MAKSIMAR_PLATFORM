@@ -1,0 +1,776 @@
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:55:    """Canonical engine observability binding entry."""
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:70:    binding_status: ObservabilityBindingStatus
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:74:        """Validate engine observability binding invariants."""
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:125:        if self.binding_status != "defined":
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:127:                f"binding_status must be defined: {self.observability_entry_id}"
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:219:    """Unified engine observability binding contract."""
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:229:        """Validate engine observability binding contract invariants."""
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:245:            1 for entry in self.entries if entry.binding_status == "defined"
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:272:def build_engine_observability_binding_contract() -> EngineObservabilityBindingContract:
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:273:    """Build canonical engine observability binding contract."""
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:331:            binding_status="defined",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:332:            description="Engine observability binding for simulation engine.",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:348:            binding_status="defined",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:349:            description="Engine observability binding for optics engine.",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:365:            binding_status="defined",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:366:            description="Engine observability binding for display transform engine.",
+MAKSIMAR_CORE_LIB/engine_observability_binding/engine_observability_binding_contract.py:382:        1 for entry in entries if entry.binding_status == "defined"
+MAKSIMAR_CORE_LIB/engine_observability_binding/__init__.py:1:from MAKSIMAR_CORE_LIB.engine_observability_binding.engine_observability_binding_contract import (
+MAKSIMAR_CORE_LIB/engine_observability_binding/__init__.py:4:    build_engine_observability_binding_contract,
+MAKSIMAR_CORE_LIB/engine_observability_binding/__init__.py:10:    "build_engine_observability_binding_contract",
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:82:    direct_worker_to_backend_binding_forbidden: bool
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:149:        if not self.direct_worker_to_backend_binding_forbidden:
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:151:                f"direct_worker_to_backend_binding_forbidden must be True: {self.engine_adapter_id}"
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:307:            direct_worker_to_backend_binding_forbidden=True,
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:323:            direct_worker_to_backend_binding_forbidden=True,
+MAKSIMAR_CORE_LIB/engine_adapter_boundary/engine_adapter_boundary_contract.py:339:            direct_worker_to_backend_binding_forbidden=True,
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:73:    identity_binding_required: bool
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:80:    security_binding: SecurityBinding
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:145:        if not self.identity_binding_required:
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:147:                f"identity_binding_required must be True: {self.wrist_terminal_id}"
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:171:        if self.security_binding != "owner_bound":
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:173:                f"security_binding must be owner_bound: {self.wrist_terminal_id}"
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:265:            identity_binding_required=True,
+MAKSIMAR_CORE_LIB/wrist_terminal_contract/wrist_terminal_contract.py:272:            security_binding="owner_bound",
+MAKSIMAR_CORE_LIB/evolution_debug/hypothesis_contract.py:21:            error_code="dashboard.binding.mismatch",
+MAKSIMAR_CORE_LIB/evolution_debug/hypothesis_contract.py:22:            reasoning_summary="Dashboard panel binding does not align with normalized panel identifiers.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:6:    build_display_target_vocabulary_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:8:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:9:    build_panel_exposure_policy_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:18:    """Canonical binding entry between a panel and display target semantics."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:21:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:22:    binding_reason: str
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:31:    """Canonical panel binding contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:34:    primary_operator_bindings: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:35:    diagnostics_bindings: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:36:    expansion_bindings: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:37:    default_target_bindings: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:41:def build_panel_binding_contract() -> PanelBindingContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:42:    """Build canonical panel binding contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:44:    exposure_contract = build_panel_exposure_policy_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:45:    display_contract = build_display_target_vocabulary_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:48:    exposure_map = {entry.panel_id: entry for entry in exposure_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:49:    display_targets = {entry.display_target_id: entry for entry in display_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:51:    def resolve_display_target_id(panel_id: str) -> str:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:53:        exposure_entry = exposure_map[panel_id]
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:55:        if exposure_entry.exposure_level == "hidden_internal":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:75:    def resolve_binding_reason(panel_id: str) -> str:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:77:        exposure_entry = exposure_map[panel_id]
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:79:        if exposure_entry.exposure_level == "hidden_internal":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:80:            return "hidden_internal_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:82:            return "foundation_monitoring_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:84:            return "diagnostics_monitoring_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:86:            return "operator_surface_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:88:            return "expansion_observability_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:90:            return "navigation_internal_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:91:        return "fallback_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:96:            display_target_id=display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:97:            binding_reason=resolve_binding_reason(panel_id),
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:99:            eligible_for_main_dashboard=exposure_map[panel_id].visible_in_main_dashboard,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:100:            eligible_for_oob_dashboard=exposure_map[panel_id].visible_in_oob_dashboard,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:102:                f"Canonical panel binding entry for {metadata_map[panel_id].display_title} "
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:103:                f"to {display_targets[display_target_id].display_title}."
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:107:        for display_target_id in (resolve_display_target_id(panel_id),)
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:112:        primary_operator_bindings=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:113:            1 for entry in entries if entry.display_target_id == "display_primary_operator"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:115:        diagnostics_bindings=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:116:            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:118:        expansion_bindings=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:119:            1 for entry in entries if entry.display_target_id == "display_tertiary_expansion"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:121:        default_target_bindings=sum(1 for entry in entries if entry.is_default_target),
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:59:    explainability_binding: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:205:            explainability_binding=(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:230:            1 for entry in entries if entry.explainability_binding
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:7:    build_display_target_vocabulary_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:30:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:53:    display_contract = build_display_target_vocabulary_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:55:    valid_display_target_ids = {
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:56:        entry.display_target_id for entry in display_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:68:            display_target_id=entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py:72:                entry.display_target_id in valid_display_target_ids
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:7:    build_panel_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:69:def build_view_targeting_contract() -> ViewTargetingContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:71:    panel_binding_contract = build_panel_binding_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:124:        for entry in panel_binding_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:41:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:69:    def resolve_layout_zone(panel_id: str, display_target_id: str) -> LayoutZone:
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:70:        if display_target_id == "display_primary_operator":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:74:        if display_target_id == "display_secondary_diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:84:    def resolve_layout_slot(panel_id: str, display_target_id: str) -> LayoutSlot:
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:85:        if display_target_id == "display_primary_operator":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:91:        if display_target_id == "display_secondary_diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:110:            layout_zone=resolve_layout_zone(entry.panel_id, entry.display_target_id),
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:111:            layout_slot=resolve_layout_slot(entry.panel_id, entry.display_target_id),
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:112:            display_target_id=entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:118:        for workspace_id in (workspace_map[entry.display_target_id],)
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:30:    """Canonical exposure policy entry for one panel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:33:    exposure_level: ExposureLevel
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:43:    """Canonical exposure/visibility policy contract for panels."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:54:def build_panel_exposure_policy_contract() -> PanelExposurePolicyContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:55:    """Build canonical panel exposure/visibility policy contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:59:    exposure_map: dict[str, tuple[ExposureLevel, VisibilityPolicy, bool, bool, bool, str]] = {
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:217:            exposure_level=exposure_map[entry.panel_id][0],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:218:            visibility_policy=exposure_map[entry.panel_id][1],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:219:            visible_in_oob_dashboard=exposure_map[entry.panel_id][2],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:220:            visible_in_main_dashboard=exposure_map[entry.panel_id][3],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:221:            visible_in_navigation=exposure_map[entry.panel_id][4],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:222:            description=exposure_map[entry.panel_id][5],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:230:            1 for entry in entries if entry.exposure_level == "oob_only"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:233:            1 for entry in entries if entry.exposure_level == "main_dashboard_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:236:            1 for entry in entries if entry.exposure_level == "shared_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:239:            1 for entry in entries if entry.exposure_level == "hidden_internal"
+MAKSIMAR_CORE_LIB/oob_dashboard/gesture_panel_models.py:18:    """One gesture → action binding."""
+MAKSIMAR_CORE_LIB/oob_dashboard/gesture_panel_models.py:30:    bindings: tuple[GestureBinding, ...]
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:36:    display_target_id: DisplayTargetId
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:39:    display_target_type: DisplayTargetType
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:54:def build_display_target_vocabulary_contract() -> DisplayTargetVocabularyContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:58:            display_target_id="display_primary_operator",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:61:            display_target_type="physical_monitor",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:66:            display_target_id="display_secondary_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:69:            display_target_type="physical_monitor",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:74:            display_target_id="display_tertiary_expansion",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:77:            display_target_type="logical_surface",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:86:            1 for entry in entries if entry.display_target_type == "physical_monitor"
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:89:            1 for entry in entries if entry.display_target_type == "logical_surface"
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:22:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py:64:            display_target_id=workspace_registry_map[workspace_id].display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:29:    """Canonical source binding entry for one panel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:32:    source_binding: SourceBindingKind
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:41:    """Canonical source binding contract for normalized panels."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:50:def build_panel_source_binding_contract() -> PanelSourceBindingContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:51:    """Build canonical source binding contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:55:    binding_map: dict[str, tuple[SourceBindingKind, str, str, bool, str]] = {
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:194:            source_binding=binding_map[entry.panel_id][0],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:195:            source_contract_name=binding_map[entry.panel_id][1],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:196:            source_scope=binding_map[entry.panel_id][2],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:197:            read_only=binding_map[entry.panel_id][3],
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:198:            description=binding_map[entry.panel_id][4],
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py:22:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py:58:            display_target_id=dashboard_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:217:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_source_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:218:    build_panel_source_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:223:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:224:    build_panel_exposure_policy_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:235:from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:236:    build_display_target_vocabulary_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:241:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:242:    build_panel_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:247:from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:248:    build_view_targeting_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:302:from MAKSIMAR_CORE_LIB.oob_dashboard.operator_workspace_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:303:    build_operator_workspace_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:326:from MAKSIMAR_CORE_LIB.oob_dashboard.policy_aware_action_exposure_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:327:    build_policy_aware_action_exposure_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:695:    "PanelTaxonomyContract", "build_panel_source_binding_contract", "PanelSourceBindingContract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:696:    "PanelSourceBindingEntry", "build_panel_exposure_policy_contract", "PanelExposureEntry", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:698:    "build_display_target_vocabulary_contract", "DisplayTargetVocabularyContract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:699:    "DisplayTargetVocabularyEntry", "build_panel_binding_contract", "PanelBindingContract", "PanelBindingEntry", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:700:    "build_view_targeting_contract", "ViewTargetingContract", "ViewTargetingEntry", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:710:    "MainOperatorDashboardReadModelEntry", "build_operator_workspace_binding_contract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:715:    "ControlPlaneHandoffEntry", "build_policy_aware_action_exposure_contract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/chat_input_models.py:33:    bindings: tuple[DashboardChatInputBinding, ...]
+MAKSIMAR_CORE_LIB/oob_dashboard/chat_input_contract.py:12:    bindings = (
+MAKSIMAR_CORE_LIB/oob_dashboard/chat_input_contract.py:37:        bindings=bindings,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_render_surface_contract.py:24:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_render_surface_contract.py:67:            display_target_id=shell_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_render_surface_contract.py:84:                f"{shell_entry.display_target_id}."
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:105:        if entry.explainability_binding and entry.preferred_zone == "right_explainable"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:9:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:10:    build_panel_exposure_policy_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:15:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_source_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:16:    build_panel_source_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:59:    exposure_contract = build_panel_exposure_policy_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:60:    source_binding_contract = build_panel_source_binding_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:64:    exposure_map = {entry.panel_id: entry for entry in exposure_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:65:    source_map = {entry.panel_id: entry for entry in source_binding_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:73:        source_binding = source_map[panel_id].source_binding
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:74:        if source_binding in (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:80:        if source_binding in (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:86:        if source_binding == "execution_panel_contract":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:108:                or exposure_map[panel_id].visibility_policy
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:9:from MAKSIMAR_CORE_LIB.oob_dashboard.operator_workspace_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:10:    build_operator_workspace_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:22:    "operator_workspace_binding",
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:55:    workspace_binding_contract = build_operator_workspace_binding_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:57:    binding_map = {
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:58:        entry.workspace_id: entry for entry in workspace_binding_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:68:                if binding_map[entry.workspace_id].supports_interaction
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:72:            approval_required_for_mutation=binding_map[
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_interaction_guard_contract.py:80:        if entry.workspace_id in binding_map
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:23:    """Canonical policy-aware action exposure entry."""
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:27:    action_exposure_mode: ActionExposureMode
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:28:    action_exposure_status: ActionExposureStatus
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:36:    """Canonical policy-aware action exposure contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:44:def build_policy_aware_action_exposure_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:47:    """Build canonical policy-aware action exposure contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:54:            action_exposure_mode=(
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:59:            action_exposure_status="visible_but_not_executed",
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:63:                f"Canonical policy-aware action exposure entry for {entry.workspace_id}."
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:72:            1 for entry in entries if entry.action_exposure_mode == "read_only_exposed"
+MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py:77:            if entry.action_exposure_mode == "approval_gated_exposed"
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:22:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:54:            display_target_id=workspace_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/gesture_panel_contract.py:12:    bindings = (
+MAKSIMAR_CORE_LIB/oob_dashboard/gesture_panel_contract.py:21:        bindings=bindings,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:17:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:18:    build_panel_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:26:from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:27:    build_view_targeting_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:38:    present_in_panel_binding: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:39:    present_in_view_targeting: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:91:    panel_binding = build_panel_binding_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:92:    view_targeting = build_view_targeting_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:99:        "panel_binding": {
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:100:            entry.panel_id for entry in panel_binding.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:102:        "view_targeting": {
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:103:            entry.panel_id for entry in view_targeting.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:137:            present_in_panel_binding=(
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:138:                panel_id in panel_sources["panel_binding"]
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:140:            present_in_view_targeting=(
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_canonical_panel_contract.py:141:                panel_id in panel_sources["view_targeting"]
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:6:    build_display_target_vocabulary_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:8:from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:9:    build_panel_binding_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:11:from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:12:    build_view_targeting_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:22:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:43:    panel_binding_contract = build_panel_binding_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:44:    view_targeting_contract = build_view_targeting_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:45:    display_contract = build_display_target_vocabulary_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:47:    panel_binding_map = {entry.panel_id: entry for entry in panel_binding_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:48:    view_targeting_map = {entry.panel_id: entry for entry in view_targeting_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:49:    display_map = {entry.display_target_id: entry for entry in display_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:54:            view_id=view_targeting_map[panel_id].view_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:55:            display_target_id=panel_binding_map[panel_id].display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:56:            display_role=display_map[panel_binding_map[panel_id].display_target_id].display_role,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:57:            display_zone=display_map[panel_binding_map[panel_id].display_target_id].display_zone,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:58:            is_default_chain=panel_binding_map[panel_id].is_default_target,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:63:        for panel_id in panel_binding_map
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:69:            1 for entry in entries if entry.display_target_id == "display_primary_operator"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:72:            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:75:            1 for entry in entries if entry.display_target_id == "display_tertiary_expansion"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:8:    """Read-only immutable-core binding entry for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:10:    binding_entry_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:23:    """Read-only immutable-core binding view for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:35:def build_foundation_immutable_core_binding_view() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:38:    """Build read-only immutable-core binding view for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:41:            binding_entry_id="foundationimmutable_stop_gate_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:49:            description="Immutable-core binding entry for STOP-GATE script.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:52:            binding_entry_id="foundationimmutable_stop_gate_watcher_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:60:            description="Immutable-core binding entry for STOP-GATE watcher.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:63:            binding_entry_id="foundationimmutable_core_guard_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:71:            description="Immutable-core binding entry for core guard.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:74:            binding_entry_id="foundationimmutable_integrity_verifier_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:82:            description="Immutable-core binding entry for integrity verifier.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:85:            binding_entry_id="foundationimmutable_genesis_hash_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:93:            description="Immutable-core binding entry for genesis hash baseline.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_immutable_core_binding_view.py:98:        view_id="foundation_immutable_core_binding_view_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:26:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:68:            display_target_id=dashboard_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_shell_contract.py:81:                f"{dashboard_entry.display_target_id}."
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_renderer_contract.py:19:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_renderer_contract.py:60:            display_target_id=surface_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_renderer_contract.py:83:                f"{surface_entry.display_target_id}."
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:18:    """Canonical binding between operator dashboard and workspace."""
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:23:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:32:    """Canonical operator workspace binding contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:41:def build_operator_workspace_binding_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:44:    """Build canonical operator workspace binding contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:61:            display_target_id=dashboard_entry.display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/operator_workspace_binding_contract.py:71:                f"Canonical operator workspace binding entry for "
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:7:    build_display_target_vocabulary_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:33:    display_target_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:51:    display_contract = build_display_target_vocabulary_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:54:    display_ids = {entry.display_target_id for entry in display_contract.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:84:            display_target_id=display_target_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:88:                if chain_entry.display_target_id == display_target_id
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:93:        for workspace_id, workspace_role, display_target_id, read_only, description in workspace_specs
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:94:        if display_target_id in display_ids
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:61:    display_target_role: str
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:134:            if self.display_target_role != "engineering_display":
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:152:            if self.display_target_role != "primary_dashboard_display":
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:170:            if self.display_target_role != "ar_glasses_display":
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:195:            if entry.display_target_role == "engineering_display"
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:200:            if entry.display_target_role == "primary_dashboard_display"
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:203:            1 for entry in self.entries if entry.display_target_role == "ar_glasses_display"
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:278:            display_target_role="engineering_display",
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:294:            display_target_role="primary_dashboard_display",
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:310:            display_target_role="ar_glasses_display",
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:321:        1 for entry in entries if entry.display_target_role == "engineering_display"
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:326:        if entry.display_target_role == "primary_dashboard_display"
+MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py:329:        1 for entry in entries if entry.display_target_role == "ar_glasses_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:65:    display_target_role: DisplayTargetRole
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:128:            if self.display_target_role != "engineering_display":
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:138:            if self.display_target_role != "primary_dashboard_display":
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:148:            if self.display_target_role != "ar_glasses_display":
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:171:            1 for entry in self.entries if entry.display_target_role == "engineering_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:174:            1 for entry in self.entries if entry.display_target_role == "primary_dashboard_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:177:            1 for entry in self.entries if entry.display_target_role == "ar_glasses_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:240:            display_target_role="engineering_display",
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:255:            display_target_role="primary_dashboard_display",
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:270:            display_target_role="ar_glasses_display",
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:284:        1 for entry in entries if entry.display_target_role == "engineering_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:287:        1 for entry in entries if entry.display_target_role == "primary_dashboard_display"
+MAKSIMAR_CORE_LIB/spatial_anchor_resolution/spatial_anchor_resolution_contract.py:290:        1 for entry in entries if entry.display_target_role == "ar_glasses_display"
+MAKSIMAR_CORE_LIB/real_engine_backends/real_engine_backends_contract.py:13:from MAKSIMAR_CORE_LIB.engine_observability_binding import (
+MAKSIMAR_CORE_LIB/real_engine_backends/real_engine_backends_contract.py:14:    build_engine_observability_binding_contract,
+MAKSIMAR_CORE_LIB/real_engine_backends/real_engine_backends_contract.py:262:    observability_contract = build_engine_observability_binding_contract()
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:26:    build_voice_multilingual_binding_contract,
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:77:    linked_multilingual_binding_id: str
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:122:        if not _MLANG_ID_PATTERN.fullmatch(self.linked_multilingual_binding_id):
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:124:                f"Invalid linked_multilingual_binding_id: {self.linked_multilingual_binding_id}"
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:187:            if self.linked_multilingual_binding_id != "voicemlang_show_memory_001":
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:225:            if self.linked_multilingual_binding_id != "voicemlang_show_simulation_001":
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:263:            if self.linked_multilingual_binding_id != "voicemlang_show_monitoring_001":
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:336:    multilingual_bindings = build_voice_multilingual_binding_contract()
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:345:    multilingual_ids = {entry.binding_id for entry in multilingual_bindings.entries}
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:412:            linked_multilingual_binding_id="voicemlang_show_memory_001",
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:430:            linked_multilingual_binding_id="voicemlang_show_simulation_001",
+MAKSIMAR_CORE_LIB/real_voice_runtime/real_voice_runtime_contract.py:448:            linked_multilingual_binding_id="voicemlang_show_monitoring_001",
+MAKSIMAR_CORE_LIB/ar_glasses_display_contract/ar_glasses_display_contract.py:59:    gesture_binding_mode: GestureBindingMode
+MAKSIMAR_CORE_LIB/ar_glasses_display_contract/ar_glasses_display_contract.py:101:        if self.gesture_binding_mode != "gesture_linked_interface":
+MAKSIMAR_CORE_LIB/ar_glasses_display_contract/ar_glasses_display_contract.py:219:            gesture_binding_mode="gesture_linked_interface",
+MAKSIMAR_CORE_LIB/observability_contracts/observability_event_models.py:113:            description="Payload event shape for routing, embedding, and data-plane exposure.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:217:            description="Completed observability binding for validation metrics.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:231:            description="Completed observability binding for pressure metrics.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:245:            description="Completed observability binding for payload metrics.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:265:            description="Completed observability binding for execution views.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:279:            description="Completed observability binding for memory/skill metrics.",
+MAKSIMAR_CORE_LIB/observability_completion/observability_completion_contract.py:293:            description="Completed observability binding for presentation/display metrics.",
+MAKSIMAR_CORE_LIB/voice_layer/voice_command_contract.py:11:    build_explainable_view_binding_contract,
+MAKSIMAR_CORE_LIB/voice_layer/voice_command_contract.py:280:    explainable_binding = build_explainable_view_binding_contract()
+MAKSIMAR_CORE_LIB/voice_layer/voice_command_contract.py:283:        entry.view_id: entry for entry in explainable_binding.entries
+MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py:278:                "evidence_binding",
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:59:    policy_binding_required: bool
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:87:        if not self.policy_binding_required:
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:89:                f"policy_binding_required must be True: {self.autonomy_entry_id}"
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:240:            policy_binding_required=True,
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:256:            policy_binding_required=True,
+MAKSIMAR_CORE_LIB/wrist_autonomy_path/wrist_autonomy_path_contract.py:272:            policy_binding_required=True,
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/__init__.py:1:from MAKSIMAR_SERVER.CONTROL_PLANE.ai_router_binding.ai_router_binding_contract import (
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/__init__.py:2:    build_ai_router_memory_skill_binding_contract,
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/__init__.py:4:from MAKSIMAR_SERVER.CONTROL_PLANE.ai_router_binding.ai_router_binding_models import (
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/__init__.py:12:    "build_ai_router_memory_skill_binding_contract",
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:38:    """Canonical AI router memory/skill binding entry."""
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:57:        """Validate AI router memory/skill binding invariants."""
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:88:                f"AI router binding must use skill_plus_memory mode: {self.route_request_id}"
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:93:                f"AI router binding must be bound: {self.route_request_id}"
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:98:                f"AI router binding must be policy compatible: {self.route_request_id}"
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:103:                f"AI router binding must expose explanation path: {self.route_request_id}"
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:108:                f"AI router binding must target active registries: {self.route_request_id}"
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:114:    """Unified AI router memory/skill binding contract."""
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_models.py:123:        """Validate AI router memory/skill binding contract invariants."""
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:6:from MAKSIMAR_SERVER.CONTROL_PLANE.ai_router_binding.ai_router_binding_models import (
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:18:def build_ai_router_memory_skill_binding_contract() -> AiRouterMemorySkillBindingContract:
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:19:    """Build canonical AI router memory/skill binding contract."""
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:74:                "AI router binding for architecture decision retrieval using the "
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:94:                "AI router binding for platform invariant retrieval using the "
+MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding/ai_router_binding_contract.py:114:                "AI router binding for roadmap checkpoint retrieval using the "
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_models.py:55:    explanation_binding_id: str
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_models.py:76:        if not _EXPLAIN_BINDING_ID_PATTERN.fullmatch(self.explanation_binding_id):
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_models.py:78:                f"Invalid explanation_binding_id: {self.explanation_binding_id}"
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_models.py:117:                f"voice display handoff must target active bindings: {self.handoff_id}"
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_contract.py:7:    build_explainable_view_binding_contract,
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_contract.py:22:    explainable_binding = build_explainable_view_binding_contract()
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_contract.py:28:        entry.view_id: entry for entry in explainable_binding.entries
+MAKSIMAR_SERVER/VOICE_DISPLAY_HANDOFF/voice_display_handoff_contract.py:56:                explanation_binding_id=explainable_entry.binding_id,
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:29:def build_artifact_routing_binding_contract() -> ArtifactRoutingBindingContract:
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:30:    """Build artifact routing binding contract from server-side payload classification."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:73:                        binding_status="rejected",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:75:                        binding_reason="artifact_metadata_missing",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:96:                    binding_status="bound_to_data_plane",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:98:                    binding_reason="artifact_reference_bound",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:110:                binding_status="inline_control_route",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_binding.py:112:                binding_reason="inline_control_payload",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/__init__.py:1:from MAKSIMAR_SERVER.EXECUTION_CONTROL.artifact_routing.artifact_routing_binding import (
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/__init__.py:2:    build_artifact_routing_binding_contract,
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/__init__.py:12:    "build_artifact_routing_binding_contract",
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_models.py:21:    """Server-side artifact routing binding entry."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_models.py:28:    binding_status: ArtifactRoutingBindingStatus
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_models.py:30:    binding_reason: str
+MAKSIMAR_SERVER/EXECUTION_CONTROL/artifact_routing/artifact_routing_models.py:35:    """Unified server-side artifact routing binding contract."""
+MAKSIMAR_SERVER/WORKERS/simulation_worker/engine_observability_binding.py:22:    """Produce deterministic latency sample for observability binding."""
+MAKSIMAR_SERVER/WORKERS/simulation_worker/engine_observability_binding.py:38:    """Build observability binding for simulation engine executions."""
+MAKSIMAR_SERVER/WORKERS/simulation_worker/__init__.py:26:from MAKSIMAR_SERVER.WORKERS.simulation_worker.engine_observability_binding import (
+MAKSIMAR_SERVER/WORKERS/simulation_worker/engine_observability_models.py:37:    """Unified observability binding contract for simulation engine executions."""
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_models.py:54:    """Canonical voice routing / intent binding entry."""
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_models.py:124:                f"voice routing must target active bindings: {self.voice_route_id}"
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_models.py:213:    """Unified voice routing / intent binding contract."""
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_contract.py:7:    build_explainable_view_binding_contract,
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_contract.py:19:    """Build canonical voice routing / intent binding contract."""
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_contract.py:22:    explainable_binding = build_explainable_view_binding_contract()
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_contract.py:28:        entry.view_id: entry for entry in explainable_binding.entries
+MAKSIMAR_SERVER/VOICE_ROUTING/voice_routing_contract.py:66:                    f"Voice routing binding for normalized intent {intent_entry.intent_id} "
+MAKSIMAR_SERVER/OBSERVABILITY/presentation_display_metrics/presentation_display_metrics_contract.py:10:    build_explainable_view_binding_contract,
+MAKSIMAR_SERVER/OBSERVABILITY/presentation_display_metrics/presentation_display_metrics_contract.py:22:    explainable_binding = build_explainable_view_binding_contract()
+MAKSIMAR_SERVER/OBSERVABILITY/presentation_display_metrics/presentation_display_metrics_contract.py:28:        entry.view_id: entry for entry in explainable_binding.entries
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:11:    "ai_router_binding",
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:31:    """Canonical observability metric entry for memory and skill bindings."""
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:127:        if self.source_component == "ai_router_binding":
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:130:                    f"ai_router_binding metric must define linked_memory_tier_id: {self.metric_id}"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:134:                    f"ai_router_binding metric must define linked_skill_id: {self.metric_id}"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:138:                    f"ai_router_binding metric must define linked_worker_id: {self.metric_id}"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:142:                    f"ai_router_binding metric must define route_request_id: {self.metric_id}"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:154:    router_binding_entries: int
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:169:        router_binding_entries = sum(
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:170:            1 for entry in self.entries if entry.source_component == "ai_router_binding"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:182:        if self.router_binding_entries != router_binding_entries:
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_models.py:183:            raise ValueError("router_binding_entries must match computed count")
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:3:from MAKSIMAR_SERVER.CONTROL_PLANE.ai_router_binding import (
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:4:    build_ai_router_memory_skill_binding_contract,
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:32:    """Build observability binding contract for memory and skills."""
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:35:    ai_router_binding = build_ai_router_memory_skill_binding_contract()
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:97:    for route_entry in ai_router_binding.entries:
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:101:                source_component="ai_router_binding",
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:116:                    f"Observability metric for AI router binding {route_entry.route_request_id}."
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:128:    router_binding_entries = sum(
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:129:        1 for entry in entries if entry.source_component == "ai_router_binding"
+MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/memory_skill_metrics_contract.py:137:        router_binding_entries=router_binding_entries,
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_models.py:31:    binding_status: ArtifactRoutingBindingStatus
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_models.py:72:        if self.binding_status == "inline_control_route":
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_models.py:86:        if self.binding_status == "bound_to_data_plane":
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_models.py:100:        if self.binding_status == "rejected":
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:10:    build_artifact_routing_binding_contract,
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:20:    binding_status: str,
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:24:    if binding_status in ("bound_to_data_plane", "rejected"):
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:35:    artifact_routing = build_artifact_routing_binding_contract()
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:57:            routing_entry.binding_status == "rejected"
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:60:        data_plane_routed = routing_entry.binding_status == "bound_to_data_plane"
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:62:            binding_status=routing_entry.binding_status,
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:76:                binding_status=routing_entry.binding_status,
+MAKSIMAR_SERVER/OBSERVABILITY/payload_metrics/payload_metrics_contract.py:83:                    f"with binding_status={routing_entry.binding_status}."
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:63:    normalization_binding_id: str
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:85:        if not _STAGE_BINDING_ID_PATTERN.fullmatch(self.normalization_binding_id):
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:87:                f"Invalid normalization_binding_id: {self.normalization_binding_id}"
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:157:            if self.normalization_binding_id != "intent_show_memory_001":
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:159:                    f"intent_show_memory_001 must use canonical normalization binding: {self.path_id}"
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:179:            if self.normalization_binding_id != "intent_show_simulation_001":
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:181:                    f"intent_show_simulation_001 must use canonical normalization binding: {self.path_id}"
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:201:            if self.normalization_binding_id != "intent_show_monitoring_001":
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_models.py:203:                    f"intent_show_monitoring_001 must use canonical normalization binding: {self.path_id}"
+MAKSIMAR_SERVER/VOICE_LATENCY_PATH/voice_latency_path_contract.py:57:                normalization_binding_id=intent_entry.intent_id,
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:9:from MAKSIMAR_SERVER.VOICE_MULTILINGUAL_BINDING.voice_multilingual_binding_models import (
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:18:def build_voice_multilingual_binding_contract() -> VoiceMultilingualBindingContract:
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:19:    """Build canonical voice multilingual / multiscript binding contract."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:59:                binding_id=_resolve_binding_id(intent_entry.intent_id),
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:88:                binding_status="bound",
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:90:                    f"Voice multilingual binding for {intent_entry.intent_id} "
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:117:def _resolve_binding_id(intent_id: str) -> str:
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_contract.py:118:    """Resolve canonical multilingual binding id from intent id."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/__init__.py:1:from MAKSIMAR_SERVER.VOICE_MULTILINGUAL_BINDING.voice_multilingual_binding_contract import (
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/__init__.py:2:    build_voice_multilingual_binding_contract,
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/__init__.py:4:from MAKSIMAR_SERVER.VOICE_MULTILINGUAL_BINDING.voice_multilingual_binding_models import (
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/__init__.py:12:    "build_voice_multilingual_binding_contract",
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:60:    """Canonical voice multilingual / multiscript binding entry."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:62:    binding_id: str
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:75:    binding_status: VoiceBindingStatus
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:79:        """Validate voice multilingual binding invariants."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:80:        if not _BINDING_ID_PATTERN.fullmatch(self.binding_id):
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:81:            raise ValueError(f"Invalid binding_id: {self.binding_id}")
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:93:            raise ValueError(f"description must not be empty for {self.binding_id}")
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:98:            owner_id=self.binding_id,
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:103:            owner_id=self.binding_id,
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:108:            owner_id=self.binding_id,
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:116:                f"voice multilingual binding must preserve canonical language set: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:121:                f"voice multilingual binding must preserve canonical script set: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:126:                f"voice multilingual binding must provide 4 localized texts: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:131:                f"voice multilingual binding must require low latency: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:136:                f"voice multilingual binding must require explanation: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:141:                f"voice multilingual binding must be multilingual-ready: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:146:                f"voice multilingual binding must be multiscript-ready: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:151:                f"voice multilingual binding must be active: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:154:        if self.binding_status != "bound":
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:156:                f"voice multilingual binding must be bound: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:162:                    f"intent_show_memory_001 must use voiceroute_show_memory_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:166:                    f"intent_show_memory_001 must use latencypath_show_memory_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:170:                    f"intent_show_memory_001 must use canonical text 'show memory': {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:176:                    f"intent_show_simulation_001 must use voiceroute_show_simulation_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:180:                    f"intent_show_simulation_001 must use latencypath_show_simulation_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:184:                    f"intent_show_simulation_001 must use canonical text 'show simulation': {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:190:                    f"intent_show_monitoring_001 must use voiceroute_show_monitoring_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:194:                    f"intent_show_monitoring_001 must use latencypath_show_monitoring_001: {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:198:                    f"intent_show_monitoring_001 must use canonical text 'show monitoring': {self.binding_id}"
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:204:    """Unified voice multilingual / multiscript binding contract."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:214:        """Validate voice multilingual binding contract invariants."""
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:241:        binding_ids = tuple(entry.binding_id for entry in self.entries)
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:244:        if len(set(binding_ids)) != len(binding_ids):
+MAKSIMAR_SERVER/VOICE_MULTILINGUAL_BINDING/voice_multilingual_binding_models.py:245:            raise ValueError("Duplicate binding_id values detected")
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_models.py:38:    """Canonical dashboard read-only view entry for memory/skill exposure."""
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_models.py:89:                f"dashboard view must target active bindings: {self.view_entry_id}"
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_contract.py:4:    build_explainable_view_binding_contract,
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_contract.py:30:    explainable_binding = build_explainable_view_binding_contract()
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_contract.py:44:        entry.view_id: entry for entry in explainable_binding.entries
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_contract.py:79:                "Dashboard read-only view for foundational memory exposure on the mobile proxy."
+MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS/dashboard_read_only_views_contract.py:104:                "Dashboard read-only view for simulation skill exposure on the engineering display."
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:9:from MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_view_binding_models import (
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:15:def build_explainable_view_binding_contract() -> ExplainableViewBindingContract:
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:16:    """Build canonical explainable view binding contract."""
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:30:                binding_id=f"explainbind_{orchestration_entry.route_request_id}",
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:41:                binding_status="bound",
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_contract.py:43:                    f"Explainable view binding for {orchestration_entry.resolved_view_id} "
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/__init__.py:1:from MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_view_binding_contract import (
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/__init__.py:2:    build_explainable_view_binding_contract,
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/__init__.py:4:from MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_view_binding_models import (
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/__init__.py:12:    "build_explainable_view_binding_contract",
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:44:    """Canonical explainable view binding entry."""
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:46:    binding_id: str
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:57:    binding_status: ExplainableBindingStatus
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:61:        """Validate explainable view binding invariants."""
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:62:        if not _BINDING_ID_PATTERN.fullmatch(self.binding_id):
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:63:            raise ValueError(f"Invalid binding_id: {self.binding_id}")
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:72:            raise ValueError(f"description must not be empty: {self.binding_id}")
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:76:                f"explainable binding must expose summary_available: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:81:                f"explainable binding must expose reasoning_payload_available: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:86:                f"explainable binding must expose safety_note_available: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:91:                f"explainable binding must be multilingual-ready: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:96:                f"explainable binding must expose explanation text: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:101:                f"explainable binding must expose explanation payload: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:104:        if self.binding_status != "bound":
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:106:                f"explainable binding must be bound: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:112:                    f"view_memory_project_architecture must bind to panel_memory_project_architecture: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:116:                    f"view_memory_project_architecture must bind to mobile_display_proxy: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:122:                    f"view_simulation_skill_overview must bind to panel_simulation_skill_overview: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:126:                    f"view_simulation_skill_overview must bind to engineering_display: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:132:                    f"view_monitoring_panel must bind to panel_monitoring_panel: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:136:                    f"view_monitoring_panel must bind to primary_dashboard_display: {self.binding_id}"
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:142:    """Unified explainable view binding contract."""
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:151:        """Validate explainable view binding contract invariants."""
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:180:        binding_ids = tuple(entry.binding_id for entry in self.entries)
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:181:        if len(set(binding_ids)) != len(binding_ids):
+MAKSIMAR_SERVER/EXPLAINABLE_VIEW_BINDING/explainable_view_binding_models.py:182:            raise ValueError("Duplicate binding_id values detected")
+tests/ai_router_binding/test_ai_router_memory_skill_metrics_contract_smoke.py:16:    assert contract.router_binding_entries == 3
+tests/ai_router_binding/test_ai_router_memory_skill_metrics_contract_smoke.py:39:    """Memory/skill metrics should expose router binding entries."""
+tests/ai_router_binding/test_ai_router_memory_skill_metrics_contract_smoke.py:45:    assert third.source_component == "ai_router_binding"
+tests/ai_router_binding/test_ai_router_memory_skill_metrics_contract_smoke.py:50:    assert last.source_component == "ai_router_binding"
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:3:from MAKSIMAR_SERVER.CONTROL_PLANE.ai_router_binding import (
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:4:    build_ai_router_memory_skill_binding_contract,
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:8:def test_ai_router_memory_skill_binding_contract_builds() -> None:
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:9:    """AI router memory/skill binding contract should build successfully."""
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:10:    contract = build_ai_router_memory_skill_binding_contract()
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:18:def test_ai_router_memory_skill_binding_contract_contains_expected_routes() -> None:
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:19:    """AI router memory/skill binding should expose expected routes."""
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:20:    contract = build_ai_router_memory_skill_binding_contract()
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:42:def test_ai_router_memory_skill_binding_contract_preserves_binding_mode_and_status() -> None:
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:43:    """AI router memory/skill binding should preserve binding semantics."""
+tests/ai_router_binding/test_ai_router_binding_contract_smoke.py:44:    contract = build_ai_router_memory_skill_binding_contract()
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.engine_observability_binding import (
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:4:    build_engine_observability_binding_contract,
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:8:def test_engine_observability_binding_contract_builds() -> None:
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:9:    """Engine observability binding contract should build successfully."""
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:10:    contract = build_engine_observability_binding_contract()
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:19:def test_engine_observability_binding_contract_contains_expected_simulation_entry() -> None:
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:20:    """Engine observability binding should expose expected simulation entry."""
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:21:    contract = build_engine_observability_binding_contract()
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:32:def test_engine_observability_binding_contract_contains_expected_optics_entry() -> None:
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:33:    """Engine observability binding should expose expected optics entry."""
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:34:    contract = build_engine_observability_binding_contract()
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:45:def test_engine_observability_binding_contract_contains_expected_display_entry() -> None:
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:46:    """Engine observability binding should expose expected display entry."""
+tests/engine_observability_binding/test_engine_observability_binding_contract_smoke.py:47:    contract = build_engine_observability_binding_contract()
+tests/wrist_terminal_contract/test_wrist_terminal_contract_smoke.py:33:    assert entry.identity_binding_required is True
+tests/wrist_terminal_contract/test_wrist_terminal_contract_smoke.py:40:    assert entry.security_binding == "owner_bound"
+tests/oob_dashboard/test_panel_to_visual_mapping_contract_smoke.py:37:    assert entry.explainability_binding is True
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:4:    build_view_targeting_contract,
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:8:def test_view_targeting_contract_builds() -> None:
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:10:    contract = build_view_targeting_contract()
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:20:def test_view_targeting_chat_entry() -> None:
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:22:    contract = build_view_targeting_contract()
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:30:def test_view_targeting_foundation_runtime_entry() -> None:
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:32:    contract = build_view_targeting_contract()
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:44:def test_view_targeting_navigation_entry() -> None:
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:46:    contract = build_view_targeting_contract()
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:27:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:44:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:63:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_visual_hud_preview_state_contract_smoke.py:32:def test_visual_hud_preview_state_preserves_expected_layer_bindings() -> None:
+tests/oob_dashboard/test_visual_hud_preview_state_contract_smoke.py:33:    """Visual HUD preview state should preserve canonical layer bindings."""
+tests/oob_dashboard/test_layout_composition_contract_smoke.py:26:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_layout_composition_contract_smoke.py:41:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_layout_composition_contract_smoke.py:54:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:25:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:41:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:54:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_visual_renderer_contract_smoke.py:31:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_visual_hud_preview_contract_smoke.py:32:def test_visual_hud_preview_preserves_expected_layer_bindings() -> None:
+tests/oob_dashboard/test_visual_hud_preview_contract_smoke.py:33:    """Visual HUD preview should preserve canonical layer bindings."""
+tests/oob_dashboard/test_visual_render_surface_contract_smoke.py:28:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:4:    build_operator_workspace_binding_contract,
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:8:def test_operator_workspace_binding_contract_builds() -> None:
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:9:    """Operator workspace binding contract should build successfully."""
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:10:    contract = build_operator_workspace_binding_contract()
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:18:def test_operator_workspace_binding_entry() -> None:
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:19:    """Operator workspace binding entry should remain canonical."""
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:20:    contract = build_operator_workspace_binding_contract()
+tests/oob_dashboard/test_operator_workspace_binding_contract_smoke.py:26:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_immutable_core_binding_view import (
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:2:    build_foundation_immutable_core_binding_view,
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:6:def test_foundation_immutable_core_binding_view_counts() -> None:
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:7:    """Immutable-core binding view should expose expected counts."""
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:8:    view = build_foundation_immutable_core_binding_view()
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:10:    assert view.view_id == "foundation_immutable_core_binding_view_001"
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:19:def test_foundation_immutable_core_binding_view_stop_gate_entry() -> None:
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:20:    """Immutable-core binding view should expose STOP-GATE entry."""
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:21:    view = build_foundation_immutable_core_binding_view()
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:24:    assert entry.binding_entry_id == "foundationimmutable_stop_gate_001"
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:34:def test_foundation_immutable_core_binding_view_genesis_hash_entry() -> None:
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:35:    """Immutable-core binding view should expose genesis hash entry."""
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:36:    view = build_foundation_immutable_core_binding_view()
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:39:    assert entry.binding_entry_id == "foundationimmutable_genesis_hash_001"
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:49:def test_foundation_immutable_core_binding_view_order() -> None:
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:50:    """Immutable-core binding view should preserve canonical artifact order."""
+tests/oob_dashboard/test_foundation_immutable_core_binding_view_smoke.py:51:    view = build_foundation_immutable_core_binding_view()
+tests/oob_dashboard/test_visual_shell_contract_smoke.py:26:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_visual_hud_screen_contract_smoke.py:32:def test_visual_hud_screen_preserves_expected_layer_bindings() -> None:
+tests/oob_dashboard/test_visual_hud_screen_contract_smoke.py:33:    """Visual HUD screen should preserve canonical layer bindings."""
+tests/oob_dashboard/test_visual_hud_render_result_contract_smoke.py:32:def test_visual_hud_render_result_preserves_expected_layer_bindings() -> None:
+tests/oob_dashboard/test_visual_hud_render_result_contract_smoke.py:33:    """Visual HUD render result should preserve canonical layer bindings."""
+tests/oob_dashboard/test_main_operator_dashboard_read_model_contract_smoke.py:24:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:4:    build_panel_exposure_policy_contract,
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:8:def test_panel_exposure_policy_contract_builds() -> None:
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:9:    """Panel exposure policy contract should build successfully."""
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:10:    contract = build_panel_exposure_policy_contract()
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:19:def test_panel_exposure_policy_chat_entry() -> None:
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:21:    contract = build_panel_exposure_policy_contract()
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:24:    assert entry.exposure_level == "main_dashboard_visible"
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:31:def test_panel_exposure_policy_foundation_runtime_entry() -> None:
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:33:    contract = build_panel_exposure_policy_contract()
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:40:    assert entry.exposure_level == "shared_visible"
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:47:def test_panel_exposure_policy_navigation_entry() -> None:
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:49:    contract = build_panel_exposure_policy_contract()
+tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py:54:    assert entry.exposure_level == "hidden_internal"
+tests/oob_dashboard/test_display_runtime_resolver_integration_contract_smoke.py:24:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_display_runtime_resolver_integration_contract_smoke.py:40:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_display_runtime_resolver_integration_contract_smoke.py:53:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:27:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:40:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:55:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_visual_hud_preview_artifact_contract_smoke.py:32:def test_visual_hud_preview_artifact_preserves_expected_layer_bindings() -> None:
+tests/oob_dashboard/test_visual_hud_preview_artifact_contract_smoke.py:33:    """Visual HUD preview artifact should preserve canonical layer bindings."""
+tests/oob_dashboard/test_chat_input_contract_smoke.py:12:    assert len(contract.bindings) == 3
+tests/oob_dashboard/test_chat_input_contract_smoke.py:20:    modes = {binding.input_mode for binding in contract.bindings}
+tests/oob_dashboard/test_main_operator_dashboard_contract_smoke.py:25:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:4:    build_panel_source_binding_contract,
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:8:def test_panel_source_binding_contract_builds() -> None:
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:9:    """Panel source binding contract should build successfully."""
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:10:    contract = build_panel_source_binding_contract()
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:17:def test_panel_source_binding_foundation_runtime_entry() -> None:
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:19:    contract = build_panel_source_binding_contract()
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:26:    assert entry.source_binding == "foundation_status_summary_contract"
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:32:def test_panel_source_binding_chat_entry() -> None:
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:34:    contract = build_panel_source_binding_contract()
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:37:    assert entry.source_binding == "dashboard_chat_contract"
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:43:def test_panel_source_binding_gesture_entry() -> None:
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:45:    contract = build_panel_source_binding_contract()
+tests/oob_dashboard/test_panel_source_binding_contract_smoke.py:50:    assert entry.source_binding == "gesture_panel_contract"
+tests/oob_dashboard/test_visual_shell_canonical_panel_contract_smoke.py:49:    assert entry.present_in_panel_binding is True
+tests/oob_dashboard/test_visual_shell_canonical_panel_contract_smoke.py:50:    assert entry.present_in_view_targeting is True
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:4:    build_display_target_vocabulary_contract,
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:8:def test_display_target_vocabulary_contract_builds() -> None:
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:10:    contract = build_display_target_vocabulary_contract()
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:17:def test_display_target_vocabulary_primary_operator_entry() -> None:
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:19:    contract = build_display_target_vocabulary_contract()
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:22:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:25:    assert entry.display_target_type == "physical_monitor"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:29:def test_display_target_vocabulary_diagnostics_entry() -> None:
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:31:    contract = build_display_target_vocabulary_contract()
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:34:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:37:    assert entry.display_target_type == "physical_monitor"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:40:def test_display_target_vocabulary_expansion_entry() -> None:
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:42:    contract = build_display_target_vocabulary_contract()
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:45:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:48:    assert entry.display_target_type == "logical_surface"
+tests/oob_dashboard/test_gesture_panel_smoke.py:12:    assert len(panel.bindings) >= 1
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:4:    build_policy_aware_action_exposure_contract,
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:8:def test_policy_aware_action_exposure_contract_builds() -> None:
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:9:    """Policy-aware action exposure contract should build successfully."""
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:10:    contract = build_policy_aware_action_exposure_contract()
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:17:def test_policy_aware_action_exposure_entry() -> None:
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:18:    """Policy-aware action exposure entry should remain canonical."""
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:19:    contract = build_policy_aware_action_exposure_contract()
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:24:    assert entry.action_exposure_mode == "approval_gated_exposed"
+tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py:25:    assert entry.action_exposure_status == "visible_but_not_executed"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:4:    build_panel_binding_contract,
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:8:def test_panel_binding_contract_builds() -> None:
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:9:    """Panel binding contract should build successfully."""
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:10:    contract = build_panel_binding_contract()
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:13:    assert contract.primary_operator_bindings == 3
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:14:    assert contract.diagnostics_bindings == 8
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:15:    assert contract.expansion_bindings == 8
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:16:    assert contract.default_target_bindings == 19
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:19:def test_panel_binding_chat_entry() -> None:
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:21:    contract = build_panel_binding_contract()
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:24:    assert entry.display_target_id == "display_primary_operator"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:25:    assert entry.binding_reason == "operator_surface_binding"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:31:def test_panel_binding_foundation_runtime_entry() -> None:
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:33:    contract = build_panel_binding_contract()
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:40:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:41:    assert entry.binding_reason == "foundation_monitoring_binding"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:46:def test_panel_binding_navigation_entry() -> None:
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:48:    contract = build_panel_binding_contract()
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:53:    assert entry.display_target_id == "display_tertiary_expansion"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:54:    assert entry.binding_reason == "hidden_internal_binding"
+tests/wrist_psc_display_integration/test_wrist_psc_display_integration_contract_smoke.py:28:    assert entry.display_target_role == "engineering_display"
+tests/wrist_psc_display_integration/test_wrist_psc_display_integration_contract_smoke.py:40:    assert entry.display_target_role == "primary_dashboard_display"
+tests/wrist_psc_display_integration/test_wrist_psc_display_integration_contract_smoke.py:52:    assert entry.display_target_role == "ar_glasses_display"
+tests/spatial_anchor_resolution/test_spatial_anchor_resolution_contract_smoke.py:27:    assert entry.display_target_role == "engineering_display"
+tests/spatial_anchor_resolution/test_spatial_anchor_resolution_contract_smoke.py:39:    assert entry.display_target_role == "primary_dashboard_display"
+tests/spatial_anchor_resolution/test_spatial_anchor_resolution_contract_smoke.py:51:    assert entry.display_target_role == "ar_glasses_display"
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:4:    build_explainable_view_binding_contract,
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:8:def test_explainable_view_binding_contract_builds() -> None:
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:9:    """Explainable view binding contract should build successfully."""
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:10:    contract = build_explainable_view_binding_contract()
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:18:def test_explainable_view_binding_contract_contains_expected_bindings() -> None:
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:19:    """Explainable view binding contract should expose expected view bindings."""
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:20:    contract = build_explainable_view_binding_contract()
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:39:def test_explainable_view_binding_contract_preserves_explanation_flags() -> None:
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:40:    """Explainable view binding contract should preserve explanation flags."""
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:41:    contract = build_explainable_view_binding_contract()
+tests/explainable_view_binding/test_explainable_view_binding_contract_smoke.py:50:        assert entry.binding_status == "bound"
+tests/observability/test_payload_metrics_contract_smoke.py:37:    assert last.binding_status == "bound_to_data_plane"
+tests/observability/test_payload_metrics_contract_smoke.py:54:    assert second.binding_status == "inline_control_route"
+tests/payload_classification/test_artifact_routing_binding_smoke.py:4:    build_artifact_routing_binding_contract,
+tests/payload_classification/test_artifact_routing_binding_smoke.py:8:def test_artifact_routing_binding_contract_builds() -> None:
+tests/payload_classification/test_artifact_routing_binding_smoke.py:9:    """Artifact routing binding contract should build successfully."""
+tests/payload_classification/test_artifact_routing_binding_smoke.py:10:    contract = build_artifact_routing_binding_contract()
+tests/payload_classification/test_artifact_routing_binding_smoke.py:16:def test_artifact_routing_binding_contract_keeps_control_payload_inline() -> None:
+tests/payload_classification/test_artifact_routing_binding_smoke.py:18:    contract = build_artifact_routing_binding_contract()
+tests/payload_classification/test_artifact_routing_binding_smoke.py:24:    assert first.binding_status == "inline_control_route"
+tests/payload_classification/test_artifact_routing_binding_smoke.py:28:def test_artifact_routing_binding_contract_binds_heavy_artifact_to_data_plane() -> None:
+tests/payload_classification/test_artifact_routing_binding_smoke.py:30:    contract = build_artifact_routing_binding_contract()
+tests/payload_classification/test_artifact_routing_binding_smoke.py:37:    assert heavy.binding_status == "bound_to_data_plane"
+tests/display_topology/test_display_topology_contract_smoke.py:43:    """Display topology contract should preserve expected capability bindings."""
+tests/ar_glasses_display_contract/test_ar_glasses_display_contract_smoke.py:30:    assert entry.gesture_binding_mode == "gesture_linked_interface"
+tests/voice_latency_path/test_voice_latency_path_contract_smoke.py:27:    assert entry.normalization_binding_id == "intent_show_memory_001"
+tests/voice_latency_path/test_voice_latency_path_contract_smoke.py:41:    assert entry.normalization_binding_id == "intent_show_simulation_001"
+tests/voice_latency_path/test_voice_latency_path_contract_smoke.py:55:    assert entry.normalization_binding_id == "intent_show_monitoring_001"
+tests/workers/test_simulation_engine_observability_binding_smoke.py:8:def test_simulation_engine_observability_binding_builds() -> None:
+tests/workers/test_simulation_engine_observability_binding_smoke.py:9:    """Simulation engine observability binding should build successfully."""
+tests/workers/test_simulation_engine_observability_binding_smoke.py:16:def test_simulation_engine_observability_binding_contains_selected_backend() -> None:
+tests/workers/test_simulation_engine_observability_binding_smoke.py:17:    """Simulation engine observability binding should expose selected backend data."""
+tests/workers/test_simulation_engine_observability_binding_smoke.py:27:def test_simulation_engine_observability_binding_contains_fallback_path() -> None:
+tests/workers/test_simulation_engine_observability_binding_smoke.py:28:    """Simulation engine observability binding should expose fallback path data."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:4:    build_voice_multilingual_binding_contract,
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:8:def test_voice_multilingual_binding_contract_builds() -> None:
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:9:    """Voice multilingual binding contract should build successfully."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:10:    contract = build_voice_multilingual_binding_contract()
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:19:def test_voice_multilingual_binding_contract_contains_expected_memory_binding() -> None:
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:20:    """Voice multilingual binding should expose expected memory binding."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:21:    contract = build_voice_multilingual_binding_contract()
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:24:    assert entry.binding_id == "voicemlang_show_memory_001"
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:37:def test_voice_multilingual_binding_contract_contains_expected_simulation_binding() -> None:
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:38:    """Voice multilingual binding should expose expected simulation binding."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:39:    contract = build_voice_multilingual_binding_contract()
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:42:    assert entry.binding_id == "voicemlang_show_simulation_001"
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:55:def test_voice_multilingual_binding_contract_contains_expected_monitoring_binding() -> None:
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:56:    """Voice multilingual binding should expose expected monitoring binding."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:57:    contract = build_voice_multilingual_binding_contract()
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:60:    assert entry.binding_id == "voicemlang_show_monitoring_001"
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:73:def test_voice_multilingual_binding_contract_preserves_language_and_script_sets() -> None:
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:74:    """Voice multilingual binding should preserve canonical language and script sets."""
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:75:    contract = build_voice_multilingual_binding_contract()
+tests/voice_multilingual_binding/test_voice_multilingual_binding_contract_smoke.py:85:        assert entry.binding_status == "bound"

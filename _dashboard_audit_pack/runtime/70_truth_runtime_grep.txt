@@ -1,0 +1,988 @@
+MAKSIMAR_CORE_LIB/platform_integration/self_check.py:6:from MAKSIMAR_CORE_LIB.platform_integration.health_snapshot import (
+MAKSIMAR_CORE_LIB/platform_integration/self_check.py:7:    build_platform_health_snapshot,
+MAKSIMAR_CORE_LIB/platform_integration/self_check.py:17:    health = build_platform_health_snapshot(context)
+MAKSIMAR_CORE_LIB/platform_integration/health_models.py:18:    """Unified health snapshot for the platform."""
+MAKSIMAR_CORE_LIB/platform_integration/health_snapshot.py:47:def build_platform_health_snapshot(
+MAKSIMAR_CORE_LIB/platform_integration/health_snapshot.py:50:    """Build unified platform health snapshot."""
+MAKSIMAR_CORE_LIB/platform_integration/__init__.py:17:from MAKSIMAR_CORE_LIB.platform_integration.health_snapshot import (
+MAKSIMAR_CORE_LIB/platform_integration/__init__.py:19:    build_platform_health_snapshot,
+MAKSIMAR_CORE_LIB/platform_integration/__init__.py:39:    "build_platform_health_snapshot",
+MAKSIMAR_CORE_LIB/platform_integration/bootstrap_loader.py:58:    snapshot = PlatformBootstrapSnapshot(
+MAKSIMAR_CORE_LIB/platform_integration/bootstrap_loader.py:88:        snapshot=snapshot,
+MAKSIMAR_CORE_LIB/platform_integration/bootstrap_models.py:17:    """Unified snapshot of platform bootstrap state."""
+MAKSIMAR_CORE_LIB/platform_integration/bootstrap_models.py:51:    snapshot: PlatformBootstrapSnapshot
+MAKSIMAR_CORE_LIB/execution_observability/shell_contract.py:6:from MAKSIMAR_CORE_LIB.execution_observability.incident_contract import (
+MAKSIMAR_CORE_LIB/execution_observability/shell_contract.py:7:    build_execution_incident_contract,
+MAKSIMAR_CORE_LIB/execution_observability/shell_contract.py:28:    incident_contract = build_execution_incident_contract()
+MAKSIMAR_CORE_LIB/execution_observability/shell_contract.py:34:    if any(incident.active and incident.severity == "critical" for incident in incident_contract.incidents):
+MAKSIMAR_CORE_LIB/execution_observability/shell_contract.py:42:        total_incidents=incident_contract.total_incidents,
+MAKSIMAR_CORE_LIB/execution_observability/shell_models.py:14:    total_incidents: int
+MAKSIMAR_CORE_LIB/execution_observability/trace_models.py:12:    correlated_incident: str
+MAKSIMAR_CORE_LIB/execution_observability/__init__.py:9:from MAKSIMAR_CORE_LIB.execution_observability.incident_contract import (
+MAKSIMAR_CORE_LIB/execution_observability/__init__.py:10:    build_execution_incident_contract,
+MAKSIMAR_CORE_LIB/execution_observability/__init__.py:12:from MAKSIMAR_CORE_LIB.execution_observability.incident_models import (
+MAKSIMAR_CORE_LIB/execution_observability/__init__.py:101:    "build_execution_incident_contract",
+MAKSIMAR_CORE_LIB/execution_observability/incident_models.py:8:    """Canonical execution observability incident."""
+MAKSIMAR_CORE_LIB/execution_observability/incident_models.py:10:    incident_name: str
+MAKSIMAR_CORE_LIB/execution_observability/incident_models.py:17:    """Unified execution incident contract."""
+MAKSIMAR_CORE_LIB/execution_observability/incident_models.py:19:    total_incidents: int
+MAKSIMAR_CORE_LIB/execution_observability/incident_models.py:20:    incidents: tuple[ExecutionIncident, ...]
+MAKSIMAR_CORE_LIB/execution_observability/trace_contract.py:23:            correlated_incident="queue_pressure_incident",
+MAKSIMAR_CORE_LIB/execution_observability/trace_contract.py:28:            correlated_incident="lease_conflict_incident",
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:3:from MAKSIMAR_CORE_LIB.execution_observability.incident_models import (
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:12:def build_execution_incident_contract() -> ExecutionIncidentContract:
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:13:    """Build unified execution incident contract."""
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:16:    incidents = (
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:18:            incident_name="queue_pressure_incident",
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:23:            incident_name="lease_conflict_incident",
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:28:            incident_name="scheduler_state_incident",
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:35:        total_incidents=len(incidents),
+MAKSIMAR_CORE_LIB/execution_observability/incident_contract.py:36:        incidents=incidents,
+MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging/product_hardening_onboarding_packaging_contract.py:7:from MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents import (
+MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging/product_hardening_onboarding_packaging_contract.py:8:    build_operations_deployment_backup_incidents_contract,
+MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging/product_hardening_onboarding_packaging_contract.py:271:    ops = build_operations_deployment_backup_incidents_contract()
+MAKSIMAR_CORE_LIB/version_control/__init__.py:8:from MAKSIMAR_CORE_LIB.version_control.snapshot_models import (
+MAKSIMAR_CORE_LIB/version_control/panel_contract.py:21:            snapshot_available=True,
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:8:    "manual_snapshot",
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:9:    "pre_update_snapshot",
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:10:    "conversation_snapshot",
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:16:    """Canonical version-control snapshot request."""
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:18:    snapshot_id: str
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:19:    snapshot_type: SnapshotType
+MAKSIMAR_CORE_LIB/version_control/snapshot_models.py:26:    """Unified snapshot request contract."""
+MAKSIMAR_CORE_LIB/version_control/panel_models.py:13:    snapshot_available: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:35:    diagnostics_bindings: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:59:            return "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:61:        if metadata_entry.panel_family in ("diagnostics", "read_only_monitoring"):
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:62:            return "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:83:        if metadata_entry.panel_family in ("diagnostics", "read_only_monitoring"):
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:84:            return "diagnostics_monitoring_binding"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:115:        diagnostics_bindings=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_binding_contract.py:116:            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_status_adapter.py:41:    """Normalized live status snapshot across all foundation surfaces."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_status_adapter.py:122:def build_foundation_live_status_snapshot() -> FoundationLiveStatusSnapshot:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_status_adapter.py:123:    """Build normalized live foundation status snapshot from current shell surfaces."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:19:    "diagnostics_card",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:89:    if panel_state_class == "diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:90:        return "diagnostics_card"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:109:    if panel_state_class in {"diagnostics", "topology"}:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:123:    if panel_state_class in {"diagnostics", "operator"}:
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:141:    if panel_state_class == "diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:142:        return "diagnostics_icon"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:160:    if panel_state_class == "diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_to_visual_mapping_contract.py:207:                in {"foundation", "diagnostics", "operator"}
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_models.py:8:    """One diagnostics item routed into chat feedback channel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_models.py:17:    """Unified diagnostics-to-chat feedback contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_models.py:9:    "snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_models.py:10:    "incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_models.py:11:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_stalled_stage_command_flow_view.py:7:    build_foundation_live_status_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_stalled_stage_command_flow_view.py:118:    snapshot = build_foundation_live_status_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_stalled_stage_command_flow_view.py:121:    for record in snapshot.records:
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_dashboard_view import (
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:7:    build_foundation_incident_dashboard_view,
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:12:    "incident_visible",
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:13:    "no_incident_visible",
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:19:    """Canonical content entry for the incidents panel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:22:    total_incident_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:23:    active_incident_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:27:    incidents_panel_status: IncidentsPanelStatus
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:36:    """Canonical content contract for the incidents panel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:45:def build_incidents_panel_content_contract() -> IncidentsPanelContentContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:46:    """Build canonical content contract for the incidents panel."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:47:    incident_dashboard_view = build_foundation_incident_dashboard_view()
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:51:            panel_id="panel_incidents_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:52:            total_incident_entries=len(incident_dashboard_view.entries),
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:53:            active_incident_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:55:                for entry in incident_dashboard_view.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:56:                if entry.current_incident
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:60:                for entry in incident_dashboard_view.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:65:                for entry in incident_dashboard_view.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:70:                for entry in incident_dashboard_view.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:73:            incidents_panel_status=(
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:74:                "incident_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:75:                if any(entry.current_incident for entry in incident_dashboard_view.entries)
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:76:                else "no_incident_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:82:                "Canonical incidents panel content contract built from "
+MAKSIMAR_CORE_LIB/oob_dashboard/incidents_panel_content_contract.py:83:                "foundation incident dashboard view."
+MAKSIMAR_CORE_LIB/oob_dashboard/version_control_panel_models.py:13:    snapshot_available: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_diagnostics_correlation_view import (
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:7:    build_foundation_diagnostics_correlation_view,
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:12:    "diagnostics_visible",
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:13:    "no_diagnostics_visible",
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:48:    diagnostics_view = build_foundation_diagnostics_correlation_view()
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:53:            total_log_related_entries=len(diagnostics_view.entries),
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:55:                1 for entry in diagnostics_view.entries if entry.severity == "critical"
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:58:                1 for entry in diagnostics_view.entries if entry.severity == "warning"
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:61:                1 for entry in diagnostics_view.entries if entry.severity == "info"
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:65:                for entry in diagnostics_view.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:69:                1 for entry in diagnostics_view.entries if entry.failure_visible
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:72:                "diagnostics_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:73:                if len(diagnostics_view.entries) > 0
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:74:                else "no_diagnostics_visible"
+MAKSIMAR_CORE_LIB/oob_dashboard/logs_panel_content_contract.py:81:                "foundation diagnostics correlation view."
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:20:    "view_snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:21:    "view_incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:22:    "view_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:38:    "diagnostics_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:62:    diagnostics_views: int
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:82:        "panel_snapshot": "view_snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:83:        "panel_incident": "view_incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:84:        "panel_diagnostics": "view_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:103:        if panel_family in ("diagnostics", "read_only_monitoring"):
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:104:            return "diagnostics_view"
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:132:        diagnostics_views=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/view_targeting_contract.py:133:            1 for entry in entries if entry.view_target_kind == "diagnostics_view"
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:17:    "diagnostics_strip",
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:62:        "display_secondary_diagnostics": "workspace_foundation_monitoring",
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:74:        if display_target_id == "display_secondary_diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:77:            if panel_id in ("panel_incident", "panel_diagnostics"):
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:78:                return "diagnostics_strip"
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:91:        if display_target_id == "display_secondary_diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/layout_composition_contract.py:99:            if panel_id in ("panel_incident", "panel_diagnostics"):
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:68:        "panel_snapshot": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:76:        "panel_incident": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py:84:        "panel_diagnostics": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:20:        "panel_consistency": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:21:        "panel_snapshot": "foundation",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:22:        "panel_incident": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:23:        "panel_diagnostics": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:29:        "panel_degraded_mode": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:43:        "panel_snapshot": "read_only",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:44:        "panel_incident": "read_only",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:45:        "panel_diagnostics": "read_only",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:65:        "panel_snapshot": 20,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:66:        "panel_incident": 10,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:67:        "panel_diagnostics": 15,
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:86:        "panel_consistency": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:87:        "panel_snapshot": "foundation",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:88:        "panel_incident": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:89:        "panel_diagnostics": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_contract.py:95:        "panel_degraded_mode": "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py:6:    build_foundation_truth_consistency_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py:57:def build_foundation_truth_consistency_view() -> FoundationTruthConsistencyView:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py:59:    contract = build_foundation_truth_consistency_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_view.py:84:        view_id="foundation_truth_consistency_view_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_index import (
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:4:    build_diagnostics_index,
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:10:from MAKSIMAR_CORE_LIB.oob_dashboard.snapshot_aggregator import (
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:11:    build_dashboard_state_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:16:    """Build unified diagnostics-to-chat feedback contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:17:    snapshot = build_dashboard_state_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:18:    diagnostics = build_diagnostics_index(snapshot)
+MAKSIMAR_CORE_LIB/oob_dashboard/feedback_contract.py:26:        for hint in diagnostics.hints
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:9:    "display_secondary_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:15:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:66:            display_target_id="display_secondary_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:67:            display_role="diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py:71:            description="Canonical diagnostics display target.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:17:    "foundation_incident_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:18:    "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:57:            "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:58:            "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:59:            "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:61:            "Consistency panel reads canonical diagnostics correlation output.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:63:        "panel_snapshot": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:70:        "panel_incident": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:71:            "foundation_incident_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:72:            "foundation_incident_failure_localization_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:73:            "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:75:            "Incident panel reads canonical incident failure localization view.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:77:        "panel_diagnostics": (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:78:            "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:79:            "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:80:            "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_source_binding_contract.py:82:            "Diagnostics panel reads canonical diagnostics correlation view.",
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py:26:    diagnostics_panels: int
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py:66:            diagnostics_panels=workspace_read_model_map[
+MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py:68:            ].diagnostics_panels,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:18:from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:22:from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_index import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:23:    build_diagnostics_index,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:25:from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:26:    build_dashboard_incident_view,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:28:from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:32:from MAKSIMAR_CORE_LIB.oob_dashboard.snapshot_aggregator import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:33:    build_dashboard_state_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:344:from MAKSIMAR_CORE_LIB.oob_dashboard.incidents_panel_content_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:345:    build_incidents_panel_content_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:671:    "build_dashboard_incident_view", "build_dashboard_state_snapshot", "build_diagnostics_index", 
+MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:719:    "GuardChainPanelContentContract", "GuardChainPanelContentEntry", "build_incidents_panel_content_contract", 
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_bottom_ticker_contract.py:22:    "incident_stream",
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:27:            hint_text="Проверь snapshot, metrics, summary, incident и alert цепочку.",
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:30:    if source_name == "incident_snapshot":
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:34:            probable_location="MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py",
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:35:            hint_text="Проверь incident signals и согласованность source-of-truth.",
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:54:def build_diagnostics_index(
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:55:    snapshot: DashboardStateSnapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:57:    """Build diagnostics index from dashboard state snapshot."""
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_index.py:63:        for line in snapshot.lines
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_models.py:16:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_history_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:6:    build_foundation_incident_history_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:8:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_snapshot_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:9:    build_foundation_incident_snapshot_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:15:    """Read-only dashboard entry for unified foundation incident visibility."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:18:    incident_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:23:    incident_state: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:25:    current_incident: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:36:    """Read-only dashboard view for unified foundation incident visibility."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:40:    current_incident_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:66:def build_foundation_incident_dashboard_view() -> FoundationIncidentDashboardView:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:67:    """Build unified read-only dashboard view for foundation incidents."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:68:    snapshot_contract = build_foundation_incident_snapshot_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:69:    history_contract = build_foundation_incident_history_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:71:    history_by_incident_id = {
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:72:        entry.incident_id: entry for entry in history_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:77:            dashboard_entry_id=f"foundation_incident_dashboard_{entry.source_component}_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:78:            incident_id=entry.incident_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:83:            incident_state=entry.incident_state,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:85:            current_incident=entry.current_incident,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:86:            history_visible=history_by_incident_id[entry.incident_id].history_visible,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:88:            archived=history_by_incident_id[entry.incident_id].archived,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:89:            recovered=history_by_incident_id[entry.incident_id].recovered,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:92:                "Read-only foundation incident dashboard entry derived from "
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:93:                f"incident snapshot/history for scope={entry.source_component}."
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:96:        for entry in snapshot_contract.entries
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:100:        view_id="foundation_incident_dashboard_view_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_dashboard_view.py:102:        current_incident_entries=sum(1 for entry in entries if entry.current_incident),
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view_models.py:8:    """One incident-oriented line for dashboard view."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view_models.py:10:    incident_name: str
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view_models.py:18:    """Unified incident view with error localization for dashboard."""
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:16:    "diagnostics_block",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:48:    diagnostics_block_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:66:        "panel_incidents_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:69:        return "diagnostics_block"
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:82:        "panel_incidents_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:113:        ("panel_incidents_001", "secondary"),
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:155:                "panel_incidents_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:169:        diagnostics_block_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py:170:            1 for entry in entries if entry.block_type == "diagnostics_block"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_model import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:6:    build_foundation_incident_model,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:12:    """Canonical incident snapshot entry for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:14:    snapshot_entry_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:15:    incident_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:19:    incident_state: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:21:    snapshot_available: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:22:    current_incident: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:28:    """Canonical incident snapshot contract for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:31:    snapshot_available_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:32:    current_incident_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:40:def build_foundation_incident_snapshot_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:43:    """Build canonical incident snapshot contract from foundation incident model."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:44:    model = build_foundation_incident_model()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:48:            snapshot_entry_id=f"foundation_snapshot_{entry.source_component}_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:49:            incident_id=entry.incident_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:53:            incident_state=entry.incident_state,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:55:            snapshot_available=True,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:56:            current_incident=entry.incident_state in {"NEW", "ACTIVE", "CONFIRMED"},
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:58:                "Canonical incident snapshot entry derived from foundation "
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:59:                f"incident model for scope={entry.source_component}."
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:67:        snapshot_available_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:68:            1 for entry in entries if entry.snapshot_available
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_snapshot_contract.py:70:        current_incident_entries=sum(1 for entry in entries if entry.current_incident),
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_failure_localization_view import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:6:    build_foundation_incident_failure_localization_view,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:9:    build_foundation_live_status_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:18:    """Canonical correlated diagnostics entry for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:28:    incident_visible: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:37:    """Canonical correlated diagnostics view for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:47:    incident_visible_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:52:def build_foundation_diagnostics_correlation_view() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:55:    """Build canonical correlated diagnostics view for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:56:    live_snapshot = build_foundation_live_status_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:57:    incident_view = build_foundation_incident_failure_localization_view()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:60:    incident_by_scope = {entry.truth_scope: entry for entry in incident_view.entries}
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:64:    for live_record in live_snapshot.records:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:66:        incident_entry = incident_by_scope[truth_scope]
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:69:        panel_id = incident_entry.panel_id
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:73:                correlation_entry_id=f"foundationdiagnostics_{truth_scope}_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:76:                display_title=incident_entry.display_title,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:79:                severity=incident_entry.severity,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:80:                failure_stage=incident_entry.failure_stage,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:81:                incident_visible=incident_entry.incident_visible,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:82:                failure_visible=incident_entry.failure_visible,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:84:                suspected_source_file=incident_entry.suspected_source_file,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:86:                    "Canonical correlated diagnostics entry derived from live "
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:95:        view_id="foundation_diagnostics_correlation_view_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:105:        incident_visible_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_diagnostics_correlation_view.py:106:            1 for entry in entry_tuple if entry.incident_visible
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:7:    build_foundation_live_status_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:34:    """Canonical incident/failure localization entry for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:42:    incident_visible: bool
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:51:    """Canonical incident/failure localization view for foundation dashboards."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:55:    visible_incident_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:93:    """Map derived foundation state to incident severity."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:103:def _incident_visible_for_state(derived_state: str) -> bool:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:104:    """Return whether incident visibility should be enabled for a state."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:113:def build_foundation_incident_failure_localization_view() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:116:    """Build canonical incident/failure localization view from live foundation state."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:117:    snapshot = build_foundation_live_status_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:120:    for record in snapshot.records:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:132:                incident_visible=_incident_visible_for_state(derived_state),
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:137:                    "Canonical incident/failure localization entry derived from "
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:146:        view_id="foundation_incident_failure_localization_view_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:148:        visible_incident_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_failure_localization_view.py:149:            1 for entry in entry_tuple if entry.incident_visible
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view_models import (
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:8:    build_platform_incident_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:9:    build_runtime_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:13:def _resolve_location(incident_name: str) -> str:
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:14:    """Resolve probable code location for incident signal."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:15:    if incident_name == "health_failed_domains":
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:16:        return "MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py"
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:17:    if incident_name == "runtime_documents":
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:19:    if incident_name == "event_records":
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:21:    if incident_name == "self_check_total_items":
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:26:def build_dashboard_incident_view() -> DashboardIncidentView:
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:27:    """Build dashboard incident view with error localization."""
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:28:    runtime_snapshot = build_runtime_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:29:    incident_snapshot = build_platform_incident_snapshot(runtime_snapshot)
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:33:            incident_name=record.incident_name,
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:35:            probable_location=_resolve_location(record.incident_name),
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:36:            detail_value=record.incident_value,
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:38:        for record in incident_snapshot.records
+MAKSIMAR_CORE_LIB/oob_dashboard/incident_view.py:42:        overall_status=incident_snapshot.overall_status,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_guard_chain_truth_view.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_guard_chain_truth_view.py:6:    build_foundation_truth_consistency_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_guard_chain_truth_view.py:82:    contract = build_foundation_truth_consistency_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_models.py:8:    """One root-cause hint for dashboard diagnostics."""
+MAKSIMAR_CORE_LIB/oob_dashboard/diagnostics_models.py:18:    """Read-only diagnostics index for OOB dashboard."""
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:14:    "diagnostics_strip",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:73:            panel_zone="diagnostics_strip",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:74:            description="Canonical diagnostics strip zone for incident/diagnostic surfaces.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:105:            parent_zone="diagnostics_strip",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:106:            description="Canonical first diagnostics-strip slot.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:110:            parent_zone="diagnostics_strip",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_zone_slot_vocabulary_contract.py:111:            description="Canonical second diagnostics-strip slot.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:22:    "diagnostics_view_contract",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:47:    diagnostics_content_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:75:            "foundation_incident_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:76:            "foundation_diagnostics_correlation_view",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:79:            return "diagnostics_view_contract"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:126:        diagnostics_content_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_content_contract.py:129:            if entry.content_contract_kind == "diagnostics_view_contract"
+MAKSIMAR_CORE_LIB/oob_dashboard/version_control_panel_contract.py:21:            snapshot_available=entry.snapshot_available,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_unified_dashboard_view.py:12:    build_foundation_live_status_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_unified_dashboard_view.py:63:    live_snapshot = build_foundation_live_status_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_unified_dashboard_view.py:69:    live_by_panel = {record.truth_scope: record for record in live_snapshot.records}
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_historical_state_split_view.py:9:    build_foundation_live_status_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_historical_state_split_view.py:63:    live_snapshot = build_foundation_live_status_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_live_historical_state_split_view.py:69:    for live_record in live_snapshot.records:
+MAKSIMAR_CORE_LIB/oob_dashboard/dashboard_models.py:17:    """Unified read-only dashboard snapshot."""
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:25:    diagnostics_panels: int
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:67:            diagnostics_panels=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_read_model_contract.py:71:                and layout_entry.layout_zone == "diagnostics_strip"
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_hud_snapshot_contract import (
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:7:    build_visual_hud_snapshot_contract,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:26:    snapshot_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:56:    snapshot_contract = build_visual_hud_snapshot_contract()
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:57:    snapshot_entry = snapshot_contract.entries[0]
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:60:        "ready" if snapshot_entry.preview_ready else "previewable"
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:66:            snapshot_id=snapshot_entry.snapshot_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:67:            renderer_surface_id=snapshot_entry.renderer_surface_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:68:            theme_id=snapshot_entry.theme_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:71:            top_layer_id=snapshot_entry.top_layer_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:72:            center_layer_id=snapshot_entry.center_layer_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:73:            bottom_layer_id=snapshot_entry.bottom_layer_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:74:            right_sidebar_layer_id=snapshot_entry.right_sidebar_layer_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:75:            total_layers=snapshot_entry.total_layers,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_preview_contract.py:76:            visible_layers=snapshot_entry.visible_layers,
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:18:    """Canonical HUD snapshot entry for preview-ready whole-screen state."""
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:20:    snapshot_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:37:    """Canonical HUD snapshot contract for preview-ready whole-screen state."""
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:48:def build_visual_hud_snapshot_contract() -> VisualHudSnapshotContract:
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:49:    """Build canonical HUD snapshot contract."""
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:85:            snapshot_id="visual_hud_snapshot_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:101:            description="Canonical HUD snapshot entry for first preview-ready screen.",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_hud_snapshot_contract.py:106:        contract_id="visual_hud_snapshot_contract_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:35:    diagnostics_chains: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:71:        diagnostics_chains=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_view_display_chain_contract.py:72:            1 for entry in entries if entry.display_target_id == "display_secondary_diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_model import (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:6:    build_foundation_incident_model,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:12:    """Canonical incident history entry for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:15:    incident_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:18:    incident_state: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:28:    """Canonical incident history contract for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:40:def build_foundation_incident_history_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:43:    """Build canonical incident history contract from foundation incident model."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:44:    model = build_foundation_incident_model()
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:49:            incident_id=entry.incident_id,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:52:            incident_state=entry.incident_state,
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:54:            archived=entry.incident_state == "ARCHIVED",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:55:            recovered=entry.incident_state == "RECOVERED",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_history_contract.py:58:                "Canonical incident history entry derived from foundation incident "
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:9:    build_platform_incident_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:12:    build_runtime_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:17:def build_dashboard_state_snapshot() -> DashboardStateSnapshot:
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:18:    """Build unified read-only dashboard snapshot."""
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:19:    runtime_snapshot = build_runtime_snapshot()
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:20:    runtime_metrics = build_runtime_metrics(runtime_snapshot)
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:22:        runtime_snapshot,
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:25:    incident_snapshot = build_platform_incident_snapshot(runtime_snapshot)
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:26:    alert_policy = evaluate_alert_policy(incident_snapshot)
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:41:            source_name="incident_snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:42:            status=incident_snapshot.overall_status,
+MAKSIMAR_CORE_LIB/oob_dashboard/snapshot_aggregator.py:43:            detail_value=incident_snapshot.total_incident_signals,
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_contract.py:22:        WorkspacePlacement(display_id=0, zone="secondary", panel_id="panel_incident"),
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_contract.py:24:        WorkspacePlacement(display_id=1, zone="main", panel_id="panel_diagnostics"),
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_signal_overlay_contract.py:68:    diagnostics_stream_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_signal_overlay_contract.py:79:    if panel_state_class == "diagnostics":
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_signal_overlay_contract.py:173:        diagnostics_stream_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_truth_consistency_contract.py:106:def build_foundation_truth_consistency_contract() -> (
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_models.py:23:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_metadata_models.py:32:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:10:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:20:    "incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:21:    "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:37:    "diagnostics_surface",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:47:    "panel_snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:48:    "panel_incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:49:    "panel_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:96:    diagnostics_entries: int
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:120:            canonical_panel_id="panel_snapshot",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:125:            description="Canonical runtime snapshot monitoring panel.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:128:            canonical_panel_id="panel_incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:129:            panel_family="diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:130:            panel_kind="incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:131:            panel_role="diagnostics_surface",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:133:            description="Canonical incident localization and inspection panel.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:136:            canonical_panel_id="panel_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:137:            panel_family="diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:138:            panel_kind="diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:139:            panel_role="diagnostics_surface",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:141:            description="Canonical diagnostics and correlation panel.",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:286:        diagnostics_entries=sum(
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_id_vocabulary_normalization.py:287:            1 for entry in entries if entry.panel_family == "diagnostics"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:38:    """Canonical incident model entry for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:40:    incident_id: str
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:41:    incident_state: FoundationIncidentState
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:56:    """Canonical incident model for foundation dashboard hardening."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:70:def build_foundation_incident_model() -> FoundationIncidentModel:
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:71:    """Build canonical foundation incident model."""
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:74:            incident_id="foundationincident_runtime_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:75:            incident_state="ACTIVE",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:80:            reason="Runtime incident placeholder model entry for dashboard hardening.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:85:            description="Canonical runtime incident model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:88:            incident_id="foundationincident_guard_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:89:            incident_state="ACTIVE",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:94:            reason="Stop-gate watcher incident placeholder model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:99:            description="Canonical guard incident model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:102:            incident_id="foundationincident_core_guard_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:103:            incident_state="ACTIVE",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:108:            reason="Core guard incident placeholder model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:113:            description="Canonical core guard incident model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:116:            incident_id="foundationincident_kernel_guard_001",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:117:            incident_state="ACTIVE",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:122:            reason="Kernel watchdog incident placeholder model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:127:            description="Canonical kernel guard incident model entry.",
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:133:        new_entries=sum(1 for entry in entries if entry.incident_state == "NEW"),
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:134:        active_entries=sum(1 for entry in entries if entry.incident_state == "ACTIVE"),
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:136:            1 for entry in entries if entry.incident_state == "CONFIRMED"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:139:            1 for entry in entries if entry.incident_state == "RECOVERED"
+MAKSIMAR_CORE_LIB/oob_dashboard/foundation_incident_model.py:142:            1 for entry in entries if entry.incident_state == "ARCHIVED"
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_taxonomy_contract.py:64:        "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_taxonomy_contract.py:73:        "incident",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_taxonomy_contract.py:74:        "diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_taxonomy_contract.py:89:        "diagnostics_surface",
+MAKSIMAR_CORE_LIB/oob_dashboard/visual_renderer_contract.py:64:                "diagnostics_overlay",
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:15:        NavigationItem("nav_snapshot", "Snapshot", "snapshot", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:16:        NavigationItem("nav_incident", "Incident", "incident", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:17:        NavigationItem("nav_diagnostics", "Diagnostics", "diagnostics", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:26:        DisplayPanelPlacement("panel_snapshot", "snapshot", 0, "center"),
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:27:        DisplayPanelPlacement("panel_incident", "incident", 0, "right"),
+MAKSIMAR_CORE_LIB/oob_dashboard/navigation_contract.py:30:        DisplayPanelPlacement("panel_diagnostics", "diagnostics", 1, "left"),
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py:23:        ("panel_snapshot", "core", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py:24:        ("panel_incident", "diagnostics", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py:25:        ("panel_diagnostics", "diagnostics", True),
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:60:            "display_secondary_diagnostics",
+MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py:62:            "Canonical workspace for foundation and diagnostics monitoring surfaces.",
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.snapshot_aggregator import (
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:4:    build_dashboard_state_snapshot,
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:12:def build_snapshot_metrics_consistency_check() -> ConsistencyCheckResult:
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:14:    Validate that snapshot layer and derived metrics are consistent.
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:17:    snapshot = build_dashboard_state_snapshot()
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:21:    expected_total = snapshot.total_lines
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:22:    actual_total = len(snapshot.lines)
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:26:            check_name="snapshot_total_lines_match",
+MAKSIMAR_CORE_LIB/source_of_truth/snapshot_metrics_consistency.py:36:        check_scope="snapshot_metrics",
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:6:from MAKSIMAR_CORE_LIB.source_of_truth.snapshot_metrics_consistency import (
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:7:    build_snapshot_metrics_consistency_check,
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:10:from MAKSIMAR_CORE_LIB.source_of_truth.summary_incident_alert_consistency import (
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:11:    build_summary_incident_alert_consistency_check,
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:22:    "build_snapshot_metrics_consistency_check",
+MAKSIMAR_CORE_LIB/source_of_truth/__init__.py:23:    "build_summary_incident_alert_consistency_check",
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.snapshot_aggregator import (
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:4:    build_dashboard_state_snapshot,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view import (
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:7:    build_dashboard_incident_view,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:16:def build_summary_incident_alert_consistency_check() -> ConsistencyCheckResult:
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:19:    - summary (snapshot)
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:20:    - incident view
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:24:    snapshot = build_dashboard_state_snapshot()
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:25:    incident_view = build_dashboard_incident_view()
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:33:            expected_value=1 if snapshot.overall_status == incident_view.overall_status else 0,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:35:            consistent=snapshot.overall_status == incident_view.overall_status,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:43:            expected_value=snapshot.total_lines,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:44:            actual_value=incident_view.total_lines,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:45:            consistent=snapshot.total_lines == incident_view.total_lines,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:50:    snapshot_has_problem = snapshot.overall_status != "ok"
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:51:    incident_has_problem = any(
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:52:        line.status != "ok" for line in incident_view.lines
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:58:            expected_value=1 if snapshot_has_problem else 0,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:59:            actual_value=1 if incident_has_problem else 0,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:60:            consistent=snapshot_has_problem == incident_has_problem,
+MAKSIMAR_CORE_LIB/source_of_truth/summary_incident_alert_consistency.py:67:        check_scope="summary_incident_alert",
+MAKSIMAR_CORE_LIB/source_of_truth/unified_consistency_report.py:4:    build_snapshot_metrics_consistency_check,
+MAKSIMAR_CORE_LIB/source_of_truth/unified_consistency_report.py:5:    build_summary_incident_alert_consistency_check,
+MAKSIMAR_CORE_LIB/source_of_truth/unified_consistency_report.py:30:        build_snapshot_metrics_consistency_check(),
+MAKSIMAR_CORE_LIB/source_of_truth/unified_consistency_report.py:31:        build_summary_incident_alert_consistency_check(),
+MAKSIMAR_CORE_LIB/data_plane/artifact_ownership_contract.py:20:            artifact_ref="artifact://logs/runtime_001",
+MAKSIMAR_CORE_LIB/node_roles/artifact_contract.py:26:            artifact_ref="artifact://logs/runtime_001",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:29:    "backup_incident_domain",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:46:    "control_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:47:    "execution_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:48:    "mobile_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:65:    """Canonical operations / deployment / backup / incidents entry."""
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:75:    incident_mode: IncidentMode
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:77:    incident_snapshot_required: bool
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:84:        """Validate operations / deployment / backup / incidents invariants."""
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:116:        if not self.incident_snapshot_required:
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:118:                f"incident_snapshot_required must be True: {self.ops_entry_id}"
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:151:            if self.incident_mode != "control_incident_ready":
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:152:                raise ValueError("ops_dev_control_001 must use control_incident_ready")
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:155:            if self.ops_domain != "backup_incident_domain":
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:156:                raise ValueError("ops_home_execution_001 must use backup_incident_domain")
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:173:            if self.incident_mode != "execution_incident_ready":
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:175:                    "ops_home_execution_001 must use execution_incident_ready"
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:197:            if self.incident_mode != "mobile_incident_ready":
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:198:                raise ValueError("ops_mobile_proxy_001 must use mobile_incident_ready")
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:203:    """Unified operations / deployment / backup / incidents contract."""
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:207:    backup_incident_domain_entries: int
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:213:        """Validate operations / deployment / backup / incidents contract invariants."""
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:220:        backup_incident_domain_entries = sum(
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:221:            1 for entry in self.entries if entry.ops_domain == "backup_incident_domain"
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:233:        if self.backup_incident_domain_entries != backup_incident_domain_entries:
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:235:                "backup_incident_domain_entries must match computed count"
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:256:def build_operations_deployment_backup_incidents_contract() -> OperationsDeploymentBackupIncidentsContract:
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:257:    """Build canonical operations / deployment / backup / incidents contract."""
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:308:            incident_mode="control_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:310:            incident_snapshot_required=True,
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:318:            ops_domain="backup_incident_domain",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:325:            incident_mode="execution_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:327:            incident_snapshot_required=True,
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:331:            description="Canonical operations entry for HOME execution backup/incident path.",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:342:            incident_mode="mobile_incident_ready",
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:344:            incident_snapshot_required=True,
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:355:    backup_incident_domain_entries = sum(
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:356:        1 for entry in entries if entry.ops_domain == "backup_incident_domain"
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py:368:        backup_incident_domain_entries=backup_incident_domain_entries,
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/__init__.py:1:from MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents.operations_deployment_backup_incidents_contract import (
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/__init__.py:4:    build_operations_deployment_backup_incidents_contract,
+MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/__init__.py:10:    "build_operations_deployment_backup_incidents_contract",
+MAKSIMAR_CORE_LIB/runtime_observability/metrics_models.py:17:    """Unified runtime observability snapshot."""
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:9:from MAKSIMAR_CORE_LIB.runtime_observability.incident_models import (
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:13:from MAKSIMAR_CORE_LIB.runtime_observability.incident_snapshot import (
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:14:    build_platform_incident_snapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:25:from MAKSIMAR_CORE_LIB.runtime_observability.snapshot_loader import (
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:27:    build_runtime_snapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:103:    "build_platform_incident_snapshot",
+MAKSIMAR_CORE_LIB/runtime_observability/__init__.py:106:    "build_runtime_snapshot",
+MAKSIMAR_CORE_LIB/runtime_observability/logging_contract.py:19:            event_name="runtime_snapshot_built",
+MAKSIMAR_CORE_LIB/runtime_observability/logging_contract.py:22:            message="Runtime snapshot contract built successfully.",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_models.py:8:    """One platform incident-oriented signal."""
+MAKSIMAR_CORE_LIB/runtime_observability/incident_models.py:10:    incident_name: str
+MAKSIMAR_CORE_LIB/runtime_observability/incident_models.py:11:    incident_value: int
+MAKSIMAR_CORE_LIB/runtime_observability/incident_models.py:17:    """Unified incident snapshot for platform observability."""
+MAKSIMAR_CORE_LIB/runtime_observability/incident_models.py:20:    total_incident_signals: int
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:6:    build_platform_health_snapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:16:def build_runtime_snapshot() -> RuntimeSnapshot:
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:17:    """Build unified runtime observability snapshot."""
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:19:    health = build_platform_health_snapshot(context)
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:34:def build_runtime_metrics(snapshot: RuntimeSnapshot) -> list[RuntimeMetric]:
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:35:    """Convert runtime snapshot to metric list."""
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:39:            metric_value=snapshot.runtime_documents,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:44:            metric_value=snapshot.event_records,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:49:            metric_value=snapshot.health_total_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:54:            metric_value=snapshot.health_loaded_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:59:            metric_value=snapshot.health_failed_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:60:            status="ok" if snapshot.health_failed_domains == 0 else "failed",
+MAKSIMAR_CORE_LIB/runtime_observability/snapshot_loader.py:64:            metric_value=snapshot.self_check_total_items,
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:8:from MAKSIMAR_CORE_LIB.runtime_observability.snapshot_loader import (
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:9:    build_runtime_snapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:15:    snapshot = build_runtime_snapshot()
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:21:            metric_value=snapshot.health_total_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:26:            metric_value=snapshot.health_failed_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:36:            metric_value=snapshot.runtime_documents,
+MAKSIMAR_CORE_LIB/runtime_observability/extended_metrics_contract.py:41:            metric_value=snapshot.event_records,
+MAKSIMAR_CORE_LIB/runtime_observability/observability_summary.py:31:    snapshot: RuntimeSnapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/slo_contract.py:14:            indicator_name="runtime_snapshot_health",
+MAKSIMAR_CORE_LIB/runtime_observability/slo_contract.py:16:            service_impact="System snapshot built successfully.",
+MAKSIMAR_CORE_LIB/runtime_observability/alert_models.py:18:    incident_name: str
+MAKSIMAR_CORE_LIB/runtime_observability/alert_models.py:19:    incident_value: int
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:3:from MAKSIMAR_CORE_LIB.runtime_observability.incident_models import (
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:10:def build_platform_incident_snapshot(
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:11:    snapshot: RuntimeSnapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:13:    """Build unified platform incident snapshot from runtime snapshot."""
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:16:            incident_name="health_failed_domains",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:17:            incident_value=snapshot.health_failed_domains,
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:18:            status="ok" if snapshot.health_failed_domains == 0 else "failed",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:21:            incident_name="runtime_documents",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:22:            incident_value=snapshot.runtime_documents,
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:23:            status="ok" if snapshot.runtime_documents >= 0 else "failed",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:26:            incident_name="event_records",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:27:            incident_value=snapshot.event_records,
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:28:            status="ok" if snapshot.event_records >= 0 else "failed",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:31:            incident_name="self_check_total_items",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:32:            incident_value=snapshot.self_check_total_items,
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:33:            status="ok" if snapshot.self_check_total_items > 0 else "failed",
+MAKSIMAR_CORE_LIB/runtime_observability/incident_snapshot.py:42:        total_incident_signals=len(records),
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:7:from MAKSIMAR_CORE_LIB.runtime_observability.incident_models import (
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:14:    """Classify one incident record into alert signal."""
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:17:            incident_name=record.incident_name,
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:18:            incident_value=record.incident_value,
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:23:    if record.incident_name == "health_failed_domains" and record.incident_value == 0:
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:25:    elif record.incident_name == "self_check_total_items" and record.incident_value > 0:
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:31:        incident_name=record.incident_name,
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:32:        incident_value=record.incident_value,
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:39:    incident_snapshot: PlatformIncidentSnapshot,
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:41:    """Evaluate alert policy from incident snapshot."""
+MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py:42:    signals = [_classify_record(record) for record in incident_snapshot.records]
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:78:def _detect_cpu_snapshot() -> tuple[DetectedCpuSnapshot, tuple[str, ...]]:
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:79:    """Detect CPU snapshot using lscpu and /proc/cpuinfo."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:140:    snapshot = DetectedCpuSnapshot(
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:149:    return snapshot, tuple(dict.fromkeys(sources))
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:226:def _detect_memory_snapshot() -> tuple[DetectedMemorySnapshot, tuple[str, ...]]:
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:227:    """Detect memory snapshot using /proc/meminfo and dmidecode when available."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:249:    snapshot = DetectedMemorySnapshot(
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:263:    return snapshot, tuple(dict.fromkeys(sources))
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:392:def _merge_gpu_snapshots(
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:396:    """Merge GPU snapshots while avoiding obvious duplicates."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:424:    cpu_snapshot, cpu_sources = _detect_cpu_snapshot()
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:425:    memory_snapshot, memory_sources = _detect_memory_snapshot()
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:429:    merged_gpus = _merge_gpu_snapshots(nvidia_gpus, generic_gpus)
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:436:        cpu=cpu_snapshot,
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter.py:437:        memory=memory_snapshot,
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter_models.py:10:    """Vendor-neutral detected CPU snapshot."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter_models.py:22:    """Vendor-neutral detected memory snapshot."""
+MAKSIMAR_SERVER/EXECUTION_CONTROL/node_runtime/hardware_detection_adapter_models.py:39:    """Vendor-neutral detected GPU/accelerator snapshot."""
+tests/platform_integration/test_bootstrap_loader_smoke.py:13:    assert context.snapshot.contract_count >= 1
+tests/platform_integration/test_bootstrap_loader_smoke.py:14:    assert context.snapshot.config_count >= 1
+tests/platform_integration/test_health_snapshot_smoke.py:6:    build_platform_health_snapshot,
+tests/platform_integration/test_health_snapshot_smoke.py:10:def test_platform_health_snapshot_builds() -> None:
+tests/platform_integration/test_health_snapshot_smoke.py:11:    """Platform health snapshot should build successfully."""
+tests/platform_integration/test_health_snapshot_smoke.py:13:    snapshot = build_platform_health_snapshot(context)
+tests/platform_integration/test_health_snapshot_smoke.py:15:    assert snapshot.total_domains == 13
+tests/platform_integration/test_health_snapshot_smoke.py:16:    assert snapshot.loaded_domains >= 1
+tests/platform_integration/test_health_snapshot_smoke.py:17:    assert snapshot.failed_domains == 0
+tests/platform_integration/test_health_snapshot_smoke.py:18:    assert snapshot.overall_status == "ok"
+tests/execution_observability/test_incident_contract_smoke.py:4:    build_execution_incident_contract,
+tests/execution_observability/test_incident_contract_smoke.py:8:def test_execution_incident_contract_builds() -> None:
+tests/execution_observability/test_incident_contract_smoke.py:9:    contract = build_execution_incident_contract()
+tests/execution_observability/test_incident_contract_smoke.py:11:    assert contract.total_incidents == 3
+tests/execution_observability/test_incident_contract_smoke.py:12:    assert len(contract.incidents) == 3
+tests/execution_observability/test_incident_contract_smoke.py:15:def test_execution_incident_contract_contains_severities() -> None:
+tests/execution_observability/test_incident_contract_smoke.py:16:    contract = build_execution_incident_contract()
+tests/execution_observability/test_incident_contract_smoke.py:18:    severities = {incident.severity for incident in contract.incidents}
+tests/execution_observability/test_shell_contract_smoke.py:15:    assert shell.total_incidents == 3
+tests/test_artifact_reference_models_smoke.py:23:                artifact_ref="artifact://logs/runtime_001",
+tests/version_control/test_snapshot_models_smoke.py:9:def test_snapshot_models_build() -> None:
+tests/version_control/test_snapshot_models_smoke.py:15:                snapshot_id="snapshot_001",
+tests/version_control/test_snapshot_models_smoke.py:16:                snapshot_type="manual_snapshot",
+tests/version_control/test_snapshot_models_smoke.py:21:                snapshot_id="snapshot_002",
+tests/version_control/test_snapshot_models_smoke.py:22:                snapshot_type="conversation_snapshot",
+tests/version_control/test_snapshot_models_smoke.py:31:    assert contract.requests[0].snapshot_type == "manual_snapshot"
+tests/version_control/test_snapshot_models_smoke.py:32:    assert contract.requests[-1].snapshot_type == "conversation_snapshot"
+tests/oob_dashboard/test_incident_view_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard import build_dashboard_incident_view
+tests/oob_dashboard/test_incident_view_smoke.py:6:def test_dashboard_incident_view_builds() -> None:
+tests/oob_dashboard/test_incident_view_smoke.py:7:    """Dashboard incident view should build successfully."""
+tests/oob_dashboard/test_incident_view_smoke.py:8:    view = build_dashboard_incident_view()
+tests/oob_dashboard/test_incident_view_smoke.py:15:def test_dashboard_incident_view_contains_locations() -> None:
+tests/oob_dashboard/test_incident_view_smoke.py:16:    """Dashboard incident view should contain localized incident sources."""
+tests/oob_dashboard/test_incident_view_smoke.py:17:    view = build_dashboard_incident_view()
+tests/oob_dashboard/test_incident_view_smoke.py:19:    assert any(line.incident_name == "health_failed_domains" for line in view.lines)
+tests/oob_dashboard/test_view_targeting_contract_smoke.py:14:    assert contract.diagnostics_views == 4
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_model import (
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:2:    build_foundation_incident_model,
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:6:def test_foundation_incident_model_counts() -> None:
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:8:    model = build_foundation_incident_model()
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:21:def test_foundation_incident_model_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:22:    """Incident model should expose runtime incident entry."""
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:23:    model = build_foundation_incident_model()
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:26:    assert entry.incident_id == "foundationincident_runtime_001"
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:27:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:36:def test_foundation_incident_model_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:37:    """Incident model should expose kernel incident entry."""
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:38:    model = build_foundation_incident_model()
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:41:    assert entry.incident_id == "foundationincident_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:42:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:51:def test_foundation_incident_model_scope_order() -> None:
+tests/oob_dashboard/test_foundation_incident_model_smoke.py:53:    model = build_foundation_incident_model()
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:27:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:30:    assert entry.diagnostics_panels == 2
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:47:    assert entry.diagnostics_panels == 0
+tests/oob_dashboard/test_workspace_read_model_contract_smoke.py:66:    assert entry.diagnostics_panels == 0
+tests/oob_dashboard/test_layout_composition_contract_smoke.py:41:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:14:    assert contract.diagnostics_chains == 8
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:32:    """Foundation runtime panel should map to foundation view and diagnostics display."""
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:41:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_panel_view_display_chain_contract_smoke.py:42:    assert entry.display_role == "diagnostics"
+tests/oob_dashboard/test_visual_hud_preview_contract_smoke.py:25:    assert entry.snapshot_id == "visual_hud_snapshot_001"
+tests/oob_dashboard/test_panel_id_vocabulary_normalization_smoke.py:17:    assert model.diagnostics_entries == 2
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard import build_dashboard_state_snapshot
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:6:def test_dashboard_state_snapshot_builds() -> None:
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:7:    """Dashboard state snapshot should build successfully."""
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:8:    snapshot = build_dashboard_state_snapshot()
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:10:    assert snapshot.overall_status == "ok"
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:11:    assert snapshot.total_lines == 4
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:12:    assert len(snapshot.lines) == 4
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:15:def test_dashboard_state_snapshot_contains_expected_sources() -> None:
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:16:    """Dashboard snapshot should contain expected read-only sources."""
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:17:    snapshot = build_dashboard_state_snapshot()
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:19:    assert any(line.source_name == "platform_self_check" for line in snapshot.lines)
+tests/oob_dashboard/test_snapshot_aggregator_smoke.py:20:    assert any(line.source_name == "alert_policy" for line in snapshot.lines)
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_snapshot_contract import (
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:2:    build_foundation_incident_snapshot_contract,
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:6:def test_foundation_incident_snapshot_contract_counts() -> None:
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:7:    """Incident snapshot contract should expose expected counts."""
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:8:    contract = build_foundation_incident_snapshot_contract()
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:11:    assert contract.snapshot_available_entries == 4
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:12:    assert contract.current_incident_entries == 4
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:19:def test_foundation_incident_snapshot_contract_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:20:    """Incident snapshot contract should expose runtime snapshot entry."""
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:21:    contract = build_foundation_incident_snapshot_contract()
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:24:    assert entry.snapshot_entry_id == "foundation_snapshot_runtime_001"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:25:    assert entry.incident_id == "foundationincident_runtime_001"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:29:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:31:    assert entry.snapshot_available is True
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:32:    assert entry.current_incident is True
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:35:def test_foundation_incident_snapshot_contract_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:36:    """Incident snapshot contract should expose kernel snapshot entry."""
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:37:    contract = build_foundation_incident_snapshot_contract()
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:40:    assert entry.snapshot_entry_id == "foundation_snapshot_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:41:    assert entry.incident_id == "foundationincident_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:45:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:47:    assert entry.snapshot_available is True
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:48:    assert entry.current_incident is True
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:51:def test_foundation_incident_snapshot_contract_scope_order() -> None:
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:52:    """Incident snapshot contract should preserve canonical scope order."""
+tests/oob_dashboard/test_foundation_incident_snapshot_contract_smoke.py:53:    contract = build_foundation_incident_snapshot_contract()
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_dashboard_view import (
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:2:    build_foundation_incident_dashboard_view,
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:6:def test_foundation_incident_dashboard_view_counts() -> None:
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:8:    view = build_foundation_incident_dashboard_view()
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:10:    assert view.view_id == "foundation_incident_dashboard_view_001"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:12:    assert view.current_incident_entries == 4
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:22:def test_foundation_incident_dashboard_view_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:24:    view = build_foundation_incident_dashboard_view()
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:29:        == "foundation_incident_dashboard_runtime_001"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:31:    assert entry.incident_id == "foundationincident_runtime_001"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:36:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:38:    assert entry.current_incident is True
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:46:def test_foundation_incident_dashboard_view_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:48:    view = build_foundation_incident_dashboard_view()
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:53:        == "foundation_incident_dashboard_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:55:    assert entry.incident_id == "foundationincident_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:60:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:62:    assert entry.current_incident is True
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:70:def test_foundation_incident_dashboard_view_scope_order() -> None:
+tests/oob_dashboard/test_foundation_incident_dashboard_view_smoke.py:72:    view = build_foundation_incident_dashboard_view()
+tests/oob_dashboard/test_visual_signal_overlay_contract_smoke.py:59:        + contract.diagnostics_stream_entries
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_diagnostics_correlation_view import (
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:2:    build_foundation_diagnostics_correlation_view,
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:6:def test_foundation_diagnostics_correlation_view_shape() -> None:
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:8:    view = build_foundation_diagnostics_correlation_view()
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:10:    assert view.view_id == "foundation_diagnostics_correlation_view_001"
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:15:    assert view.incident_visible_entries >= 0
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:19:def test_foundation_diagnostics_correlation_view_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:21:    view = build_foundation_diagnostics_correlation_view()
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:24:    assert entry.correlation_entry_id == "foundationdiagnostics_runtime_001"
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:32:def test_foundation_diagnostics_correlation_view_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:34:    view = build_foundation_diagnostics_correlation_view()
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:37:    assert entry.correlation_entry_id == "foundationdiagnostics_kernel_guard_001"
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:45:def test_foundation_diagnostics_correlation_view_scope_order() -> None:
+tests/oob_dashboard/test_foundation_diagnostics_correlation_view_smoke.py:47:    view = build_foundation_diagnostics_correlation_view()
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_hud_snapshot_contract import (
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:4:    build_visual_hud_snapshot_contract,
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:8:def test_visual_hud_snapshot_contract_builds() -> None:
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:9:    """Visual HUD snapshot contract should build successfully."""
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:10:    contract = build_visual_hud_snapshot_contract()
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:12:    assert contract.contract_id == "visual_hud_snapshot_contract_001"
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:18:def test_visual_hud_snapshot_contains_expected_entry() -> None:
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:19:    """Visual HUD snapshot should contain canonical preview-ready entry."""
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:20:    contract = build_visual_hud_snapshot_contract()
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:23:    assert entry.snapshot_id == "visual_hud_snapshot_001"
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:32:def test_visual_hud_snapshot_contains_expected_anchor_layers() -> None:
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:33:    """Visual HUD snapshot should expose top, center, bottom, and sidebar layers."""
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:34:    contract = build_visual_hud_snapshot_contract()
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:46:def test_visual_hud_snapshot_totals_are_consistent() -> None:
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:47:    """Visual HUD snapshot totals should remain internally consistent."""
+tests/oob_dashboard/test_visual_hud_snapshot_contract_smoke.py:48:    contract = build_visual_hud_snapshot_contract()
+tests/oob_dashboard/test_main_operator_dashboard_read_model_contract_smoke.py:28:    assert entry.diagnostics_panels == 0
+tests/oob_dashboard/test_panel_taxonomy_contract_smoke.py:28:    assert family_counts["diagnostics"] == 2
+tests/oob_dashboard/test_panel_taxonomy_contract_smoke.py:45:    assert role_counts["diagnostics_surface"] == 2
+tests/oob_dashboard/test_panel_taxonomy_contract_smoke.py:63:    assert kind_counts["incident"] == 1
+tests/oob_dashboard/test_panel_taxonomy_contract_smoke.py:64:    assert kind_counts["diagnostics"] == 1
+tests/oob_dashboard/test_display_runtime_resolver_integration_contract_smoke.py:31:    """Foundation runtime panel should resolve to diagnostics display."""
+tests/oob_dashboard/test_display_runtime_resolver_integration_contract_smoke.py:40:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_view import (
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:2:    build_foundation_truth_consistency_view,
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:6:def test_foundation_truth_consistency_view_counts() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:8:    view = build_foundation_truth_consistency_view()
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:10:    assert view.view_id == "foundation_truth_consistency_view_001"
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:18:def test_foundation_truth_consistency_view_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:20:    view = build_foundation_truth_consistency_view()
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:37:def test_foundation_truth_consistency_view_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:39:    view = build_foundation_truth_consistency_view()
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:56:def test_foundation_truth_consistency_view_scope_order() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_view_smoke.py:58:    view = build_foundation_truth_consistency_view()
+tests/oob_dashboard/test_workspace_registry_contract_smoke.py:27:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_failure_localization_view import (
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:2:    build_foundation_incident_failure_localization_view,
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:6:def test_foundation_incident_failure_localization_view_shape() -> None:
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:8:    view = build_foundation_incident_failure_localization_view()
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:10:    assert view.view_id == "foundation_incident_failure_localization_view_001"
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:18:def test_foundation_incident_failure_localization_view_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:20:    view = build_foundation_incident_failure_localization_view()
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:31:def test_foundation_incident_failure_localization_view_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:33:    view = build_foundation_incident_failure_localization_view()
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:44:def test_foundation_incident_failure_localization_view_scope_order() -> None:
+tests/oob_dashboard/test_foundation_incident_failure_localization_view_smoke.py:46:    view = build_foundation_incident_failure_localization_view()
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:4:    build_incidents_panel_content_contract,
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:8:def test_incidents_panel_content_contract_builds() -> None:
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:10:    contract = build_incidents_panel_content_contract()
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:18:def test_incidents_panel_content_entry() -> None:
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:20:    contract = build_incidents_panel_content_contract()
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:23:    assert entry.panel_id == "panel_incidents_001"
+tests/oob_dashboard/test_incidents_panel_content_contract_smoke.py:24:    assert entry.total_incident_entries == 4
+tests/oob_dashboard/test_diagnostics_index_smoke.py:4:    build_dashboard_state_snapshot,
+tests/oob_dashboard/test_diagnostics_index_smoke.py:5:    build_diagnostics_index,
+tests/oob_dashboard/test_diagnostics_index_smoke.py:9:def test_diagnostics_index_builds() -> None:
+tests/oob_dashboard/test_diagnostics_index_smoke.py:11:    snapshot = build_dashboard_state_snapshot()
+tests/oob_dashboard/test_diagnostics_index_smoke.py:12:    diagnostics = build_diagnostics_index(snapshot)
+tests/oob_dashboard/test_diagnostics_index_smoke.py:14:    assert diagnostics.total_hints == 4
+tests/oob_dashboard/test_diagnostics_index_smoke.py:15:    assert len(diagnostics.hints) == 4
+tests/oob_dashboard/test_diagnostics_index_smoke.py:18:def test_diagnostics_index_contains_expected_sources() -> None:
+tests/oob_dashboard/test_diagnostics_index_smoke.py:20:    snapshot = build_dashboard_state_snapshot()
+tests/oob_dashboard/test_diagnostics_index_smoke.py:21:    diagnostics = build_diagnostics_index(snapshot)
+tests/oob_dashboard/test_diagnostics_index_smoke.py:23:    assert any(hint.source_name == "platform_self_check" for hint in diagnostics.hints)
+tests/oob_dashboard/test_diagnostics_index_smoke.py:24:    assert any(hint.source_name == "alert_policy" for hint in diagnostics.hints)
+tests/oob_dashboard/test_logs_panel_content_contract_smoke.py:25:    assert entry.logs_panel_status == "diagnostics_visible"
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:3:    build_foundation_live_status_snapshot,
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:22:def test_build_foundation_live_status_snapshot_shape() -> None:
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:23:    """Foundation live status snapshot should expose expected shape."""
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:24:    snapshot = build_foundation_live_status_snapshot()
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:26:    assert snapshot.total_records == 4
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:27:    assert len(snapshot.records) == 4
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:28:    assert [record.truth_scope for record in snapshot.records] == [
+tests/oob_dashboard/test_foundation_live_status_adapter_smoke.py:35:    for record in snapshot.records:
+tests/oob_dashboard/test_panel_content_contract_smoke.py:14:    assert contract.diagnostics_content_entries == 4
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_incident_history_contract import (
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:2:    build_foundation_incident_history_contract,
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:6:def test_foundation_incident_history_contract_counts() -> None:
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:8:    contract = build_foundation_incident_history_contract()
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:19:def test_foundation_incident_history_contract_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:21:    contract = build_foundation_incident_history_contract()
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:25:    assert entry.incident_id == "foundationincident_runtime_001"
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:28:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:35:def test_foundation_incident_history_contract_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:37:    contract = build_foundation_incident_history_contract()
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:41:    assert entry.incident_id == "foundationincident_kernel_guard_001"
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:44:    assert entry.incident_state == "ACTIVE"
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:51:def test_foundation_incident_history_contract_scope_order() -> None:
+tests/oob_dashboard/test_foundation_incident_history_contract_smoke.py:53:    contract = build_foundation_incident_history_contract()
+tests/oob_dashboard/test_visual_explainability_sidebar_contract_smoke.py:33:def test_visual_explainability_sidebar_contains_incidents_entry() -> None:
+tests/oob_dashboard/test_visual_explainability_sidebar_contract_smoke.py:34:    """Explainability sidebar should contain incidents entry."""
+tests/oob_dashboard/test_visual_explainability_sidebar_contract_smoke.py:37:        item for item in contract.entries if item.panel_id == "panel_incidents_001"
+tests/oob_dashboard/test_visual_explainability_sidebar_contract_smoke.py:40:    assert entry.block_type in {"diagnostics_block", "explainability_block"}
+tests/oob_dashboard/test_visual_explainability_sidebar_contract_smoke.py:51:        + contract.diagnostics_block_entries
+tests/oob_dashboard/test_panel_zone_slot_vocabulary_contract_smoke.py:25:        "diagnostics_strip",
+tests/oob_dashboard/test_panel_zone_slot_vocabulary_contract_smoke.py:47:    assert slot_map["slot_diag_1"] == "diagnostics_strip"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:29:def test_display_target_vocabulary_diagnostics_entry() -> None:
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:34:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_display_target_vocabulary_contract_smoke.py:35:    assert entry.display_role == "diagnostics"
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:14:    assert contract.diagnostics_bindings == 8
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:32:    """Foundation runtime panel should bind to diagnostics display."""
+tests/oob_dashboard/test_panel_binding_contract_smoke.py:40:    assert entry.display_target_id == "display_secondary_diagnostics"
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:1:from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_contract import (
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:2:    build_foundation_truth_consistency_contract,
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:6:def test_foundation_truth_consistency_contract_counts() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:8:    contract = build_foundation_truth_consistency_contract()
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:17:def test_foundation_truth_consistency_contract_runtime_entry() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:19:    contract = build_foundation_truth_consistency_contract()
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:34:def test_foundation_truth_consistency_contract_kernel_entry() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:36:    contract = build_foundation_truth_consistency_contract()
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:51:def test_foundation_truth_consistency_contract_scope_order() -> None:
+tests/oob_dashboard/test_foundation_truth_consistency_contract_smoke.py:53:    contract = build_foundation_truth_consistency_contract()
+tests/source_of_truth/test_snapshot_metrics_consistency_smoke.py:4:    build_snapshot_metrics_consistency_check,
+tests/source_of_truth/test_snapshot_metrics_consistency_smoke.py:8:def test_snapshot_metrics_consistency_build() -> None:
+tests/source_of_truth/test_snapshot_metrics_consistency_smoke.py:10:    result = build_snapshot_metrics_consistency_check()
+tests/source_of_truth/test_snapshot_metrics_consistency_smoke.py:12:    assert result.check_scope == "snapshot_metrics"
+tests/source_of_truth/test_summary_incident_alert_consistency_smoke.py:4:    build_summary_incident_alert_consistency_check,
+tests/source_of_truth/test_summary_incident_alert_consistency_smoke.py:8:def test_summary_incident_alert_consistency_build() -> None:
+tests/source_of_truth/test_summary_incident_alert_consistency_smoke.py:9:    """Summary ↔ incident ↔ alert consistency should build."""
+tests/source_of_truth/test_summary_incident_alert_consistency_smoke.py:10:    result = build_summary_incident_alert_consistency_check()
+tests/source_of_truth/test_summary_incident_alert_consistency_smoke.py:12:    assert result.check_scope == "summary_incident_alert"
+tests/source_of_truth/test_consistency_models_smoke.py:12:        check_name="snapshot_vs_metrics",
+tests/source_of_truth/test_consistency_models_smoke.py:28:    assert result.lines[0].check_name == "snapshot_vs_metrics"
+tests/data_plane/test_artifact_ownership_models_smoke.py:21:                artifact_ref="artifact://logs/runtime_001",
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents import (
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:4:    build_operations_deployment_backup_incidents_contract,
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:8:def test_operations_deployment_backup_incidents_contract_builds() -> None:
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:9:    """Operations / deployment / backup / incidents contract should build successfully."""
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:10:    contract = build_operations_deployment_backup_incidents_contract()
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:14:    assert contract.backup_incident_domain_entries == 1
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:19:def test_operations_deployment_backup_incidents_contract_contains_expected_dev_entry() -> None:
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:21:    contract = build_operations_deployment_backup_incidents_contract()
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:30:def test_operations_deployment_backup_incidents_contract_contains_expected_home_entry() -> None:
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:32:    contract = build_operations_deployment_backup_incidents_contract()
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:36:    assert entry.ops_domain == "backup_incident_domain"
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:41:def test_operations_deployment_backup_incidents_contract_contains_expected_mobile_entry() -> None:
+tests/operations_deployment_backup_incidents/test_operations_deployment_backup_incidents_contract_smoke.py:43:    contract = build_operations_deployment_backup_incidents_contract()
+tests/runtime_observability/test_snapshot_loader_smoke.py:5:    build_runtime_snapshot,
+tests/runtime_observability/test_snapshot_loader_smoke.py:9:def test_runtime_snapshot_builds() -> None:
+tests/runtime_observability/test_snapshot_loader_smoke.py:10:    """Runtime snapshot should build successfully."""
+tests/runtime_observability/test_snapshot_loader_smoke.py:11:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_snapshot_loader_smoke.py:13:    assert snapshot.health_total_domains == 13
+tests/runtime_observability/test_snapshot_loader_smoke.py:14:    assert snapshot.health_loaded_domains == 13
+tests/runtime_observability/test_snapshot_loader_smoke.py:15:    assert snapshot.health_failed_domains == 0
+tests/runtime_observability/test_snapshot_loader_smoke.py:16:    assert snapshot.self_check_total_items >= 1
+tests/runtime_observability/test_snapshot_loader_smoke.py:21:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_snapshot_loader_smoke.py:22:    metrics = build_runtime_metrics(snapshot)
+tests/runtime_observability/test_alert_policy_smoke.py:4:    build_platform_incident_snapshot,
+tests/runtime_observability/test_alert_policy_smoke.py:5:    build_runtime_snapshot,
+tests/runtime_observability/test_alert_policy_smoke.py:12:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_alert_policy_smoke.py:13:    incident = build_platform_incident_snapshot(snapshot)
+tests/runtime_observability/test_alert_policy_smoke.py:14:    result = evaluate_alert_policy(incident)
+tests/runtime_observability/test_alert_policy_smoke.py:25:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_alert_policy_smoke.py:26:    incident = build_platform_incident_snapshot(snapshot)
+tests/runtime_observability/test_alert_policy_smoke.py:27:    result = evaluate_alert_policy(incident)
+tests/runtime_observability/test_alert_policy_smoke.py:29:    assert any(signal.incident_name == "health_failed_domains" for signal in result.signals)
+tests/runtime_observability/test_alert_policy_smoke.py:30:    assert any(signal.incident_name == "self_check_total_items" for signal in result.signals)
+tests/runtime_observability/test_incident_snapshot_smoke.py:4:    build_platform_incident_snapshot,
+tests/runtime_observability/test_incident_snapshot_smoke.py:5:    build_runtime_snapshot,
+tests/runtime_observability/test_incident_snapshot_smoke.py:9:def test_platform_incident_snapshot_builds() -> None:
+tests/runtime_observability/test_incident_snapshot_smoke.py:10:    """Platform incident snapshot should build successfully."""
+tests/runtime_observability/test_incident_snapshot_smoke.py:11:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_incident_snapshot_smoke.py:12:    incident = build_platform_incident_snapshot(snapshot)
+tests/runtime_observability/test_incident_snapshot_smoke.py:14:    assert incident.overall_status == "ok"
+tests/runtime_observability/test_incident_snapshot_smoke.py:15:    assert incident.total_incident_signals == 4
+tests/runtime_observability/test_incident_snapshot_smoke.py:16:    assert incident.failed_signals == 0
+tests/runtime_observability/test_incident_snapshot_smoke.py:17:    assert len(incident.records) == 4
+tests/runtime_observability/test_incident_snapshot_smoke.py:20:def test_platform_incident_snapshot_contains_health_signal() -> None:
+tests/runtime_observability/test_incident_snapshot_smoke.py:21:    """Platform incident snapshot should contain health_failed_domains signal."""
+tests/runtime_observability/test_incident_snapshot_smoke.py:22:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_incident_snapshot_smoke.py:23:    incident = build_platform_incident_snapshot(snapshot)
+tests/runtime_observability/test_incident_snapshot_smoke.py:25:    assert any(record.incident_name == "health_failed_domains" for record in incident.records)
+tests/runtime_observability/test_incident_snapshot_smoke.py:26:    assert any(record.incident_name == "self_check_total_items" for record in incident.records)
+tests/runtime_observability/test_observability_summary_smoke.py:6:    build_runtime_snapshot,
+tests/runtime_observability/test_observability_summary_smoke.py:12:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_observability_summary_smoke.py:13:    metrics = build_runtime_metrics(snapshot)
+tests/runtime_observability/test_observability_summary_smoke.py:14:    summary = build_runtime_observability_summary(snapshot, metrics)
+tests/runtime_observability/test_observability_summary_smoke.py:24:    snapshot = build_runtime_snapshot()
+tests/runtime_observability/test_observability_summary_smoke.py:25:    metrics = build_runtime_metrics(snapshot)
+tests/runtime_observability/test_observability_summary_smoke.py:26:    summary = build_runtime_observability_summary(snapshot, metrics)

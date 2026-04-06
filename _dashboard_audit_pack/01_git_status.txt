@@ -1,0 +1,30 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	02_IMPORT_PATH_CANONICALIZATION_v1.md
+	04_PARALLEL_VALIDATION_EXECUTION_BASELINE_v1.md
+	05_SERIAL_FALLBACK_BASELINE_v1.md
+	06_ENVIRONMENT_ACTIVATION_DISCIPLINE_v1.md
+	07_TEST_COLLECTION_FAILURE_INTERPRETATION_v1.md
+	08_VALIDATION_COMMAND_REFERENCE_BASELINE_v1.md
+	STRUCTURE.md
+	_dashboard_audit_pack/
+	conftest.py
+	docs/agent_swarm_advanced_deep/
+	docs/ai_memory_self_awareness_deep/
+	docs/document_meta_governance/
+	docs/document_registry.yaml
+	docs/document_registry.yaml.bak
+	docs/document_registry_expansion/
+	docs/document_registry_rollout/
+	docs/validation_bootstrap_automation/
+	docs/validation_bootstrap_canonicalization/
+	docs/validation_entry_diagnostics/
+	docs/validation_entry_enforcement/
+	docs/validation_entry_guard_design/
+	docs/validation_entry_implementation/
+	docs/validation_entry_runbooks/
+
+nothing added to commit but untracked files present (use "git add" to track)

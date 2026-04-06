@@ -1,0 +1,13 @@
+scripts/bootstrap/README.md
+scripts/bootstrap/bootstrap_env.sh
+scripts/bootstrap/bootstrap_requirements.sh
+scripts/bootstrap/create_giant_tree.sh
+scripts/config/validate_config_presence.sh
+scripts/dev/run_tests.sh
+scripts/tests/README.md
+scripts/tests/run_regression_matrix.sh
+scripts/validators/validate_configs.sh
+scripts/validators/validate_contract_domains.sh
+scripts/validators/validate_contracts.sh
+scripts/validators/validate_no_empty_contracts.sh
+scripts/validators/validate_structure.sh

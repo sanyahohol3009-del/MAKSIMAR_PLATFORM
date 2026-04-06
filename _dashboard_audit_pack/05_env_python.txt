@@ -1,0 +1,3 @@
+PYTHONPATH=/home/aleksandr/MAKSIMAR_PLATFORM
+VIRTUAL_ENV=/home/aleksandr/MAKSIMAR_PLATFORM/.venv
+VIRTUAL_ENV_PROMPT=(.venv) 

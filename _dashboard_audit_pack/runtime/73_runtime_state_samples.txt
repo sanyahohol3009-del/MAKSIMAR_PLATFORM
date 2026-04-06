@@ -1,0 +1,12 @@
+===== RUNTIME/state/.tmp_2ma7yluq.json =====
+{"schema_version":1,"source":"core_guard","status":"alive","ts":1774567838.5843527,"monotonic_ts":233930.392773537}
+===== RUNTIME/state/README.md =====
+
+===== RUNTIME/state/core_guard_heartbeat_state.json =====
+{"schema_version":1,"source":"core_guard","status":"alive","ts":1775278793.9437368,"monotonic_ts":860843.173642652}
+===== RUNTIME/state/guard_heartbeat_state.json =====
+{"schema_version":1,"source":"stop_gate_watcher","status":"alive","ts":1775278793.9272323,"monotonic_ts":860843.15713785}
+===== RUNTIME/state/heartbeat_state.json =====
+{"schema_version":1,"source":"process_supervisor","status":"alive","ts":1775278793.4680636,"monotonic_ts":860842.697969289}
+===== RUNTIME/state/kernel_heartbeat_state.json =====
+{"schema_version":1,"source":"kernel_watchdog","status":"alive","ts":1775278793.9883606,"monotonic_ts":860843.218266026}

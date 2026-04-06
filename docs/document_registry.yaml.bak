@@ -1,0 +1,125 @@
+registry_version: 1
+status_model:
+  - active_canonical
+  - draft
+  - superseded
+  - historical_only
+
+document_types:
+  - canonical
+  - audit_closure
+  - continuity_history
+  - draft
+
+authority_levels:
+  - constitutional
+  - operational
+  - reference
+  - historical
+
+interpretation_priorities:
+  - strict
+  - high
+  - medium
+  - historical
+
+packages:
+  - package_id: document_meta_governance_v1
+    title: Document Meta Governance v1
+    path: docs/document_meta_governance
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+    canonical: true
+    audit_closure: false
+    continuity_history: false
+    implementation_ready: false
+    depends_on:
+      - docs/project_documentation_system/DOCUMENTATION_ARCHITECTURE_v1.md
+      - docs/project_documentation_system/DOCUMENTATION_FAMILIES_MATRIX_v1.md
+    used_by:
+      - future_document_registry_expansion
+      - future_doc_to_code_linkage
+      - future_self_reading_jarvis
+
+documents:
+  - doc_id: document_meta_governance_01
+    title: 01 DOCUMENT HEADER STANDARD v1
+    path: docs/document_meta_governance/01_DOCUMENT_HEADER_STANDARD_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_02
+    title: 02 DOCUMENT STATUS MODEL v1
+    path: docs/document_meta_governance/02_DOCUMENT_STATUS_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_03
+    title: 03 DOCUMENT TYPE AND AUTHORITY MODEL v1
+    path: docs/document_meta_governance/03_DOCUMENT_TYPE_AND_AUTHORITY_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_04
+    title: 04 INTERPRETATION PRIORITY MODEL v1
+    path: docs/document_meta_governance/04_INTERPRETATION_PRIORITY_MODEL_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_05
+    title: 05 DOCUMENT REGISTRY BASELINE v1
+    path: docs/document_meta_governance/05_DOCUMENT_REGISTRY_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_06
+    title: 06 CANONICAL AUDIT HISTORY SEPARATION v1
+    path: docs/document_meta_governance/06_CANONICAL_AUDIT_HISTORY_SEPARATION_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: constitutional
+    interpretation_priority: strict
+
+  - doc_id: document_meta_governance_07
+    title: 07 DOCUMENT DEPENDENCY REFERENCE RULE v1
+    path: docs/document_meta_governance/07_DOCUMENT_DEPENDENCY_REFERENCE_RULE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_meta_governance_08
+    title: 08 DOCUMENT TO CODE TEST RUNBOOK LINKAGE BASELINE v1
+    path: docs/document_meta_governance/08_DOCUMENT_TO_CODE_TEST_RUNBOOK_LINKAGE_BASELINE_v1.md
+    status: active_canonical
+    document_type: canonical
+    authority_level: operational
+    interpretation_priority: high
+
+  - doc_id: document_meta_governance_09
+    title: 09 DOCUMENT META GOVERNANCE GAP NOTES v1
+    path: docs/document_meta_governance/09_DOCUMENT_META_GOVERNANCE_GAP_NOTES_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
+
+  - doc_id: document_meta_governance_10
+    title: 10 DOCUMENT META GOVERNANCE COMPLETION NOTE v1
+    path: docs/document_meta_governance/10_DOCUMENT_META_GOVERNANCE_COMPLETION_NOTE_v1.md
+    status: active_canonical
+    document_type: audit_closure
+    authority_level: reference
+    interpretation_priority: medium
