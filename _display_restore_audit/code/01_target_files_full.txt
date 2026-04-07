@@ -1,0 +1,2022 @@
+===== MAKSIMAR_CORE_LIB/display_topology/display_topology_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_SERVER.MEMORY_REGISTRY import (
+    build_memory_registry_contract,
+)
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT import (
+    build_registry_auto_enrollment_contract,
+)
+from MAKSIMAR_SERVER.SKILL_ADAPTER_REGISTRY import (
+    build_skill_adapter_registry_contract,
+)
+
+
+DisplayTargetRole = Literal[
+    "primary_dashboard_display",
+    "monitoring_display",
+    "engineering_display",
+    "presentation_display",
+    "mobile_display_proxy",
+    "simulation_display",
+    "wall_display",
+    "wrist_projection_zone",
+    "ar_glasses_display",
+]
+
+DisplayCapability = Literal[
+    "render_panels",
+    "render_explanations",
+    "multi_window",
+    "spatial_overlay",
+    "mobile_proxy",
+    "private_display",
+    "wall_projection",
+    "gesture_input",
+]
+
+DisplayVisibilityMode = Literal[
+    "private",
+    "shared",
+]
+
+DisplayAvailabilityStatus = Literal[
+    "active",
+]
+
+
+DISPLAY_ID_PATTERN = re.compile(r"^display_[a-z][a-z0-9_]*$")
+ZONE_ID_PATTERN = re.compile(r"^zone_[a-z][a-z0-9_]*$")
+PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
+
+
+def _validate_unique_non_empty_str_tuple(
+    *,
+    values: tuple[str, ...],
+    field_name: str,
+    owner_id: str,
+) -> None:
+    """Validate tuple items are non-empty and unique."""
+    if len(set(values)) != len(values):
+        raise ValueError(f"Duplicate values in {field_name} for {owner_id}")
+
+    for value in values:
+        if not value.strip():
+            raise ValueError(f"{field_name} contains empty value for {owner_id}")
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTopologyEntry:
+    """Canonical display topology entry."""
+
+    display_id: str
+    display_role: DisplayTargetRole
+    zone_ids: tuple[str, ...]
+    default_panel_ids: tuple[str, ...]
+    capabilities: tuple[DisplayCapability, ...]
+    visibility_mode: DisplayVisibilityMode
+    supports_multilingual_rendering: bool
+    supports_explainable_views: bool
+    supports_registry_routing: bool
+    availability_status: DisplayAvailabilityStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate display topology invariants."""
+        if not DISPLAY_ID_PATTERN.fullmatch(self.display_id):
+            raise ValueError(f"Invalid display_id: {self.display_id}")
+
+        if not self.description.strip():
+            raise ValueError(f"description must not be empty for {self.display_id}")
+
+        if not self.zone_ids:
+            raise ValueError(f"zone_ids must not be empty for {self.display_id}")
+
+        if not self.default_panel_ids:
+            raise ValueError(
+                f"default_panel_ids must not be empty for {self.display_id}"
+            )
+
+        if not self.capabilities:
+            raise ValueError(f"capabilities must not be empty for {self.display_id}")
+
+        _validate_unique_non_empty_str_tuple(
+            values=self.zone_ids,
+            field_name="zone_ids",
+            owner_id=self.display_id,
+        )
+        _validate_unique_non_empty_str_tuple(
+            values=self.default_panel_ids,
+            field_name="default_panel_ids",
+            owner_id=self.display_id,
+        )
+
+        if len(set(self.capabilities)) != len(self.capabilities):
+            raise ValueError(f"Duplicate capabilities detected for {self.display_id}")
+
+        for zone_id in self.zone_ids:
+            if not ZONE_ID_PATTERN.fullmatch(zone_id):
+                raise ValueError(f"Invalid zone_id: {zone_id}")
+
+        for panel_id in self.default_panel_ids:
+            if not PANEL_ID_PATTERN.fullmatch(panel_id):
+                raise ValueError(f"Invalid panel_id: {panel_id}")
+
+        if not self.supports_multilingual_rendering:
+            raise ValueError(
+                f"display must support multilingual rendering: {self.display_id}"
+            )
+
+        if not self.supports_explainable_views:
+            raise ValueError(
+                f"display must support explainable views: {self.display_id}"
+            )
+
+        if not self.supports_registry_routing:
+            raise ValueError(
+                f"display must support registry routing: {self.display_id}"
+            )
+
+        if self.availability_status != "active":
+            raise ValueError(f"display must be active: {self.display_id}")
+
+        if self.display_role == "primary_dashboard_display":
+            if "multi_window" not in self.capabilities:
+                raise ValueError(
+                    f"primary_dashboard_display must support multi_window: {self.display_id}"
+                )
+
+        if self.display_role == "engineering_display":
+            if "spatial_overlay" not in self.capabilities:
+                raise ValueError(
+                    f"engineering_display must support spatial_overlay: {self.display_id}"
+                )
+
+        if self.display_role == "mobile_display_proxy":
+            if self.visibility_mode != "private":
+                raise ValueError(
+                    f"mobile_display_proxy must be private: {self.display_id}"
+                )
+            if "mobile_proxy" not in self.capabilities:
+                raise ValueError(
+                    f"mobile_display_proxy must expose mobile_proxy capability: {self.display_id}"
+                )
+            if "private_display" not in self.capabilities:
+                raise ValueError(
+                    f"mobile_display_proxy must expose private_display capability: {self.display_id}"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTopologyContract:
+    """Unified display topology contract."""
+
+    total_displays: int
+    private_displays: int
+    shared_displays: int
+    multilingual_ready_displays: int
+    entries: tuple[DisplayTopologyEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate display topology contract invariants."""
+        if self.total_displays != len(self.entries):
+            raise ValueError("total_displays must match entries length")
+
+        private_displays = sum(
+            1 for entry in self.entries if entry.visibility_mode == "private"
+        )
+        shared_displays = sum(
+            1 for entry in self.entries if entry.visibility_mode == "shared"
+        )
+        multilingual_ready_displays = sum(
+            1 for entry in self.entries if entry.supports_multilingual_rendering
+        )
+
+        if self.private_displays != private_displays:
+            raise ValueError("private_displays must match computed count")
+
+        if self.shared_displays != shared_displays:
+            raise ValueError("shared_displays must match computed count")
+
+        if self.multilingual_ready_displays != multilingual_ready_displays:
+            raise ValueError(
+                "multilingual_ready_displays must match computed count"
+            )
+
+        display_ids = tuple(entry.display_id for entry in self.entries)
+        display_roles = tuple(entry.display_role for entry in self.entries)
+
+        if len(set(display_ids)) != len(display_ids):
+            raise ValueError("Duplicate display_id values detected")
+
+        if len(set(display_roles)) != len(display_roles):
+            raise ValueError("Duplicate display_role values detected")
+
+
+def build_display_topology_contract() -> DisplayTopologyContract:
+    """Build canonical display topology contract."""
+    memory_registry = build_memory_registry_contract()
+    skill_registry = build_skill_adapter_registry_contract()
+    auto_enrollment = build_registry_auto_enrollment_contract()
+
+    memory_panel_id = memory_registry.entries[0].panel_ids[0]
+    skill_panel_id = skill_registry.entries[0].panel_ids[0]
+
+    monitoring_entries = [
+        entry
+        for entry in auto_enrollment.entries
+        if entry.module_slug == "monitoring_panel"
+    ]
+    if len(monitoring_entries) != 1:
+        raise ValueError("Expected exactly one monitoring_panel registry entry")
+
+    monitoring_panel_id = monitoring_entries[0].panel_ids[0]
+
+    entries = (
+        DisplayTopologyEntry(
+            display_id="display_primary_dashboard_001",
+            display_role="primary_dashboard_display",
+            zone_ids=(
+                "zone_dashboard_main",
+                "zone_dashboard_sidebar",
+                "zone_dashboard_explanation",
+            ),
+            default_panel_ids=(
+                monitoring_panel_id,
+                memory_panel_id,
+            ),
+            capabilities=(
+                "render_panels",
+                "render_explanations",
+                "multi_window",
+            ),
+            visibility_mode="shared",
+            supports_multilingual_rendering=True,
+            supports_explainable_views=True,
+            supports_registry_routing=True,
+            availability_status="active",
+
+===== MAKSIMAR_CORE_LIB/physics_dashboard_views/physics_dashboard_views_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.material_registry import (
+    build_material_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.optics_light_field_engine import (
+    build_optics_light_field_engine_contract,
+)
+from MAKSIMAR_CORE_LIB.physics_validation_gate import (
+    build_physics_validation_gate_contract,
+)
+from MAKSIMAR_CORE_LIB.surface_intelligence import (
+    build_surface_intelligence_contract,
+)
+
+
+PhysicsPanelId = Literal[
+    "panel_surface_map_001",
+    "panel_material_profile_001",
+    "panel_validation_report_001",
+    "panel_optics_mode_001",
+    "panel_project_export_001",
+]
+
+PhysicsViewKind = Literal[
+    "surface_map_view",
+    "material_profile_view",
+    "validation_report_view",
+    "optics_mode_view",
+    "project_export_view",
+]
+
+DisplayRole = Literal[
+    "engineering_display",
+    "primary_dashboard_display",
+]
+
+DashboardVisibilityMode = Literal[
+    "read_only",
+]
+
+PhysicsDashboardStatus = Literal[
+    "defined",
+]
+
+
+_PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
+_VIEW_ID_PATTERN = re.compile(r"^view_[a-z][a-z0-9_]*$")
+_GATE_ID_PATTERN = re.compile(r"^physgate_[a-z][a-z0-9_]*$")
+_ENGINE_ID_PATTERN = re.compile(r"^opticsengine_[a-z][a-z0-9_]*$")
+_SURFACE_ID_PATTERN = re.compile(r"^surfaceintel_[a-z][a-z0-9_]*$")
+_MATERIAL_ID_PATTERN = re.compile(r"^material_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicsDashboardViewEntry:
+    """Canonical physics dashboard / explainable view entry."""
+
+    panel_id: PhysicsPanelId
+    view_id: str
+    view_kind: PhysicsViewKind
+    display_role: DisplayRole
+    visibility_mode: DashboardVisibilityMode
+    explainable_required: bool
+    read_only: bool
+    linked_surface_entry_id: str | None
+    linked_material_id: str | None
+    linked_validation_gate_id: str | None
+    linked_optics_engine_id: str | None
+    export_capable: bool
+    dashboard_status: PhysicsDashboardStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate physics dashboard view invariants."""
+        if not _PANEL_ID_PATTERN.fullmatch(self.panel_id):
+            raise ValueError(f"Invalid panel_id: {self.panel_id}")
+
+        if not _VIEW_ID_PATTERN.fullmatch(self.view_id):
+            raise ValueError(f"Invalid view_id: {self.view_id}")
+
+        if self.linked_surface_entry_id is not None:
+            if not _SURFACE_ID_PATTERN.fullmatch(self.linked_surface_entry_id):
+                raise ValueError(
+                    f"Invalid linked_surface_entry_id: {self.linked_surface_entry_id}"
+                )
+
+        if self.linked_material_id is not None:
+            if not _MATERIAL_ID_PATTERN.fullmatch(self.linked_material_id):
+                raise ValueError(
+                    f"Invalid linked_material_id: {self.linked_material_id}"
+                )
+
+        if self.linked_validation_gate_id is not None:
+            if not _GATE_ID_PATTERN.fullmatch(self.linked_validation_gate_id):
+                raise ValueError(
+                    f"Invalid linked_validation_gate_id: {self.linked_validation_gate_id}"
+                )
+
+        if self.linked_optics_engine_id is not None:
+            if not _ENGINE_ID_PATTERN.fullmatch(self.linked_optics_engine_id):
+                raise ValueError(
+                    f"Invalid linked_optics_engine_id: {self.linked_optics_engine_id}"
+                )
+
+        if not self.description.strip():
+            raise ValueError(f"description must not be empty for {self.panel_id}")
+
+        if self.visibility_mode != "read_only":
+            raise ValueError(f"Physics dashboard must be read_only: {self.panel_id}")
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True for {self.panel_id}"
+            )
+
+        if not self.read_only:
+            raise ValueError(f"read_only must be True for {self.panel_id}")
+
+        if self.dashboard_status != "defined":
+            raise ValueError(
+                f"dashboard_status must be defined for {self.panel_id}"
+            )
+
+        if self.panel_id == "panel_surface_map_001":
+            if self.view_kind != "surface_map_view":
+                raise ValueError("panel_surface_map_001 must use surface_map_view")
+            if self.display_role != "engineering_display":
+                raise ValueError(
+                    "panel_surface_map_001 must target engineering_display"
+                )
+            if self.linked_surface_entry_id != "surfaceintel_aluminum_engraving_001":
+                raise ValueError(
+                    "panel_surface_map_001 must link surfaceintel_aluminum_engraving_001"
+                )
+            if self.linked_material_id != "material_aluminum_001":
+                raise ValueError(
+                    "panel_surface_map_001 must link material_aluminum_001"
+                )
+            if self.export_capable:
+                raise ValueError("panel_surface_map_001 must not be export_capable")
+
+        if self.panel_id == "panel_material_profile_001":
+            if self.view_kind != "material_profile_view":
+                raise ValueError(
+                    "panel_material_profile_001 must use material_profile_view"
+                )
+            if self.display_role != "engineering_display":
+                raise ValueError(
+                    "panel_material_profile_001 must target engineering_display"
+                )
+            if self.linked_material_id != "material_steel_001":
+                raise ValueError(
+                    "panel_material_profile_001 must link material_steel_001"
+                )
+            if self.export_capable:
+                raise ValueError(
+                    "panel_material_profile_001 must not be export_capable"
+                )
+
+        if self.panel_id == "panel_validation_report_001":
+            if self.view_kind != "validation_report_view":
+                raise ValueError(
+                    "panel_validation_report_001 must use validation_report_view"
+                )
+            if self.display_role != "primary_dashboard_display":
+                raise ValueError(
+                    "panel_validation_report_001 must target primary_dashboard_display"
+                )
+            if (
+                self.linked_validation_gate_id
+                != "physgate_engineering_realistic_001"
+            ):
+                raise ValueError(
+                    "panel_validation_report_001 must link physgate_engineering_realistic_001"
+                )
+            if self.export_capable:
+                raise ValueError(
+                    "panel_validation_report_001 must not be export_capable"
+                )
+
+        if self.panel_id == "panel_optics_mode_001":
+            if self.view_kind != "optics_mode_view":
+                raise ValueError("panel_optics_mode_001 must use optics_mode_view")
+            if self.display_role != "engineering_display":
+                raise ValueError(
+                    "panel_optics_mode_001 must target engineering_display"
+                )
+            if (
+                self.linked_optics_engine_id
+                != "opticsengine_projection_assisted_spatial_001"
+            ):
+                raise ValueError(
+                    "panel_optics_mode_001 must link opticsengine_projection_assisted_spatial_001"
+                )
+            if self.export_capable:
+                raise ValueError("panel_optics_mode_001 must not be export_capable")
+
+        if self.panel_id == "panel_project_export_001":
+            if self.view_kind != "project_export_view":
+                raise ValueError("panel_project_export_001 must use project_export_view")
+            if self.display_role != "primary_dashboard_display":
+                raise ValueError(
+                    "panel_project_export_001 must target primary_dashboard_display"
+                )
+            if not self.export_capable:
+                raise ValueError("panel_project_export_001 must be export_capable")
+            if (
+                self.linked_validation_gate_id
+                != "physgate_strict_physics_001"
+            ):
+                raise ValueError(
+                    "panel_project_export_001 must link physgate_strict_physics_001"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicsDashboardViewsContract:
+    """Unified physics dashboard / explainable views contract."""
+
+    total_entries: int
+    engineering_display_entries: int
+    primary_dashboard_entries: int
+    export_capable_entries: int
+    defined_entries: int
+    entries: tuple[PhysicsDashboardViewEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate physics dashboard contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        engineering_display_entries = sum(
+            1 for entry in self.entries if entry.display_role == "engineering_display"
+        )
+        primary_dashboard_entries = sum(
+            1
+            for entry in self.entries
+            if entry.display_role == "primary_dashboard_display"
+        )
+        export_capable_entries = sum(
+            1 for entry in self.entries if entry.export_capable
+        )
+        defined_entries = sum(
+            1 for entry in self.entries if entry.dashboard_status == "defined"
+        )
+
+        if self.engineering_display_entries != engineering_display_entries:
+            raise ValueError(
+                "engineering_display_entries must match computed count"
+            )
+
+        if self.primary_dashboard_entries != primary_dashboard_entries:
+            raise ValueError(
+                "primary_dashboard_entries must match computed count"
+            )
+
+===== MAKSIMAR_CORE_LIB/real_dashboard_clients_mobile/real_dashboard_clients_mobile_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.ar_glasses_display_contract import (
+    build_ar_glasses_display_contract,
+)
+from MAKSIMAR_CORE_LIB.end_to_end_orchestration_runtime import (
+    build_end_to_end_orchestration_runtime_contract,
+)
+from MAKSIMAR_CORE_LIB.physics_dashboard_views import (
+    build_physics_dashboard_views_contract,
+)
+from MAKSIMAR_CORE_LIB.real_node_agents import (
+    build_real_node_agents_contract,
+)
+from MAKSIMAR_CORE_LIB.wrist_terminal_contract import (
+    build_wrist_terminal_contract,
+)
+
+
+RealClientEntryId = Literal[
+    "realclient_dashboard_001",
+    "realclient_mobile_001",
+    "realclient_ar_glasses_001",
+]
+
+ClientKind = Literal[
+    "dashboard_client",
+    "mobile_client",
+    "ar_glasses_client",
+]
+
+PresentationMode = Literal[
+    "read_only_dashboard",
+    "mobile_proxy_view",
+    "private_spatial_view",
+]
+
+ClientRuntimeStatus = Literal[
+    "active",
+]
+
+
+_ENTRY_ID_PATTERN = re.compile(r"^realclient_[a-z][a-z0-9_]*$")
+_ORCH_ID_PATTERN = re.compile(r"^orchestration_[a-z][a-z0-9_]*$")
+_AGENT_ID_PATTERN = re.compile(r"^nodeagent_[a-z][a-z0-9_]*$")
+_PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
+_WRIST_ID_PATTERN = re.compile(r"^wrist_[a-z][a-z0-9_]*$")
+_AR_ID_PATTERN = re.compile(r"^ar_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class RealDashboardClientMobileEntry:
+    """Canonical real dashboard / clients / mobile entry."""
+
+    real_client_entry_id: RealClientEntryId
+    client_kind: ClientKind
+    linked_orchestration_entry_id: str
+    linked_node_agent_id: str
+    linked_panel_id: str | None
+    linked_wrist_terminal_id: str | None
+    linked_ar_display_id: str | None
+    presentation_mode: PresentationMode
+    read_only_required: bool
+    transport_path_required: bool
+    explainable_required: bool
+    production_path_allowed: bool
+    client_runtime_status: ClientRuntimeStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate real dashboard / clients / mobile invariants."""
+        if not _ENTRY_ID_PATTERN.fullmatch(self.real_client_entry_id):
+            raise ValueError(
+                f"Invalid real_client_entry_id: {self.real_client_entry_id}"
+            )
+
+        if not _ORCH_ID_PATTERN.fullmatch(self.linked_orchestration_entry_id):
+            raise ValueError(
+                f"Invalid linked_orchestration_entry_id: {self.linked_orchestration_entry_id}"
+            )
+
+        if not _AGENT_ID_PATTERN.fullmatch(self.linked_node_agent_id):
+            raise ValueError(
+                f"Invalid linked_node_agent_id: {self.linked_node_agent_id}"
+            )
+
+        if self.linked_panel_id is not None:
+            if not _PANEL_ID_PATTERN.fullmatch(self.linked_panel_id):
+                raise ValueError(f"Invalid linked_panel_id: {self.linked_panel_id}")
+
+        if self.linked_wrist_terminal_id is not None:
+            if not _WRIST_ID_PATTERN.fullmatch(self.linked_wrist_terminal_id):
+                raise ValueError(
+                    f"Invalid linked_wrist_terminal_id: {self.linked_wrist_terminal_id}"
+                )
+
+        if self.linked_ar_display_id is not None:
+            if not _AR_ID_PATTERN.fullmatch(self.linked_ar_display_id):
+                raise ValueError(
+                    f"Invalid linked_ar_display_id: {self.linked_ar_display_id}"
+                )
+
+        if not self.description.strip():
+            raise ValueError(
+                f"description must not be empty for {self.real_client_entry_id}"
+            )
+
+        if not self.read_only_required:
+            raise ValueError(
+                f"read_only_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.transport_path_required:
+            raise ValueError(
+                f"transport_path_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.production_path_allowed:
+            raise ValueError(
+                f"production_path_allowed must be True: {self.real_client_entry_id}"
+            )
+
+        if self.client_runtime_status != "active":
+            raise ValueError(
+                f"client_runtime_status must be active: {self.real_client_entry_id}"
+            )
+
+        if self.real_client_entry_id == "realclient_dashboard_001":
+            if self.client_kind != "dashboard_client":
+                raise ValueError("realclient_dashboard_001 must use dashboard_client")
+            if self.linked_orchestration_entry_id != "orchestration_control_plane_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link orchestration_control_plane_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_dev_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link nodeagent_dev_001"
+                )
+            if self.linked_panel_id != "panel_validation_report_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link panel_validation_report_001"
+                )
+            if self.linked_wrist_terminal_id is not None:
+                raise ValueError(
+                    "realclient_dashboard_001 must not link wrist terminal"
+                )
+            if self.linked_ar_display_id is not None:
+                raise ValueError(
+                    "realclient_dashboard_001 must not link ar display"
+                )
+            if self.presentation_mode != "read_only_dashboard":
+                raise ValueError(
+                    "realclient_dashboard_001 must use read_only_dashboard"
+                )
+
+        if self.real_client_entry_id == "realclient_mobile_001":
+            if self.client_kind != "mobile_client":
+                raise ValueError("realclient_mobile_001 must use mobile_client")
+            if self.linked_orchestration_entry_id != "orchestration_mobile_entry_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link orchestration_mobile_entry_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_mobile_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link nodeagent_mobile_001"
+                )
+            if self.linked_panel_id != "panel_project_export_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link panel_project_export_001"
+                )
+            if self.linked_wrist_terminal_id != "wrist_terminal_core_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link wrist_terminal_core_001"
+                )
+            if self.linked_ar_display_id is not None:
+                raise ValueError(
+                    "realclient_mobile_001 must not link ar display"
+                )
+            if self.presentation_mode != "mobile_proxy_view":
+                raise ValueError(
+                    "realclient_mobile_001 must use mobile_proxy_view"
+                )
+
+        if self.real_client_entry_id == "realclient_ar_glasses_001":
+            if self.client_kind != "ar_glasses_client":
+                raise ValueError("realclient_ar_glasses_001 must use ar_glasses_client")
+            if self.linked_orchestration_entry_id != "orchestration_mobile_entry_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link orchestration_mobile_entry_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_mobile_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link nodeagent_mobile_001"
+                )
+            if self.linked_panel_id != "panel_optics_mode_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link panel_optics_mode_001"
+                )
+            if self.linked_wrist_terminal_id != "wrist_terminal_core_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link wrist_terminal_core_001"
+                )
+            if self.linked_ar_display_id != "ar_glasses_display_core_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link ar_glasses_display_core_001"
+                )
+            if self.presentation_mode != "private_spatial_view":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must use private_spatial_view"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class RealDashboardClientsMobileContract:
+    """Unified real dashboard / clients / mobile contract."""
+
+    total_entries: int
+    dashboard_entries: int
+    mobile_entries: int
+    spatial_entries: int
+    active_entries: int
+    entries: tuple[RealDashboardClientMobileEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate real dashboard / clients / mobile contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        dashboard_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "dashboard_client"
+        )
+        mobile_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "mobile_client"
+        )
+        spatial_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "ar_glasses_client"
+        )
+        active_entries = sum(
+            1 for entry in self.entries if entry.client_runtime_status == "active"
+        )
+
+        if self.dashboard_entries != dashboard_entries:
+            raise ValueError("dashboard_entries must match computed count")
+
+        if self.mobile_entries != mobile_entries:
+            raise ValueError("mobile_entries must match computed count")
+
+        if self.spatial_entries != spatial_entries:
+            raise ValueError("spatial_entries must match computed count")
+
+        if self.active_entries != active_entries:
+
+===== MAKSIMAR_CORE_LIB/ar_glasses_display_contract/ar_glasses_display_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.optics_light_field_engine import (
+    build_optics_light_field_engine_contract,
+)
+from MAKSIMAR_CORE_LIB.wrist_terminal_contract import (
+    build_wrist_terminal_contract,
+)
+
+
+ArGlassesDisplayId = Literal[
+    "ar_glasses_display_core_001",
+]
+
+DisplayPrivacyMode = Literal[
+    "private_display",
+]
+
+AnchorMode = Literal[
+    "spatial_anchor_required",
+]
+
+OverlayMode = Literal[
+    "explanation_overlay_required",
+]
+
+GestureBindingMode = Literal[
+    "gesture_linked_interface",
+]
+
+DisplayTransportMode = Literal[
+    "wrist_proxy_handoff",
+]
+
+ArDisplayStatus = Literal[
+    "defined",
+]
+
+
+_DISPLAY_ID_PATTERN = re.compile(r"^ar_[a-z][a-z0-9_]*$")
+_ENGINE_ID_PATTERN = re.compile(r"^opticsengine_[a-z][a-z0-9_]*$")
+_WRIST_ID_PATTERN = re.compile(r"^wrist_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class ArGlassesDisplayEntry:
+    """Canonical AR glasses display contract entry."""
+
+    ar_display_id: ArGlassesDisplayId
+    linked_optics_engine_id: str
+    linked_wrist_terminal_id: str
+    display_privacy_mode: DisplayPrivacyMode
+    anchor_mode: AnchorMode
+    overlay_mode: OverlayMode
+    gesture_binding_mode: GestureBindingMode
+    display_transport_mode: DisplayTransportMode
+    private_render_required: bool
+    explanation_overlay_required: bool
+    spatial_anchor_required: bool
+    production_path_allowed: bool
+    display_status: ArDisplayStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate AR glasses display invariants."""
+        if not _DISPLAY_ID_PATTERN.fullmatch(self.ar_display_id):
+            raise ValueError(f"Invalid ar_display_id: {self.ar_display_id}")
+
+        if not _ENGINE_ID_PATTERN.fullmatch(self.linked_optics_engine_id):
+            raise ValueError(
+                f"Invalid linked_optics_engine_id: {self.linked_optics_engine_id}"
+            )
+
+        if not _WRIST_ID_PATTERN.fullmatch(self.linked_wrist_terminal_id):
+            raise ValueError(
+                f"Invalid linked_wrist_terminal_id: {self.linked_wrist_terminal_id}"
+            )
+
+        if not self.description.strip():
+            raise ValueError(f"description must not be empty for {self.ar_display_id}")
+
+        if self.display_privacy_mode != "private_display":
+            raise ValueError(
+                f"AR glasses must use private_display: {self.ar_display_id}"
+            )
+
+        if self.anchor_mode != "spatial_anchor_required":
+            raise ValueError(
+                f"AR glasses must require spatial anchors: {self.ar_display_id}"
+            )
+
+        if self.overlay_mode != "explanation_overlay_required":
+            raise ValueError(
+                f"AR glasses must require explanation overlay: {self.ar_display_id}"
+            )
+
+        if self.gesture_binding_mode != "gesture_linked_interface":
+            raise ValueError(
+                f"AR glasses must use gesture_linked_interface: {self.ar_display_id}"
+            )
+
+        if self.display_transport_mode != "wrist_proxy_handoff":
+            raise ValueError(
+                f"AR glasses must use wrist_proxy_handoff: {self.ar_display_id}"
+            )
+
+        if not self.private_render_required:
+            raise ValueError(
+                f"private_render_required must be True: {self.ar_display_id}"
+            )
+
+        if not self.explanation_overlay_required:
+            raise ValueError(
+                f"explanation_overlay_required must be True: {self.ar_display_id}"
+            )
+
+        if not self.spatial_anchor_required:
+            raise ValueError(
+                f"spatial_anchor_required must be True: {self.ar_display_id}"
+            )
+
+        if not self.production_path_allowed:
+            raise ValueError(
+                f"production_path_allowed must be True: {self.ar_display_id}"
+            )
+
+        if self.display_status != "defined":
+            raise ValueError(
+                f"display_status must be defined: {self.ar_display_id}"
+            )
+
+        if self.ar_display_id == "ar_glasses_display_core_001":
+            if self.linked_optics_engine_id != "opticsengine_ar_glasses_projection_001":
+                raise ValueError(
+                    "ar_glasses_display_core_001 must link opticsengine_ar_glasses_projection_001"
+                )
+            if self.linked_wrist_terminal_id != "wrist_terminal_core_001":
+                raise ValueError(
+                    "ar_glasses_display_core_001 must link wrist_terminal_core_001"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class ArGlassesDisplayContract:
+    """Unified AR glasses display contract."""
+
+    total_entries: int
+    private_display_entries: int
+    anchor_required_entries: int
+    production_allowed_entries: int
+    defined_entries: int
+    entries: tuple[ArGlassesDisplayEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate AR glasses display contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        private_display_entries = sum(
+            1 for entry in self.entries if entry.display_privacy_mode == "private_display"
+        )
+        anchor_required_entries = sum(
+            1 for entry in self.entries if entry.spatial_anchor_required
+        )
+        production_allowed_entries = sum(
+            1 for entry in self.entries if entry.production_path_allowed
+        )
+        defined_entries = sum(
+            1 for entry in self.entries if entry.display_status == "defined"
+        )
+
+        if self.private_display_entries != private_display_entries:
+            raise ValueError("private_display_entries must match computed count")
+
+        if self.anchor_required_entries != anchor_required_entries:
+            raise ValueError("anchor_required_entries must match computed count")
+
+        if self.production_allowed_entries != production_allowed_entries:
+            raise ValueError("production_allowed_entries must match computed count")
+
+        if self.defined_entries != defined_entries:
+            raise ValueError("defined_entries must match computed count")
+
+        entry_ids = tuple(entry.ar_display_id for entry in self.entries)
+        if len(set(entry_ids)) != len(entry_ids):
+            raise ValueError("Duplicate ar_display_id values detected")
+
+
+def build_ar_glasses_display_contract() -> ArGlassesDisplayContract:
+    """Build canonical AR glasses display contract."""
+    optics_contract = build_optics_light_field_engine_contract()
+    wrist_contract = build_wrist_terminal_contract()
+
+    optics_ids = {entry.engine_entry_id for entry in optics_contract.entries}
+    wrist_ids = {entry.wrist_terminal_id for entry in wrist_contract.entries}
+
+    if "opticsengine_ar_glasses_projection_001" not in optics_ids:
+        raise ValueError(
+            "Expected opticsengine_ar_glasses_projection_001 in optics engine contract"
+        )
+
+    if "wrist_terminal_core_001" not in wrist_ids:
+        raise ValueError(
+            "Expected wrist_terminal_core_001 in wrist terminal contract"
+        )
+
+    entries = (
+        ArGlassesDisplayEntry(
+            ar_display_id="ar_glasses_display_core_001",
+            linked_optics_engine_id="opticsengine_ar_glasses_projection_001",
+            linked_wrist_terminal_id="wrist_terminal_core_001",
+            display_privacy_mode="private_display",
+            anchor_mode="spatial_anchor_required",
+            overlay_mode="explanation_overlay_required",
+            gesture_binding_mode="gesture_linked_interface",
+            display_transport_mode="wrist_proxy_handoff",
+            private_render_required=True,
+            explanation_overlay_required=True,
+            spatial_anchor_required=True,
+            production_path_allowed=True,
+            display_status="defined",
+            description="Canonical AR glasses display contract for private anchored explainable rendering.",
+        ),
+    )
+
+    private_display_entries = sum(
+        1 for entry in entries if entry.display_privacy_mode == "private_display"
+    )
+    anchor_required_entries = sum(
+        1 for entry in entries if entry.spatial_anchor_required
+    )
+    production_allowed_entries = sum(
+        1 for entry in entries if entry.production_path_allowed
+    )
+    defined_entries = sum(
+        1 for entry in entries if entry.display_status == "defined"
+    )
+
+    return ArGlassesDisplayContract(
+        total_entries=len(entries),
+        private_display_entries=private_display_entries,
+        anchor_required_entries=anchor_required_entries,
+        production_allowed_entries=production_allowed_entries,
+        defined_entries=defined_entries,
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/air_display_research_slot/air_display_research_slot_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.optics_light_field_engine import (
+    build_optics_light_field_engine_contract,
+)
+from MAKSIMAR_CORE_LIB.wrist_psc_display_integration import (
+    build_wrist_psc_display_integration_contract,
+)
+
+
+AirDisplayResearchMode = Literal[
+    "projection_assisted_research",
+    "controlled_scattering_research",
+    "beam_intersection_research",
+]
+
+ResearchMaturity = Literal[
+    "experimental_only",
+]
+
+ExecutionEligibility = Literal[
+    "forbidden_for_production_execution",
+]
+
+VisibilityMode = Literal[
+    "public_research_visibility",
+]
+
+SafetyEnvelopeClass = Literal[
+    "bounded_research_envelope",
+]
+
+ResearchSlotStatus = Literal[
+    "defined",
+]
+
+
+_ENTRY_ID_PATTERN = re.compile(r"^airdisplay_[a-z][a-z0-9_]*$")
+_ENGINE_ID_PATTERN = re.compile(r"^opticsengine_[a-z][a-z0-9_]*$")
+_INTEGRATION_ID_PATTERN = re.compile(r"^wristdisplayint_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class AirDisplayResearchSlotEntry:
+    """Canonical air display research slot entry."""
+
+    research_entry_id: str
+    research_mode: AirDisplayResearchMode
+    linked_optics_engine_id: str
+    linked_integration_entry_id: str
+    research_maturity: ResearchMaturity
+    execution_eligibility: ExecutionEligibility
+    visibility_mode: VisibilityMode
+    safety_envelope_class: SafetyEnvelopeClass
+    explainable_required: bool
+    research_only: bool
+    production_path_allowed: bool
+    slot_status: ResearchSlotStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate air display research slot invariants."""
+        if not _ENTRY_ID_PATTERN.fullmatch(self.research_entry_id):
+            raise ValueError(f"Invalid research_entry_id: {self.research_entry_id}")
+
+        if not _ENGINE_ID_PATTERN.fullmatch(self.linked_optics_engine_id):
+            raise ValueError(
+                f"Invalid linked_optics_engine_id: {self.linked_optics_engine_id}"
+            )
+
+        if not _INTEGRATION_ID_PATTERN.fullmatch(self.linked_integration_entry_id):
+            raise ValueError(
+                f"Invalid linked_integration_entry_id: {self.linked_integration_entry_id}"
+            )
+
+        if not self.description.strip():
+            raise ValueError(
+                f"description must not be empty for {self.research_entry_id}"
+            )
+
+        if self.research_maturity != "experimental_only":
+            raise ValueError(
+                f"research_maturity must be experimental_only: {self.research_entry_id}"
+            )
+
+        if self.execution_eligibility != "forbidden_for_production_execution":
+            raise ValueError(
+                f"execution_eligibility must be forbidden_for_production_execution: {self.research_entry_id}"
+            )
+
+        if self.visibility_mode != "public_research_visibility":
+            raise ValueError(
+                f"visibility_mode must be public_research_visibility: {self.research_entry_id}"
+            )
+
+        if self.safety_envelope_class != "bounded_research_envelope":
+            raise ValueError(
+                f"safety_envelope_class must be bounded_research_envelope: {self.research_entry_id}"
+            )
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True: {self.research_entry_id}"
+            )
+
+        if not self.research_only:
+            raise ValueError(
+                f"research_only must be True: {self.research_entry_id}"
+            )
+
+        if self.production_path_allowed:
+            raise ValueError(
+                f"production_path_allowed must be False: {self.research_entry_id}"
+            )
+
+        if self.slot_status != "defined":
+            raise ValueError(
+                f"slot_status must be defined: {self.research_entry_id}"
+            )
+
+        if self.research_mode == "projection_assisted_research":
+            if self.linked_optics_engine_id != "opticsengine_projection_assisted_spatial_001":
+                raise ValueError(
+                    "projection_assisted_research must link opticsengine_projection_assisted_spatial_001"
+                )
+            if self.linked_integration_entry_id != "wristdisplayint_engineering_001":
+                raise ValueError(
+                    "projection_assisted_research must link wristdisplayint_engineering_001"
+                )
+
+        if self.research_mode == "controlled_scattering_research":
+            if self.linked_optics_engine_id != "opticsengine_controlled_scattering_research_001":
+                raise ValueError(
+                    "controlled_scattering_research must link opticsengine_controlled_scattering_research_001"
+                )
+            if self.linked_integration_entry_id != "wristdisplayint_ar_001":
+                raise ValueError(
+                    "controlled_scattering_research must link wristdisplayint_ar_001"
+                )
+
+        if self.research_mode == "beam_intersection_research":
+            if self.linked_optics_engine_id != "opticsengine_beam_intersection_research_001":
+                raise ValueError(
+                    "beam_intersection_research must link opticsengine_beam_intersection_research_001"
+                )
+            if self.linked_integration_entry_id != "wristdisplayint_ar_001":
+                raise ValueError(
+                    "beam_intersection_research must link wristdisplayint_ar_001"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class AirDisplayResearchSlotContract:
+    """Unified air display research slot contract."""
+
+    total_entries: int
+    research_only_entries: int
+    production_forbidden_entries: int
+    explainable_entries: int
+    defined_entries: int
+    entries: tuple[AirDisplayResearchSlotEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate air display research slot contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        research_only_entries = sum(
+            1 for entry in self.entries if entry.research_only
+        )
+        production_forbidden_entries = sum(
+            1 for entry in self.entries if not entry.production_path_allowed
+        )
+        explainable_entries = sum(
+            1 for entry in self.entries if entry.explainable_required
+        )
+        defined_entries = sum(
+            1 for entry in self.entries if entry.slot_status == "defined"
+        )
+
+        if self.research_only_entries != research_only_entries:
+            raise ValueError("research_only_entries must match computed count")
+
+        if self.production_forbidden_entries != production_forbidden_entries:
+            raise ValueError(
+                "production_forbidden_entries must match computed count"
+            )
+
+        if self.explainable_entries != explainable_entries:
+            raise ValueError("explainable_entries must match computed count")
+
+        if self.defined_entries != defined_entries:
+            raise ValueError("defined_entries must match computed count")
+
+        entry_ids = tuple(entry.research_entry_id for entry in self.entries)
+        modes = tuple(entry.research_mode for entry in self.entries)
+
+        if len(set(entry_ids)) != len(entry_ids):
+            raise ValueError("Duplicate research_entry_id values detected")
+
+        if len(set(modes)) != len(modes):
+            raise ValueError("Duplicate research_mode values detected")
+
+
+def build_air_display_research_slot_contract() -> AirDisplayResearchSlotContract:
+    """Build canonical air display research slot contract."""
+    optics_contract = build_optics_light_field_engine_contract()
+    integration_contract = build_wrist_psc_display_integration_contract()
+
+    optics_ids = {entry.engine_entry_id for entry in optics_contract.entries}
+    integration_ids = {entry.integration_entry_id for entry in integration_contract.entries}
+
+    required_optics_ids = {
+        "opticsengine_projection_assisted_spatial_001",
+        "opticsengine_controlled_scattering_research_001",
+        "opticsengine_beam_intersection_research_001",
+    }
+    required_integration_ids = {
+        "wristdisplayint_engineering_001",
+        "wristdisplayint_ar_001",
+    }
+
+    missing_optics = required_optics_ids - optics_ids
+    if missing_optics:
+        raise ValueError(f"Missing optics ids: {sorted(missing_optics)}")
+
+    missing_integrations = required_integration_ids - integration_ids
+    if missing_integrations:
+        raise ValueError(
+            f"Missing integration ids: {sorted(missing_integrations)}"
+        )
+
+    entries = (
+        AirDisplayResearchSlotEntry(
+            research_entry_id="airdisplay_projection_assisted_001",
+            research_mode="projection_assisted_research",
+            linked_optics_engine_id="opticsengine_projection_assisted_spatial_001",
+            linked_integration_entry_id="wristdisplayint_engineering_001",
+            research_maturity="experimental_only",
+            execution_eligibility="forbidden_for_production_execution",
+            visibility_mode="public_research_visibility",
+            safety_envelope_class="bounded_research_envelope",
+            explainable_required=True,
+            research_only=True,
+            production_path_allowed=False,
+            slot_status="defined",
+            description="Projection-assisted air display research slot.",
+        ),
+        AirDisplayResearchSlotEntry(
+            research_entry_id="airdisplay_controlled_scattering_001",
+            research_mode="controlled_scattering_research",
+            linked_optics_engine_id="opticsengine_controlled_scattering_research_001",
+            linked_integration_entry_id="wristdisplayint_ar_001",
+            research_maturity="experimental_only",
+            execution_eligibility="forbidden_for_production_execution",
+            visibility_mode="public_research_visibility",
+
+===== MAKSIMAR_CORE_LIB/wrist_psc_display_integration/wrist_psc_display_integration_contract.py =====
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.ar_glasses_display_contract import (
+    build_ar_glasses_display_contract,
+)
+from MAKSIMAR_CORE_LIB.physics_dashboard_views import (
+    build_physics_dashboard_views_contract,
+)
+from MAKSIMAR_CORE_LIB.spatial_anchor_resolution import (
+    build_spatial_anchor_resolution_contract,
+)
+from MAKSIMAR_CORE_LIB.wrist_terminal_contract import (
+    build_wrist_terminal_contract,
+)
+
+
+IntegrationMode = Literal[
+    "wrist_to_engineering_display",
+    "wrist_to_dashboard_display",
+    "wrist_to_ar_display",
+]
+
+IntegratedViewId = Literal[
+    "view_surface_map_001",
+    "view_validation_report_001",
+    "view_optics_mode_001",
+]
+
+IntegrationAuthority = Literal[
+    "display_only_handoff",
+]
+
+IntegrationStatus = Literal[
+    "integrated",
+]
+
+
+_ENTRY_ID_PATTERN = re.compile(r"^wristdisplayint_[a-z][a-z0-9_]*$")
+_WRIST_ID_PATTERN = re.compile(r"^wrist_[a-z][a-z0-9_]*$")
+_AR_ID_PATTERN = re.compile(r"^ar_[a-z][a-z0-9_]*$")
+_VIEW_ID_PATTERN = re.compile(r"^view_[a-z][a-z0-9_]*$")
+_RESOLUTION_ID_PATTERN = re.compile(r"^spatialview_[a-z][a-z0-9_]*$")
+_PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class WristPscDisplayIntegrationEntry:
+    """Canonical wrist + PSC + display integration entry."""
+
+    integration_entry_id: str
+    integration_mode: IntegrationMode
+    wrist_terminal_id: str
+    ar_display_id: str
+    resolution_entry_id: str
+    resolved_view_id: IntegratedViewId
+    source_panel_id: str
+    display_target_role: str
+    integration_authority: IntegrationAuthority
+    explainable_required: bool
+    read_only: bool
+    production_path_allowed: bool
+    integration_status: IntegrationStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate wrist + PSC + display integration invariants."""
+        if not _ENTRY_ID_PATTERN.fullmatch(self.integration_entry_id):
+            raise ValueError(
+                f"Invalid integration_entry_id: {self.integration_entry_id}"
+            )
+
+        if not _WRIST_ID_PATTERN.fullmatch(self.wrist_terminal_id):
+            raise ValueError(f"Invalid wrist_terminal_id: {self.wrist_terminal_id}")
+
+        if not _AR_ID_PATTERN.fullmatch(self.ar_display_id):
+            raise ValueError(f"Invalid ar_display_id: {self.ar_display_id}")
+
+        if not _RESOLUTION_ID_PATTERN.fullmatch(self.resolution_entry_id):
+            raise ValueError(
+                f"Invalid resolution_entry_id: {self.resolution_entry_id}"
+            )
+
+        if not _VIEW_ID_PATTERN.fullmatch(self.resolved_view_id):
+            raise ValueError(f"Invalid resolved_view_id: {self.resolved_view_id}")
+
+        if not _PANEL_ID_PATTERN.fullmatch(self.source_panel_id):
+            raise ValueError(f"Invalid source_panel_id: {self.source_panel_id}")
+
+        if not self.description.strip():
+            raise ValueError(
+                f"description must not be empty for {self.integration_entry_id}"
+            )
+
+        if self.integration_authority != "display_only_handoff":
+            raise ValueError(
+                f"integration_authority must be display_only_handoff: {self.integration_entry_id}"
+            )
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True: {self.integration_entry_id}"
+            )
+
+        if not self.read_only:
+            raise ValueError(f"read_only must be True: {self.integration_entry_id}")
+
+        if not self.production_path_allowed:
+            raise ValueError(
+                f"production_path_allowed must be True: {self.integration_entry_id}"
+            )
+
+        if self.integration_status != "integrated":
+            raise ValueError(
+                f"integration_status must be integrated: {self.integration_entry_id}"
+            )
+
+        if self.integration_mode == "wrist_to_engineering_display":
+            if self.resolution_entry_id != "spatialview_surface_map_001":
+                raise ValueError(
+                    "wrist_to_engineering_display must use spatialview_surface_map_001"
+                )
+            if self.resolved_view_id != "view_surface_map_001":
+                raise ValueError(
+                    "wrist_to_engineering_display must use view_surface_map_001"
+                )
+            if self.source_panel_id != "panel_surface_map_001":
+                raise ValueError(
+                    "wrist_to_engineering_display must use panel_surface_map_001"
+                )
+            if self.display_target_role != "engineering_display":
+                raise ValueError(
+                    "wrist_to_engineering_display must target engineering_display"
+                )
+
+        if self.integration_mode == "wrist_to_dashboard_display":
+            if self.resolution_entry_id != "spatialview_validation_report_001":
+                raise ValueError(
+                    "wrist_to_dashboard_display must use spatialview_validation_report_001"
+                )
+            if self.resolved_view_id != "view_validation_report_001":
+                raise ValueError(
+                    "wrist_to_dashboard_display must use view_validation_report_001"
+                )
+            if self.source_panel_id != "panel_validation_report_001":
+                raise ValueError(
+                    "wrist_to_dashboard_display must use panel_validation_report_001"
+                )
+            if self.display_target_role != "primary_dashboard_display":
+                raise ValueError(
+                    "wrist_to_dashboard_display must target primary_dashboard_display"
+                )
+
+        if self.integration_mode == "wrist_to_ar_display":
+            if self.resolution_entry_id != "spatialview_optics_mode_001":
+                raise ValueError(
+                    "wrist_to_ar_display must use spatialview_optics_mode_001"
+                )
+            if self.resolved_view_id != "view_optics_mode_001":
+                raise ValueError(
+                    "wrist_to_ar_display must use view_optics_mode_001"
+                )
+            if self.source_panel_id != "panel_optics_mode_001":
+                raise ValueError(
+                    "wrist_to_ar_display must use panel_optics_mode_001"
+                )
+            if self.display_target_role != "ar_glasses_display":
+                raise ValueError(
+                    "wrist_to_ar_display must target ar_glasses_display"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class WristPscDisplayIntegrationContract:
+    """Unified wrist + PSC + display integration contract."""
+
+    total_entries: int
+    engineering_entries: int
+    dashboard_entries: int
+    ar_entries: int
+    integrated_entries: int
+    entries: tuple[WristPscDisplayIntegrationEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate wrist + PSC + display integration contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        engineering_entries = sum(
+            1
+            for entry in self.entries
+            if entry.display_target_role == "engineering_display"
+        )
+        dashboard_entries = sum(
+            1
+            for entry in self.entries
+            if entry.display_target_role == "primary_dashboard_display"
+        )
+        ar_entries = sum(
+            1 for entry in self.entries if entry.display_target_role == "ar_glasses_display"
+        )
+        integrated_entries = sum(
+            1 for entry in self.entries if entry.integration_status == "integrated"
+        )
+
+        if self.engineering_entries != engineering_entries:
+            raise ValueError("engineering_entries must match computed count")
+
+        if self.dashboard_entries != dashboard_entries:
+            raise ValueError("dashboard_entries must match computed count")
+
+        if self.ar_entries != ar_entries:
+            raise ValueError("ar_entries must match computed count")
+
+        if self.integrated_entries != integrated_entries:
+            raise ValueError("integrated_entries must match computed count")
+
+        entry_ids = tuple(entry.integration_entry_id for entry in self.entries)
+        modes = tuple(entry.integration_mode for entry in self.entries)
+
+        if len(set(entry_ids)) != len(entry_ids):
+            raise ValueError("Duplicate integration_entry_id values detected")
+
+        if len(set(modes)) != len(modes):
+            raise ValueError("Duplicate integration_mode values detected")
+
+
+def build_wrist_psc_display_integration_contract() -> WristPscDisplayIntegrationContract:
+    """Build canonical wrist + PSC + display integration contract."""
+    wrist_contract = build_wrist_terminal_contract()
+    ar_contract = build_ar_glasses_display_contract()
+    resolution_contract = build_spatial_anchor_resolution_contract()
+    dashboard_contract = build_physics_dashboard_views_contract()
+
+    wrist_ids = {entry.wrist_terminal_id for entry in wrist_contract.entries}
+    ar_ids = {entry.ar_display_id for entry in ar_contract.entries}
+    resolution_ids = {entry.resolution_entry_id for entry in resolution_contract.entries}
+    panel_ids = {entry.panel_id for entry in dashboard_contract.entries}
+
+    if "wrist_terminal_core_001" not in wrist_ids:
+        raise ValueError("Expected wrist_terminal_core_001 in wrist contract")
+
+    if "ar_glasses_display_core_001" not in ar_ids:
+        raise ValueError("Expected ar_glasses_display_core_001 in AR display contract")
+
+    required_resolution_ids = {
+        "spatialview_surface_map_001",
+        "spatialview_validation_report_001",
+        "spatialview_optics_mode_001",
+    }
+    missing_resolution_ids = required_resolution_ids - resolution_ids
+    if missing_resolution_ids:
+        raise ValueError(
+            f"Missing resolution ids: {sorted(missing_resolution_ids)}"
+        )
+
+    required_panel_ids = {
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/dashboard_shell_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.consistency_panel import (
+    build_dashboard_consistency_panel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_shell_models import (
+    DashboardShellContract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.feedback_contract import (
+    build_dashboard_feedback_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_composition_contract import (
+    build_dashboard_view_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_contract import (
+    build_dashboard_workspace_contract,
+)
+
+
+def build_dashboard_shell_contract() -> DashboardShellContract:
+    """Build final shell contract for OOB dashboard."""
+    consistency_panel = build_dashboard_consistency_panel()
+    workspace = build_dashboard_workspace_contract()
+    composition = build_dashboard_view_composition_contract()
+    feedback = build_dashboard_feedback_contract()
+
+    return DashboardShellContract(
+        shell_id="oob_dashboard_shell",
+        total_panels=composition.total_panels,
+        total_displays=len(workspace.displays),
+        total_feedback_items=feedback.total_items,
+        consistency_status=consistency_panel.status,
+        active_panel_id=composition.active_panel_id,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/dashboard_execution_shell_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_execution_shell_models import (
+    DashboardExecutionPanelsShellContract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.data_flow_panel_contract import (
+    build_data_flow_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.degraded_mode_panel_contract import (
+    build_degraded_mode_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dependency_map_panel_contract import (
+    build_dependency_map_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.node_topology_panel_contract import (
+    build_node_topology_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.project_map_panel_contract import (
+    build_project_map_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.queue_load_panel_contract import (
+    build_queue_load_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.version_control_panel_contract import (
+    build_version_control_panel_contract,
+)
+
+
+def build_dashboard_execution_panels_shell_contract() -> DashboardExecutionPanelsShellContract:
+    """Build final shell contract for execution-aware dashboard panels."""
+    queue_load = build_queue_load_panel_contract()
+    node_topology = build_node_topology_panel_contract()
+    degraded_mode = build_degraded_mode_panel_contract()
+    project_map = build_project_map_panel_contract()
+    data_flow = build_data_flow_panel_contract()
+    dependency_map = build_dependency_map_panel_contract()
+    version_control = build_version_control_panel_contract()
+
+    return DashboardExecutionPanelsShellContract(
+        shell_id="dashboard_execution_panels_shell",
+        total_queue_load_entries=queue_load.total_entries,
+        total_node_topology_entries=node_topology.total_entries,
+        total_degraded_mode_entries=degraded_mode.total_entries,
+        total_project_map_entries=project_map.total_entries,
+        total_data_flow_entries=data_flow.total_entries,
+        total_dependency_map_entries=dependency_map.total_entries,
+        total_version_control_entries=version_control.total_entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/panel_orchestration_contract.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_router_contract import (
+    build_dashboard_input_router_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.navigation_contract import (
+    build_dashboard_navigation_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_models import (
+    DashboardPanelOrchestrationContract,
+    OrchestratedPanel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_contract import (
+    build_dashboard_workspace_contract,
+)
+
+
+def _resolve_active_panel_id(active_panel: str) -> str:
+    """Resolve normalized active panel id from navigation active panel."""
+    return f"panel_{active_panel}"
+
+
+def build_dashboard_panel_orchestration_contract() -> DashboardPanelOrchestrationContract:
+    """Build unified dashboard panel orchestration contract."""
+    navigation = build_dashboard_navigation_contract()
+    workspace = build_dashboard_workspace_contract()
+    input_router = build_dashboard_input_router_contract()
+
+    resolved_active_panel_id = _resolve_active_panel_id(navigation.active_panel)
+
+    panels = tuple(
+        OrchestratedPanel(
+            panel_id=placement.panel_id,
+            active=placement.panel_id == resolved_active_panel_id,
+            display_id=placement.display_id,
+            zone=placement.zone,
+        )
+        for placement in workspace.placements
+    )
+
+    active_panel_id = next(
+        (panel.panel_id for panel in panels if panel.active),
+        panels[0].panel_id,
+    )
+
+    return DashboardPanelOrchestrationContract(
+        panels=panels,
+        active_panel_id=active_panel_id,
+        navigation_enabled=True,
+        input_routing_enabled=input_router.supports_navigation_routing,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/input_router_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Optional, Tuple
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_models import InputEvent
+from MAKSIMAR_CORE_LIB.oob_dashboard.navigation_models import NavigationItem
+
+
+@dataclass(frozen=True)
+class RoutedAction:
+    """
+    Result of routing input into a system-level action.
+
+    This is abstraction layer between raw input and system behavior.
+    """
+    action: str
+    target: Optional[str]
+    navigation_target: Optional[NavigationItem]
+
+
+@dataclass(frozen=True)
+class DashboardInputRouterContract:
+    """
+    Defines how input events are translated into actions and navigation.
+
+    This is a pure contract — no execution logic.
+    """
+    supported_actions: Tuple[str, ...]
+    supports_navigation_routing: bool
+    supports_context_routing: bool
+
+
+def build_dashboard_input_router_contract() -> DashboardInputRouterContract:
+    """
+    Build routing contract between input layer and system orchestration.
+    """
+    return DashboardInputRouterContract(
+        supported_actions=(
+            "select",
+            "navigate",
+            "execute",
+            "scroll",
+            "switch_panel",
+            "drag",
+        ),
+        supports_navigation_routing=True,
+        supports_context_routing=True,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/control_plane_handoff_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_contract import (
+    build_operator_intent_contract,
+)
+
+
+HandoffTarget = Literal[
+    "control_plane_router",
+]
+
+HandoffStatus = Literal[
+    "handoff_only",
+]
+
+HandoffMode = Literal[
+    "approval_gated",
+    "read_only_path",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class ControlPlaneHandoffEntry:
+    """Canonical control-plane handoff entry."""
+
+    dashboard_id: str
+    workspace_id: str
+    handoff_target: HandoffTarget
+    handoff_status: HandoffStatus
+    handoff_mode: HandoffMode
+    direct_execution_allowed: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class ControlPlaneHandoffContract:
+    """Canonical control-plane handoff contract."""
+
+    total_entries: int
+    approval_gated_entries: int
+    read_only_path_entries: int
+    entries: tuple[ControlPlaneHandoffEntry, ...]
+
+
+def build_control_plane_handoff_contract() -> ControlPlaneHandoffContract:
+    """Build canonical control-plane handoff contract."""
+    intent_contract = build_operator_intent_contract()
+
+    entries = tuple(
+        ControlPlaneHandoffEntry(
+            dashboard_id=entry.dashboard_id,
+            workspace_id=entry.workspace_id,
+            handoff_target="control_plane_router",
+            handoff_status="handoff_only",
+            handoff_mode=(
+                "approval_gated" if entry.approval_required else "read_only_path"
+            ),
+            direct_execution_allowed=entry.direct_execution_allowed,
+            description=(
+                f"Canonical control-plane handoff entry for {entry.workspace_id}."
+            ),
+        )
+        for entry in intent_contract.entries
+    )
+
+    return ControlPlaneHandoffContract(
+        total_entries=len(entries),
+        approval_gated_entries=sum(
+            1 for entry in entries if entry.handoff_mode == "approval_gated"
+        ),
+        read_only_path_entries=sum(
+            1 for entry in entries if entry.handoff_mode == "read_only_path"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/display_target_vocabulary_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+
+DisplayTargetId = Literal[
+    "display_primary_operator",
+    "display_secondary_diagnostics",
+    "display_tertiary_expansion",
+]
+
+DisplayRole = Literal[
+    "primary_operator",
+    "diagnostics",
+    "expansion",
+]
+
+DisplayZone = Literal[
+    "left",
+    "center",
+    "right",
+    "overlay",
+]
+
+DisplayTargetType = Literal[
+    "physical_monitor",
+    "logical_surface",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTargetVocabularyEntry:
+    """Canonical display target vocabulary entry."""
+
+    display_target_id: DisplayTargetId
+    display_role: DisplayRole
+    display_zone: DisplayZone
+    display_target_type: DisplayTargetType
+    display_title: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayTargetVocabularyContract:
+    """Canonical display target vocabulary / role contract."""
+
+    total_entries: int
+    physical_monitor_entries: int
+    logical_surface_entries: int
+    entries: tuple[DisplayTargetVocabularyEntry, ...]
+
+
+def build_display_target_vocabulary_contract() -> DisplayTargetVocabularyContract:
+    """Build canonical display target vocabulary / role contract."""
+    entries = (
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_primary_operator",
+            display_role="primary_operator",
+            display_zone="center",
+            display_target_type="physical_monitor",
+            display_title="Primary Operator Display",
+            description="Canonical primary operator display target.",
+        ),
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_secondary_diagnostics",
+            display_role="diagnostics",
+            display_zone="right",
+            display_target_type="physical_monitor",
+            display_title="Secondary Diagnostics Display",
+            description="Canonical diagnostics display target.",
+        ),
+        DisplayTargetVocabularyEntry(
+            display_target_id="display_tertiary_expansion",
+            display_role="expansion",
+            display_zone="left",
+            display_target_type="logical_surface",
+            display_title="Tertiary Expansion Display",
+            description="Canonical expandable logical display target.",
+        ),
+    )
+
+    return DisplayTargetVocabularyContract(
+        total_entries=len(entries),
+        physical_monitor_entries=sum(
+            1 for entry in entries if entry.display_target_type == "physical_monitor"
+        ),
+        logical_surface_entries=sum(
+            1 for entry in entries if entry.display_target_type == "logical_surface"
+        ),
+        entries=entries,
+    )
+
+===== MAKSIMAR_CORE_LIB/oob_dashboard/display_runtime_resolver_integration_contract.py =====
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+
+
+ResolverState = Literal[
+    "resolved",
+    "hidden_internal",
+]
+
+DisplayAvailability = Literal[
+    "available",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayRuntimeResolverEntry:
+    """Canonical display runtime / resolver integration entry."""
+
+    panel_id: str
+    view_id: str
+    display_target_id: str
+    resolver_state: ResolverState
+    display_availability: DisplayAvailability
+    participates_in_runtime_resolution: bool
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayRuntimeResolverIntegrationContract:
+    """Canonical display runtime / resolver integration contract."""
+
+    total_entries: int
+    resolved_entries: int
+    hidden_internal_entries: int
+    runtime_resolved_entries: int
+    entries: tuple[DisplayRuntimeResolverEntry, ...]
+
+
+def build_display_runtime_resolver_integration_contract() -> (
+    DisplayRuntimeResolverIntegrationContract
+):
+    """Build canonical display runtime / resolver integration contract."""
+    chain_contract = build_panel_view_display_chain_contract()
+    display_contract = build_display_target_vocabulary_contract()
+
+    valid_display_target_ids = {
+        entry.display_target_id for entry in display_contract.entries
+    }
+
+    def resolve_resolver_state(panel_id: str) -> ResolverState:
+        if panel_id == "panel_navigation":
+            return "hidden_internal"
+        return "resolved"
+
+    entries = tuple(
+        DisplayRuntimeResolverEntry(
+            panel_id=entry.panel_id,
+            view_id=entry.view_id,
+            display_target_id=entry.display_target_id,
+            resolver_state=resolve_resolver_state(entry.panel_id),
+            display_availability="available",
+            participates_in_runtime_resolution=(
+                entry.display_target_id in valid_display_target_ids
+                and resolve_resolver_state(entry.panel_id) == "resolved"
+            ),
+            description=(
+                f"Canonical display runtime/resolver integration entry for {entry.panel_id}."
+            ),
+        )
+        for entry in chain_contract.entries
+    )
+
+    return DisplayRuntimeResolverIntegrationContract(
+        total_entries=len(entries),
+        resolved_entries=sum(
+            1 for entry in entries if entry.resolver_state == "resolved"
+        ),
+        hidden_internal_entries=sum(
+            1 for entry in entries if entry.resolver_state == "hidden_internal"
+        ),
+        runtime_resolved_entries=sum(
+            1 for entry in entries if entry.participates_in_runtime_resolution
+        ),
+        entries=entries,
+    )
+

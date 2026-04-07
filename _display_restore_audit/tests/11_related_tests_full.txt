@@ -1,0 +1,405 @@
+===== tests/air_display_research_slot/test_air_display_research_slot_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.air_display_research_slot import (
+    build_air_display_research_slot_contract,
+)
+
+
+def test_air_display_research_slot_contract_builds() -> None:
+    """Air display research slot contract should build successfully."""
+    contract = build_air_display_research_slot_contract()
+
+    assert contract.total_entries == 3
+    assert contract.research_only_entries == 3
+    assert contract.production_forbidden_entries == 3
+    assert contract.explainable_entries == 3
+    assert contract.defined_entries == 3
+
+
+def test_air_display_research_slot_contract_contains_expected_projection_entry() -> None:
+    """Air display research slot should expose expected projection entry."""
+    contract = build_air_display_research_slot_contract()
+    entry = contract.entries[0]
+
+    assert entry.research_entry_id == "airdisplay_projection_assisted_001"
+    assert entry.research_mode == "projection_assisted_research"
+    assert entry.linked_optics_engine_id == "opticsengine_projection_assisted_spatial_001"
+    assert entry.linked_integration_entry_id == "wristdisplayint_engineering_001"
+    assert entry.production_path_allowed is False
+
+
+def test_air_display_research_slot_contract_contains_expected_scattering_entry() -> None:
+    """Air display research slot should expose expected scattering entry."""
+    contract = build_air_display_research_slot_contract()
+    entry = contract.entries[1]
+
+    assert entry.research_entry_id == "airdisplay_controlled_scattering_001"
+    assert entry.research_mode == "controlled_scattering_research"
+    assert entry.linked_optics_engine_id == "opticsengine_controlled_scattering_research_001"
+    assert entry.linked_integration_entry_id == "wristdisplayint_ar_001"
+    assert entry.production_path_allowed is False
+
+
+def test_air_display_research_slot_contract_contains_expected_intersection_entry() -> None:
+    """Air display research slot should expose expected intersection entry."""
+    contract = build_air_display_research_slot_contract()
+    entry = contract.entries[2]
+
+    assert entry.research_entry_id == "airdisplay_beam_intersection_001"
+    assert entry.research_mode == "beam_intersection_research"
+    assert entry.linked_optics_engine_id == "opticsengine_beam_intersection_research_001"
+    assert entry.linked_integration_entry_id == "wristdisplayint_ar_001"
+    assert entry.production_path_allowed is False
+
+===== tests/real_dashboard_clients_mobile/test_real_dashboard_clients_mobile_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.real_dashboard_clients_mobile import (
+    build_real_dashboard_clients_mobile_contract,
+)
+
+
+def test_real_dashboard_clients_mobile_contract_builds() -> None:
+    """Real dashboard / clients / mobile contract should build successfully."""
+    contract = build_real_dashboard_clients_mobile_contract()
+
+    assert contract.total_entries == 3
+    assert contract.dashboard_entries == 1
+    assert contract.mobile_entries == 1
+    assert contract.spatial_entries == 1
+    assert contract.active_entries == 3
+
+
+def test_real_dashboard_clients_mobile_contract_contains_expected_dashboard_entry() -> None:
+    """Real dashboard / clients / mobile should expose expected dashboard entry."""
+    contract = build_real_dashboard_clients_mobile_contract()
+    entry = contract.entries[0]
+
+    assert entry.real_client_entry_id == "realclient_dashboard_001"
+    assert entry.client_kind == "dashboard_client"
+    assert entry.linked_orchestration_entry_id == "orchestration_control_plane_001"
+    assert entry.linked_node_agent_id == "nodeagent_dev_001"
+    assert entry.linked_panel_id == "panel_validation_report_001"
+
+
+def test_real_dashboard_clients_mobile_contract_contains_expected_mobile_entry() -> None:
+    """Real dashboard / clients / mobile should expose expected mobile entry."""
+    contract = build_real_dashboard_clients_mobile_contract()
+    entry = contract.entries[1]
+
+    assert entry.real_client_entry_id == "realclient_mobile_001"
+    assert entry.client_kind == "mobile_client"
+    assert entry.linked_orchestration_entry_id == "orchestration_mobile_entry_001"
+    assert entry.linked_node_agent_id == "nodeagent_mobile_001"
+    assert entry.linked_wrist_terminal_id == "wrist_terminal_core_001"
+
+
+def test_real_dashboard_clients_mobile_contract_contains_expected_ar_entry() -> None:
+    """Real dashboard / clients / mobile should expose expected AR entry."""
+    contract = build_real_dashboard_clients_mobile_contract()
+    entry = contract.entries[2]
+
+    assert entry.real_client_entry_id == "realclient_ar_glasses_001"
+    assert entry.client_kind == "ar_glasses_client"
+    assert entry.linked_orchestration_entry_id == "orchestration_mobile_entry_001"
+    assert entry.linked_node_agent_id == "nodeagent_mobile_001"
+    assert entry.linked_ar_display_id == "ar_glasses_display_core_001"
+
+===== tests/physics_dashboard_views/test_physics_dashboard_views_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.physics_dashboard_views import (
+    build_physics_dashboard_views_contract,
+)
+
+
+def test_physics_dashboard_views_contract_builds() -> None:
+    """Physics dashboard views contract should build successfully."""
+    contract = build_physics_dashboard_views_contract()
+
+    assert contract.total_entries == 5
+    assert contract.engineering_display_entries == 3
+    assert contract.primary_dashboard_entries == 2
+    assert contract.export_capable_entries == 1
+    assert contract.defined_entries == 5
+
+
+def test_physics_dashboard_views_contract_contains_expected_surface_panel() -> None:
+    """Physics dashboard should expose expected surface panel."""
+    contract = build_physics_dashboard_views_contract()
+    entry = contract.entries[0]
+
+    assert entry.panel_id == "panel_surface_map_001"
+    assert entry.view_kind == "surface_map_view"
+    assert entry.display_role == "engineering_display"
+    assert entry.linked_surface_entry_id == "surfaceintel_aluminum_engraving_001"
+    assert entry.linked_material_id == "material_aluminum_001"
+    assert entry.export_capable is False
+
+
+def test_physics_dashboard_views_contract_contains_expected_material_panel() -> None:
+    """Physics dashboard should expose expected material panel."""
+    contract = build_physics_dashboard_views_contract()
+    entry = contract.entries[1]
+
+    assert entry.panel_id == "panel_material_profile_001"
+    assert entry.view_kind == "material_profile_view"
+    assert entry.display_role == "engineering_display"
+    assert entry.linked_material_id == "material_steel_001"
+    assert entry.export_capable is False
+
+
+def test_physics_dashboard_views_contract_contains_expected_validation_panel() -> None:
+    """Physics dashboard should expose expected validation panel."""
+    contract = build_physics_dashboard_views_contract()
+    entry = contract.entries[2]
+
+    assert entry.panel_id == "panel_validation_report_001"
+    assert entry.view_kind == "validation_report_view"
+    assert entry.display_role == "primary_dashboard_display"
+    assert entry.linked_validation_gate_id == "physgate_engineering_realistic_001"
+    assert entry.export_capable is False
+
+
+def test_physics_dashboard_views_contract_contains_expected_export_panel() -> None:
+    """Physics dashboard should expose expected export panel."""
+    contract = build_physics_dashboard_views_contract()
+    entry = contract.entries[4]
+
+    assert entry.panel_id == "panel_project_export_001"
+    assert entry.view_kind == "project_export_view"
+    assert entry.display_role == "primary_dashboard_display"
+    assert entry.linked_validation_gate_id == "physgate_strict_physics_001"
+    assert entry.export_capable is True
+
+===== tests/oob_dashboard/test_dashboard_shell_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard import (
+    build_dashboard_shell_contract,
+)
+
+
+def test_dashboard_shell_contract_builds() -> None:
+    """Dashboard shell contract should build successfully."""
+    shell = build_dashboard_shell_contract()
+
+    assert shell.shell_id == "oob_dashboard_shell"
+    assert shell.total_panels == 7
+    assert shell.total_displays == 3
+    assert shell.total_feedback_items == 4
+
+
+def test_dashboard_shell_contract_has_active_panel() -> None:
+    """Dashboard shell contract should expose active panel and consistency status."""
+    shell = build_dashboard_shell_contract()
+
+    assert shell.active_panel_id == "panel_consistency"
+    assert shell.consistency_status == "consistent"
+
+===== tests/oob_dashboard/test_control_plane_handoff_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard import (
+    build_control_plane_handoff_contract,
+)
+
+
+def test_control_plane_handoff_contract_builds() -> None:
+    """Control-plane handoff contract should build successfully."""
+    contract = build_control_plane_handoff_contract()
+
+    assert contract.total_entries == 1
+    assert contract.approval_gated_entries == 1
+    assert contract.read_only_path_entries == 0
+
+
+def test_control_plane_handoff_entry() -> None:
+    """Control-plane handoff entry should remain canonical."""
+    contract = build_control_plane_handoff_contract()
+    entry = contract.entries[0]
+
+    assert entry.dashboard_id == "dashboard_main_operator_001"
+    assert entry.workspace_id == "workspace_operator_main"
+    assert entry.handoff_target == "control_plane_router"
+    assert entry.handoff_status == "handoff_only"
+    assert entry.handoff_mode == "approval_gated"
+    assert entry.direct_execution_allowed is False
+
+===== tests/oob_dashboard/test_panel_orchestration_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard import (
+    build_dashboard_panel_orchestration_contract,
+)
+
+
+def test_panel_orchestration_contract_builds() -> None:
+    """Panel orchestration contract should build successfully."""
+    contract = build_dashboard_panel_orchestration_contract()
+
+    assert len(contract.panels) >= 1
+    assert contract.navigation_enabled is True
+    assert contract.input_routing_enabled is True
+
+
+def test_panel_orchestration_has_active_panel() -> None:
+    """Panel orchestration contract should expose active panel."""
+    contract = build_dashboard_panel_orchestration_contract()
+
+    assert isinstance(contract.active_panel_id, str)
+    assert contract.active_panel_id != ""
+
+===== tests/wrist_psc_display_integration/test_wrist_psc_display_integration_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.wrist_psc_display_integration import (
+    build_wrist_psc_display_integration_contract,
+)
+
+
+def test_wrist_psc_display_integration_contract_builds() -> None:
+    """Wrist PSC display integration contract should build successfully."""
+    contract = build_wrist_psc_display_integration_contract()
+
+    assert contract.total_entries == 3
+    assert contract.engineering_entries == 1
+    assert contract.dashboard_entries == 1
+    assert contract.ar_entries == 1
+    assert contract.integrated_entries == 3
+
+
+def test_wrist_psc_display_integration_contract_contains_expected_engineering_entry() -> None:
+    """Integration contract should expose expected engineering entry."""
+    contract = build_wrist_psc_display_integration_contract()
+    entry = contract.entries[0]
+
+    assert entry.integration_mode == "wrist_to_engineering_display"
+    assert entry.resolution_entry_id == "spatialview_surface_map_001"
+    assert entry.resolved_view_id == "view_surface_map_001"
+    assert entry.source_panel_id == "panel_surface_map_001"
+    assert entry.display_target_role == "engineering_display"
+
+
+def test_wrist_psc_display_integration_contract_contains_expected_dashboard_entry() -> None:
+    """Integration contract should expose expected dashboard entry."""
+    contract = build_wrist_psc_display_integration_contract()
+    entry = contract.entries[1]
+
+    assert entry.integration_mode == "wrist_to_dashboard_display"
+    assert entry.resolution_entry_id == "spatialview_validation_report_001"
+    assert entry.resolved_view_id == "view_validation_report_001"
+    assert entry.source_panel_id == "panel_validation_report_001"
+    assert entry.display_target_role == "primary_dashboard_display"
+
+
+def test_wrist_psc_display_integration_contract_contains_expected_ar_entry() -> None:
+    """Integration contract should expose expected AR entry."""
+    contract = build_wrist_psc_display_integration_contract()
+    entry = contract.entries[2]
+
+    assert entry.integration_mode == "wrist_to_ar_display"
+    assert entry.resolution_entry_id == "spatialview_optics_mode_001"
+    assert entry.resolved_view_id == "view_optics_mode_001"
+    assert entry.source_panel_id == "panel_optics_mode_001"
+    assert entry.display_target_role == "ar_glasses_display"
+
+===== tests/display_topology/test_display_topology_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.display_topology import (
+    build_display_topology_contract,
+)
+
+
+def test_display_topology_contract_builds() -> None:
+    """Display topology contract should build successfully."""
+    contract = build_display_topology_contract()
+
+    assert contract.total_displays == 3
+    assert contract.private_displays == 1
+    assert contract.shared_displays == 2
+    assert contract.multilingual_ready_displays == 3
+
+
+def test_display_topology_contract_contains_expected_display_roles() -> None:
+    """Display topology contract should expose expected display roles."""
+    contract = build_display_topology_contract()
+
+    first = contract.entries[0]
+    second = contract.entries[1]
+    last = contract.entries[-1]
+
+    assert first.display_id == "display_primary_dashboard_001"
+    assert first.display_role == "primary_dashboard_display"
+    assert first.default_panel_ids == (
+        "panel_monitoring_panel",
+        "panel_memory_project_architecture",
+    )
+
+    assert second.display_id == "display_engineering_001"
+    assert second.display_role == "engineering_display"
+    assert second.default_panel_ids == ("panel_simulation_skill_overview",)
+
+    assert last.display_id == "display_mobile_proxy_001"
+    assert last.display_role == "mobile_display_proxy"
+    assert last.default_panel_ids == ("panel_memory_project_architecture",)
+
+
+def test_display_topology_contract_preserves_expected_capabilities() -> None:
+    """Display topology contract should preserve expected capability bindings."""
+    contract = build_display_topology_contract()
+
+    first = contract.entries[0]
+    second = contract.entries[1]
+    last = contract.entries[-1]
+
+    assert "multi_window" in first.capabilities
+    assert first.visibility_mode == "shared"
+
+    assert "spatial_overlay" in second.capabilities
+    assert second.visibility_mode == "shared"
+
+    assert "mobile_proxy" in last.capabilities
+    assert "private_display" in last.capabilities
+    assert last.visibility_mode == "private"
+
+===== tests/ar_glasses_display_contract/test_ar_glasses_display_contract_smoke.py =====
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.ar_glasses_display_contract import (
+    build_ar_glasses_display_contract,
+)
+
+
+def test_ar_glasses_display_contract_builds() -> None:
+    """AR glasses display contract should build successfully."""
+    contract = build_ar_glasses_display_contract()
+
+    assert contract.total_entries == 1
+    assert contract.private_display_entries == 1
+    assert contract.anchor_required_entries == 1
+    assert contract.production_allowed_entries == 1
+    assert contract.defined_entries == 1
+
+
+def test_ar_glasses_display_contract_contains_expected_entry() -> None:
+    """AR glasses display contract should expose expected entry."""
+    contract = build_ar_glasses_display_contract()
+    entry = contract.entries[0]
+
+    assert entry.ar_display_id == "ar_glasses_display_core_001"
+    assert entry.linked_optics_engine_id == "opticsengine_ar_glasses_projection_001"
+    assert entry.linked_wrist_terminal_id == "wrist_terminal_core_001"
+    assert entry.display_privacy_mode == "private_display"
+    assert entry.anchor_mode == "spatial_anchor_required"
+    assert entry.overlay_mode == "explanation_overlay_required"
+    assert entry.gesture_binding_mode == "gesture_linked_interface"
+    assert entry.display_transport_mode == "wrist_proxy_handoff"
+    assert entry.private_render_required is True
+    assert entry.explanation_overlay_required is True
+    assert entry.spatial_anchor_required is True
+    assert entry.production_path_allowed is True
+    assert entry.display_status == "defined"
+

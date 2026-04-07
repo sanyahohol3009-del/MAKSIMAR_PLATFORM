@@ -1,0 +1,5529 @@
+===== docs/core_architecture/core_topology/CORE_FLOW_TOPOLOGY_v1.md =====
+# CORE FLOW TOPOLOGY v1
+
+Status: active canonical flow-topology baseline
+Scope: high-level flow orientation across core domains
+Rule: platform flow must remain intelligible as a directed structure rather than an accidental mesh
+
+---
+
+## 1. Purpose
+
+This document defines the current high-level flow topology of the platform.
+
+It exists to prevent:
+- accidental mesh growth
+- unclear execution and interpretation order
+- loss of flow explainability
+
+---
+
+## 2. High-Level Flow Logic
+
+The current preferred flow orientation is broadly:
+
+- canonical rules and contracts define allowed structure
+- governance constrains what execution may do
+- runtime/execution performs live behavior
+- observability reads and interprets runtime/system state
+- dashboard/presentation exposes downstream views
+- external/mobile surfaces consume through explicit bridge logic
+- future advanced domains build on top of stable lower layers
+
+---
+
+## 3. Flow Discipline
+
+Important flow principles include:
+- upstream defines
+- runtime executes
+- observability interprets
+- dashboard presents
+- extensions attach through explicit interfaces
+- future intelligence layers must not silently redefine lower-layer truth
+
+---
+
+## 4. Required Rule
+
+The project should remain explainable in terms of flow direction, not only file presence.
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+- accidental circular architectural meaning
+- hidden authority inversion
+- presentation re-owning execution truth
+- extensions bypassing foundational flow discipline
+
+---
+
+## 6. Final Rule
+
+Flow clarity is part of platform stability.
+
+---
+
+## 7. Status
+
+This document is the active canonical flow-topology baseline until replaced by a stricter flow architecture reference.
+
+===== docs/core_architecture/core_topology/CORE_TOPOLOGY_BASELINE_v1.md =====
+# CORE TOPOLOGY BASELINE v1
+
+Status: active canonical core topology baseline
+Scope: whole-platform structural topology
+Rule: the core platform must preserve an explainable topology showing how foundational domains relate structurally
+
+---
+
+## 1. Purpose
+
+This document defines the current high-level topology baseline of the platform.
+
+It exists to preserve:
+- structural orientation
+- topology continuity
+- a readable system-wide mental model
+- a stable baseline for later detailed topology docs
+
+---
+
+## 2. Topology Principle
+
+The platform is not a flat execution surface.
+
+Its topology is broadly organized as:
+
+- foundational canonical layer
+- governance/security constraints
+- runtime/execution behavior
+- observability/diagnostic interpretation
+- operator-facing visual/presentation layer
+- extension/bridge/mobile/external domains
+- advanced future intelligence and physical layers
+
+---
+
+## 3. Foundational Ordering
+
+The preferred structural understanding is:
+
+1. canonical contracts and rules
+2. security/governance constraints
+3. runtime and execution control
+4. observability and diagnostics
+5. dashboard / operator presentation
+6. external/mobile/accelerator extensions
+7. higher-order AI/self-awareness/swarm/physical layers
+
+---
+
+## 4. Required Rule
+
+The topology must remain explainable even as the implementation grows.
+
+A future engineer or operator should be able to answer:
+- what is foundational
+- what is downstream
+- what is extension logic
+- what is future higher-order logic
+
+---
+
+## 5. Final Rule
+
+A large platform must preserve a readable topology if it is to remain coherent.
+
+---
+
+## 6. Status
+
+This document is the active canonical core topology baseline until replaced by a stricter topology reference.
+
+===== docs/core_architecture/core_topology/CORE_TOPOLOGY_GAP_NOTES_v1.md =====
+# CORE TOPOLOGY GAP NOTES v1
+
+Status: active canonical topology gap notes
+Scope: limitations of the current topology documentation pass
+Rule: the topology pass must remain honest about what is still high-level or incomplete
+
+---
+
+## 1. Purpose
+
+This document records current limitations in the topology documentation pass.
+
+It exists to keep the pass explicit and honest.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The topology is currently documented at a high architectural level rather than as a repository-to-directory exhaustive map.
+
+### Gap 2
+The current topology pass preserves orientation and continuity, but not every runtime relationship is yet described in detailed operational form.
+
+### Gap 3
+Future domains such as self-awareness, swarm, and physical AI are structurally placed, but not yet documented to full implementation depth.
+
+### Gap 4
+This pass improves baseline structural readability, but does not replace later per-domain deep topology documentation.
+
+---
+
+## 3. Required Rule
+
+These gaps do not invalidate the topology pass.
+They identify where later documentation hardening is still needed.
+
+---
+
+## 4. Final Rule
+
+A topology baseline may start high-level, provided its incompleteness is explicit.
+
+---
+
+## 5. Status
+
+This document is the active canonical topology gap note set until replaced by a stricter topology audit.
+
+===== docs/core_architecture/core_topology/CORE_UPSTREAM_DOWNSTREAM_MODEL_v1.md =====
+# CORE UPSTREAM DOWNSTREAM MODEL v1
+
+Status: active canonical upstream/downstream model
+Scope: structural interpretation of upstream and downstream platform roles
+Rule: the platform must preserve a stable upstream/downstream model so authority, interpretation, and presentation do not blur together
+
+---
+
+## 1. Purpose
+
+This document defines the current upstream/downstream model for the platform.
+
+It exists to preserve clarity about:
+- where truth originates
+- where execution happens
+- where interpretation happens
+- where presentation happens
+
+---
+
+## 2. Upstream Roles
+
+Upstream layers are generally those that define or constrain:
+- canonical contracts
+- rules
+- invariants
+- governance
+- source-backed truth
+
+---
+
+## 3. Midstream Roles
+
+Midstream layers are generally those that carry live behavior:
+- runtime
+- execution control
+- bridge routing
+- health-relevant live state
+
+---
+
+## 4. Downstream Roles
+
+Downstream layers are generally those that:
+- read
+- summarize
+- diagnose
+- visualize
+- present
+
+Examples:
+- observability summaries
+- diagnostics views
+- dashboards
+- operator-facing UI surfaces
+
+---
+
+## 5. Required Rule
+
+Downstream layers may explain upstream truth,
+but must not silently replace it.
+
+Midstream layers may execute under upstream rules,
+but must not redefine upstream governance.
+
+---
+
+## 6. Final Rule
+
+A stable upstream/downstream model protects the platform from authority confusion.
+
+---
+
+## 7. Status
+
+This document is the active canonical upstream/downstream model until replaced by a stricter authority topology reference.
+
+===== docs/document_package_operator_readability/01_DOCUMENT_PACKAGE_OPERATOR_READABILITY_BASELINE_v1.md =====
+# 01 DOCUMENT PACKAGE OPERATOR READABILITY BASELINE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: constitutional
+Interpretation Priority: strict
+Scope: baseline rules for operator readability across documentation packages
+Rule: documentation packages must remain operator-readable so human maintainers can understand package purpose, state, and next action without reconstructing meaning from scattered files
+
+---
+
+## 1. Purpose
+
+This document defines the document-package-operator-readability baseline of the platform.
+
+It exists to preserve:
+- readable package handling by operators
+- lower ambiguity during package review and maintenance
+- continuity between package structure and human interpretation
+- a stable base for later readability hardening
+
+---
+
+## 2. Readability Principle
+
+Package operator readability should remain understandable in terms of:
+- what the package is
+- what state it is in
+- what remains next
+- how the operator should orient quickly and safely
+
+Readability should reduce handling cost, not create another interpretation burden.
+
+---
+
+## 3. Required Rule
+
+Package operator readability should remain:
+- explicit
+- package-aware
+- human-readable
+- canonical-first
+- incrementally hardenable
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- package meaning recoverable only through deep re-reading
+- operator orientation based only on memory
+- readability signals too vague to guide real use
+- readability growth that creates noise instead of clarity
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps package meaning readable to operators before scale turns maintenance into guesswork.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-readability baseline until replaced by a stricter readability reference.
+
+===== docs/document_package_operator_readability/02_OPERATOR_READABILITY_SCOPE_RULE_v1.md =====
+# 02 OPERATOR READABILITY SCOPE RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: scope rule for how operator readability should be bounded and interpreted across documentation packages
+Rule: operator readability scope must remain explicit so readability stays bounded, meaningful, and usable in real maintenance work
+
+---
+
+## 1. Purpose
+
+This document defines the operator-readability-scope rule of the platform.
+
+It exists to preserve:
+- bounded human-readable interpretation
+- lower ambiguity around what readability should cover
+- continuity between package role and package handling
+- a stable base for later readability hardening
+
+---
+
+## 2. Scope Principle
+
+Operator readability scope should remain understandable in terms of:
+- what package signals must be readable first
+- what remains outside quick orientation
+- what readability level is primary
+- how scope differs across package families
+
+---
+
+## 3. Required Rule
+
+Operator readability scope should remain:
+- explicit
+- bounded
+- meaningful
+- readable
+- non-bloated
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- undefined readability boundaries
+- operator readability treated as full re-reading by default
+- readability growth with no readable discipline
+- scope ambiguity preserved only in operator memory
+
+---
+
+## 5. Final Rule
+
+A mature readability layer first defines what operators must see quickly before it relies on readability claims.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-readability-scope rule until replaced by a stricter scope reference.
+
+===== docs/document_package_operator_readability/03_PACKAGE_ENTRY_READABILITY_RULE_v1.md =====
+# 03 PACKAGE ENTRY READABILITY RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for making package entrypoints readable to human operators
+Rule: package entrypoints must remain operator-readable so maintainers can start from the correct file or summary instead of entering the package randomly
+
+---
+
+## 1. Purpose
+
+This document defines the package-entry-readability rule of the platform.
+
+It exists to preserve:
+- readable package entry handling
+- lower ambiguity around where maintenance should begin
+- continuity between package structure and human onboarding
+- a stable base for later readability hardening
+
+---
+
+## 2. Entry Principle
+
+Package entry readability should remain understandable in terms of:
+- what file should be read first
+- why that file is the entrypoint
+- how entry clarity preserves safe maintenance
+- how readability preserves documentation trust
+
+---
+
+## 3. Required Rule
+
+Package entry readability should remain:
+- explicit
+- readable
+- selective
+- meaningful
+- non-random
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- package entry guessed only from habit
+- maintainers entering packages through random files by default
+- entry logic preserved only in operator memory
+- multiple competing entry surfaces with no readable guidance
+
+---
+
+## 5. Final Rule
+
+A mature documentation system makes package entry readable before first contact turns into confusion.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-entry-readability rule until replaced by a stricter readability reference.
+
+===== docs/document_package_operator_readability/04_PACKAGE_STATE_READABILITY_RULE_v1.md =====
+# 04 PACKAGE STATE READABILITY RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for keeping current package state readable to human operators
+Rule: package state must remain operator-readable so maintainers can understand what is established now without reconstructing state from multiple closure artifacts
+
+---
+
+## 1. Purpose
+
+This document defines the package-state-readability rule of the platform.
+
+It exists to preserve:
+- readable package state handling
+- lower ambiguity around current package maturity
+- continuity between package now-state and next maintenance step
+- a stable base for later readability hardening
+
+---
+
+## 2. State Principle
+
+Package state readability should remain understandable in terms of:
+- what is established now
+- what is active now
+- what status best describes the package
+- how state readability preserves continuity
+
+---
+
+## 3. Required Rule
+
+Package state readability should remain:
+- explicit
+- compact
+- meaningful
+- readable
+- non-random
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- current package state guessed only from recent memory
+- state meaning spread across too many files by default
+- current-state readability preserved only in operator memory
+- package handling that hides what the package currently is
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps package state readable before time gaps turn active meaning into uncertainty.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-state-readability rule until replaced by a stricter readability reference.
+
+===== docs/document_package_operator_readability/05_PACKAGE_GAP_AND_NEXT_STEP_READABILITY_RULE_v1.md =====
+# 05 PACKAGE GAP AND NEXT STEP READABILITY RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for keeping package gaps and next actions readable to human operators
+Rule: package open gaps and next steps must remain operator-readable so unfinished work is resumed deliberately instead of rediscovered through friction
+
+---
+
+## 1. Purpose
+
+This document defines the package-gap-and-next-step-readability rule of the platform.
+
+It exists to preserve:
+- readable unfinished-work handling
+- lower ambiguity around what remains next
+- continuity between package closure and next action
+- a stable base for later readability hardening
+
+---
+
+## 2. Gaps Principle
+
+Package gap and next-step readability should remain understandable in terms of:
+- what remains incomplete
+- what should be done next
+- what is blocked versus merely pending
+- how readability preserves continuity
+
+---
+
+## 3. Required Rule
+
+Package gap and next-step readability should remain:
+- explicit
+- selective
+- meaningful
+- readable
+- non-bloated
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- unfinished work rediscovered only by rereading
+- next actions hidden in scattered notes
+- gap meaning preserved only in operator memory
+- package handling that hides what still remains
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps gaps and next steps readable before pauses turn pending work into drift.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-gap-and-next-step-readability rule until replaced by a stricter readability reference.
+
+===== docs/document_package_operator_readability/06_REGISTRY_AND_SUMMARY_READABILITY_ALIGNMENT_RULE_v1.md =====
+# 06 REGISTRY AND SUMMARY READABILITY ALIGNMENT RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for keeping operator-readable package signals aligned with registry and summary layers
+Rule: operator-readable package meaning must remain aligned with registry and summary surfaces so human orientation does not drift away from declared package metadata
+
+---
+
+## 1. Purpose
+
+This document defines the registry-and-summary-readability-alignment rule of the platform.
+
+It exists to preserve:
+- readable cross-layer operator orientation
+- lower ambiguity across human-readable and machine-readable layers
+- continuity between package summaries, registry metadata, and human handling
+- a stable base for later readability hardening
+
+---
+
+## 2. Alignment Principle
+
+Registry and summary readability alignment should remain understandable in terms of:
+- what operator-facing signals align with registry meaning
+- what summary fields support operator readability
+- how alignment preserves trust
+- how interpretive drift is avoided
+
+---
+
+## 3. Required Rule
+
+Registry and summary readability alignment should remain:
+- explicit
+- readable
+- non-contradictory
+- alignment-aware
+- incrementally hardenable
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- operator-readable package meaning conflicting with registry or summary meaning
+- silent drift between human-readable and machine-readable layers
+- alignment guessed only from memory
+- readability claims with no cross-layer discipline
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps operator readability aligned with registry and summary layers because safe maintenance depends on that stability.
+
+---
+
+## 6. Status
+
+This document is the active canonical registry-and-summary-readability-alignment rule until replaced by a stricter alignment reference.
+
+===== docs/document_package_operator_readability/07_INCREMENTAL_OPERATOR_READABILITY_HARDENING_v1.md =====
+# 07 INCREMENTAL OPERATOR READABILITY HARDENING v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: incremental hardening rule for operator readability across the documentation universe
+Rule: operator-readability hardening must remain incremental so maintainability improves without causing retrofit chaos
+
+---
+
+## 1. Purpose
+
+This document defines the incremental-operator-readability-hardening rule of the platform.
+
+It exists to preserve:
+- practical readability hardening
+- lower retrofit overload
+- continuity between readability ambition and real maintenance work
+- a stable base for later tooling
+
+---
+
+## 2. Hardening Principle
+
+Incremental operator-readability hardening should remain understandable in terms of:
+- what package family is hardened next
+- why it is prioritized
+- what minimum readability quality is expected
+- how hardening grows without chaos
+
+---
+
+## 3. Required Rule
+
+Incremental operator-readability hardening should remain:
+- explicit
+- incremental
+- canonical-first
+- practical
+- non-chaotic
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- pretending full readability hardening will happen instantly
+- uncontrolled retrofit pressure
+- random hardening order
+- readability hardening with no readable sequencing
+
+---
+
+## 5. Final Rule
+
+A mature documentation system hardens operator readability in a controlled sequence, not through one blind sweep.
+
+---
+
+## 6. Status
+
+This document is the active canonical incremental-operator-readability-hardening rule until replaced by a stricter hardening reference.
+
+===== docs/document_package_operator_readability/08_OPERATOR_READABILITY_RESULT_INTERPRETATION_v1.md =====
+# 08 OPERATOR READABILITY RESULT INTERPRETATION v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: interpretation rules for operator-readability outcomes across documentation packages
+Rule: operator-readability results must remain readable so readability hardening preserves trust instead of creating ambiguity
+
+---
+
+## 1. Purpose
+
+This document defines the operator-readability-result-interpretation model of the platform.
+
+It exists to preserve:
+- readable readability outcomes
+- lower ambiguity around what an operator-readability result means
+- continuity between readability handling and operator understanding
+- a stable base for later diagnostics hardening
+
+---
+
+## 2. Interpretation Principle
+
+Operator-readability result interpretation should remain understandable in terms of:
+- what package state is now readable
+- what entry and next-step signals are now readable
+- what remains unresolved
+- what kind of followup is justified
+- whether documentation trust was meaningfully preserved
+
+---
+
+## 3. Required Rule
+
+Operator-readability result interpretation should remain:
+- explicit
+- readable
+- stage-aware
+- non-panicked
+- governance-oriented
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- treating all readability outcomes as equally strong
+- output that creates noise instead of clarity
+- panic-first interpretation of unresolved readability structure
+- unreadable result semantics preserved only in memory
+
+---
+
+## 5. Final Rule
+
+A mature readability layer explains outcomes before it demands more hardening work.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-readability-result-interpretation model until replaced by a stricter interpretation reference.
+
+===== docs/document_package_operator_readability/09_DOCUMENT_PACKAGE_OPERATOR_READABILITY_GAP_NOTES_v1.md =====
+# 09 DOCUMENT PACKAGE OPERATOR READABILITY GAP NOTES v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: limitations of the current document-package-operator-readability pass
+Rule: the operator-readability pass must remain explicit about what is still incomplete beyond the current baseline
+
+---
+
+## 1. Purpose
+
+This document records the current limitations of the document-package-operator-readability pass.
+
+It exists to keep the pass honest and bounded.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The current pass establishes package operator-readability baseline semantics, not yet implementation-backed readability tooling.
+
+### Gap 2
+The pass does not yet provide automated readability helpers across all package families.
+
+### Gap 3
+Full retroactive readability coverage of older packages is still future work.
+
+### Gap 4
+Future deeper work is still needed for:
+- broader package coverage
+- stronger operator-readable guidance
+- registry and summary alignment hardening
+- readability diagnostics
+- tighter self-reading integration
+
+---
+
+## 3. Final Rule
+
+An operator-readability baseline may begin documentation-first if its remaining gaps are explicit.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-readability gap note set until replaced by a stricter deep audit.
+
+===== docs/document_package_operator_readability/10_DOCUMENT_PACKAGE_OPERATOR_READABILITY_COMPLETION_NOTE_v1.md =====
+# 10 DOCUMENT PACKAGE OPERATOR READABILITY COMPLETION NOTE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: completion state of the current document-package-operator-readability pass
+Rule: the pass may be considered materially advanced once the major package-operator-readability families have explicit canonical coverage
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of the document-package-operator-readability pass.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Document-package-operator-readability current state:
+- materially advanced
+- baseline established
+- not yet maximally deep
+- suitable as a canonical starting point for later readability hardening work
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+- package-operator-readability baseline docs
+- readability scope docs
+- package entry readability docs
+- package state readability docs
+- package gap and next-step readability docs
+- registry and summary alignment docs
+- incremental hardening docs
+- result interpretation docs
+- gap notes and completion note
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+- implementation-backed readability helpers
+- broader package coverage
+- stronger operator-readable guidance
+- diagnostics tooling
+- structured readability interpretation
+- tighter self-reading integration
+
+---
+
+## 5. Final Rule
+
+This pass does not require implementation before progress.
+It requires a stable canonical package-operator-readability reference, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-readability completion note until replaced by a stricter completion audit.
+
+===== docs/document_package_operator_readability/document_package_operator_readability_audit/DOCUMENT_PACKAGE_OPERATOR_READABILITY_AUDIT_COMPLETION_STATE_v1.md =====
+# DOCUMENT PACKAGE OPERATOR READABILITY AUDIT COMPLETION STATE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: completion state of the current document-package-operator-readability audit layer
+Rule: the audit layer may be considered materially advanced once the document-package-operator-readability pass has a readable audit, consolidation, and next-step reference set
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of the document-package-operator-readability audit layer.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Document-package-operator-readability audit current state:
+- materially advanced
+- baseline established
+- audit layer established
+- not yet maximally deep
+- suitable as a canonical starting point for later readability hardening
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+
+- document-package-operator-readability baseline family
+- audit notes
+- consolidated baseline
+- next-deepening hints
+- explicit completion-state note
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+
+- broader package coverage
+- stronger operator-readable guidance
+- package manifest widening
+- diagnostics tooling
+- self-reading linkage
+- implementation-facing readability helpers
+
+---
+
+## 5. Final Rule
+
+The audit layer does not require full package-operator-readability hardening before progress.
+It requires a stable canonical audit closure, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-readability audit completion note until replaced by a stricter completion audit.
+
+===== docs/document_package_operator_readability/document_package_operator_readability_audit/DOCUMENT_PACKAGE_OPERATOR_READABILITY_AUDIT_NOTES_v1.md =====
+# DOCUMENT PACKAGE OPERATOR READABILITY AUDIT NOTES v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: audit notes for the current document-package-operator-readability pass
+Rule: the operator-readability pass should leave behind explicit audit notes so completion claims stay readable and bounded
+
+---
+
+## 1. Purpose
+
+This document records audit notes for the current document-package-operator-readability pass.
+
+It exists to preserve:
+- readable closure reasoning
+- bounded interpretation of what was actually established
+- continuity between baseline docs and audit closure
+- a stable base for later deepening work
+
+---
+
+## 2. Audit Notes
+
+### Note 1
+The document-package-operator-readability pass now covers the major package-operator-readability surfaces at baseline level.
+
+### Note 2
+The pass establishes operator-readability semantics, not yet implementation-backed readability tooling.
+
+### Note 3
+The pass is suitable as a canonical reference for future package-readability hardening work.
+
+### Note 4
+Further work is still needed before package operator readability becomes implementation-backed and coverage-complete across older packages.
+
+---
+
+## 3. Final Rule
+
+An audit note should clarify what was actually achieved, not exaggerate it.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-readability audit note set until replaced by a stricter audit record.
+
+===== docs/document_package_operator_readability/document_package_operator_readability_audit/DOCUMENT_PACKAGE_OPERATOR_READABILITY_CONSOLIDATED_BASELINE_v1.md =====
+# DOCUMENT PACKAGE OPERATOR READABILITY CONSOLIDATED BASELINE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: consolidated view of the current document-package-operator-readability documentation pass
+Rule: the document-package-operator-readability pass must conclude in one consolidated baseline so the project can move forward from a stable package-operator-readability reference point
+
+---
+
+## 1. Purpose
+
+This document consolidates the current document-package-operator-readability pass.
+
+It exists to preserve one stable reference summarizing that the project now has explicit baseline coverage for:
+
+- document-package-operator-readability baseline
+- operator-readability-scope rule
+- package-entry-readability rule
+- package-state-readability rule
+- package-gap-and-next-step-readability rule
+- registry-and-summary-readability-alignment rule
+- incremental-operator-readability-hardening
+- operator-readability-result-interpretation
+- document-package-operator-readability gap notes
+- document-package-operator-readability completion note
+
+---
+
+## 2. What Has Been Established
+
+The current document-package-operator-readability pass has established canonical baseline coverage for:
+
+- explicit package-operator-readability thinking
+- readable entry, state, and next-step semantics
+- stable interpretation of package handling structure
+- registry and summary aware readability maintenance
+- incremental hardening discipline for future readability work
+
+---
+
+## 3. What This Means
+
+The project now has a materially stronger package-operator-readability baseline than before.
+
+This does not mean the project already has implementation-backed readability helpers, full retroactive readability coverage, stronger readability-resolution tooling, or complete diagnostics implementation.
+It means the operator-readability layer is no longer only implicit or memory-bound.
+
+---
+
+## 4. Remaining Limitation
+
+The current document-package-operator-readability result is still:
+
+- baseline-oriented rather than readability-complete
+- not yet tooling-backed
+- not yet widened across all older packages
+- not yet state-complete
+- not yet tightly bound to every self-reading surface
+- not yet implementation-backed
+
+---
+
+## 5. Required Rule
+
+This consolidated baseline should be treated as the current canonical document-package-operator-readability reference until stricter or deeper replacements are intentionally written.
+
+---
+
+## 6. Final Rule
+
+A package-operator-readability pass is only useful if it leaves behind one readable reference point, not scattered readability fragments.
+
+---
+
+## 7. Status
+
+This document is the active canonical consolidated document-package-operator-readability baseline until replaced by a stricter readability reference.
+
+===== docs/document_package_operator_readability/document_package_operator_readability_audit/DOCUMENT_PACKAGE_OPERATOR_READABILITY_NEXT_DEEPENING_HINTS_v1.md =====
+# DOCUMENT PACKAGE OPERATOR READABILITY NEXT DEEPENING HINTS v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: next-step hints after the current document-package-operator-readability pass
+Rule: the pass should leave behind readable deepening hints so later work can continue without re-deriving direction from scratch
+
+---
+
+## 1. Purpose
+
+This document records next-deepening hints for the current document-package-operator-readability pass.
+
+It exists to preserve:
+- readable continuation guidance
+- lower restart cost in later sessions
+- continuity between baseline closure and future hardening
+- a stable base for later package-quality work
+
+---
+
+## 2. Next Deepening Hints
+
+Later deeper work may include:
+- widening readability coverage across older canonical packages
+- adding stronger operator-readable guidance
+- defining package-readability procedures
+- tightening registry and summary alignment
+- linking readability handling to future self-reading behavior
+- introducing implementation-facing readability helpers
+
+---
+
+## 3. Final Rule
+
+A useful baseline pass leaves behind direction for the next hardening step.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-readability next-deepening hint set until replaced by a stricter continuation reference.
+
+===== docs/document_package_operator_resume_contracts/01_DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_BASELINE_v1.md =====
+# 01 DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS BASELINE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: constitutional
+Interpretation Priority: strict
+Scope: baseline rules for operator-facing resume contracts across documentation packages
+Rule: documentation packages must expose readable operator-resume contracts so humans can resume work from explicit package signals instead of reconstructing package state from scattered artifacts
+
+---
+
+## 1. Purpose
+
+This document defines the document-package-operator-resume-contracts baseline of the platform.
+
+It exists to preserve:
+- readable operator-facing resume structure
+- lower ambiguity during package continuation
+- continuity between package state and operator handling
+- a stable base for later resume-contract hardening
+
+---
+
+## 2. Contract Principle
+
+Package operator resume contracts should remain understandable in terms of:
+- what the operator needs first at resume time
+- what package state is contractually visible
+- what next action is made readable
+- how resume contracts preserve documentation trust
+
+Resume contracts should reduce operator restart burden, not create another interpretive layer.
+
+---
+
+## 3. Required Rule
+
+Package operator resume contracts should remain:
+- explicit
+- package-aware
+- human-readable
+- canonical-first
+- incrementally hardenable
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- resume handling dependent on operator memory alone
+- package continuation reconstructed only by rereading
+- contract signals too vague to support real continuation
+- contract growth that creates clutter instead of clarity
+
+---
+
+## 5. Final Rule
+
+A mature documentation system defines operator-resume contracts before scale turns continuation into guesswork.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-resume-contracts baseline until replaced by a stricter resume-contract reference.
+
+===== docs/document_package_operator_resume_contracts/02_OPERATOR_RESUME_SCOPE_RULE_v1.md =====
+# 02 OPERATOR RESUME SCOPE RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: scope rule for how operator-facing resume contracts should be bounded across documentation packages
+Rule: operator-resume scope must remain explicit so continuation signals stay bounded, meaningful, and usable in real maintenance work
+
+---
+
+## 1. Purpose
+
+This document defines the operator-resume-scope rule of the platform.
+
+It exists to preserve:
+- bounded operator resume interpretation
+- lower ambiguity around what must be exposed first
+- continuity between package role and resume handling
+- a stable base for later contract hardening
+
+---
+
+## 2. Scope Principle
+
+Operator resume scope should remain understandable in terms of:
+- what signals belong in early operator reentry
+- what may remain outside the first resume layer
+- what scope level is primary
+- how scope differs across package families
+
+---
+
+## 3. Required Rule
+
+Operator resume scope should remain:
+- explicit
+- bounded
+- meaningful
+- readable
+- non-bloated
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- undefined operator-resume boundaries
+- operator-resume treated as full package replay
+- scope growth with no readable discipline
+- scope ambiguity preserved only in operator memory
+
+---
+
+## 5. Final Rule
+
+A mature resume layer first defines what operators must see early before it relies on resume quality.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-resume-scope rule until replaced by a stricter scope reference.
+
+===== docs/document_package_operator_resume_contracts/03_PACKAGE_RESUME_ENTRY_CONTRACT_RULE_v1.md =====
+# 03 PACKAGE RESUME ENTRY CONTRACT RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for the first operator-facing resume entry contract across documentation packages
+Rule: package resume entry must remain contract-readable so maintainers can orient from the strongest visible package cue before exploring deeper detail
+
+---
+
+## 1. Purpose
+
+This document defines the package-resume-entry-contract rule of the platform.
+
+It exists to preserve:
+- readable first-entry handling
+- lower ambiguity around what the operator should read first
+- continuity between package meaning and package reentry
+- a stable base for later contract hardening
+
+---
+
+## 2. Entry Principle
+
+Package resume entry contracts should remain understandable in terms of:
+- what the operator sees first
+- why that signal has priority
+- what it clarifies immediately
+- how entry contracts reduce restart cost
+
+---
+
+## 3. Required Rule
+
+Package resume entry contracts should remain:
+- explicit
+- compact
+- meaningful
+- readable
+- non-random
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- entry handling guessed only from memory
+- strongest reentry cue buried inside weak details
+- entry priority preserved only in operator memory
+- continuation beginning from arbitrary secondary signals
+
+---
+
+## 5. Final Rule
+
+A mature documentation system defines operator entry contracts before it widens restart depth.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-resume-entry-contract rule until replaced by a stricter entry reference.
+
+===== docs/document_package_operator_resume_contracts/04_PACKAGE_CURRENT_STATE_RESUME_CONTRACT_RULE_v1.md =====
+# 04 PACKAGE CURRENT STATE RESUME CONTRACT RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for exposing current package state through an operator-readable resume contract
+Rule: current package state must remain contract-readable so maintainers can continue from what is true now without reconstructing state from scattered closure artifacts
+
+---
+
+## 1. Purpose
+
+This document defines the package-current-state-resume-contract rule of the platform.
+
+It exists to preserve:
+- readable current-state handling
+- lower ambiguity around package maturity
+- continuity between package now-state and resumed work
+- a stable base for later contract hardening
+
+---
+
+## 2. State Principle
+
+Current-state resume contracts should remain understandable in terms of:
+- what is established now
+- what is active now
+- what status best describes the package
+- how state contracts preserve continuity
+
+---
+
+## 3. Required Rule
+
+Current-state resume contracts should remain:
+- explicit
+- compact
+- meaningful
+- readable
+- non-random
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- current package state guessed only from recent memory
+- state recovery spread across too many files by default
+- current-state meaning preserved only in operator memory
+- contracts that hide what the package currently is
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps current-state contracts readable before time gaps turn active meaning into uncertainty.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-current-state-resume-contract rule until replaced by a stricter state reference.
+
+===== docs/document_package_operator_resume_contracts/05_PACKAGE_NEXT_ACTION_RESUME_CONTRACT_RULE_v1.md =====
+# 05 PACKAGE NEXT ACTION RESUME CONTRACT RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for exposing the next operator action through a readable resume contract
+Rule: the next action must remain contract-readable so unfinished package work can continue deliberately instead of being rediscovered through rereading and guesswork
+
+---
+
+## 1. Purpose
+
+This document defines the package-next-action-resume-contract rule of the platform.
+
+It exists to preserve:
+- readable next-action recovery
+- lower ambiguity around what the operator should do next
+- continuity between package closure and resumed work
+- a stable base for later contract hardening
+
+---
+
+## 2. Next-Action Principle
+
+Next-action resume contracts should remain understandable in terms of:
+- what should be done next
+- what remains blocked or pending
+- what kind of followup is expected
+- how next-action contracts preserve continuity
+
+---
+
+## 3. Required Rule
+
+Next-action resume contracts should remain:
+- explicit
+- selective
+- meaningful
+- readable
+- non-bloated
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- next action rediscovered only by rereading
+- next-step handling overloaded with weak or irrelevant details
+- next-action meaning preserved only in operator memory
+- contracts that hide what still remains to be done
+
+---
+
+## 5. Final Rule
+
+A mature documentation system exposes the next operator action clearly before pauses turn pending work into drift.
+
+---
+
+## 6. Status
+
+This document is the active canonical package-next-action-resume-contract rule until replaced by a stricter action reference.
+
+===== docs/document_package_operator_resume_contracts/06_REGISTRY_AND_SUMMARY_RESUME_CONTRACT_ALIGNMENT_RULE_v1.md =====
+# 06 REGISTRY AND SUMMARY RESUME CONTRACT ALIGNMENT RULE v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: rule for keeping operator-resume contracts aligned with registry and summary layers
+Rule: operator-resume contract signals must remain aligned with registry and summary surfaces so resumed package meaning does not drift away from declared metadata and summary meaning
+
+---
+
+## 1. Purpose
+
+This document defines the registry-and-summary-resume-contract-alignment rule of the platform.
+
+It exists to preserve:
+- readable cross-layer resume orientation
+- lower ambiguity across operator resume, registry, and summary layers
+- continuity between recovered package meaning and declared package signals
+- a stable base for later contract hardening
+
+---
+
+## 2. Alignment Principle
+
+Registry and summary resume contract alignment should remain understandable in terms of:
+- what contract signals align with registry meaning
+- what summary fields support operator continuation
+- how alignment preserves trust
+- how interpretive drift is avoided
+
+---
+
+## 3. Required Rule
+
+Registry and summary resume contract alignment should remain:
+- explicit
+- readable
+- non-contradictory
+- alignment-aware
+- incrementally hardenable
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- resume-contract signals conflicting with registry or summary meaning
+- silent drift between operator continuation cues and machine-readable layers
+- alignment guessed only from memory
+- contract claims with no cross-layer discipline
+
+---
+
+## 5. Final Rule
+
+A mature documentation system keeps operator-resume contracts aligned with registry and summary layers because trusted continuation depends on that stability.
+
+---
+
+## 6. Status
+
+This document is the active canonical registry-and-summary-resume-contract-alignment rule until replaced by a stricter alignment reference.
+
+===== docs/document_package_operator_resume_contracts/07_INCREMENTAL_OPERATOR_RESUME_CONTRACT_HARDENING_v1.md =====
+# 07 INCREMENTAL OPERATOR RESUME CONTRACT HARDENING v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: incremental hardening rule for operator-facing resume contracts across the documentation universe
+Rule: operator-resume-contract hardening must remain incremental so trusted continuation improves without causing retrofit chaos
+
+---
+
+## 1. Purpose
+
+This document defines the incremental-operator-resume-contract-hardening rule of the platform.
+
+It exists to preserve:
+- practical contract hardening
+- lower retrofit overload
+- continuity between contract ambition and real maintenance work
+- a stable base for later tooling
+
+---
+
+## 2. Hardening Principle
+
+Incremental operator resume contract hardening should remain understandable in terms of:
+- what package family is hardened next
+- why it is prioritized
+- what minimum contract quality is expected
+- how hardening grows without chaos
+
+---
+
+## 3. Required Rule
+
+Incremental operator resume contract hardening should remain:
+- explicit
+- incremental
+- canonical-first
+- practical
+- non-chaotic
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- pretending full contract hardening will happen instantly
+- uncontrolled retrofit pressure
+- random hardening order
+- contract hardening with no readable sequencing
+
+---
+
+## 5. Final Rule
+
+A mature documentation system hardens operator-resume contracts in a controlled sequence, not through one blind sweep.
+
+---
+
+## 6. Status
+
+This document is the active canonical incremental-operator-resume-contract-hardening rule until replaced by a stricter hardening reference.
+
+===== docs/document_package_operator_resume_contracts/08_OPERATOR_RESUME_CONTRACT_RESULT_INTERPRETATION_v1.md =====
+# 08 OPERATOR RESUME CONTRACT RESULT INTERPRETATION v1
+
+Status: active_canonical
+Document Type: canonical
+Authority Level: operational
+Interpretation Priority: high
+Scope: interpretation rules for operator-resume-contract outcomes across documentation packages
+Rule: operator-resume-contract results must remain readable so contract hardening preserves trust instead of creating ambiguity
+
+---
+
+## 1. Purpose
+
+This document defines the operator-resume-contract-result-interpretation model of the platform.
+
+It exists to preserve:
+- readable contract outcomes
+- lower ambiguity around what a contract result means
+- continuity between contract handling and operator understanding
+- a stable base for later diagnostics hardening
+
+---
+
+## 2. Interpretation Principle
+
+Operator resume contract result interpretation should remain understandable in terms of:
+- what package meaning is now contract-readable
+- what current-state and next-action cues are now readable
+- what remains unresolved
+- what kind of followup is justified
+- whether documentation trust was meaningfully preserved
+
+---
+
+## 3. Required Rule
+
+Operator resume contract result interpretation should remain:
+- explicit
+- readable
+- stage-aware
+- non-panicked
+- governance-oriented
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- treating all contract outcomes as equally strong
+- output that creates noise instead of clarity
+- panic-first interpretation of unresolved contract structure
+- unreadable result semantics preserved only in memory
+
+---
+
+## 5. Final Rule
+
+A mature contract layer explains outcomes before it demands more hardening work.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-resume-contract-result-interpretation model until replaced by a stricter interpretation reference.
+
+===== docs/document_package_operator_resume_contracts/09_DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_GAP_NOTES_v1.md =====
+# 09 DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS GAP NOTES v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: limitations of the current document-package-operator-resume-contracts pass
+Rule: the operator-resume-contracts pass must remain explicit about what is still incomplete beyond the current baseline
+
+---
+
+## 1. Purpose
+
+This document records the current limitations of the document-package-operator-resume-contracts pass.
+
+It exists to keep the pass honest and bounded.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The current pass establishes package-operator-resume-contract baseline semantics, not yet implementation-backed contract tooling.
+
+### Gap 2
+The pass does not yet provide automated operator-resume helpers across all package families.
+
+### Gap 3
+Full retroactive operator-resume contract coverage of older packages is still future work.
+
+### Gap 4
+Future deeper work is still needed for:
+- broader package coverage
+- stronger operator-resume guidance
+- registry and summary resume-contract alignment
+- contract diagnostics
+- tighter self-reading integration
+
+---
+
+## 3. Final Rule
+
+An operator-resume-contract baseline may begin documentation-first if its remaining gaps are explicit.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-resume-contracts gap note set until replaced by a stricter deep audit.
+
+===== docs/document_package_operator_resume_contracts/10_DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_COMPLETION_NOTE_v1.md =====
+# 10 DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS COMPLETION NOTE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: completion state of the current document-package-operator-resume-contracts pass
+Rule: the pass may be considered materially advanced once the major package-operator-resume-contract families have explicit canonical coverage
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of the document-package-operator-resume-contracts pass.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Document-package-operator-resume-contracts current state:
+- materially advanced
+- baseline established
+- not yet maximally deep
+- suitable as a canonical starting point for later contract hardening work
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+- package-operator-resume-contract baseline docs
+- operator-resume scope docs
+- package resume entry docs
+- current-state resume contract docs
+- next-action resume contract docs
+- registry and summary resume contract alignment docs
+- incremental hardening docs
+- result interpretation docs
+- gap notes and completion note
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+- implementation-backed contract helpers
+- broader package coverage
+- stronger operator-resume guidance
+- diagnostics tooling
+- structured contract interpretation
+- tighter self-reading integration
+
+---
+
+## 5. Final Rule
+
+This pass does not require implementation before progress.
+It requires a stable canonical package-operator-resume-contract reference, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-resume-contracts completion note until replaced by a stricter completion audit.
+
+===== docs/document_package_operator_resume_contracts/document_package_operator_resume_contracts_audit/DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_AUDIT_COMPLETION_STATE_v1.md =====
+# DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS AUDIT COMPLETION STATE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: completion state of the current document-package-operator-resume-contracts audit layer
+Rule: the audit layer may be considered materially advanced once the document-package-operator-resume-contracts pass has a readable audit, consolidation, and next-step reference set
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of the document-package-operator-resume-contracts audit layer.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Document-package-operator-resume-contracts audit current state:
+- materially advanced
+- baseline established
+- audit layer established
+- not yet maximally deep
+- suitable as a canonical starting point for later contract hardening
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+
+- document-package-operator-resume-contracts baseline family
+- audit notes
+- consolidated baseline
+- next-deepening hints
+- explicit completion-state note
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+
+- broader package coverage
+- stronger operator-resume guidance
+- package manifest widening
+- diagnostics tooling
+- self-reading linkage
+- implementation-facing contract helpers
+
+---
+
+## 5. Final Rule
+
+The audit layer does not require full package-operator-resume-contract hardening before progress.
+It requires a stable canonical audit closure, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical document-package-operator-resume-contracts audit completion note until replaced by a stricter completion audit.
+
+===== docs/document_package_operator_resume_contracts/document_package_operator_resume_contracts_audit/DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_AUDIT_NOTES_v1.md =====
+# DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS AUDIT NOTES v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: audit notes for the current document-package-operator-resume-contracts pass
+Rule: the operator-resume-contracts pass should leave behind explicit audit notes so completion claims stay readable and bounded
+
+---
+
+## 1. Purpose
+
+This document records audit notes for the current document-package-operator-resume-contracts pass.
+
+It exists to preserve:
+- readable closure reasoning
+- bounded interpretation of what was actually established
+- continuity between baseline docs and audit closure
+- a stable base for later deepening work
+
+---
+
+## 2. Audit Notes
+
+### Note 1
+The document-package-operator-resume-contracts pass now covers the major package-operator-resume-contract surfaces at baseline level.
+
+### Note 2
+The pass establishes operator-resume-contract semantics, not yet implementation-backed contract tooling.
+
+### Note 3
+The pass is suitable as a canonical reference for future package-operator-resume hardening work.
+
+### Note 4
+Further work is still needed before package operator-resume contracts become implementation-backed and coverage-complete across older packages.
+
+---
+
+## 3. Final Rule
+
+An audit note should clarify what was actually achieved, not exaggerate it.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-resume-contracts audit note set until replaced by a stricter audit record.
+
+===== docs/document_package_operator_resume_contracts/document_package_operator_resume_contracts_audit/DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_CONSOLIDATED_BASELINE_v1.md =====
+# DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS CONSOLIDATED BASELINE v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: consolidated view of the current document-package-operator-resume-contracts documentation pass
+Rule: the document-package-operator-resume-contracts pass must conclude in one consolidated baseline so the project can move forward from a stable package-operator-resume-contracts reference point
+
+---
+
+## 1. Purpose
+
+This document consolidates the current document-package-operator-resume-contracts pass.
+
+It exists to preserve one stable reference summarizing that the project now has explicit baseline coverage for:
+
+- document-package-operator-resume-contracts baseline
+- operator-resume-scope rule
+- package-resume-entry-contract rule
+- package-current-state-resume-contract rule
+- package-next-action-resume-contract rule
+- registry-and-summary-resume-contract-alignment rule
+- incremental-operator-resume-contract-hardening
+- operator-resume-contract-result-interpretation
+- document-package-operator-resume-contracts gap notes
+- document-package-operator-resume-contracts completion note
+
+---
+
+## 2. What Has Been Established
+
+The current document-package-operator-resume-contracts pass has established canonical baseline coverage for:
+
+- explicit package-operator-resume-contract thinking
+- readable entry, current-state, and next-action contract semantics
+- stable interpretation of package operator-resume-contract structure
+- registry and summary aware contract maintenance
+- incremental hardening discipline for future contract work
+
+---
+
+## 3. What This Means
+
+The project now has a materially stronger package-operator-resume-contract baseline than before.
+
+This does not mean the project already has implementation-backed contract helpers, full retroactive contract coverage, stronger contract-resolution tooling, or complete diagnostics implementation.
+It means the operator-resume-contract layer is no longer only implicit or memory-bound.
+
+---
+
+## 4. Remaining Limitation
+
+The current document-package-operator-resume-contracts result is still:
+
+- baseline-oriented rather than contract-complete
+- not yet tooling-backed
+- not yet widened across all older packages
+- not yet state-complete
+- not yet tightly bound to every self-reading surface
+- not yet implementation-backed
+
+---
+
+## 5. Required Rule
+
+This consolidated baseline should be treated as the current canonical document-package-operator-resume-contracts reference until stricter or deeper replacements are intentionally written.
+
+---
+
+## 6. Final Rule
+
+A package-operator-resume-contracts pass is only useful if it leaves behind one readable reference point, not scattered contract fragments.
+
+---
+
+## 7. Status
+
+This document is the active canonical consolidated document-package-operator-resume-contracts baseline until replaced by a stricter contract reference.
+
+===== docs/document_package_operator_resume_contracts/document_package_operator_resume_contracts_audit/DOCUMENT_PACKAGE_OPERATOR_RESUME_CONTRACTS_NEXT_DEEPENING_HINTS_v1.md =====
+# DOCUMENT PACKAGE OPERATOR RESUME CONTRACTS NEXT DEEPENING HINTS v1
+
+Status: active_canonical
+Document Type: audit_closure
+Authority Level: reference
+Interpretation Priority: medium
+Scope: next-step hints after the current document-package-operator-resume-contracts pass
+Rule: the pass should leave behind readable deepening hints so later work can continue without re-deriving direction from scratch
+
+---
+
+## 1. Purpose
+
+This document records next-deepening hints for the current document-package-operator-resume-contracts pass.
+
+It exists to preserve:
+- readable continuation guidance
+- lower restart cost in later sessions
+- continuity between baseline closure and future hardening
+- a stable base for later package-quality work
+
+---
+
+## 2. Next Deepening Hints
+
+Later deeper work may include:
+- widening operator-resume-contract coverage across older canonical packages
+- adding stronger operator-resume guidance
+- defining package-resume-contract procedures
+- tightening registry and summary resume-contract alignment
+- linking contract handling to future self-reading behavior
+- introducing implementation-facing contract helpers
+
+---
+
+## 3. Final Rule
+
+A useful baseline pass leaves behind direction for the next hardening step.
+
+---
+
+## 4. Status
+
+This document is the active canonical document-package-operator-resume-contracts next-deepening hint set until replaced by a stricter continuation reference.
+
+===== docs/visual_canonical_source_of_truth.md =====
+# VISUAL CANONICAL SOURCE OF TRUTH v1
+
+Status: active  
+Scope: canonical truth ownership for the visual layer  
+Rule: premium visual work may only polish the canonical visual chain, not alternate or legacy visual representations
+
+---
+
+## 1. Purpose
+
+This document defines which visual contracts and artifacts are canonical for the current HUD/visual track.
+
+It exists to prevent polishing the wrong layer.
+
+---
+
+## 2. Canonical Visual Contracts
+
+The following are the canonical visual contracts for the current visual HUD chain:
+
+- `visual_render_surface_contract`
+- `visual_renderer_contract`
+- `visual_theme_contract`
+- `panel_to_visual_mapping_contract`
+- `visual_signal_overlay_contract`
+- `visual_topology_overlay_contract`
+- `visual_explainability_sidebar_contract`
+- `visual_status_bar_contract`
+- `visual_bottom_ticker_contract`
+- `visual_hud_composition_contract`
+- `visual_hud_snapshot_contract`
+- `visual_hud_preview_contract`
+- `visual_hud_screen_contract`
+- `visual_hud_render_result_contract`
+- `visual_hud_preview_artifact_contract`
+- `visual_hud_preview_state_contract`
+
+---
+
+## 3. Official Canonical Visual Artifacts / States
+
+The following downstream states/artifacts are currently official for the visual track:
+
+- HUD preview
+- HUD screen
+- HUD render result
+- HUD preview artifact
+- HUD preview state
+
+These are the currently accepted downstream presentation-ready visual states.
+
+---
+
+## 4. Transitional / Legacy / Non-Canonical Visual Surfaces
+
+The following are not to be treated as canonical polish targets unless explicitly promoted later:
+
+- older diagnostic-only representations
+- earlier/transitional read views that are not part of the canonical visual HUD chain
+- legacy panel naming/style history
+- non-promoted experimental visual representations
+- any decorative/preview-only concept lacking canonical contract binding
+
+---
+
+## 5. Rule
+
+Visual polish must target the canonical visual chain only.
+
+It must not:
+- silently polish alternate legacy views
+- silently reinterpret older diagnostic layers as canonical HUD truth
+- silently normalize historical panel ids/names as part of polish
+
+---
+
+## 6. Final Rule
+
+The canonical visual source of truth is the current HUD chain through preview state.
+
+Everything else is either downstream support, legacy context, or future work until explicitly promoted.
+
+===== docs/visual_change_acceptance_checklist.md =====
+# VISUAL CHANGE ACCEPTANCE CHECKLIST v1
+
+Status: active  
+Scope: acceptance checklist for each visual polish change  
+Rule: every visual change must pass the same truth-preserving acceptance filter
+
+---
+
+## 1. Purpose
+
+This document defines the per-change checklist for visual polish work.
+
+It exists to catch subtle visual drift early.
+
+---
+
+## 2. Required Acceptance Checks
+
+Every visual change must satisfy all of the following:
+
+- readability improved
+- operator hierarchy improved or preserved
+- truth preserved
+- semantics unchanged
+- tests green
+- no new runtime coupling introduced
+
+---
+
+## 3. Additional Required Questions
+
+For each visual change, ask:
+
+1. Did this change improve clarity?
+2. Did this change preserve truth binding?
+3. Did this change avoid semantic reinterpretation?
+4. Did this change avoid new runtime/control coupling?
+5. Did tests remain green?
+
+If any answer is “no”, the change is rejected.
+
+---
+
+## 4. Final Rule
+
+A visual change is accepted only if it improves presentation without weakening truth, readability, or architectural discipline.
+
+===== docs/visual_dashboard/DISPLAY_AND_PRESENTATION_SPLIT_v1.md =====
+# DISPLAY AND PRESENTATION SPLIT v1
+
+Status: active canonical display/presentation split
+Scope: separation between what is shown and where/how it is shown
+Rule: the platform must preserve a split between dashboard meaning and display placement so panels do not become display-authority blobs
+
+---
+
+## 1. Purpose
+
+This document defines the current display and presentation split of the platform.
+
+It exists to preserve clarity about:
+- what the dashboard means
+- what a panel means
+- what display placement means
+- why these should not collapse into one thing
+
+---
+
+## 2. Split Principle
+
+The system should distinguish among:
+- panel or view meaning
+- presentation structure
+- display placement or topology
+- renderer or future visual realization
+
+What is shown is not identical to where it is shown.
+
+---
+
+## 3. Required Rule
+
+Panel semantics should remain downstream of system meaning.
+Display logic should remain downstream of panel semantics.
+
+A display decision must not silently become a truth or control decision.
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- panel identity determined only by display position
+- display topology acting as system truth
+- presentation logic silently becoming control logic
+- collapsing view semantics into monitor placement
+
+---
+
+## 5. Final Rule
+
+A mature dashboard system distinguishes semantic presentation from display placement.
+
+---
+
+## 6. Status
+
+This document is the active canonical display/presentation split until replaced by a stricter display topology reference.
+
+===== docs/visual_dashboard/OPERATOR_VISIBILITY_MODEL_v1.md =====
+# OPERATOR VISIBILITY MODEL v1
+
+Status: active canonical operator-visibility model
+Scope: what should become visible to operators and why
+Rule: operator visibility must remain structured enough that the dashboard helps understanding rather than merely emitting visual noise
+
+---
+
+## 1. Purpose
+
+This document defines the current operator-visibility model of the platform.
+
+It exists to preserve clarity about:
+- what operators should be able to see
+- why operator visibility matters
+- how visibility differs from authority
+- why visibility should remain explainable and structured
+
+---
+
+## 2. Visibility Principle
+
+Operator visibility should help expose:
+- runtime condition
+- health or degraded state
+- incident-facing meaning
+- diagnostics-relevant context
+- platform status and flow meaning
+- future role-based or display-specific visibility where appropriate
+
+---
+
+## 3. Required Rule
+
+Visibility should remain explainable in terms of:
+- what upstream truth or interpretation it depends on
+- what operator concern it serves
+- what the visibility does not imply in terms of authority or control
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- operator visibility that looks rich but explains nothing
+- dashboard visibility treated as system control authority
+- visual saturation with no meaning discipline
+- visibility detached from runtime, health, or diagnostics semantics
+
+---
+
+## 5. Final Rule
+
+Operator visibility should support understanding, not decoration alone.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-visibility model until replaced by a stricter operator visibility reference.
+
+===== docs/visual_dashboard/PANEL_AND_VIEW_SEMANTICS_v1.md =====
+# PANEL AND VIEW SEMANTICS v1
+
+Status: active canonical panel/view semantics baseline
+Scope: meaning of panels and views across the dashboard layer
+Rule: panels and views must remain semantic operator-facing structures rather than arbitrary screen fragments
+
+---
+
+## 1. Purpose
+
+This document defines the current panel and view semantics baseline of the platform.
+
+It exists to preserve clarity about:
+- what a panel is
+- what a view is
+- why panels and views are not just decorative UI containers
+- how dashboard meaning remains structured and explainable
+
+---
+
+## 2. Semantics Principle
+
+Panels and views should remain meaningful operator-facing structures.
+
+They may represent:
+- system status surfaces
+- runtime state surfaces
+- diagnostics surfaces
+- incident or degraded-state surfaces
+- navigation and selection surfaces
+- future renderer-supported visibility surfaces
+
+---
+
+## 3. Required Rule
+
+A panel or view should remain explainable in terms of:
+- what it is showing
+- what upstream meaning it depends on
+- what operator role it serves
+- why it exists in the dashboard model
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- arbitrary visual fragments with no semantic role
+- panel identity detached from platform meaning
+- view logic that silently redefines the system it displays
+- operator surfaces treated as purely aesthetic placeholders
+
+---
+
+## 5. Final Rule
+
+Panels and views are part of system meaning, not only layout.
+
+---
+
+## 6. Status
+
+This document is the active canonical panel/view semantics baseline until replaced by a stricter dashboard semantics reference.
+
+===== docs/visual_dashboard/VISUAL_DASHBOARD_BASELINE_v1.md =====
+# VISUAL DASHBOARD BASELINE v1
+
+Status: active canonical visual/dashboard baseline
+Scope: whole-platform visual and dashboard orientation
+Rule: the platform must preserve an explicit visual/dashboard baseline so operator-facing visibility remains structured, downstream, and non-authoritative over source truth
+
+---
+
+## 1. Purpose
+
+This document defines the current high-level visual/dashboard baseline of MAKSIMAR/JARVIS.
+
+It exists to preserve:
+- operator-facing visibility structure
+- dashboard continuity
+- downstream presentation discipline
+- separation between visibility and authority
+- a stable foundation for later visual and renderer-specific documentation
+
+---
+
+## 2. Baseline Principle
+
+Visual/dashboard logic is not merely “UI.”
+
+It also includes:
+- what becomes visible to the operator
+- how visibility is structured into panels and views
+- how downstream presentation relates to runtime and observability truth
+- how dashboard semantics stay separate from execution authority
+- how display and placement remain subordinate to platform meaning
+
+---
+
+## 3. Core Visual / Dashboard Themes
+
+The platform currently includes or plans for themes such as:
+
+- panel and view semantics
+- downstream operator visibility
+- dashboard as presentation rather than source of truth
+- display and presentation split
+- structured visibility of runtime, incidents, and diagnostics
+- future renderer and visual shell integration
+- explainable operator-facing system state
+
+---
+
+## 4. Required Rule
+
+No meaningful future platform expansion should contradict the need for explicit visual/dashboard discipline.
+
+If a feature damages dashboard clarity or makes presentation act like authority, dashboard discipline wins.
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+- dashboard as source of truth
+- UI or presentation acting like execution control
+- visual surfaces with no semantic structure
+- operator visibility existing only as aesthetic output with no system meaning
+
+---
+
+## 6. Final Rule
+
+Visual/dashboard logic is not optional polish.
+It is part of the platform’s operator legitimacy.
+
+---
+
+## 7. Status
+
+This document is the active canonical visual/dashboard baseline until replaced by a stricter visual/dashboard reference.
+
+===== docs/visual_dashboard/VISUAL_DASHBOARD_GAP_NOTES_v1.md =====
+# VISUAL DASHBOARD GAP NOTES v1
+
+Status: active canonical visual/dashboard gap notes
+Scope: limitations of the current visual/dashboard baseline pass
+Rule: the visual/dashboard pass must remain explicit about what is still baseline-level or incomplete
+
+---
+
+## 1. Purpose
+
+This document records the current limitations of the visual/dashboard baseline pass.
+
+It exists to keep the pass honest and bounded.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The current pass establishes a baseline, not yet a full renderer, visual shell, or panel registry specification family.
+
+### Gap 2
+The pass does not yet replace detailed display topology or visual composition runbooks.
+
+### Gap 3
+Per-panel and per-view implementation mappings are still future work.
+
+### Gap 4
+Future deeper documentation is still needed for:
+- panel registry normalization
+- display placement logic
+- workspace/layout families
+- renderer and visual realization families
+- tighter linkage to observability and runtime-facing views
+
+---
+
+## 3. Required Rule
+
+These notes do not invalidate the baseline.
+They show where later hardening is still needed.
+
+---
+
+## 4. Final Rule
+
+A visual/dashboard baseline may begin high-level if its incompleteness is explicit.
+
+---
+
+## 5. Status
+
+This document is the active canonical visual/dashboard gap note set until replaced by a stricter visual/dashboard audit.
+
+===== docs/visual_dashboard/visual_baseline_audit/VISUAL_BASELINE_NEXT_REMEDIATION_HINTS_v1.md =====
+# VISUAL BASELINE NEXT REMEDIATION HINTS v1
+
+Status: active canonical next-step note
+Scope: what the project should do after the current Priority 6 pass
+Rule: after establishing a stable visual/dashboard baseline, the project should move to the next documentation priority rather than reopening the same baseline endlessly
+
+---
+
+## 1. Purpose
+
+This document records the intended next-step logic after the current visual/dashboard baseline pass.
+
+It exists to prevent endless self-looping on the same documentation family.
+
+---
+
+## 2. Next Recommended Direction
+
+After the current Priority 6 baseline is accepted, the next recommended documentation priority remains:
+
+Priority 7:
+Mobile / Bridge / Accelerator
+
+After that:
+Priority 8:
+AI / Memory / Self-Awareness
+
+---
+
+## 3. Reasoning
+
+This order remains correct because:
+- architecture baseline now exists
+- security/governance baseline now exists
+- runtime/operations baseline now exists
+- validation baseline now exists
+- observability baseline now exists
+- visual/dashboard baseline now exists
+- mobile/bridge/accelerator documentation should now be expanded on top of those foundations
+
+---
+
+## 4. Final Rule
+
+Once a stable baseline exists, the project should continue to the next foundational gap instead of polishing the same layer indefinitely.
+
+---
+
+## 5. Status
+
+This document is the active canonical next-step note until replaced by a stricter remediation roadmap.
+
+===== docs/visual_dashboard/visual_baseline_audit/VISUAL_DASHBOARD_AUDIT_NOTES_v1.md =====
+# VISUAL DASHBOARD AUDIT NOTES v1
+
+Status: active canonical visual/dashboard audit notes
+Scope: observations from the current Priority 6 visual/dashboard documentation pass
+Rule: the project should record what the pass achieved and what it did not claim to achieve
+
+---
+
+## 1. Purpose
+
+This document records audit-style notes for the current visual/dashboard documentation pass.
+
+It exists to keep the pass honest and interpretable.
+
+---
+
+## 2. Audit Notes
+
+### Note 1
+The project now has an explicit high-level visual/dashboard baseline.
+
+### Note 2
+The pass materially reduced undocumented ambiguity around panel meaning, operator visibility, presentation split, and dashboard semantics.
+
+### Note 3
+The pass did not attempt to replace a full renderer family, full panel registry family, or full display topology handbook.
+
+### Note 4
+The pass focused on visual meaning and operator-facing interpretation, not yet on exhaustive renderer or per-panel implementation detail.
+
+### Note 5
+The pass strengthened continuity and platform-level dashboard explainability.
+
+---
+
+## 3. Required Rule
+
+Audit notes should preserve what was truly accomplished without exaggerating maturity.
+
+---
+
+## 4. Final Rule
+
+A documentation hardening pass should leave behind an honest audit trail, not only new files.
+
+---
+
+## 5. Status
+
+This document is the active canonical visual/dashboard audit note set until replaced by a stricter visual/dashboard audit reference.
+
+===== docs/visual_dashboard/visual_baseline_audit/VISUAL_DASHBOARD_CONSOLIDATED_BASELINE_v1.md =====
+# VISUAL DASHBOARD CONSOLIDATED BASELINE v1
+
+Status: active canonical consolidated visual/dashboard baseline
+Scope: consolidated view of current Priority 6 visual/dashboard documentation pass
+Rule: the visual/dashboard pass must conclude in a consolidated baseline so the project can move forward from one stable visual reference point
+
+---
+
+## 1. Purpose
+
+This document consolidates the current Priority 6 visual/dashboard pass.
+
+It exists to preserve one stable reference summarizing that the project now has explicit baseline coverage for:
+- visual/dashboard baseline
+- panel and view semantics
+- display and presentation split
+- operator visibility model
+- visual operations baseline
+- panel usage and meaning model
+- operator followup visibility
+
+---
+
+## 2. What Has Been Established
+
+The current visual/dashboard pass has established canonical baseline coverage for:
+
+- whole-platform visual/dashboard baseline
+- panel and view semantics baseline
+- display/presentation split
+- operator visibility model
+- visual operations baseline
+- panel usage/meaning model
+- operator followup visibility
+- gap notes for major subfamilies
+
+---
+
+## 3. What This Means
+
+The project now has a materially stronger visual/dashboard baseline than before.
+
+This does not mean the project has a full panel registry family, full renderer handbook, or full display topology manual.
+It means visual/dashboard logic is no longer only implicit or scattered across chats.
+
+---
+
+## 4. Remaining Limitation
+
+The current baseline is still:
+- high-level
+- semantics-oriented and operations-oriented
+- not yet a full renderer/display/runbook family
+- not yet a complete panel registry/workspace handbook
+- not yet a per-panel implementation matrix
+
+---
+
+## 5. Required Rule
+
+This consolidated baseline should be treated as the current canonical reference for visual/dashboard documentation until a stricter or deeper replacement is intentionally written.
+
+---
+
+## 6. Final Rule
+
+A visual/dashboard documentation pass is only useful if it leaves behind one readable baseline, not scattered fragments.
+
+---
+
+## 7. Status
+
+This document is the active canonical consolidated visual/dashboard baseline until replaced by a stricter visual/dashboard reference.
+
+===== docs/visual_dashboard/visual_baseline_audit/VISUAL_PRIORITY6_COMPLETION_STATE_v1.md =====
+# VISUAL PRIORITY6 COMPLETION STATE v1
+
+Status: active canonical Priority 6 completion note
+Scope: completion state of the current visual/dashboard remediation priority
+Rule: Priority 6 may be considered materially advanced once visual baseline, semantics, presentation split, operator visibility, and visual operations families exist in canonical form
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of Priority 6 in the documentation remediation order.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Priority 6 = Visual / Dashboard normalization
+
+Current state:
+- materially advanced
+- baseline established
+- not yet maximally deep
+- suitable as a canonical starting point for later deeper passes
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+- visual/dashboard baseline docs
+- semantics / display split / operator visibility docs
+- visual operations docs
+- consolidation/audit docs
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+- panel registry normalization family
+- renderer and visual shell family
+- workspace/layout family
+- display topology family
+- tighter linkage to observability and runtime-facing views
+
+---
+
+## 5. Final Rule
+
+Priority 6 does not require perfection before progress.
+It requires a stable canonical baseline, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical Priority 6 completion note until replaced by a stricter completion audit.
+
+===== docs/visual_dashboard/visual_operations/OPERATOR_FOLLOWUP_VISIBILITY_v1.md =====
+# OPERATOR FOLLOWUP VISIBILITY v1
+
+Status: active canonical operator-followup visibility model
+Scope: how visual/dashboard surfaces should support operator next-step thinking
+Rule: dashboard visibility must remain useful for followup understanding rather than ending at passive display alone
+
+---
+
+## 1. Purpose
+
+This document defines the operator followup visibility model of the platform.
+
+It exists to preserve clarity about:
+- why visibility alone is not enough
+- how dashboard surfaces should help an operator think about next steps
+- how runtime, health, and diagnostics visibility should remain actionable in understanding without becoming direct execution authority
+
+---
+
+## 2. Followup Visibility Principle
+
+Dashboard visibility should not stop at “something is visible.”
+
+It should support operator understanding of:
+- what changed
+- what state seems relevant
+- whether deeper inspection is needed
+- whether degraded or incident context matters
+- how followup reasoning stays tied to upstream meaning
+
+---
+
+## 3. Required Rule
+
+Followup visibility should remain:
+- source-aware
+- explainable
+- downstream
+- semantically bounded
+- distinct from direct control authority
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- visibility that creates confusion but not understanding
+- dashboard followup based only on guesswork
+- visually intense output with no support for operator reasoning
+- hidden transition from visibility to control behavior
+
+---
+
+## 5. Final Rule
+
+A mature dashboard helps operators move from seeing to understanding, not from signal to confusion.
+
+---
+
+## 6. Status
+
+This document is the active canonical operator-followup visibility model until replaced by a stricter operator-visibility reference.
+
+===== docs/visual_dashboard/visual_operations/PANEL_USAGE_AND_MEANING_MODEL_v1.md =====
+# PANEL USAGE AND MEANING MODEL v1
+
+Status: active canonical panel usage/meaning model
+Scope: how operators should understand and use panels as meaningful system surfaces
+Rule: panel usage must remain structured enough that panels support understanding rather than becoming arbitrary visual fragments
+
+---
+
+## 1. Purpose
+
+This document defines the panel usage and meaning model of the platform.
+
+It exists to preserve clarity about:
+- how panels are used
+- what kind of system meaning panels should surface
+- why operator-facing panel usage must remain more structured than casual screen browsing
+
+---
+
+## 2. Usage Principle
+
+Panels should support operator understanding of things such as:
+- runtime condition
+- health or degraded state
+- diagnostics or incident context
+- status overview
+- future domain-specific visibility where appropriate
+
+Panels are not merely boxes on a screen.
+They are semantic visibility surfaces.
+
+---
+
+## 3. Required Rule
+
+Panel usage should remain explainable in terms of:
+- what the panel represents
+- what upstream meaning it depends on
+- what operator question it helps answer
+- what it does not imply in terms of authority or control
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- panel usage by visual habit alone
+- panels with no stable semantic role
+- operator dependence on layout intuition without semantic structure
+- panel meaning drifting away from actual system interpretation
+
+---
+
+## 5. Final Rule
+
+Panels are useful when they answer operator questions with structured meaning, not when they merely occupy space.
+
+---
+
+## 6. Status
+
+This document is the active canonical panel usage/meaning model until replaced by a stricter panel-operations reference.
+
+===== docs/visual_dashboard/visual_operations/VISUAL_OPERATIONS_BASELINE_v1.md =====
+# VISUAL OPERATIONS BASELINE v1
+
+Status: active canonical visual operations baseline
+Scope: practical operator-facing handling of dashboard and visual surfaces
+Rule: visual/dashboard logic must remain operationally meaningful, not only conceptually present or aesthetically arranged
+
+---
+
+## 1. Purpose
+
+This document defines the visual operations baseline of the platform.
+
+It exists to preserve:
+- practical operator-facing visibility discipline
+- continuity between visual surfaces and platform meaning
+- explainable use of panels and views
+- a stable base for future dashboard/runbook and renderer documentation
+
+---
+
+## 2. Operations Principle
+
+Visual operations are not only about what is drawn.
+
+They are also about:
+- how operators use visibility
+- how panels support interpretation
+- how dashboards support followup thinking
+- how presentation remains tied to runtime, health, and diagnostics meaning
+- how operator-facing surfaces remain downstream rather than authoritative
+
+---
+
+## 3. Required Rule
+
+Visual operations should remain:
+- explicit
+- semantically structured
+- explainable
+- tied to upstream meaning
+- useful for operator understanding rather than mere decoration
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- visually rich but semantically empty surfaces
+- operator-facing output with no interpretive role
+- presentation detached from runtime and diagnostics meaning
+- dashboard usage dependent only on intuition or habit
+
+---
+
+## 5. Final Rule
+
+Visual/dashboard logic becomes real when it supports operator understanding in practice, not only visual composition in theory.
+
+---
+
+## 6. Status
+
+This document is the active canonical visual operations baseline until replaced by a stricter visual operations reference.
+
+===== docs/visual_dashboard/visual_operations/VISUAL_OPERATIONS_GAP_NOTES_v1.md =====
+# VISUAL OPERATIONS GAP NOTES v1
+
+Status: active canonical visual operations gap notes
+Scope: limitations of the current visual operations pass
+Rule: the visual operations pass must remain explicit about what is still baseline-level or incomplete
+
+---
+
+## 1. Purpose
+
+This document records the current limitations of the visual operations pass.
+
+It exists to keep the pass honest and bounded.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The current pass establishes a baseline, not yet a full dashboard/runbook or renderer-usage family.
+
+### Gap 2
+The pass does not yet replace detailed panel registry or panel workflow documents.
+
+### Gap 3
+Per-panel operational usage mappings are still future work.
+
+### Gap 4
+Future deeper documentation is still needed for:
+- panel registry normalization
+- workspace/layout interaction
+- display placement procedures
+- renderer and visual realization families
+- stronger linkage to observability and runtime-facing views
+
+---
+
+## 3. Required Rule
+
+These notes do not invalidate the baseline.
+They show where later hardening is still needed.
+
+---
+
+## 4. Final Rule
+
+A visual operations baseline may begin high-level if its incompleteness is explicit.
+
+---
+
+## 5. Status
+
+This document is the active canonical visual operations gap note set until replaced by a stricter visual/dashboard audit.
+
+===== docs/visual_dashboard_deep/DISPLAY_TOPOLOGY_BASELINE_v1.md =====
+# DISPLAY TOPOLOGY BASELINE v1
+
+Status: active canonical display-topology baseline
+Scope: how display surfaces and placement contexts should be understood across the dashboard layer
+Rule: display topology must remain downstream of panel and workspace meaning so screen placement does not become hidden truth or control authority
+
+---
+
+## 1. Purpose
+
+This document defines the display-topology baseline of the platform.
+
+It exists to preserve clarity about:
+- what display topology is for
+- how displays differ from panels and workspaces
+- why screen placement should remain subordinate to dashboard semantics
+
+---
+
+## 2. Display Topology Principle
+
+Display topology may include:
+- one or more display surfaces
+- placement contexts
+- future main, secondary, or role-based display arrangements
+- future mobile or external visibility surfaces
+
+Display topology expresses where visibility is shown, not what truth is.
+
+---
+
+## 3. Required Rule
+
+Display topology interpretation should remain:
+- explicit
+- downstream
+- distinct from panel identity
+- distinct from workspace semantics
+- non-authoritative over runtime and observability truth
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- monitor placement treated as semantic truth
+- display count or location acting like platform authority
+- screen arrangement silently redefining dashboard structure
+- topology logic detached from panel and workspace meaning
+
+---
+
+## 5. Final Rule
+
+A mature dashboard system separates what is shown from where it is shown.
+
+---
+
+## 6. Status
+
+This document is the active canonical display-topology baseline until replaced by a stricter display-topology reference.
+
+===== docs/visual_dashboard_deep/PANEL_FAMILY_MODEL_v1.md =====
+# PANEL FAMILY MODEL v1
+
+Status: active canonical panel-family model
+Scope: grouping dashboard panels into semantic families
+Rule: panels should be grouped into readable families so dashboard structure remains explainable as the system grows
+
+---
+
+## 1. Purpose
+
+This document defines the panel-family model of the platform.
+
+It exists to preserve clarity about:
+- why panels should belong to families
+- how family grouping reduces dashboard sprawl
+- why panel growth must remain semantically organized
+
+---
+
+## 2. Family Principle
+
+Panels may belong to families such as:
+- runtime status
+- health and degraded state
+- diagnostics and incident context
+- navigation and overview
+- future visual or topology-oriented families
+
+These families are semantic groupings, not mere layout tricks.
+
+---
+
+## 3. Required Rule
+
+Panel family interpretation should remain explainable in terms of:
+- semantic purpose
+- operator concern
+- upstream meaning dependency
+- bounded relation to other panel families
+
+---
+
+## 4. What Is Forbidden
+
+The following remain forbidden:
+- every panel treated as isolated visual furniture
+- family identity inferred only by screen position
+- panel growth with no grouping discipline
+- family labels used as decorative naming with no semantic consequence
+
+---
+
+## 5. Final Rule
+
+Panel families make dashboard growth readable when they remain semantic rather than cosmetic.
+
+---
+
+## 6. Status
+
+This document is the active canonical panel-family model until replaced by a stricter dashboard-family reference.
+
+===== docs/visual_dashboard_deep/PANEL_REGISTRY_BASELINE_v1.md =====
+# PANEL REGISTRY BASELINE v1
+
+Status: active canonical panel-registry baseline
+Scope: canonical registration and identity of dashboard panels
+Rule: panels must remain registry-backed semantic entities rather than ad hoc screen fragments
+
+---
+
+## 1. Purpose
+
+This document defines the panel-registry baseline of the platform.
+
+It exists to preserve:
+- stable panel identity
+- readable operator-facing semantics
+- continuity between panel meaning and dashboard structure
+- a stable base for later renderer and workspace documentation
+
+---
+
+## 2. Registry Principle
+
+A panel should not exist only because something is drawn on screen.
+
+A panel should remain a registry-backed entity with:
+- stable identity
+- semantic role
+- readable purpose
+- bounded relationship to upstream meaning
+
+---
+
+## 3. Panel Registry Intent
+
+The panel registry should help answer:
+- what panel exists
+- what it is for
+- what family it belongs to
+- what operator concern it serves
+- what it must not silently redefine
+
+---
+
+## 4. Required Rule
+
+Panel registry thinking should remain:
+- explicit
+- semantic
+- stable
+- non-authoritative over source truth
+- consistent with dashboard baseline documentation
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+- ad hoc panels with no stable identity
+- panel meaning known only from visual habit
+- registry-free panel growth
+- presentation fragments silently treated as dashboard semantics
+
+---
+
+## 6. Final Rule
+
+A mature dashboard system needs a readable panel registry, not only a pile of surfaces.
+
+---
+
+## 7. Status
+
+This document is the active canonical panel-registry baseline until replaced by a stricter panel-registry reference.
+
+===== docs/visual_dashboard_deep/VISUAL_DASHBOARD_DEEP_GAP_NOTES_v1.md =====
+# VISUAL DASHBOARD DEEP GAP NOTES v1
+
+Status: active canonical visual-dashboard deep gap notes
+Scope: limitations of the current visual/dashboard deep pass
+Rule: the visual/dashboard deep pass must remain explicit about what is still incomplete beyond the current family baseline
+
+---
+
+## 1. Purpose
+
+This document records the current limitations of the visual/dashboard deep pass.
+
+It exists to keep the pass honest and bounded.
+
+---
+
+## 2. Current Gap Notes
+
+### Gap 1
+The current pass establishes a deeper family baseline, not yet a full renderer-binding or panel-by-panel implementation matrix.
+
+### Gap 2
+The pass does not yet replace detailed visual shell, renderer contract, or display-placement procedure documents.
+
+### Gap 3
+Per-panel registry entries and per-workspace operational definitions are still future work.
+
+### Gap 4
+Future deeper documentation is still needed for:
+- panel registry entries
+- workspace-specific operator surfaces
+- display placement procedures
+- renderer/view binding families
+- tighter linkage to observability-facing and runtime-facing panels
+
+---
+
+## 3. Required Rule
+
+These notes do not invalidate the baseline.
+They show where later hardening is still needed.
+
+---
+
+## 4. Final Rule
+
+A visual/dashboard deep baseline may begin at family level if its incompleteness is explicit.
+
+---
+
+## 5. Status
+
+This document is the active canonical visual-dashboard deep gap note set until replaced by a stricter dashboard deep audit.
+
+===== docs/visual_dashboard_deep/WORKSPACE_AND_LAYOUT_BASELINE_v1.md =====
+# WORKSPACE AND LAYOUT BASELINE v1
+
+Status: active canonical workspace/layout baseline
+Scope: how dashboard workspaces and layout structure should be understood
+Rule: workspace and layout must remain structured downstream arrangements of panel meaning rather than hidden semantic or authority owners
+
+---
+
+## 1. Purpose
+
+This document defines the workspace and layout baseline of the platform.
+
+It exists to preserve clarity about:
+- what a workspace is
+- what layout structure is for
+- how layout differs from panel meaning
+- why arrangement must not silently redefine semantics
+
+---
+
+## 2. Workspace Principle
+
+A workspace should remain understandable in terms of:
+- a bounded operator-facing context
+- a chosen arrangement of relevant panels
+- a readable visibility surface for a specific concern or mode
+
+A workspace is not identical to system truth.
+
+---
+
+## 3. Layout Principle
+
+Layout should remain understandable in terms of:
+- arrangement
+- emphasis
+- visibility prioritization
+- readability for operator interpretation
+
+Layout is not authority.
+Layout is downstream organization.
+
+---
+
+## 4. Required Rule
+
+Workspace and layout interpretation should remain:
+- explicit
+- downstream
+- semantically subordinate to panel meaning
+- distinct from runtime, observability, and governance ownership
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+- layout treated as source of semantics by itself
+- workspace acting as hidden dashboard root authority
+- arrangement logic silently replacing system meaning
+- operator dependence on placement habit with no semantic structure
+
+---
+
+## 6. Final Rule
+
+Workspaces and layouts are useful when they organize meaning, not when they replace it.
+
+---
+
+## 7. Status
+
+This document is the active canonical workspace/layout baseline until replaced by a stricter workspace reference.
+
+===== docs/visual_dashboard_deep/visual_dashboard_deep_audit/VISUAL_DASHBOARD_DEEP_AUDIT_NOTES_v1.md =====
+# VISUAL DASHBOARD DEEP AUDIT NOTES v1
+
+Status: active canonical visual-dashboard deep audit notes
+Scope: observations from the current visual/dashboard deep pass
+Rule: the project should record what the visual/dashboard deep pass achieved and what it did not claim to achieve
+
+---
+
+## 1. Purpose
+
+This document records audit-style notes for the current visual/dashboard deep pass.
+
+It exists to keep the pass honest and interpretable.
+
+---
+
+## 2. Audit Notes
+
+### Note 1
+The project now has an explicit deeper dashboard-structure baseline instead of relying only on high-level dashboard semantics.
+
+### Note 2
+The pass materially reduced ambiguity around panel registry thinking, panel family grouping, workspace meaning, and display topology.
+
+### Note 3
+The pass did not attempt to replace a full renderer-binding family, per-panel registry entries, or exhaustive workspace/display operating procedures.
+
+### Note 4
+The pass focused on structural readability, downstream semantics, and dashboard growth discipline.
+
+### Note 5
+The pass established a stable bridge between dashboard meaning and future renderer/workspace/display deepening.
+
+---
+
+## 3. Required Rule
+
+Audit notes should preserve what was truly accomplished without exaggerating maturity.
+
+---
+
+## 4. Final Rule
+
+A visual/dashboard deep pass should leave behind an honest audit trail, not only additional files.
+
+---
+
+## 5. Status
+
+This document is the active canonical visual-dashboard deep audit note set until replaced by a stricter dashboard deep audit reference.
+
+===== docs/visual_dashboard_deep/visual_dashboard_deep_audit/VISUAL_DASHBOARD_DEEP_COMPLETION_STATE_v1.md =====
+# VISUAL DASHBOARD DEEP COMPLETION STATE v1
+
+Status: active canonical visual-dashboard deep completion note
+Scope: completion state of the current visual/dashboard deep pass
+Rule: the visual/dashboard deep pass may be considered materially advanced once the major structural dashboard families have canonical deeper baseline coverage in place
+
+---
+
+## 1. Purpose
+
+This document records the current completion state of the visual/dashboard deep pass.
+
+It exists to mark progress explicitly.
+
+---
+
+## 2. Current State
+
+Visual/dashboard deep current state:
+- materially advanced
+- deeper family baseline established
+- not yet maximally deep
+- suitable as a canonical starting point for later renderer and placement passes
+
+---
+
+## 3. What Counts As Completed In This Pass
+
+This pass counts as materially established because the following now exist:
+- panel registry baseline docs
+- panel family docs
+- workspace/layout docs
+- display topology docs
+- consolidated and audit docs for visual/dashboard deep structure
+
+---
+
+## 4. What Still Remains Later
+
+Later deeper work may still include:
+- per-panel registry entries
+- per-workspace operational definitions
+- renderer and visual-shell references
+- display-placement procedures
+- tighter linkage to observability, runtime, and panel-specific implementation surfaces
+
+---
+
+## 5. Final Rule
+
+The visual/dashboard deep pass does not require panel-by-panel exhaustion before progress.
+It requires a stable canonical family baseline, which now exists.
+
+---
+
+## 6. Status
+
+This document is the active canonical visual-dashboard deep completion note until replaced by a stricter completion audit.
+
+===== docs/visual_dashboard_deep/visual_dashboard_deep_audit/VISUAL_DASHBOARD_DEEP_CONSOLIDATED_BASELINE_v1.md =====
+# VISUAL DASHBOARD DEEP CONSOLIDATED BASELINE v1
+
+Status: active canonical consolidated visual-dashboard deep baseline
+Scope: consolidated view of the current visual/dashboard deep pass
+Rule: the visual/dashboard deep pass must conclude in one consolidated baseline so the project can move forward from a stable dashboard-structure reference point
+
+---
+
+## 1. Purpose
+
+This document consolidates the current visual/dashboard deep pass.
+
+It exists to preserve one stable reference summarizing that the project now has explicit deeper baseline coverage for:
+
+- panel registry baseline
+- panel family model
+- workspace and layout baseline
+- display topology baseline
+- visual/dashboard deep gap notes
+
+---
+
+## 2. What Has Been Established
+
+The current visual/dashboard deep pass has established canonical baseline coverage for:
+
+- registry-backed panel identity
+- semantic grouping of panels into readable families
+- downstream workspace and layout understanding
+- downstream display-topology understanding
+- explicit gap notes for deeper visual/dashboard work still ahead
+
+---
+
+## 3. What This Means
+
+The project now has a materially stronger visual/dashboard deep baseline than before.
+
+This does not mean the project already has a full panel-by-panel registry, renderer-binding handbook, or display-placement procedure matrix.
+It means the major deep family surfaces of dashboard structure are no longer only implicit or chat-fragmented.
+
+---
+
+## 4. Remaining Limitation
+
+The current visual/dashboard deep result is still:
+- family-level rather than per-panel exhaustive
+- not yet a full renderer and visual-shell reference
+- not yet a per-workspace operational map
+- not yet a concrete display-placement procedure family
+- not yet tightly bound to every observability-facing panel surface
+
+---
+
+## 5. Required Rule
+
+This consolidated baseline should be treated as the current canonical visual/dashboard deep reference until stricter or deeper replacements are intentionally written.
+
+---
+
+## 6. Final Rule
+
+A visual/dashboard deep pass is only useful if it leaves behind one readable structural baseline, not scattered family fragments.
+
+---
+
+## 7. Status
+
+This document is the active canonical consolidated visual-dashboard deep baseline until replaced by a stricter dashboard-structure reference.
+
+===== docs/visual_dashboard_deep/visual_dashboard_deep_audit/VISUAL_DASHBOARD_DEEP_NEXT_DEEPENING_HINTS_v1.md =====
+# VISUAL DASHBOARD DEEP NEXT DEEPENING HINTS v1
+
+Status: active canonical next-step note
+Scope: what the project should do after the current visual/dashboard deep pass
+Rule: after establishing a stable visual/dashboard deep baseline, the project should deepen into finer dashboard precision rather than repeating the same family baseline endlessly
+
+---
+
+## 1. Purpose
+
+This document records the intended next-step logic after the current visual/dashboard deep pass.
+
+It exists to prevent endless repetition of family-baseline work.
+
+---
+
+## 2. Next Recommended Deepening Direction
+
+After the current visual/dashboard deep baseline is accepted, the next recommended deepening direction includes:
+
+- per-panel registry entries
+- workspace-specific operator surface definitions
+- renderer and visual-shell references
+- display placement procedures
+- panel-to-observability and panel-to-runtime binding references
+- tighter cross-linking to visual HUD and renderer contracts
+
+---
+
+## 3. Reasoning
+
+This order remains correct because:
+- the major deep dashboard family baseline now exists
+- deeper documentation will benefit more from finer panel and renderer precision than from repeating family naming
+- the next phase should strengthen practical dashboard operability and implementation continuity
+
+---
+
+## 4. Final Rule
+
+Once a stable visual/dashboard deep baseline exists, the project should deepen structural precision rather than recreate the same baseline layer again.
+
+---
+
+## 5. Status
+
+This document is the active canonical next-step note until replaced by a stricter dashboard deep roadmap.
+
+===== docs/visual_polish_anti_drift_rule.md =====
+# VISUAL POLISH ANTI-DRIFT RULE v1
+
+Status: active  
+Scope: forbidden semantic/architectural drift during visual polish  
+Rule: polish refines presentation only; it must not mutate semantics, truth ownership, or runtime coupling
+
+---
+
+## 1. Purpose
+
+This document defines what visual polish is not allowed to change.
+
+It exists to prevent redesign hiding inside polish.
+
+---
+
+## 2. Forbidden Drift
+
+Visual polish must not:
+
+- change payload shape
+- change semantic meaning of panel/state/status
+- change truth ownership
+- change control-flow meaning
+- create new runtime dependencies
+- create new execution pathways
+- introduce new approval semantics
+- introduce new hidden coupling between UI and runtime
+
+---
+
+## 3. Visual-Only Boundary
+
+Allowed:
+- theme refinement
+- visual hierarchy refinement
+- spacing/alignment refinement
+- frame/border/glow/depth refinement
+- readability improvement
+- non-semantic motion later in controlled scope
+
+Forbidden:
+- changing what data means
+- changing what state means
+- changing what panel priority means unless backed by contracts
+- changing execution interpretation through styling
+
+---
+
+## 4. Final Rule
+
+If a change affects meaning rather than presentation, it is not polish.
+It belongs to a different pass and must not enter under the name of visual refinement.
+
+===== docs/visual_polish_entry_decision.md =====
+# VISUAL POLISH ENTRY DECISION v1
+
+Status: active decision boundary  
+Scope: final decision boundary before premium visual polish entry  
+Rule: premium polish remains locked until all required pre-polish conditions are explicitly confirmed
+
+---
+
+## 1. Purpose
+
+This document records the decision boundary between:
+
+- visual foundation completion
+- pre-polish truth/readiness closure
+- premium visual polish entry
+
+It exists to prevent accidental sequence drift.
+
+---
+
+## 2. Current Confirmed State
+
+The following are already confirmed:
+
+- visual HUD chain is assembled through preview state
+- architecture/source-of-truth documents exist
+- duplicate concept interpretation is documented
+- naming drift policy is documented
+- visual truth binding rules are documented
+- pre-polish gate is documented
+- visual state chain inventory is documented
+- visual readiness checklist exists
+- visual polish scope exists
+- tests remain green
+
+---
+
+## 3. What This Means
+
+This means the project has completed the required documentation-heavy pre-polish truth package.
+
+It does not yet mean that premium polish has automatically started.
+
+---
+
+## 4. Entry Rule
+
+Premium visual polish may begin only after the team/project owner explicitly confirms that:
+
+- pre-polish sequence has been respected
+- no unresolved truth-boundary violation remains
+- no unfinished binding gap remains that would distort polish work
+- styling will decorate truth rather than hide incompleteness
+
+---
+
+## 5. Locked Until Confirmed
+
+The following remain locked until explicit entry confirmation:
+
+- premium visual polish
+- deep motion refinement
+- advanced glow/depth pass
+- final visual chrome pass
+- final premium HUD atmosphere pass
+
+---
+
+## 6. What Remains Allowed Before Entry
+
+Before entry is opened, the following are still allowed:
+
+- final readiness verification
+- final binding verification
+- final downstream visual discipline checks
+- final document-level truth corrections
+- final structural checks that prevent semantic drift
+
+---
+
+## 7. Sequence Rule
+
+Correct sequence remains:
+
+1. visual foundation
+2. truth documents
+3. readiness documents
+4. final pre-polish verification
+5. explicit polish entry decision
+6. premium visual polish
+
+No bypass is allowed.
+
+---
+
+## 8. Final Decision Question
+
+Before opening premium polish, the answer must be “yes”:
+
+**Has everything required before beauty been completed honestly enough that polish will strengthen the dashboard instead of compensating for unfinished architecture?**
+
+---
+
+## 9. Status
+
+This document keeps premium visual polish locked until the final pre-polish confirmation is made explicitly.
+
+===== docs/visual_polish_phase_1_plan.md =====
+# VISUAL POLISH PHASE 1 PLAN v1
+
+Status: active  
+Scope: first allowed premium visual polish pass  
+Rule: Phase 1 may refine visual language and theme coherence, but may not alter semantics, truth ownership, or runtime meaning
+
+---
+
+## 1. Purpose
+
+This document opens the first allowed visual polish pass after successful completion of the pre-polish package.
+
+Phase 1 exists to improve:
+
+- theme coherence
+- visual hierarchy
+- panel/frame consistency
+- zone readability
+- center-core visual gravity
+- explainability/sidebar clarity
+- status/ticker polish quality
+
+without changing:
+
+- truth ownership
+- runtime semantics
+- approval semantics
+- execution meaning
+- control-plane boundaries
+
+---
+
+## 2. Phase 1 Entry Basis
+
+Phase 1 is allowed because the following are already complete:
+
+- visual HUD chain assembled through preview state
+- truth/readiness documents created
+- visual truth discipline documented
+- pre-polish gate documented
+- final pre-polish confirmation documented
+- tests green
+
+---
+
+## 3. Phase 1 Allowed Work
+
+### 3.1 Theme hardening
+
+Allowed:
+- refinement of visual theme tokens
+- stronger dark premium HUD consistency
+- blue/orange accent discipline
+- glass/depth/glow consistency
+- consistent border/radius hierarchy
+
+### 3.2 HUD language hardening
+
+Allowed:
+- stronger left/center/right zoning
+- stronger status bar / ticker coherence
+- better panel frame consistency
+- stronger separation between foundation / diagnostics / operator / topology surfaces
+- more readable visual grouping
+
+### 3.3 Center-core refinement
+
+Allowed:
+- stronger center-core emphasis
+- cleaner routing/signal readability around the core
+- more disciplined depth hierarchy
+- better visual gravity in the center region
+
+### 3.4 Sidebar and navigation refinement
+
+Allowed:
+- clearer right explainability/security region
+- cleaner left navigation region
+- stronger active-state readability
+- improved operator trust through hierarchy and clarity
+
+---
+
+## 4. Phase 1 Forbidden Work
+
+Phase 1 must not include:
+
+- fake runtime animation
+- motion-first redesign
+- cinematic FX pass
+- semantic UI redesign
+- new execution semantics
+- new control logic
+- new approval semantics
+- feature expansion disguised as polish
+- multi-display choreography redesign
+- advanced interaction redesign
+
+---
+
+## 5. Motion Rule
+
+Motion is not part of mandatory Phase 1 work.
+
+If touched at all, it must remain:
+- minimal
+- optional
+- non-semantic
+- non-deceptive
+
+Default rule:
+**Phase 1 = mostly static polish first**
+
+## 5.1 Truth Binding Clause
+
+Panel text may be refined visually.
+Panel meaning may not be reinterpreted.
+
+Visual emphasis may not imply runtime priority unless such priority already exists in upstream contracts or truth-bound state.
+
+## 5.2 Preview Integrity Clause
+
+Preview must remain traceable to canonical state inputs.
+
+Forbidden:
+- fabricated signals
+- decorative indicators without source mapping
+- preview-only indicators pretending to be runtime truth
+
+## 5.3 Legacy Boundary Clause
+
+Phase 1 does not normalize old naming or old panel ids.
+
+Legacy cleanup is a separate pass.
+
+Polish must not silently convert historical structures, names, or ids.
+
+## 5.4 Test Gate Clause
+
+Any Phase 1 polish change touching:
+- render/state mapping
+- panel hierarchy
+- panel grouping
+- panel/view emphasis logic
+
+requires tests to remain green before acceptance.
+
+---
+
+## 6. First Technical Focus
+
+The first technical polish focus after opening Phase 1 should be:
+
+1. visual theme hardening
+2. panel/frame hierarchy refinement
+3. center-core presentation refinement
+4. sidebar/navigation readability refinement
+5. ticker/status readability refinement
+
+---
+
+## 7. Acceptance Rule for Phase 1
+
+A Phase 1 change is acceptable only if it:
+
+- improves readability
+- improves visual coherence
+- improves operator confidence
+- preserves truth binding
+- preserves read-only visual discipline
+- does not introduce semantic ambiguity
+
+---
+
+## 8. Final Rule
+
+Phase 1 polish may make the dashboard feel premium.
+
+It may not make the dashboard less honest.
+
+---
+
+## 9. Status
+
+This document opens the first allowed premium visual polish pass in a constrained, truth-preserving scope.
+
+===== docs/visual_polish_scope.md =====
+# VISUAL POLISH SCOPE v1
+
+Status: active visual polish scope baseline  
+Scope: allowed polish work after pre-polish gate is passed  
+Rule: visual polish may improve clarity, depth, atmosphere, and coherence, but may not alter truth ownership or invent state
+
+---
+
+## 1. Purpose
+
+This document defines what visual polish is allowed to do once the visual readiness gate has been passed.
+
+It exists to prevent:
+
+- polish turning into semantic redesign
+- styling being used to hide unresolved logic
+- fake “premium” visuals replacing evidence-backed interface behavior
+- scope creep during the first polish phase
+
+---
+
+## 2. Core Principle
+
+Visual polish is downstream refinement.
+
+It may improve:
+
+- clarity
+- consistency
+- depth
+- hierarchy
+- atmosphere
+- readability
+- operator confidence
+
+It may not redefine:
+
+- truth
+- state meaning
+- control flow
+- policy meaning
+- approval semantics
+- runtime ownership
+
+---
+
+## 3. Allowed Polish Categories
+
+## 3.1 Visual language refinement
+
+Allowed:
+- typography refinement
+- spacing refinement
+- alignment refinement
+- border/radius consistency
+- card chrome consistency
+- icon consistency
+- panel frame consistency
+
+## 3.2 Premium HUD atmosphere refinement
+
+Allowed:
+- glow refinement
+- glass refinement
+- depth layering
+- visual separation of zones
+- controlled highlight emphasis
+- refined status emphasis
+- clearer center-core presentation
+
+## 3.3 Structural visual coherence
+
+Allowed:
+- stronger left/center/right zoning
+- stronger top-status and bottom-ticker coherence
+- more consistent hierarchy between foundation/diagnostics/operator/topology surfaces
+- improved panel grouping readability
+
+## 3.4 Motion and effects refinement
+
+Allowed later, if carefully controlled:
+- subtle motion
+- low-risk animation
+- smooth transitions
+- gentle pulse/glow behavior
+- controlled signal flow animation
+- optional core rotation capability
+
+### Rule
+
+Motion must remain subordinate to truth and readability.
+
+---
+
+## 4. Explicitly Allowed Project-Specific Visual Goals
+
+The following polish goals are explicitly aligned with the current MAKSIMAR/JARVIS visual direction:
+
+- dark premium operator HUD
+- blue/orange accent system
+- deep glass-like panel styling
+- strong center-core visual gravity
+- visible flow/signal routes around the core
+- clear left navigation region
+- clear right explainability/security region
+- strong top status bar
+- strong bottom status/ticker ribbon
+- perceived depth in center/runtime/topology region
+
+---
+
+## 5. Forbidden Polish Behaviors
+
+Polish must not:
+
+- fabricate runtime activity
+- fabricate trust/approval/health
+- fake severity through decoration alone
+- visually imply execution where none exists
+- hide uncertainty behind style
+- reduce explainability to decoration
+- turn operator surfaces into cinematic noise
+- make text less readable for atmosphere
+- replace evidence with motion
+
+---
+
+## 6. Readability Rule
+
+At all times, polish must preserve or improve:
+
+- panel title readability
+- status readability
+- signal readability
+- topology readability
+- explainability readability
+- alert readability
+
+If a polish decision reduces readability, it fails.
+
+---
+
+## 7. Motion Rule
+
+Motion is optional, never mandatory.
+
+If motion is used, it must be:
+
+- subtle
+- traceable in purpose
+- non-blocking
+- non-deceptive
+- low-noise
+- readable under load
+
+### Forbidden motion examples
+
+- decorative chaos
+- constant high-energy flicker
+- fake “alive” movement without truth binding
+- motion that masks state transitions
+- motion that distracts from alerts or diagnostics
+
+---
+
+## 8. Center Core Rule
+
+The center/core region may become visually stronger than the rest of the HUD, but it must remain truthful.
+
+Allowed:
+- stronger depth
+- signal emphasis
+- routing emphasis
+- layered glow
+- optional future controlled rotation capability
+
+Forbidden:
+- fake system activity
+- fake execution pressure
+- fake node load
+- fake trust state
+
+---
+
+## 9. Sidebar Rule
+
+The right explainability/security sidebar must remain explanation-first.
+
+Polish may improve:
+- framing
+- emphasis
+- typography
+- separation
+- visual trust
+
+But it may not turn the sidebar into:
+- vague flavor text
+- ornamental filler
+- ungrounded “AI wisdom”
+
+---
+
+## 10. Navigation Rule
+
+The left navigation zone may be polished for:
+- hierarchy clarity
+- menu readability
+- active-state clarity
+- reduced clutter
+- stronger operator confidence
+
+But it must not become:
+- hidden
+- ambiguous
+- overloaded with visual noise
+- detached from actual panel/view structure
+
+---
+
+## 11. Panel Identity Rule
+
+===== docs/visual_premium_demo_delivery_bridge_rule.md =====
+# VISUAL PREMIUM DEMO DELIVERY BRIDGE RULE v1
+
+Status: active bridge-layer rule
+Scope: transition from premium demo contract contour to future visual realization layers
+Rule: bridge layers may prepare delivery, but may not bypass truth, policy, or read-only boundaries
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the premium demo delivery bridge layer.
+
+It exists to prevent:
+- uncontrolled jump from contract contour into ad-hoc renderer behavior
+- shell shortcuts that bypass canonical visual contracts
+- hidden authority drift during visual delivery preparation
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached:
+
+- premium live operator boundary
+- premium showable system boundary
+- premium demo system boundary
+
+This means a strong contract-backed premium demo contour now exists.
+
+---
+
+## 3. What the Bridge Layer Is
+
+The bridge layer is:
+
+- downstream
+- truth-bound
+- read-only
+- preparation for delivery
+- preparation for later visual realization
+
+The bridge layer is not:
+
+- execution authority
+- shell-owned truth
+- direct runtime mutation path
+- uncontrolled renderer shortcut
+
+---
+
+## 4. What Is Allowed
+
+Bridge layers may:
+
+- define delivery readiness
+- define handoff readiness
+- define presentation packaging boundaries
+- define future realization-facing contracts
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+
+- direct execution through visual delivery layer
+- hidden mutation paths
+- shell-owned truth
+- runtime-owned visual shortcuts that skip contracts
+- fake live state synthesis
+
+---
+
+## 6. Final Rule
+
+A delivery bridge may prepare the path to visual realization,
+but it may not weaken the truth-preserving contract contour that precedes it.
+
+---
+
+## 7. Status
+
+This document is the active rule for the premium demo delivery bridge layer until replaced by a stricter realization-bridge standard.
+
+===== docs/visual_readiness_checklist.md =====
+# VISUAL READINESS CHECKLIST v1
+
+Status: active visual readiness checklist  
+Scope: concise readiness verification before premium visual polish  
+Rule: premium visual work may begin only after this checklist is honestly satisfied
+
+---
+
+## 1. Purpose
+
+This document provides a short operational checklist for deciding whether the project is ready to move from visual foundation work into premium visual polish.
+
+It is intentionally concise.
+
+This document does not replace:
+- architecture truth documents
+- source-of-truth documents
+- visual truth binding rules
+- pre-polish gate rules
+
+It exists to make quick readiness verification possible.
+
+---
+
+## 2. Architecture Truth Readiness
+
+The following documents must exist:
+
+- `docs/canonical_architecture_map.md`
+- `docs/source_of_truth_matrix.md`
+- `docs/duplicate_concepts_matrix.md`
+- `docs/naming_drift_policy.md`
+
+Check:
+- [ ] present
+- [ ] reviewed
+- [ ] still consistent with current repository structure
+
+---
+
+## 3. Visual Truth Discipline Readiness
+
+The following documents must exist:
+
+- `docs/visual_truth_binding_rules.md`
+- `docs/pre_polish_gate.md`
+- `docs/visual_state_chain_inventory.md`
+
+Check:
+- [ ] present
+- [ ] reviewed
+- [ ] still consistent with current visual HUD chain
+
+---
+
+## 4. Visual HUD Chain Readiness
+
+The following stages must exist and be considered green:
+
+- visual render surface
+- visual renderer
+- visual theme
+- panel-to-visual mapping
+- visual signal overlay
+- visual topology overlay
+- visual explainability sidebar
+- visual status bar
+- visual bottom ticker
+- visual HUD composition
+- visual HUD snapshot
+- visual HUD preview
+- visual HUD screen
+- visual HUD render result
+- visual HUD preview artifact
+- visual HUD preview state
+
+Check:
+- [ ] all present
+- [ ] all compile
+- [ ] all test-backed
+- [ ] no broken contract gap remains in the chain
+
+---
+
+## 5. Truth Binding Readiness
+
+The visual layer must still be:
+
+- downstream
+- read-only
+- evidence-backed
+- traceable to upstream truth
+- separated from execution authority
+
+Check:
+- [ ] no fabricated runtime state
+- [ ] no UI-owned truth
+- [ ] no hidden bypass state
+- [ ] no decorative explanation without evidence source
+
+---
+
+## 6. Repository Stability Readiness
+
+Before polish begins, the repository must be in a stable enough state.
+
+Check:
+- [ ] tests green
+- [ ] architecture meaning still clear
+- [ ] duplicate concept watchpoints documented
+- [ ] naming drift documented
+- [ ] visual inventory documented
+
+---
+
+## 7. What Passing This Checklist Allows
+
+If all sections above are honestly satisfied, the following becomes allowed:
+
+- premium visual polish
+- theme hardening
+- unified visual language
+- spacing refinement
+- depth/glow/glass refinement
+- motion/details
+- panel chrome refinement
+- final HUD atmosphere refinement
+
+---
+
+## 8. What Passing This Checklist Does Not Allow
+
+Even after passing this checklist, the following remain forbidden:
+
+- fake runtime state
+- UI truth ownership
+- bypass of control-plane/policy/runtime
+- decorative certainty over missing truth
+- autonomous visual semantics not backed by upstream data
+
+---
+
+## 9. Final Gate Question
+
+Only proceed to premium visual polish if the answer is “yes”:
+
+**Is the current visual HUD layer strict enough, truthful enough, and stable enough that styling it will improve clarity instead of hiding incompleteness?**
+
+Check:
+- [ ] yes
+
+---
+
+## 10. Status
+
+This document is the active quick readiness checklist until replaced by a stricter visual readiness standard.
+
+===== docs/visual_realization_artifact_rule.md =====
+# VISUAL REALIZATION ARTIFACT RULE v1
+
+Status: active realization-artifact rule
+Scope: transition from picture-ready contract contour to first realization artifact layer
+Rule: realization artifact layers may materialize visual output state, but may not bypass truth, policy, or read-only boundaries
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the first realization-artifact layer after picture-ready contract closure.
+
+It exists to prevent:
+- uncontrolled jump from picture-ready contour into ad-hoc rendering
+- fake visual artifacts created outside canonical chain
+- hidden runtime ownership of visual truth
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached:
+
+- premium demo delivery bridge
+- premium demo realization bridge
+- premium demo realization-ready
+- premium demo screen delivery
+- premium demo picture boundary
+- premium demo picture ready
+
+This means the contract-first picture contour is closed.
+
+---
+
+## 3. What the Realization Artifact Layer Is
+
+The realization artifact layer is:
+
+- downstream
+- truth-bound
+- read-only
+- artifact-facing
+- preparation for later renderer realization
+
+The realization artifact layer is not:
+
+- execution authority
+- shell-owned truth
+- runtime mutation path
+- uncontrolled renderer shortcut
+
+---
+
+## 4. What Is Allowed
+
+Realization artifact layers may:
+
+- define first materialized visual artifact state
+- define artifact packaging readiness
+- define renderer-facing artifact boundaries
+- define delivery-safe artifact identity
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+
+- direct execution through artifact layer
+- hidden mutation paths
+- fake rendered output
+- shell-owned truth
+- renderer shortcuts that skip canonical contracts
+
+---
+
+## 6. Final Rule
+
+A realization artifact may materialize the picture contour into an artifact-facing boundary,
+but it may not weaken the truth-preserving chain that precedes it.
+
+---
+
+## 7. Status
+
+This document is the active rule for the first realization-artifact layer until replaced by a stricter realization-output standard.
+
+===== docs/visual_realization_output_rule.md =====
+# VISUAL REALIZATION OUTPUT RULE v1
+
+Status: active realization-output rule
+Scope: transition from realization artifact layer to first output-facing realization path
+Rule: output realization layers may prepare materialized output delivery, but may not bypass truth, policy, or read-only boundaries
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the realization-output layer.
+
+It exists to prevent:
+- uncontrolled jump from realization artifact into ad-hoc output rendering
+- fake output paths outside canonical visual chain
+- hidden renderer/runtime ownership of visual truth
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached:
+
+- premium demo picture boundary
+- premium demo picture ready
+- premium demo realization artifact
+
+This means the project has crossed from picture contour into artifact-facing realization state.
+
+---
+
+## 3. What the Realization Output Layer Is
+
+The realization output layer is:
+
+- downstream
+- truth-bound
+- read-only
+- output-facing
+- realization-preparatory
+
+The realization output layer is not:
+
+- execution authority
+- shell-owned truth
+- runtime mutation path
+- uncontrolled renderer shortcut
+
+---
+
+## 4. What Is Allowed
+
+Realization output layers may:
+
+- define output-facing realization readiness
+- define delivery-safe output state
+- define output packaging boundaries
+- define first honest output realization path
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+
+- direct execution through output layer
+- hidden mutation paths
+- fake rendered output
+- renderer shortcuts that skip canonical contracts
+- shell-owned truth
+
+---
+
+## 6. Final Rule
+
+A realization output layer may prepare output delivery,
+but it may not weaken the truth-preserving chain that precedes it.
+
+---
+
+## 7. Status
+
+This document is the active rule for the realization-output layer until replaced by a stricter rendered-output standard.
+
+===== docs/visual_renderer_realization_rule.md =====
+# VISUAL RENDERER REALIZATION RULE v1
+
+Status: active renderer-realization rule
+Scope: transition from first-picture contract milestone to renderer-facing realization layer
+Rule: renderer-facing realization may prepare actual visual rendering paths, but may not bypass truth, policy, or read-only boundaries
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the first renderer-facing realization layer.
+
+It exists to prevent:
+- uncontrolled jump from first-picture contract milestone into ad-hoc renderer behavior
+- renderer-owned truth
+- hidden runtime shortcuts around canonical visual contracts
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached:
+
+- premium demo materialized output
+- premium demo first picture
+
+This means the first contract-first picture milestone is closed.
+
+---
+
+## 3. What the Renderer Realization Layer Is
+
+The renderer realization layer is:
+
+- downstream
+- truth-bound
+- read-only
+- renderer-facing
+- realization-oriented
+
+The renderer realization layer is not:
+
+- execution authority
+- shell-owned truth
+- runtime mutation path
+- uncontrolled rendering shortcut
+
+---
+
+## 4. What Is Allowed
+
+Renderer realization layers may:
+
+- define renderer-facing readiness
+- define render-safe visual packaging
+- define first renderer-oriented visual state
+- define future screen-output handoff boundaries
+
+---
+
+## 5. What Is Forbidden
+
+The following remain forbidden:
+
+- direct execution through renderer layer
+- hidden mutation paths
+- fake output synthesis
+- renderer shortcuts that skip canonical chain
+- shell-owned truth
+
+---
+
+## 6. Final Rule
+
+A renderer realization layer may prepare actual rendering paths,
+but it may not weaken the truth-preserving chain that precedes it.
+
+---
+
+## 7. Status
+
+This document is the active rule for the first renderer-facing realization layer until replaced by a stricter rendered-view standard.
+
+===== docs/visual_result_boundary_rule.md =====
+# VISUAL RESULT BOUNDARY RULE v1
+
+Status: active visual boundary rule
+Scope: first honest visual result boundary after contract-first visual progression
+Rule: reaching a display-output boundary does not yet permit uncontrolled runtime rendering shortcuts
+
+---
+
+## 1. Purpose
+
+This document defines the boundary between:
+
+- contract-first visual result readiness
+- first output-facing visual boundary
+- later real render/shell/display execution paths
+
+It exists to prevent premature jumps from contract truth into uncontrolled display behavior.
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached a meaningful visual result boundary through a contract-first progression.
+
+This includes:
+
+- view layer
+- showable view
+- observable view
+- displayable view
+- presentable display
+- demo display
+- watchable display
+- presented display
+- renderable display
+- output-ready display
+- result display
+- viewable result
+- display output
+
+This means the project now has a canonical downstream visual result path.
+
+---
+
+## 3. What This Boundary Means
+
+Reaching this boundary means:
+
+- a first honest visual result path exists
+- the result path is contract-backed
+- the result path is truth-bound
+- the result path is still read-only
+- the result path is architecturally downstream
+
+This boundary does **not** yet mean:
+- unrestricted runtime rendering is allowed
+- UI shell shortcuts are allowed
+- execution authority can move into the visual layer
+- uncontrolled “just show it” hacks are acceptable
+
+---
+
+## 4. What Is Allowed After This Boundary
+
+After reaching this boundary, the project may continue into:
+
+- controlled display result layering
+- controlled renderer-facing result assembly
+- controlled shell-facing presentation contracts
+- result-to-shell handoff contracts
+- first honest on-screen visual result path
+
+All of this must remain:
+- contract-driven
+- truth-bound
+- downstream
+- read-only until explicit control/interaction law says otherwise
+
+---
+
+## 5. What Is Still Forbidden
+
+Even after reaching this boundary, the following remain forbidden:
+
+- direct dashboard-owned execution
+- runtime mutation through visual layer
+- fake result synthesis
+- shell hacks that bypass contracts
+- untracked display shortcuts
+- hidden fallback rendering behavior
+- motion or glow used to fake missing runtime truth
+- control-plane bypass through UI rendering path
+
+---
+
+## 6. Required Next Discipline
+
+The next stage must preserve this order:
+
+1. boundary documented
+2. result-facing contract layer
+3. shell/presentation handoff contract
+4. only then later real renderer/shell realization
+
+No direct jump from contract boundary to ad-hoc output is allowed.
+
+---
+
+## 7. Final Rule
+
+A visible result must still be honest.
+
+If a visual step makes the system more watchable but less traceable, less truthful, or less architecturally clean, it is rejected.
+
+---
+
+## 8. Status
+
+This document is the active rule for the first visual result boundary until replaced by a stricter result-to-shell delivery standard.
+
+===== docs/visual_rich_live_monitor_rule.md =====
+# VISUAL RICH LIVE MONITOR RULE v1
+
+Status: active temporary live monitor rule
+Scope: single-window Rich live terminal HUD for operator visibility
+Rule: the live monitor may aggregate canonical read-only signals into one visual terminal window, but may not own truth, execute actions, or bypass policy
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the live Rich terminal monitor.
+
+It exists to provide:
+- one-window operator visibility
+- structured visual contact with the platform
+- temporary HUD-like monitoring before full dashboard realization
+
+without allowing:
+- runtime mutation
+- hidden command execution
+- truth ownership drift
+- second control plane behavior
+
+---
+
+## 2. What the Live Monitor Is
+
+The live monitor is:
+
+- read-only
+- terminal-based
+- single-window
+- operator-facing
+- downstream from canonical truth sources
+- temporary until full dashboard realization
+
+The live monitor is not:
+
+- execution UI
+- approval UI
+- write path
+- source of truth
+- control plane
+
+---
+
+## 3. Allowed Blocks
+
+The live monitor may display blocks such as:
+
+- header and system status
+- platform tree
+- governance/document summary
+- worker/test summary
+- logs and alerts
+- read-only operator input or draft area
+
+---
+
+## 4. Forbidden Behavior
+
+The following remain forbidden:
+
+- direct runtime mutation
+- action dispatch from monitor
+- code execution from input area
+- synthetic truth
+- fake status decoration without source backing
+
+---
+
+## 5. Final Rule
+
+The live monitor may improve situational awareness,
+but it must remain a read-only presentation layer.
+
+---
+
+## 6. Status
+
+This document is the active rule for the Rich live monitor until replaced by a stricter operator-monitor realization standard.
+
+===== docs/visual_rich_terminal_monitor_rule.md =====
+# VISUAL RICH TERMINAL MONITOR RULE v1
+
+Status: active temporary monitor rule
+Scope: read-only terminal visualization layer using Rich
+Rule: Rich monitor may visualize canonical read models and runtime state, but may not own truth, mutate runtime, or bypass policy
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the temporary Rich-based terminal monitor.
+
+It exists to allow:
+- human-readable visual contact with the platform
+- temporary operator visibility before full dashboard realization
+- better comprehension of runtime state, tests, and canonical signals
+
+without allowing:
+- truth ownership drift
+- runtime mutation through monitor UI
+- hidden control-plane shortcuts
+
+---
+
+## 2. What the Rich Monitor Is
+
+The Rich monitor is:
+
+- temporary
+- read-only
+- operator-facing
+- terminal-based
+- presentation-only
+- downstream from canonical truth sources
+
+The Rich monitor is not:
+
+- source of truth
+- control-plane authority
+- execution authority
+- policy engine
+- approval bypass path
+
+---
+
+## 3. Allowed Data Sources
+
+The Rich monitor may read from canonical sources such as:
+
+- RUNTIME/state/*.json
+- logs/*.log
+- canonical read models
+- diagnostics snapshots
+- test runtime summaries
+- worker/process observations
+- documented canonical status artifacts
+
+---
+
+## 4. Forbidden Behavior
+
+The following remain forbidden:
+
+- writing into CORE_ROOT
+- mutating runtime state
+- sending actions directly to workers
+- acting as approval UI
+- inventing synthetic truth
+- showing decorative status that is not source-backed
+
+---
+
+## 5. Required Properties
+
+The Rich monitor should remain:
+
+- read-only
+- traceable
+- honest
+- lightweight
+- optional
+- replaceable by future dashboard layers
+
+---
+
+## 6. Final Rule
+
+The Rich monitor may improve visibility,
+but it may not become a second control plane or a second truth layer.
+
+---
+
+## 7. Status
+
+This document is the active rule for the temporary Rich terminal monitor until replaced by a stricter operator-monitor realization standard.
+
+===== docs/visual_shell_handoff_rule.md =====
+# VISUAL SHELL HANDOFF RULE v1
+
+Status: active shell handoff rule
+Scope: first shell-facing visual handoff boundary
+Rule: shell handoff does not permit uncontrolled runtime UI shortcuts
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the first shell handoff boundary.
+
+It exists to prevent:
+- direct jumps from visual contracts into ad-hoc UI execution
+- shell shortcuts that bypass truth-bound visual layers
+- uncontrolled presentation hacks
+
+---
+
+## 2. What Is Already True
+
+At this stage, the project has reached:
+
+- display output boundary
+- shell handoff boundary
+
+This means a canonical downstream path now exists from visual truth to shell-facing handoff.
+
+---
+
+## 3. What This Boundary Means
+
+This boundary means:
+
+- shell-facing handoff is now contract-backed
+- shell-facing handoff is still read-only
+- shell-facing handoff is still downstream
+- shell-facing handoff does not yet imply uncontrolled UI ownership
+
+---
+
+## 4. What Is Allowed After This Boundary
+
+After this boundary, the project may continue into:
+
+- controlled presentation boundary contracts
+- controlled shell-facing presentation assembly
+- first honest presented visual result path
+
+---
+
+## 5. What Is Still Forbidden
+
+The following remain forbidden:
+
+- shell-owned truth
+- shell-owned execution shortcuts
+- ad-hoc runtime rendering hacks
+- bypass of visual result path
+- UI mutation authority
+
+---
+
+## 6. Final Rule
+
+A shell-facing handoff must remain as honest as the visual contracts that produced it.
+
+If shell integration weakens traceability, truth, or control boundaries, it is rejected.
+
+---
+
+## 7. Status
+
+This document is the active rule for the first shell handoff boundary until replaced by a stricter shell presentation standard.
+
+===== docs/visual_state_chain_inventory.md =====
+# VISUAL STATE CHAIN INVENTORY v1
+
+Status: active visual chain inventory baseline  
+Scope: current visual HUD contract chain, role of each stage, readiness boundary  
+Rule: every visual stage must be interpreted as a downstream read-only state layer, not as an execution authority
+
+---
+
+## 1. Purpose
+
+This document records the currently assembled visual state chain.
+
+It exists to make the following explicit:
+
+- which visual contracts already exist
+- what each stage means
+- how the stages relate to one another
+- which stages are already considered closed enough for pre-polish readiness
+- which future steps still belong after foundation closure
+
+---
+
+## 2. Core Principle
+
+The visual state chain is a downstream chain.
+
+It does not:
+- own runtime truth
+- own canonical truth
+- execute control actions
+- approve changes
+- replace observability
+
+It does:
+- compose
+- map
+- summarize
+- expose read-only visual readiness states
+
+---
+
+## 3. Current Visual State Chain
+
+The currently assembled visual HUD chain is interpreted as follows.
+
+### 3.1 Visual render surface contract
+Defines the canonical render surface boundary for downstream HUD rendering.
+
+### 3.2 Visual renderer contract
+Defines renderer-facing readiness and renderer-level downstream presentation role.
+
+### 3.3 Visual theme contract
+Defines the approved visual theme baseline for downstream HUD styling.
+
+### 3.4 Panel-to-visual mapping contract
+Defines how canonical panels are mapped into visual card/presentation semantics.
+
+### 3.5 Visual signal overlay contract
+Defines downstream signal-flow overlay participation and visual signal semantics.
+
+### 3.6 Visual topology overlay contract
+Defines downstream topology-oriented overlay semantics.
+
+### 3.7 Visual explainability sidebar contract
+Defines the explainability/sidebar exposure layer for traceable operator-facing explanation.
+
+### 3.8 Visual status bar contract
+Defines the top status bar exposure layer.
+
+### 3.9 Visual bottom ticker contract
+Defines the bottom ticker/status ribbon exposure layer.
+
+### 3.10 Visual HUD composition contract
+Defines first whole-HUD composition structure.
+
+### 3.11 Visual HUD snapshot contract
+Defines a snapshot-oriented downstream whole-HUD state.
+
+### 3.12 Visual HUD preview contract
+Defines the preview-level HUD exposure state.
+
+### 3.13 Visual HUD screen contract
+Defines the first whole-screen HUD contract.
+
+### 3.14 Visual HUD render result contract
+Defines render-result level downstream readiness.
+
+### 3.15 Visual HUD preview artifact contract
+Defines preview artifact packaging state for the HUD.
+
+### 3.16 Visual HUD preview state contract
+Defines the first stable preview-state layer for the full downstream HUD.
+
+---
+
+## 4. Interpretation of the Chain
+
+The chain should be understood as a progression:
+
+panel/view truth binding
+→ visual mapping
+→ overlay participation
+→ composition
+→ snapshot
+→ preview
+→ screen
+→ render result
+→ preview artifact
+→ preview state
+
+### Rule
+
+Later stages do not replace earlier stages.
+They depend on them.
+
+---
+
+## 5. Current Closure Status
+
+At the current stage, the visual chain is considered closed through:
+
+- preview state
+
+This means the platform now has a documented downstream path from panel/view binding up to stable preview-state interpretation.
+
+---
+
+## 6. What This Does Not Mean Yet
+
+Closing the chain through preview state does **not** automatically mean:
+
+- full production renderer exists
+- final premium styling is complete
+- motion system is complete
+- live runtime backends are fully wired
+- operator interaction UX is complete
+- production-grade display orchestration is complete
+
+Those remain future steps.
+
+---
+
+## 7. What Is Already Strong Enough
+
+The following is already strong enough for pre-polish readiness:
+
+- downstream visual state progression exists
+- major HUD surfaces are separated
+- explainability/status/ticker/overlay concepts are separated
+- preview-state level exists
+- truth-bound downstream visual discipline is documented
+
+---
+
+## 8. What Still Must Be Respected
+
+Even with the chain assembled, the following remain mandatory:
+
+- read-only dashboard rule
+- no fabricated runtime state
+- no UI-owned truth
+- no bypass of control-plane/policy/runtime layers
+- no beauty-first semantic distortion
+
+---
+
+## 9. Relationship to Pre-Polish Gate
+
+This inventory supports `docs/pre_polish_gate.md`.
+
+It is not itself the gate.
+It is evidence that the visual state chain is materially assembled.
+
+---
+
+## 10. Relationship to Future Polish
+
+After all required pre-polish conditions are satisfied, this chain becomes the structural base for:
+
+- premium HUD polish
+- visual depth refinement
+- glow/glass refinement
+- motion/detail refinement
+- unified visual language
+- final operator-facing visual coherence
+
+### Rule
+
+Future polish must decorate this chain, not replace it.
+
+---
+
+## 11. Relationship to Future Agent / Cube Modules
+
+Future cubes, helper modules, and dashboard-capable units must enter this visual world through:
+
+- manifest/registry exposure
+- panel/view binding
+- explainability binding
+- downstream visual mapping
+
+They do not get to bypass the visual chain.
+
+---
+
+## 12. Final Rule
+
+The visual chain is valid because it remains:
+
+- downstream
+- read-only
+- truth-bound
+- explainable
+- test-backed
+
+If any future change weakens those properties, the chain must be corrected before polish continues.
+
+---
+
+## 13. Status
+
+===== docs/visual_textual_operator_monitor_rule.md =====
+# VISUAL TEXTUAL OPERATOR MONITOR RULE v1
+
+Status: active temporary textual monitor rule
+Scope: single-window terminal UI with live panels and editable draft area
+Rule: the Textual operator monitor may provide editable draft input in one window, but may not own truth, execute actions, or bypass policy
+
+---
+
+## 1. Purpose
+
+This document defines the rule for the temporary Textual-based operator monitor.
+
+It exists to allow:
+- one-window terminal UI
+- live operator visibility
+- editable draft/code pane
+- temporary visual contact before full dashboard realization
+
+without allowing:
+- runtime mutation
+- code execution from monitor
+- truth ownership drift
+- hidden control-plane shortcuts
+
+---
+
+## 2. What the Textual Monitor Is
+
+The Textual monitor is:
+
+- temporary
+- read-only with respect to platform truth
+- editable only in its local draft area
+- operator-facing
+- terminal-based
+- downstream from canonical truth sources
+
+The Textual monitor is not:
+
+- source of truth
+- execution authority
+- approval UI
+- control plane
+- runtime mutation path
+
+---
+
+## 3. Allowed Blocks
+
+The Textual monitor may display:
+
+- header and status
+- system overview
+- governance/documents summary
+- platform tree
+- worker pulse
+- live logs
+- editable draft/code pane
+
+---
+
+## 4. Forbidden Behavior
+
+The following remain forbidden:
+
+- direct runtime mutation
+- action dispatch into workers
+- code execution from the editor pane
+- synthetic truth
+- fake status decoration without source backing
+
+---
+
+## 5. Final Rule
+
+The Textual monitor may improve operator visibility and comfort,
+but it must remain a read-only monitor with a local editable draft area only.
+
+---
+
+## 6. Status
+
+This document is the active rule for the temporary Textual operator monitor until replaced by a stricter operator-dashboard realization standard.
+
+===== docs/visual_truth_binding_rules.md =====
+# VISUAL TRUTH BINDING RULES v1
+
+Status: active visual truth discipline baseline  
+Scope: dashboard/HUD/view binding to canonical truth and live runtime truth  
+Rule: visual layers may render, summarize, and explain truth, but may never invent it
+
+---
+
+## 1. Purpose
+
+This document defines how visual layers must bind to truth.
+
+It exists to prevent the following failures:
+
+- beautiful but false dashboards
+- guessed runtime state
+- silent collapse of canonical truth and live runtime truth
+- display-led architecture drift
+- explainability panels that are not evidence-backed
+
+---
+
+## 2. Core Principle
+
+Visual output is downstream.
+
+This means:
+
+- visual layers do not own truth
+- visual layers do not redefine truth
+- visual layers do not create authority
+- visual layers do not guess missing runtime state
+
+Visual layers may only:
+
+- read
+- compose
+- map
+- summarize
+- explain
+- render
+
+---
+
+## 3. Truth Sources Allowed for Visual Binding
+
+Visual layers may bind only to the following truth classes:
+
+### 3.1 Canonical truth
+Examples:
+- contracts
+- canonical models
+- policy definitions
+- canonical IDs
+- documented architecture rules
+
+### 3.2 Live runtime truth
+Examples:
+- runtime status
+- pressure state
+- queue state
+- worker state
+- node health
+- incident state
+- topology state
+
+### 3.3 Derived read-only views
+Examples:
+- panel summaries
+- dashboard read models
+- explainability summaries
+- topology/read-only visual compositions
+- HUD preview/render state contracts
+
+### Rule
+
+If a visual element cannot be traced back to one of these classes, it must not be shown as truth.
+
+---
+
+## 4. Forbidden Visual Behaviors
+
+Visual layers must not:
+
+- invent healthy/alive/degraded states
+- invent approval status
+- invent policy outcomes
+- invent runtime activity
+- invent queue depth
+- invent node health
+- invent incident severity
+- invent traceability labels
+- smooth over uncertainty as certainty
+- display guessed state for aesthetic completeness
+
+---
+
+## 5. Binding Hierarchy
+
+Visual binding must follow this order:
+
+1. canonical definition
+2. live runtime fact
+3. derived read-only interpretation
+4. visual mapping
+5. rendered output
+
+### Rule
+
+Rendered output must never bypass this order.
+
+---
+
+## 6. Visual Mapping Rule
+
+A visual mapping layer may decide:
+
+- panel placement
+- visual card type
+- zone targeting
+- icon slot
+- priority
+- density mode
+- overlay participation
+- explainability placement
+
+But it may not decide:
+
+- what is true
+- what is healthy
+- what is approved
+- what is executing
+- what is safe
+
+Those must come from upstream truth.
+
+---
+
+## 7. Explainability Rule
+
+Explainability panels and sidebars must be evidence-backed.
+
+Allowed:
+- summaries of upstream truth
+- reason strings derived from policy/runtime/view models
+- downstream explanation of system state
+- traceable decision descriptions
+
+Forbidden:
+- decorative reasoning with no source
+- made-up safety explanation
+- UI-generated confidence with no contract/runtime basis
+
+---
+
+## 8. Signal Overlay Rule
+
+Signal overlays may visualize:
+
+- flow participation
+- routing paths
+- active/inactive binding
+- topology participation
+- highlighted vs passive paths
+
+But overlays must not imply execution or health beyond what upstream truth supports.
+
+### Rule
+
+A glowing line is not proof of actual execution unless bound to an allowed upstream signal.
+
+---
+
+## 9. Topology Overlay Rule
+
+Topology overlays may render:
+
+- node grouping
+- runtime relationship summaries
+- display-target placement
+- route visibility
+- surface grouping
+
+But they must not claim:
+- physical truth they do not possess
+- network trust that is not explicitly modeled
+- node capability they cannot trace to source-of-truth layers
+
+---
+
+## 10. HUD Composition Rule
+
+HUD composition is read-only orchestration of visual parts.
+
+It may:
+- assemble layers
+- compose screen parts
+- group explainability/status/sidebar/ticker regions
+- expose preview/snapshot/render-ready states
+
+It may not:
+- mutate runtime state
+- mutate canonical truth
+- act as execution control
+- become approval authority
+
+---
+
+## 11. Status Bar Rule
+
+Status bars and bottom tickers must show only evidence-backed status.
+
+Allowed:
+- known labels
+- upstream counters
+- approved summaries
+- stable truth-backed indicators
+
+Forbidden:
+- guessed “optimal”
+
