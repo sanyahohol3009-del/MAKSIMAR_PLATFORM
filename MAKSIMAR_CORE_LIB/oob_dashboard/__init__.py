@@ -663,7 +663,193 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_ready_contract 
     build_visual_first_screen_present_ready_contract,
 )
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_models import (
+    build_operator_intent_model,
+)
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_vocabulary_contract import (
+    build_operator_intent_vocabulary_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_operator_intent_binding_models import (
+    build_panel_operator_intent_binding_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_operator_intent_binding_contract import (
+    build_panel_operator_intent_binding_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_decision_models import (
+    build_operator_approval_decision_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_decision_contract import (
+    build_operator_approval_decision_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_control_plane_handoff_models import (
+    build_operator_control_plane_handoff_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_control_plane_handoff_contract import (
+    build_operator_control_plane_handoff_contract,
+    OperatorControlPlaneHandoffContract,
+    OperatorControlPlaneHandoffContractEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_visibility_models import (
+    build_operator_audit_visibility_model,
+    OperatorAuditVisibilityEntry,
+    OperatorAuditVisibilityModel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_visibility_contract import (
+    build_operator_audit_visibility_contract,
+    OperatorAuditVisibilityContract,
+    OperatorAuditVisibilityContractEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_interaction_read_model_contract import (
+    build_operator_interaction_read_model_contract,
+    OperatorInteractionReadModelContract,
+    OperatorInteractionReadModelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_interaction_surface_contract import (
+    build_main_operator_interaction_surface_contract,
+    MainOperatorInteractionSurfaceContract,
+    MainOperatorInteractionSurfaceEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_action_queue_panel_contract import (
+    build_operator_action_queue_panel_contract,
+    OperatorActionQueuePanelContract,
+    OperatorActionQueuePanelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_queue_panel_contract import (
+    build_operator_approval_queue_panel_contract,
+    OperatorApprovalQueuePanelContract,
+    OperatorApprovalQueuePanelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_timeline_panel_contract import (
+    build_operator_audit_timeline_panel_contract,
+    OperatorAuditTimelinePanelContract,
+    OperatorAuditTimelinePanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_assignment_registry_contract import (
+    build_display_assignment_registry_contract,
+    DisplayAssignmentRegistryContract,
+    DisplayAssignmentRegistryEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_occupancy_contract import (
+    build_display_occupancy_contract,
+    DisplayOccupancyContract,
+    DisplayOccupancyEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_replacement_policy_contract import (
+    build_display_replacement_policy_contract,
+    DisplayReplacementPolicyContract,
+    DisplayReplacementPolicyEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.free_display_selection_contract import (
+    build_free_display_selection_contract,
+    FreeDisplaySelectionContract,
+    FreeDisplaySelectionEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_conflict_resolution_contract import (
+    build_display_conflict_resolution_contract,
+    DisplayConflictResolutionContract,
+    DisplayConflictResolutionEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.monitor_inventory_contract import (
+    build_monitor_inventory_contract,
+    MonitorInventoryContract,
+    MonitorInventoryEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_assignment_restore_contract import (
+    build_display_assignment_restore_contract,
+    DisplayAssignmentRestoreContract,
+    DisplayAssignmentRestoreEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_restore_continuity_contract import (
+    build_display_restore_continuity_contract,
+    DisplayRestoreContinuityContract,
+    DisplayRestoreContinuityEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_placement_routing_contract import (
+    build_display_placement_routing_contract,
+    DisplayPlacementRoutingContract,
+    DisplayPlacementRoutingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_resolver_decision_contract import (
+    build_display_resolver_decision_contract,
+    DisplayResolverDecisionContract,
+    DisplayResolverDecisionEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_continuity_snapshot_contract import (
+    build_display_continuity_snapshot_contract,
+    DisplayContinuitySnapshotContract,
+    DisplayContinuitySnapshotEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_visual_projection_contract import (
+    build_display_visual_projection_contract,
+    DisplayVisualProjectionContract,
+    DisplayVisualProjectionEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_visible_presentation_contract import (
+    build_operator_visible_presentation_contract,
+    OperatorVisiblePresentationContract,
+    OperatorVisiblePresentationEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_presentation_bundle_contract import (
+    build_operator_presentation_bundle_contract,
+    OperatorPresentationBundleContract,
+    OperatorPresentationBundleEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_state_contract import (
+    build_operator_dashboard_visible_state_contract,
+    OperatorDashboardVisibleStateContract,
+    OperatorDashboardVisibleStateEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_screen_state_contract import (
+    build_operator_dashboard_screen_state_contract,
+    OperatorDashboardScreenStateContract,
+    OperatorDashboardScreenStateEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_render_handoff_contract import (
+    build_operator_dashboard_render_handoff_contract,
+    OperatorDashboardRenderHandoffContract,
+    OperatorDashboardRenderHandoffEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_snapshot_contract import (
+    build_operator_dashboard_visible_snapshot_contract,
+    OperatorDashboardVisibleSnapshotContract,
+    OperatorDashboardVisibleSnapshotEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_first_honest_view_contract import (
+    build_operator_dashboard_first_honest_view_contract,
+    OperatorDashboardFirstHonestViewContract,
+    OperatorDashboardFirstHonestViewEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_output_contract import (
+    build_operator_dashboard_visible_output_contract,
+    OperatorDashboardVisibleOutputContract,
+    OperatorDashboardVisibleOutputEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_first_real_picture_contract import (
+    build_operator_dashboard_first_real_picture_contract,
+    OperatorDashboardFirstRealPictureContract,
+    OperatorDashboardFirstRealPictureEntry,
+)
 
 __all__ = [ "DashboardChatContract", "DashboardChatMessage", "DashboardConsistencyPanel", 
     "DashboardIncidentView", "DashboardStateLine", "DashboardStateSnapshot", "DiagnosticsIndex", 
@@ -789,4 +975,98 @@ __all__ = [ "DashboardChatContract", "DashboardChatMessage", "DashboardConsisten
     "build_visual_first_screen_present_contract",
     "build_visual_first_screen_present_delivery_contract",
     "build_visual_first_screen_present_ready_contract",
+    "build_operator_intent_model",
+    "build_operator_intent_vocabulary_contract",
+    "build_panel_operator_intent_binding_model",
+    "build_panel_operator_intent_binding_contract",
+    "build_operator_approval_decision_model",
+    "build_operator_approval_decision_contract",
+    "build_operator_control_plane_handoff_model",
+    "build_operator_control_plane_handoff_contract",
+    "OperatorControlPlaneHandoffContract",
+    "OperatorControlPlaneHandoffContractEntry",
+    "build_operator_audit_visibility_model",
+    "OperatorAuditVisibilityEntry",
+    "OperatorAuditVisibilityModel",
+    "build_operator_audit_visibility_contract",
+    "OperatorAuditVisibilityContract",
+    "OperatorAuditVisibilityContractEntry",
+    "build_operator_interaction_read_model_contract",
+    "OperatorInteractionReadModelContract",
+    "OperatorInteractionReadModelEntry",
+    "build_main_operator_interaction_surface_contract",
+    "MainOperatorInteractionSurfaceContract",
+    "MainOperatorInteractionSurfaceEntry",
+    "build_operator_action_queue_panel_contract",
+    "OperatorActionQueuePanelContract",
+    "OperatorActionQueuePanelEntry",
+    "build_operator_approval_queue_panel_contract",
+    "OperatorApprovalQueuePanelContract",
+    "OperatorApprovalQueuePanelEntry",
+    "build_operator_audit_timeline_panel_contract",
+    "OperatorAuditTimelinePanelContract",
+    "OperatorAuditTimelinePanelEntry",
+    "build_display_assignment_registry_contract",
+    "DisplayAssignmentRegistryContract",
+    "DisplayAssignmentRegistryEntry",
+    "build_display_occupancy_contract",
+    "DisplayOccupancyContract",
+    "DisplayOccupancyEntry",
+    "build_display_replacement_policy_contract",
+    "DisplayReplacementPolicyContract",
+    "DisplayReplacementPolicyEntry",
+    "build_free_display_selection_contract",
+    "FreeDisplaySelectionContract",
+    "FreeDisplaySelectionEntry",
+    "build_display_conflict_resolution_contract",
+    "DisplayConflictResolutionContract",
+    "DisplayConflictResolutionEntry",
+    "build_monitor_inventory_contract",
+    "MonitorInventoryContract",
+    "MonitorInventoryEntry",
+    "build_display_assignment_restore_contract",
+    "DisplayAssignmentRestoreContract",
+    "DisplayAssignmentRestoreEntry",
+    "build_display_restore_continuity_contract",
+    "DisplayRestoreContinuityContract",
+    "DisplayRestoreContinuityEntry",
+    "build_display_placement_routing_contract",
+    "DisplayPlacementRoutingContract",
+    "DisplayPlacementRoutingEntry",
+    "build_display_resolver_decision_contract",
+    "DisplayResolverDecisionContract",
+    "DisplayResolverDecisionEntry",
+    "build_display_continuity_snapshot_contract",
+    "DisplayContinuitySnapshotContract",
+    "DisplayContinuitySnapshotEntry",
+    "build_display_visual_projection_contract",
+    "DisplayVisualProjectionContract",
+    "DisplayVisualProjectionEntry",
+    "build_operator_visible_presentation_contract",
+    "OperatorVisiblePresentationContract",
+    "OperatorVisiblePresentationEntry",
+    "build_operator_presentation_bundle_contract",
+    "OperatorPresentationBundleContract",
+    "OperatorPresentationBundleEntry",
+    "build_operator_dashboard_visible_state_contract",
+    "OperatorDashboardVisibleStateContract",
+    "OperatorDashboardVisibleStateEntry",
+    "build_operator_dashboard_screen_state_contract",
+    "OperatorDashboardScreenStateContract",
+    "OperatorDashboardScreenStateEntry",
+    "build_operator_dashboard_render_handoff_contract",
+    "OperatorDashboardRenderHandoffContract",
+    "OperatorDashboardRenderHandoffEntry",
+    "build_operator_dashboard_visible_snapshot_contract",
+    "OperatorDashboardVisibleSnapshotContract",
+    "OperatorDashboardVisibleSnapshotEntry",
+    "build_operator_dashboard_first_honest_view_contract",
+    "OperatorDashboardFirstHonestViewContract",
+    "OperatorDashboardFirstHonestViewEntry",
+    "build_operator_dashboard_visible_output_contract",
+    "OperatorDashboardVisibleOutputContract",
+    "OperatorDashboardVisibleOutputEntry",
+    "build_operator_dashboard_first_real_picture_contract",
+    "OperatorDashboardFirstRealPictureContract",
+    "OperatorDashboardFirstRealPictureEntry",
 ]
