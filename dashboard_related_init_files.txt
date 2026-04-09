@@ -1,0 +1,13 @@
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE/contracts/mobile/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE/contracts/module/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE/contracts/product/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE/contracts/shell/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE/contracts/ui/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/architecture_map/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/control_plane/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/data_plane/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/display_topology/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/mobile_bridge/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/module_manifest/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/node_topology_runtime/__init__.py
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py

@@ -1,0 +1,3276 @@
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/real_node_agents/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.real_node_agents.real_node_agents_contract import (
+    RealNodeAgentEntry,
+    RealNodeAgentsContract,
+    build_real_node_agents_contract,
+)
+
+__all__ = [
+    "RealNodeAgentEntry",
+    "RealNodeAgentsContract",
+    "build_real_node_agents_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/air_display_research_slot/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.air_display_research_slot.air_display_research_slot_contract import (
+    AirDisplayResearchSlotContract,
+    AirDisplayResearchSlotEntry,
+    build_air_display_research_slot_contract,
+)
+
+__all__ = [
+    "AirDisplayResearchSlotContract",
+    "AirDisplayResearchSlotEntry",
+    "build_air_display_research_slot_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/multi_node_health_registry/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.multi_node_health_registry.multi_node_health_registry_contract import (
+    MultiNodeHealthRegistryContract,
+    MultiNodeHealthRegistryEntry,
+    build_multi_node_health_registry_contract,
+)
+
+__all__ = [
+    "MultiNodeHealthRegistryContract",
+    "MultiNodeHealthRegistryEntry",
+    "build_multi_node_health_registry_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/ai_services/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.ai_services.query_models import (
+    AIServiceQuery,
+    AIServiceRetrievalItem,
+)
+from MAKSIMAR_CORE_LIB.ai_services.service_accessor import (
+    get_service_definition,
+    list_service_definitions,
+)
+from MAKSIMAR_CORE_LIB.ai_services.service_summary import (
+    AIServiceRetrievalSummary,
+    build_service_summary,
+)
+
+__all__ = [
+    "AIServiceQuery",
+    "AIServiceRetrievalItem",
+    "AIServiceRetrievalSummary",
+    "build_service_summary",
+    "get_service_definition",
+    "list_service_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/platform_integration/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.platform_integration.bootstrap_loader import (
+    build_platform_bootstrap_context,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.bootstrap_models import (
+    DomainBootstrapState,
+    PlatformBootstrapContext,
+    PlatformBootstrapSnapshot,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.bootstrap_summary import (
+    PlatformSummaryLine,
+    build_platform_summary,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.health_models import (
+    PlatformHealthDomain,
+    PlatformHealthSnapshot,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.health_snapshot import (
+    build_health_domains,
+    build_platform_health_snapshot,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.self_check import (
+    run_platform_self_check,
+)
+from MAKSIMAR_CORE_LIB.platform_integration.self_check_models import (
+    PlatformSelfCheckResult,
+)
+
+__all__ = [
+    "DomainBootstrapState",
+    "PlatformBootstrapContext",
+    "PlatformBootstrapSnapshot",
+    "PlatformSummaryLine",
+    "PlatformHealthDomain",
+    "PlatformHealthSnapshot",
+    "PlatformSelfCheckResult",
+    "build_platform_bootstrap_context",
+    "build_platform_summary",
+    "build_health_domains",
+    "build_platform_health_snapshot",
+    "run_platform_self_check",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/surface_intelligence/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.surface_intelligence.surface_intelligence_contract import (
+    SurfaceIntelligenceContract,
+    SurfaceIntelligenceEntry,
+    build_surface_intelligence_contract,
+)
+
+__all__ = [
+    "SurfaceIntelligenceContract",
+    "SurfaceIntelligenceEntry",
+    "build_surface_intelligence_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/evolution_loop/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.evolution_loop.handoff_models import (
+    SimulationEvaluationHandoff,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.proposal_models import (
+    ProposalDefinition,
+    ProposalRegistrySummary,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.proposal_package_builder import (
+    build_proposal_package,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.proposal_package_models import (
+    ProposalPackage,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.proposal_registry import (
+    build_proposal_registry_summary,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.ranking_models import (
+    RankedEvaluationResult,
+    RankingSelectionResult,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.ranking_selector import (
+    select_best_evaluation_result,
+)
+from MAKSIMAR_CORE_LIB.evolution_loop.simulation_to_evaluation_handoff import (
+    build_simulation_to_evaluation_handoff,
+)
+
+__all__ = [
+    "ProposalDefinition",
+    "ProposalPackage",
+    "ProposalRegistrySummary",
+    "RankedEvaluationResult",
+    "RankingSelectionResult",
+    "SimulationEvaluationHandoff",
+    "build_proposal_package",
+    "build_proposal_registry_summary",
+    "build_simulation_to_evaluation_handoff",
+    "select_best_evaluation_result",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/real_dashboard_clients_mobile/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.real_dashboard_clients_mobile.real_dashboard_clients_mobile_contract import (
+    RealDashboardClientMobileEntry,
+    RealDashboardClientsMobileContract,
+    build_real_dashboard_clients_mobile_contract,
+)
+
+__all__ = [
+    "RealDashboardClientMobileEntry",
+    "RealDashboardClientsMobileContract",
+    "build_real_dashboard_clients_mobile_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/engine_observability_binding/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.engine_observability_binding.engine_observability_binding_contract import (
+    EngineObservabilityBindingContract,
+    EngineObservabilityBindingEntry,
+    build_engine_observability_binding_contract,
+)
+
+__all__ = [
+    "EngineObservabilityBindingContract",
+    "EngineObservabilityBindingEntry",
+    "build_engine_observability_binding_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/optics_light_field_engine/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.optics_light_field_engine.optics_light_field_engine_contract import (
+    OpticsLightFieldEngineContract,
+    OpticsLightFieldEngineEntry,
+    build_optics_light_field_engine_contract,
+)
+
+__all__ = [
+    "OpticsLightFieldEngineContract",
+    "OpticsLightFieldEngineEntry",
+    "build_optics_light_field_engine_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/execution_observability/__init__.py ---
+
+
+from MAKSIMAR_CORE_LIB.execution_observability.alert_contract import (
+    build_execution_alert_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.alert_models import (
+    ExecutionAlert,
+    ExecutionAlertContract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.incident_contract import (
+    build_execution_incident_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.incident_models import (
+    ExecutionIncident,
+    ExecutionIncidentContract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.metrics_contract import (
+    build_execution_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.metrics_models import (
+    ExecutionMetric,
+    ExecutionMetricsContract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.shell_contract import (
+    build_execution_observability_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.shell_models import (
+    ExecutionObservabilityShellContract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.summary_contract import (
+    build_execution_summary,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.summary_models import (
+    ExecutionSummary,
+    ExecutionSummaryLine,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.trace_contract import (
+    build_execution_trace_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.trace_models import (
+    ExecutionTrace,
+    ExecutionTraceContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.trace_identity_models import (
+    CanonicalTraceIdentity,
+    CanonicalTraceIdentityContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.queue_metrics_contract import (
+    build_queue_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.queue_metrics_models import (
+    QueueMetricEntry,
+    QueueMetricsContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.lease_metrics_contract import (
+    build_lease_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.lease_metrics_models import (
+    LeaseMetricEntry,
+    LeaseMetricsContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.pressure_metrics_contract import (
+    build_pressure_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.pressure_metrics_models import (
+    PressureMetricEntry,
+    PressureMetricsContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.worker_saturation_metrics_contract import (
+    build_worker_saturation_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.worker_saturation_metrics_models import (
+    WorkerSaturationMetricEntry,
+    WorkerSaturationMetricsContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_observability.deep_observability_shell_contract import (
+    build_deep_execution_observability_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_observability.deep_observability_shell_models import (
+    DeepExecutionObservabilityShellContract,
+)
+
+__all__ = [
+    "ExecutionAlert",
+    "ExecutionAlertContract",
+    "ExecutionIncident",
+    "ExecutionIncidentContract",
+    "ExecutionMetric",
+    "ExecutionMetricsContract",
+    "ExecutionObservabilityShellContract",
+    "ExecutionSummary",
+    "ExecutionSummaryLine",
+    "ExecutionTrace",
+    "ExecutionTraceContract",
+    "build_execution_alert_contract",
+    "build_execution_incident_contract",
+    "build_execution_metrics_contract",
+    "build_execution_observability_shell_contract",
+    "build_execution_summary",
+    "build_execution_trace_contract",
+    "CanonicalTraceIdentity",
+    "CanonicalTraceIdentityContract",
+    "QueueMetricEntry",
+    "QueueMetricsContract",
+    "build_queue_metrics_contract",
+    "LeaseMetricEntry",
+    "LeaseMetricsContract",
+    "build_lease_metrics_contract",
+    "PressureMetricEntry",
+    "PressureMetricsContract",
+    "build_pressure_metrics_contract",
+    "WorkerSaturationMetricEntry",
+    "WorkerSaturationMetricsContract",
+    "build_worker_saturation_metrics_contract",
+    "DeepExecutionObservabilityShellContract",
+    "build_deep_execution_observability_shell_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/persistent_storage_migrations/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.persistent_storage_migrations.persistent_storage_migrations_contract import (
+    PersistentStorageMigrationEntry,
+    PersistentStorageMigrationsContract,
+    build_persistent_storage_migrations_contract,
+)
+
+__all__ = [
+    "PersistentStorageMigrationEntry",
+    "PersistentStorageMigrationsContract",
+    "build_persistent_storage_migrations_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/engine_adapter_boundary/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.engine_adapter_boundary.engine_adapter_boundary_contract import (
+    EngineAdapterBoundaryContract,
+    EngineAdapterBoundaryEntry,
+    build_engine_adapter_boundary_contract,
+)
+
+__all__ = [
+    "EngineAdapterBoundaryContract",
+    "EngineAdapterBoundaryEntry",
+    "build_engine_adapter_boundary_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/wrist_terminal_contract/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.wrist_terminal_contract.wrist_terminal_contract import (
+    WristTerminalContract,
+    WristTerminalEntry,
+    build_wrist_terminal_contract,
+)
+
+__all__ = [
+    "WristTerminalContract",
+    "WristTerminalEntry",
+    "build_wrist_terminal_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/evaluation_integration/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.evaluation_integration.evaluation_models import (
+    EvaluationDefinitionRecord,
+    EvaluationRegistrySummary,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.evaluation_registry_summary import (
+    build_evaluation_registry_summary,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.execution_envelope import (
+    build_evaluation_execution_envelope,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.execution_models import (
+    EvaluationExecutionEnvelope,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.request_builder import (
+    build_evaluation_request,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.request_models import (
+    EvaluationIntent,
+    EvaluationIntegrationRequest,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.result_adapter import (
+    adapt_evaluation_result,
+)
+from MAKSIMAR_CORE_LIB.evaluation_integration.result_models import (
+    EvaluationIntegrationResult,
+    EvaluationRawResult,
+)
+
+__all__ = [
+    "EvaluationDefinitionRecord",
+    "EvaluationExecutionEnvelope",
+    "EvaluationIntegrationRequest",
+    "EvaluationIntegrationResult",
+    "EvaluationIntent",
+    "EvaluationRawResult",
+    "EvaluationRegistrySummary",
+    "adapt_evaluation_result",
+    "build_evaluation_execution_envelope",
+    "build_evaluation_registry_summary",
+    "build_evaluation_request",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/validation_policy_completion/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.validation_policy_completion.validation_policy_completion_contract import (
+    ValidationPolicyCompletionContract,
+    ValidationPolicyCompletionEntry,
+    build_validation_policy_completion_contract,
+)
+
+__all__ = [
+    "ValidationPolicyCompletionContract",
+    "ValidationPolicyCompletionEntry",
+    "build_validation_policy_completion_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/memory_engine/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.memory_engine.memory_accessor import (
+    get_memory_definition,
+    list_memory_definitions,
+)
+from MAKSIMAR_CORE_LIB.memory_engine.query_models import (
+    MemoryQuery,
+    MemoryRetrievalItem,
+)
+from MAKSIMAR_CORE_LIB.memory_engine.retrieval_summary import (
+    MemoryRetrievalSummary,
+    build_retrieval_summary,
+)
+
+__all__ = [
+    "MemoryQuery",
+    "MemoryRetrievalItem",
+    "MemoryRetrievalSummary",
+    "build_retrieval_summary",
+    "get_memory_definition",
+    "list_memory_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/action_executor/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.action_executor.action_accessor import (
+    get_action_definition,
+    list_action_definitions,
+)
+from MAKSIMAR_CORE_LIB.action_executor.dry_run_executor import dry_run_execute
+from MAKSIMAR_CORE_LIB.action_executor.execution_models import (
+    ActionExecutionRequest,
+    DryRunExecutionResult,
+)
+
+__all__ = [
+    "ActionExecutionRequest",
+    "DryRunExecutionResult",
+    "dry_run_execute",
+    "get_action_definition",
+    "list_action_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/execution_pressure/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.execution_pressure.admission_pressure_rules import (
+    AdmissionPressureRuleEntry,
+    AdmissionPressureRulesContract,
+    build_admission_pressure_rules_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_pressure.degraded_trigger_models import (
+    DegradedRoutingPolicy,
+    DegradedTriggerContract,
+    DegradedTriggerEntry,
+    DegradedTriggerScope,
+    build_degraded_trigger_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_pressure.pressure_decision_contract import (
+    AdmissionDecision,
+    PressureDecisionAction,
+    PressureDecisionContract,
+    PressureDecisionEntry,
+    build_pressure_decision_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_pressure.pressure_level_models import (
+    PressureLevel,
+    PressureLevelContract,
+    PressureLevelEntry,
+    build_pressure_level_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_pressure.pressure_signal_models import (
+    PressureMeasurementUnit,
+    PressureSignalContract,
+    PressureSignalEntry,
+    PressureSignalKind,
+    build_pressure_signal_contract,
+)
+
+__all__ = [
+    "AdmissionDecision",
+    "AdmissionPressureRuleEntry",
+    "AdmissionPressureRulesContract",
+    "DegradedRoutingPolicy",
+    "DegradedTriggerContract",
+    "DegradedTriggerEntry",
+    "DegradedTriggerScope",
+    "PressureDecisionAction",
+    "PressureDecisionContract",
+    "PressureDecisionEntry",
+    "PressureLevel",
+    "PressureLevelContract",
+    "PressureLevelEntry",
+    "PressureMeasurementUnit",
+    "PressureSignalContract",
+    "PressureSignalEntry",
+    "PressureSignalKind",
+    "build_admission_pressure_rules_contract",
+    "build_degraded_trigger_contract",
+    "build_pressure_decision_contract",
+    "build_pressure_level_contract",
+    "build_pressure_signal_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/workflow_engine/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.workflow_engine.execution_plan import (
+    WorkflowExecutionPlan,
+    build_execution_plan,
+)
+from MAKSIMAR_CORE_LIB.workflow_engine.workflow_accessor import (
+    find_workflows_by_trigger,
+    get_workflow_definition,
+    list_workflow_definitions,
+)
+from MAKSIMAR_CORE_LIB.workflow_engine.workflow_summary import (
+    WorkflowSummary,
+    build_workflow_summary,
+)
+
+__all__ = [
+    "WorkflowExecutionPlan",
+    "WorkflowSummary",
+    "build_execution_plan",
+    "build_workflow_summary",
+    "find_workflows_by_trigger",
+    "get_workflow_definition",
+    "list_workflow_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/policy_engine/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.policy_engine.enforcement_engine import evaluate_request
+from MAKSIMAR_CORE_LIB.policy_engine.enforcement_models import (
+    EnforcementReason,
+    EnforcementRequest,
+    EnforcementResult,
+)
+from MAKSIMAR_CORE_LIB.policy_engine.policy_accessor import (
+    get_policy,
+    get_policy_definition,
+    list_policies_by_root,
+    list_policy_definitions,
+)
+from MAKSIMAR_CORE_LIB.policy_engine.policy_models import Policy
+
+__all__ = [
+    "Policy",
+    "EnforcementReason",
+    "EnforcementRequest",
+    "EnforcementResult",
+    "evaluate_request",
+    "get_policy",
+    "get_policy_definition",
+    "list_policies_by_root",
+    "list_policy_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.product_hardening_onboarding_packaging.product_hardening_onboarding_packaging_contract import (
+    ProductHardeningOnboardingPackagingContract,
+    ProductHardeningOnboardingPackagingEntry,
+    build_product_hardening_onboarding_packaging_contract,
+)
+
+__all__ = [
+    "ProductHardeningOnboardingPackagingContract",
+    "ProductHardeningOnboardingPackagingEntry",
+    "build_product_hardening_onboarding_packaging_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/simulation_layer/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.simulation_layer.query_models import (
+    SimulationQuery,
+    SimulationRetrievalItem,
+)
+from MAKSIMAR_CORE_LIB.simulation_layer.simulation_accessor import (
+    get_simulation_definition,
+    list_simulation_definitions,
+)
+from MAKSIMAR_CORE_LIB.simulation_layer.simulation_summary import (
+    SimulationRetrievalSummary,
+    build_simulation_summary,
+)
+
+__all__ = [
+    "SimulationQuery",
+    "SimulationRetrievalItem",
+    "SimulationRetrievalSummary",
+    "build_simulation_summary",
+    "get_simulation_definition",
+    "list_simulation_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/evolution_debug/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.evolution_debug.debug_cycle_models import (
+    DebugCycleStage,
+    EvolutionDebugCycle,
+)
+
+from MAKSIMAR_CORE_LIB.evolution_debug.hypothesis_contract import (
+    build_debug_hypothesis_contract,
+)
+from MAKSIMAR_CORE_LIB.evolution_debug.hypothesis_models import (
+    DebugHypothesis,
+    DebugHypothesisContract,
+)
+
+from MAKSIMAR_CORE_LIB.evolution_debug.patch_contract import (
+    build_patch_candidate_contract,
+)
+from MAKSIMAR_CORE_LIB.evolution_debug.patch_models import (
+    PatchCandidate,
+    PatchCandidateContract,
+)
+
+from MAKSIMAR_CORE_LIB.evolution_debug.sandbox_contract import (
+    build_sandbox_evaluation_contract,
+)
+from MAKSIMAR_CORE_LIB.evolution_debug.sandbox_models import (
+    SandboxEvaluation,
+    SandboxEvaluationContract,
+)
+
+from MAKSIMAR_CORE_LIB.evolution_debug.ranking_contract import (
+    build_debug_ranking_contract,
+)
+from MAKSIMAR_CORE_LIB.evolution_debug.ranking_models import (
+    DebugRankingContract,
+    DebugRankingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.evolution_debug.proposal_contract import (
+    build_debug_proposal_contract,
+)
+from MAKSIMAR_CORE_LIB.evolution_debug.proposal_models import (
+    DebugProposalContract,
+    DebugProposalPackage,
+)
+
+__all__ = [
+    "DebugCycleStage",
+    "EvolutionDebugCycle",
+    "DebugHypothesis",
+    "DebugHypothesisContract",
+    "build_debug_hypothesis_contract",
+    "PatchCandidate",
+    "PatchCandidateContract",
+    "build_patch_candidate_contract",
+    "SandboxEvaluation",
+    "SandboxEvaluationContract",
+    "build_sandbox_evaluation_contract",
+    "DebugRankingContract",
+    "DebugRankingEntry",
+    "build_debug_ranking_contract",
+    "DebugProposalContract",
+    "DebugProposalPackage",
+    "build_debug_proposal_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/physics_dashboard_views/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.physics_dashboard_views.physics_dashboard_views_contract import (
+    PhysicsDashboardViewEntry,
+    PhysicsDashboardViewsContract,
+    build_physics_dashboard_views_contract,
+)
+
+__all__ = [
+    "PhysicsDashboardViewEntry",
+    "PhysicsDashboardViewsContract",
+    "build_physics_dashboard_views_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/version_control/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.version_control.panel_contract import (
+    build_version_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.version_control.panel_models import (
+    VersionPanelContract,
+    VersionPanelEntry,
+)
+from MAKSIMAR_CORE_LIB.version_control.snapshot_models import (
+    SnapshotRequest,
+    SnapshotRequestContract,
+)
+from MAKSIMAR_CORE_LIB.version_control.sync_contract import (
+    build_sync_state_contract,
+)
+from MAKSIMAR_CORE_LIB.version_control.sync_models import (
+    SyncState,
+    SyncStateContract,
+)
+
+__all__ = [
+    "SnapshotRequest",
+    "SnapshotRequestContract",
+    "SyncState",
+    "SyncStateContract",
+    "VersionPanelContract",
+    "VersionPanelEntry",
+    "build_sync_state_contract",
+    "build_version_panel_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/secure_sync_update_transport/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.secure_sync_update_transport.secure_sync_update_transport_contract import (
+    SecureSyncUpdateTransportContract,
+    SecureSyncUpdateTransportEntry,
+    build_secure_sync_update_transport_contract,
+)
+
+__all__ = [
+    "SecureSyncUpdateTransportContract",
+    "SecureSyncUpdateTransportEntry",
+    "build_secure_sync_update_transport_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/shared_services/__init__.py ---
+
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.chat_contract import (
+    build_dashboard_chat_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.chat_models import (
+    DashboardChatContract,
+    DashboardChatMessage,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.consistency_panel import (
+    build_dashboard_consistency_panel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.consistency_panel_models import (
+    DashboardConsistencyPanel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_models import (
+    DashboardStateLine,
+    DashboardStateSnapshot,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_models import (
+    DiagnosticsIndex,
+    RootCauseHint,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.diagnostics_index import (
+    build_diagnostics_index,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view import (
+    build_dashboard_incident_view,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.incident_view_models import (
+    DashboardIncidentView,
+    IncidentViewLine,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.snapshot_aggregator import (
+    build_dashboard_state_snapshot,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.navigation_contract import (
+    build_dashboard_navigation_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.navigation_models import (
+    DashboardNavigationContract,
+    NavigationItem,
+    DisplayPanelPlacement,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_contract import (
+    build_dashboard_input_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_models import (
+    DashboardInputContract,
+    InputEvent,
+    InputCapability,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_router_contract import (
+    build_dashboard_input_router_contract,
+    DashboardInputRouterContract,
+    RoutedAction,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.chat_input_contract import (
+    build_dashboard_chat_input_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.chat_input_models import (
+    DashboardChatInputBinding,
+    DashboardChatInputContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_contract import (
+    build_dashboard_workspace_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_models import (
+    DashboardWorkspaceContract,
+    DisplayWorkspace,
+    WorkspacePlacement,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_contract import (
+    build_dashboard_panel_orchestration_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_models import (
+    DashboardPanelOrchestrationContract,
+    OrchestratedPanel,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.settings_panel_contract import (
+    build_dashboard_settings_panel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.settings_panel_models import (
+    DashboardSettingsPanel,
+    SettingsEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.gesture_panel_contract import (
+    build_dashboard_gesture_panel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.gesture_panel_models import (
+    DashboardGesturePanel,
+    GestureBinding,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
+    build_dashboard_panel_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
+    DashboardPanelRegistryContract,
+    RegisteredPanel,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_composition_contract import (
+    build_dashboard_view_composition_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_composition_models import (
+    ComposedViewPanel,
+    DashboardViewCompositionContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.feedback_contract import (
+    build_dashboard_feedback_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.feedback_models import (
+    DashboardFeedbackContract,
+    DiagnosticsFeedbackItem,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_shell_contract import (
+    build_dashboard_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_shell_models import (
+    DashboardShellContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.queue_load_panel_contract import (
+    build_queue_load_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.queue_load_panel_models import (
+    QueueLoadPanelContract,
+    QueueLoadPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.node_topology_panel_contract import (
+    build_node_topology_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.node_topology_panel_models import (
+    NodeTopologyPanelContract,
+    NodeTopologyPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.degraded_mode_panel_contract import (
+    build_degraded_mode_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.degraded_mode_panel_models import (
+    DegradedModePanelContract,
+    DegradedModePanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.project_map_panel_contract import (
+    build_project_map_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.project_map_panel_models import (
+    ProjectMapPanelContract,
+    ProjectMapPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.data_flow_panel_contract import (
+    build_data_flow_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.data_flow_panel_models import (
+    DataFlowPanelContract,
+    DataFlowPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.dependency_map_panel_contract import (
+    build_dependency_map_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dependency_map_panel_models import (
+    DependencyMapPanelContract,
+    DependencyMapPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.version_control_panel_contract import (
+    build_version_control_panel_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.version_control_panel_models import (
+    VersionControlPanelContract,
+    VersionControlPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_execution_shell_contract import (
+    build_dashboard_execution_panels_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_execution_shell_models import (
+    DashboardExecutionPanelsShellContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_identity_models import (
+    CanonicalPanelId,
+    CanonicalPanelIdentity,
+    CanonicalPanelIdentityContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
+    build_panel_metadata_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
+    PanelMetadataContract,
+    PanelMetadataEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_taxonomy_contract import (
+    build_panel_taxonomy_contract,
+    PanelFamilySummary,
+    PanelKindSummary,
+    PanelRoleSummary,
+    PanelTaxonomyContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_source_binding_contract import (
+    build_panel_source_binding_contract,
+    PanelSourceBindingContract,
+    PanelSourceBindingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
+    build_panel_exposure_policy_contract,
+    PanelExposureEntry,
+    PanelExposurePolicyContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_content_contract import (
+    build_panel_content_contract,
+    PanelContentContract,
+    PanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
+    build_display_target_vocabulary_contract,
+    DisplayTargetVocabularyContract,
+    DisplayTargetVocabularyEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
+    build_panel_binding_contract,
+    PanelBindingContract,
+    PanelBindingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
+    build_view_targeting_contract,
+    ViewTargetingContract,
+    ViewTargetingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+    PanelViewDisplayChainContract,
+    PanelViewDisplayChainEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_runtime_resolver_integration_contract import (
+    build_display_runtime_resolver_integration_contract,
+    DisplayRuntimeResolverEntry,
+    DisplayRuntimeResolverIntegrationContract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+    WorkspaceRegistryContract,
+    WorkspaceRegistryEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
+    build_layout_composition_contract,
+    LayoutCompositionContract,
+    LayoutCompositionEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_read_model_contract import (
+    build_workspace_read_model_contract,
+    WorkspaceReadModelContract,
+    WorkspaceReadModelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_zone_slot_vocabulary_contract import (
+    build_panel_zone_slot_vocabulary_contract,
+    PanelSlotVocabularyEntry,
+    PanelZoneSlotVocabularyContract,
+    PanelZoneVocabularyEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+    MainOperatorDashboardContract,
+    MainOperatorDashboardEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
+    build_main_operator_dashboard_read_model_contract,
+    MainOperatorDashboardReadModelContract,
+    MainOperatorDashboardReadModelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_workspace_binding_contract import (
+    build_operator_workspace_binding_contract,
+    OperatorWorkspaceBindingContract,
+    OperatorWorkspaceBindingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_interaction_guard_contract import (
+    build_operator_interaction_guard_contract,
+    OperatorInteractionGuardContract,
+    OperatorInteractionGuardEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_contract import (
+    build_operator_intent_contract,
+    OperatorIntentContract,
+    OperatorIntentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.control_plane_handoff_contract import (
+    build_control_plane_handoff_contract,
+    ControlPlaneHandoffContract,
+    ControlPlaneHandoffEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.policy_aware_action_exposure_contract import (
+    build_policy_aware_action_exposure_contract,
+    PolicyAwareActionExposureContract,
+    PolicyAwareActionExposureEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.system_status_panel_content_contract import (
+    build_system_status_panel_content_contract,
+    SystemStatusPanelContentContract,
+    SystemStatusPanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.guard_chain_panel_content_contract import (
+    build_guard_chain_panel_content_contract,
+    GuardChainPanelContentContract,
+    GuardChainPanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.incidents_panel_content_contract import (
+    build_incidents_panel_content_contract,
+    IncidentsPanelContentContract,
+    IncidentsPanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.logs_panel_content_contract import (
+    build_logs_panel_content_contract,
+    LogsPanelContentContract,
+    LogsPanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.topology_panel_content_contract import (
+    build_topology_panel_content_contract,
+    TopologyPanelContentContract,
+    TopologyPanelContentEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_shell_canonical_panel_contract import (
+    build_visual_shell_canonical_panel_contract,
+    VisualShellCanonicalPanelContract,
+    VisualShellCanonicalPanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_shell_contract import (
+    build_visual_shell_contract,
+    VisualShellContract,
+    VisualShellEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_render_surface_contract import (
+    build_visual_render_surface_contract,
+    VisualRenderSurfaceContract,
+    VisualRenderSurfaceEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_renderer_contract import (
+    build_visual_renderer_contract,
+    VisualRendererContract,
+    VisualRendererEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_theme_contract import (
+    build_visual_theme_contract,
+    VisualThemeContract,
+    VisualThemeEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_to_visual_mapping_contract import (
+    build_panel_to_visual_mapping_contract,
+    PanelToVisualMappingContract,
+    PanelToVisualMappingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_theme_hardening_contract import (
+    build_visual_theme_hardening_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_panel_hierarchy_hardening_contract import (
+    build_visual_panel_hierarchy_hardening_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_center_core_refinement_contract import (
+    build_visual_center_core_refinement_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_sidebar_navigation_refinement_contract import (
+    build_visual_sidebar_navigation_refinement_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_status_ticker_refinement_contract import (
+    build_visual_status_ticker_refinement_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_phase_1_readiness_contract import (
+    build_visual_phase_1_readiness_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_preview_render_polish_readiness_contract import (
+    build_visual_preview_render_polish_readiness_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_preview_render_output_contract import (
+    build_visual_preview_render_output_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_preview_render_artifact_bridge_contract import (
+    build_visual_preview_render_artifact_bridge_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_display_facing_preview_bundle_contract import (
+    build_visual_display_facing_preview_bundle_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_operator_facing_premium_preview_contract import (
+    build_visual_operator_facing_premium_preview_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_viewable_premium_preview_contract import (
+    build_visual_first_viewable_premium_preview_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_preview_delivery_readiness_contract import (
+    build_visual_preview_delivery_readiness_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_presentable_preview_contract import (
+    build_visual_first_presentable_preview_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_operator_demo_preview_contract import (
+    build_visual_operator_demo_preview_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_view_layer_contract import (
+    build_visual_first_view_layer_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_showable_view_contract import (
+    build_visual_first_showable_view_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_observable_view_contract import (
+    build_visual_first_observable_view_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_displayable_view_contract import (
+    build_visual_first_displayable_view_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_presentable_display_contract import (
+    build_visual_first_presentable_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_demo_display_contract import (
+    build_visual_first_demo_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_watchable_display_contract import (
+    build_visual_first_watchable_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_presented_display_contract import (
+    build_visual_first_presented_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderable_display_contract import (
+    build_visual_first_renderable_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_output_ready_display_contract import (
+    build_visual_first_output_ready_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_result_display_contract import (
+    build_visual_first_result_display_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_viewable_result_contract import (
+    build_visual_first_viewable_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_display_output_contract import (
+    build_visual_first_display_output_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_shell_handoff_contract import (
+    build_visual_first_shell_handoff_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_presentable_result_contract import (
+    build_visual_first_presentable_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_presented_result_contract import (
+    build_visual_first_presented_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_presentable_result_contract import (
+    build_visual_first_screen_presentable_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_result_contract import (
+    build_visual_first_screen_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_showcase_result_contract import (
+    build_visual_first_showcase_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_presentable_result_contract import (
+    build_visual_first_live_presentable_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_screen_result_contract import (
+    build_visual_first_live_screen_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_showcase_result_contract import (
+    build_visual_first_live_showcase_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_operator_viewable_live_result_contract import (
+    build_visual_first_operator_viewable_live_result_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_operator_showcase_contract import (
+    build_visual_first_live_operator_showcase_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_demo_ready_live_operator_contract import (
+    build_visual_first_demo_ready_live_operator_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_investor_presentable_live_operator_contract import (
+    build_visual_first_investor_presentable_live_operator_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_live_operator_contract import (
+    build_visual_first_premium_live_operator_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_showable_system_contract import (
+    build_visual_first_premium_showable_system_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_demo_system_contract import (
+    build_visual_first_premium_demo_system_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_delivery_bridge_contract import (
+    build_visual_premium_demo_delivery_bridge_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_bridge_contract import (
+    build_visual_premium_demo_realization_bridge_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_ready_contract import (
+    build_visual_premium_demo_realization_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_screen_delivery_contract import (
+    build_visual_premium_demo_screen_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_boundary_contract import (
+    build_visual_premium_demo_picture_boundary_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_ready_contract import (
+    build_visual_premium_demo_picture_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_artifact_contract import (
+    build_visual_premium_demo_realization_artifact_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_materialized_output_contract import (
+    build_visual_premium_demo_materialized_output_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_first_picture_contract import (
+    build_visual_premium_demo_first_picture_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_realization_contract import (
+    build_visual_first_renderer_realization_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_view_contract import (
+    build_visual_first_renderer_view_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_view_delivery_contract import (
+    build_visual_first_renderer_view_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_view_ready_contract import (
+    build_visual_first_renderer_view_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_screen_handoff_contract import (
+    build_visual_first_renderer_screen_handoff_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_contract import (
+    build_visual_first_screen_view_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_delivery_contract import (
+    build_visual_first_screen_view_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_ready_contract import (
+    build_visual_first_screen_view_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_contract import (
+    build_visual_first_screen_render_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_delivery_contract import (
+    build_visual_first_screen_render_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_ready_contract import (
+    build_visual_first_screen_render_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_contract import (
+    build_visual_first_screen_present_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_delivery_contract import (
+    build_visual_first_screen_present_delivery_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_ready_contract import (
+    build_visual_first_screen_present_ready_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_models import (
+    build_operator_intent_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_vocabulary_contract import (
+    build_operator_intent_vocabulary_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_operator_intent_binding_models import (
+    build_panel_operator_intent_binding_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_operator_intent_binding_contract import (
+    build_panel_operator_intent_binding_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_decision_models import (
+    build_operator_approval_decision_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_decision_contract import (
+    build_operator_approval_decision_contract,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_control_plane_handoff_models import (
+    build_operator_control_plane_handoff_model,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_control_plane_handoff_contract import (
+    build_operator_control_plane_handoff_contract,
+    OperatorControlPlaneHandoffContract,
+    OperatorControlPlaneHandoffContractEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_visibility_models import (
+    build_operator_audit_visibility_model,
+    OperatorAuditVisibilityEntry,
+    OperatorAuditVisibilityModel,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_visibility_contract import (
+    build_operator_audit_visibility_contract,
+    OperatorAuditVisibilityContract,
+    OperatorAuditVisibilityContractEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_interaction_read_model_contract import (
+    build_operator_interaction_read_model_contract,
+    OperatorInteractionReadModelContract,
+    OperatorInteractionReadModelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_interaction_surface_contract import (
+    build_main_operator_interaction_surface_contract,
+    MainOperatorInteractionSurfaceContract,
+    MainOperatorInteractionSurfaceEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_action_queue_panel_contract import (
+    build_operator_action_queue_panel_contract,
+    OperatorActionQueuePanelContract,
+    OperatorActionQueuePanelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_queue_panel_contract import (
+    build_operator_approval_queue_panel_contract,
+    OperatorApprovalQueuePanelContract,
+    OperatorApprovalQueuePanelEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_timeline_panel_contract import (
+    build_operator_audit_timeline_panel_contract,
+    OperatorAuditTimelinePanelContract,
+    OperatorAuditTimelinePanelEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_assignment_registry_contract import (
+    build_display_assignment_registry_contract,
+    DisplayAssignmentRegistryContract,
+    DisplayAssignmentRegistryEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_occupancy_contract import (
+    build_display_occupancy_contract,
+    DisplayOccupancyContract,
+    DisplayOccupancyEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_replacement_policy_contract import (
+    build_display_replacement_policy_contract,
+    DisplayReplacementPolicyContract,
+    DisplayReplacementPolicyEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.free_display_selection_contract import (
+    build_free_display_selection_contract,
+    FreeDisplaySelectionContract,
+    FreeDisplaySelectionEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_conflict_resolution_contract import (
+    build_display_conflict_resolution_contract,
+    DisplayConflictResolutionContract,
+    DisplayConflictResolutionEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.monitor_inventory_contract import (
+    build_monitor_inventory_contract,
+    MonitorInventoryContract,
+    MonitorInventoryEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_assignment_restore_contract import (
+    build_display_assignment_restore_contract,
+    DisplayAssignmentRestoreContract,
+    DisplayAssignmentRestoreEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_restore_continuity_contract import (
+    build_display_restore_continuity_contract,
+    DisplayRestoreContinuityContract,
+    DisplayRestoreContinuityEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_placement_routing_contract import (
+    build_display_placement_routing_contract,
+    DisplayPlacementRoutingContract,
+    DisplayPlacementRoutingEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_resolver_decision_contract import (
+    build_display_resolver_decision_contract,
+    DisplayResolverDecisionContract,
+    DisplayResolverDecisionEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_continuity_snapshot_contract import (
+    build_display_continuity_snapshot_contract,
+    DisplayContinuitySnapshotContract,
+    DisplayContinuitySnapshotEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_visual_projection_contract import (
+    build_display_visual_projection_contract,
+    DisplayVisualProjectionContract,
+    DisplayVisualProjectionEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_visible_presentation_contract import (
+    build_operator_visible_presentation_contract,
+    OperatorVisiblePresentationContract,
+    OperatorVisiblePresentationEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_presentation_bundle_contract import (
+    build_operator_presentation_bundle_contract,
+    OperatorPresentationBundleContract,
+    OperatorPresentationBundleEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_state_contract import (
+    build_operator_dashboard_visible_state_contract,
+    OperatorDashboardVisibleStateContract,
+    OperatorDashboardVisibleStateEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_screen_state_contract import (
+    build_operator_dashboard_screen_state_contract,
+    OperatorDashboardScreenStateContract,
+    OperatorDashboardScreenStateEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_render_handoff_contract import (
+    build_operator_dashboard_render_handoff_contract,
+    OperatorDashboardRenderHandoffContract,
+    OperatorDashboardRenderHandoffEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_snapshot_contract import (
+    build_operator_dashboard_visible_snapshot_contract,
+    OperatorDashboardVisibleSnapshotContract,
+    OperatorDashboardVisibleSnapshotEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_first_honest_view_contract import (
+    build_operator_dashboard_first_honest_view_contract,
+    OperatorDashboardFirstHonestViewContract,
+    OperatorDashboardFirstHonestViewEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visible_output_contract import (
+    build_operator_dashboard_visible_output_contract,
+    OperatorDashboardVisibleOutputContract,
+    OperatorDashboardVisibleOutputEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_first_real_picture_contract import (
+    build_operator_dashboard_first_real_picture_contract,
+    OperatorDashboardFirstRealPictureContract,
+    OperatorDashboardFirstRealPictureEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_final_assembled_state_contract import (
+    build_operator_dashboard_final_assembled_state_contract,
+    OperatorDashboardFinalAssembledStateContract,
+    OperatorDashboardFinalAssembledStateEntry,
+)
+
+__all__ = [ "DashboardChatContract", "DashboardChatMessage", "DashboardConsistencyPanel", 
+    "DashboardIncidentView", "DashboardStateLine", "DashboardStateSnapshot", "DiagnosticsIndex", 
+    "IncidentViewLine", "RootCauseHint", "build_dashboard_chat_contract", "build_dashboard_consistency_panel", 
+    "build_dashboard_incident_view", "build_dashboard_state_snapshot", "build_diagnostics_index", 
+    "DashboardNavigationContract", "NavigationItem", "DisplayPanelPlacement", 
+    "build_dashboard_navigation_contract", "DashboardInputContract", "InputEvent", "InputCapability", 
+    "build_dashboard_input_contract", "DashboardInputRouterContract", "RoutedAction", 
+    "build_dashboard_input_router_contract", "DashboardChatInputBinding", "DashboardChatInputContract", 
+    "build_dashboard_chat_input_contract", "DashboardWorkspaceContract", "DisplayWorkspace", 
+    "WorkspacePlacement", "build_dashboard_workspace_contract", "DashboardPanelOrchestrationContract", 
+    "OrchestratedPanel", "build_dashboard_panel_orchestration_contract", "DashboardSettingsPanel", 
+    "SettingsEntry", "DashboardGesturePanel", "GestureBinding", "build_dashboard_settings_panel", 
+    "build_dashboard_gesture_panel", "DashboardPanelRegistryContract", "RegisteredPanel", 
+    "build_dashboard_panel_registry_contract", "ComposedViewPanel", "DashboardViewCompositionContract", 
+    "build_dashboard_view_composition_contract", "DashboardFeedbackContract", "DiagnosticsFeedbackItem", 
+    "build_dashboard_feedback_contract", "DashboardShellContract", "build_dashboard_shell_contract", 
+    "QueueLoadPanelContract", "QueueLoadPanelEntry", "build_queue_load_panel_contract", 
+    "NodeTopologyPanelContract", "NodeTopologyPanelEntry", "build_node_topology_panel_contract", 
+    "DegradedModePanelContract", "DegradedModePanelEntry", "build_degraded_mode_panel_contract", 
+    "ProjectMapPanelContract", "ProjectMapPanelEntry", "build_project_map_panel_contract", 
+    "DataFlowPanelContract", "DataFlowPanelEntry", "build_data_flow_panel_contract", 
+    "DependencyMapPanelContract", "DependencyMapPanelEntry", "build_dependency_map_panel_contract", 
+    "VersionControlPanelContract", "VersionControlPanelEntry", "build_version_control_panel_contract", 
+    "DashboardExecutionPanelsShellContract", "build_dashboard_execution_panels_shell_contract", 
+    "CanonicalPanelId", "CanonicalPanelIdentity", "CanonicalPanelIdentityContract", 
+    "build_panel_metadata_contract", "PanelMetadataContract", "PanelMetadataEntry", 
+    "build_panel_taxonomy_contract", "PanelFamilySummary", "PanelKindSummary", "PanelRoleSummary", 
+    "PanelTaxonomyContract", "build_panel_source_binding_contract", "PanelSourceBindingContract", 
+    "PanelSourceBindingEntry", "build_panel_exposure_policy_contract", "PanelExposureEntry", 
+    "PanelExposurePolicyContract", "build_panel_content_contract", "PanelContentContract", "PanelContentEntry", 
+    "build_display_target_vocabulary_contract", "DisplayTargetVocabularyContract", 
+    "DisplayTargetVocabularyEntry", "build_panel_binding_contract", "PanelBindingContract", "PanelBindingEntry", 
+    "build_view_targeting_contract", "ViewTargetingContract", "ViewTargetingEntry", 
+    "build_panel_view_display_chain_contract", "PanelViewDisplayChainContract", "PanelViewDisplayChainEntry", 
+    "build_display_runtime_resolver_integration_contract", "DisplayRuntimeResolverEntry", 
+    "DisplayRuntimeResolverIntegrationContract", "build_workspace_registry_contract", 
+    "WorkspaceRegistryContract", "WorkspaceRegistryEntry", "build_layout_composition_contract", 
+    "LayoutCompositionContract", "LayoutCompositionEntry", "build_workspace_read_model_contract", 
+    "WorkspaceReadModelContract", "WorkspaceReadModelEntry", "build_panel_zone_slot_vocabulary_contract", 
+    "PanelSlotVocabularyEntry", "PanelZoneSlotVocabularyContract", "PanelZoneVocabularyEntry", 
+    "build_main_operator_dashboard_contract", "MainOperatorDashboardContract", "MainOperatorDashboardEntry", 
+    "build_main_operator_dashboard_read_model_contract", "MainOperatorDashboardReadModelContract", 
+    "MainOperatorDashboardReadModelEntry", "build_operator_workspace_binding_contract", 
+    "OperatorWorkspaceBindingContract", "OperatorWorkspaceBindingEntry", 
+    "build_operator_interaction_guard_contract", "OperatorInteractionGuardContract", 
+    "OperatorInteractionGuardEntry", "build_operator_intent_contract", "OperatorIntentContract", 
+    "OperatorIntentEntry", "build_control_plane_handoff_contract", "ControlPlaneHandoffContract", 
+    "ControlPlaneHandoffEntry", "build_policy_aware_action_exposure_contract", 
+    "PolicyAwareActionExposureContract", "PolicyAwareActionExposureEntry", 
+    "build_system_status_panel_content_contract", "SystemStatusPanelContentContract", 
+    "SystemStatusPanelContentEntry", "build_guard_chain_panel_content_contract", 
+    "GuardChainPanelContentContract", "GuardChainPanelContentEntry", "build_incidents_panel_content_contract", 
+    "IncidentsPanelContentContract", "IncidentsPanelContentEntry", "build_logs_panel_content_contract", 
+    "LogsPanelContentContract", "LogsPanelContentEntry", "build_topology_panel_content_contract", 
+    "TopologyPanelContentContract", "TopologyPanelContentEntry", "build_visual_shell_canonical_panel_contract", 
+    "VisualShellCanonicalPanelContract", "VisualShellCanonicalPanelEntry", "build_visual_shell_contract", 
+    "VisualShellContract", "VisualShellEntry", "build_visual_render_surface_contract", 
+    "VisualRenderSurfaceContract", "VisualRenderSurfaceEntry", "build_visual_renderer_contract", 
+    "VisualRendererContract", "VisualRendererEntry", "build_visual_theme_contract", "VisualThemeContract", 
+    "VisualThemeEntry", "build_panel_to_visual_mapping_contract", "PanelToVisualMappingContract", 
+    "PanelToVisualMappingEntry", "build_visual_theme_hardening_contract", 
+    "build_visual_panel_hierarchy_hardening_contract", "build_visual_center_core_refinement_contract", 
+    "build_visual_sidebar_navigation_refinement_contract", "build_visual_status_ticker_refinement_contract", 
+    "build_visual_phase_1_readiness_contract", "build_visual_preview_render_polish_readiness_contract", 
+    "build_visual_preview_render_output_contract", "build_visual_preview_render_artifact_bridge_contract", 
+    "build_visual_display_facing_preview_bundle_contract", 
+    "build_visual_operator_facing_premium_preview_contract", 
+    "build_visual_first_viewable_premium_preview_contract",
+    "build_visual_preview_delivery_readiness_contract",
+    "build_visual_first_presentable_preview_contract",
+    "build_visual_operator_demo_preview_contract",
+    "build_visual_first_view_layer_contract",
+    "build_visual_first_showable_view_contract",
+    "build_visual_first_observable_view_contract",
+    "build_visual_first_displayable_view_contract",
+    "build_visual_first_presentable_display_contract",
+    "build_visual_first_demo_display_contract",
+    "build_visual_first_watchable_display_contract",
+    "build_visual_first_presented_display_contract",
+    "build_visual_first_renderable_display_contract",
+    "build_visual_first_output_ready_display_contract",
+    "build_visual_first_result_display_contract",
+    "build_visual_first_viewable_result_contract",
+    "build_visual_first_display_output_contract",
+    "build_visual_first_shell_handoff_contract",
+    "build_visual_first_presentable_result_contract",
+    "build_visual_first_presented_result_contract",
+    "build_visual_first_screen_presentable_result_contract",
+    "build_visual_first_screen_result_contract",
+    "build_visual_first_showcase_result_contract",
+    "build_visual_first_live_presentable_result_contract",
+    "build_visual_first_live_screen_result_contract",
+    "build_visual_first_live_showcase_result_contract",
+    "build_visual_first_operator_viewable_live_result_contract",
+    "build_visual_first_live_operator_showcase_contract",
+    "build_visual_first_demo_ready_live_operator_contract",
+    "build_visual_first_investor_presentable_live_operator_contract",
+    "build_visual_first_premium_live_operator_contract",
+    "build_visual_first_premium_showable_system_contract",
+    "build_visual_first_premium_demo_system_contract",
+    "build_visual_premium_demo_delivery_bridge_contract",
+    "build_visual_premium_demo_realization_bridge_contract",
+    "build_visual_premium_demo_realization_ready_contract",
+    "build_visual_premium_demo_screen_delivery_contract",
+    "build_visual_premium_demo_picture_boundary_contract",
+    "build_visual_premium_demo_picture_ready_contract",
+    "build_visual_premium_demo_realization_artifact_contract",
+    "build_visual_premium_demo_realization_output_contract",
+    "build_visual_premium_demo_materialized_output_contract",
+    "build_visual_premium_demo_first_picture_contract",
+    "build_visual_first_renderer_realization_contract",
+    "build_visual_first_renderer_view_contract",
+    "build_visual_first_renderer_view_delivery_contract",
+    "build_visual_first_renderer_view_ready_contract",
+    "build_visual_first_renderer_screen_handoff_contract",
+    "build_visual_first_screen_view_contract",
+    "build_visual_first_screen_view_delivery_contract",
+    "build_visual_first_screen_view_ready_contract",
+    "build_visual_first_screen_render_contract",
+    "build_visual_first_screen_render_delivery_contract",
+    "build_visual_first_screen_render_ready_contract",
+    "build_visual_first_screen_present_contract",
+    "build_visual_first_screen_present_delivery_contract",
+    "build_visual_first_screen_present_ready_contract",
+    "build_operator_intent_model",
+    "build_operator_intent_vocabulary_contract",
+    "build_panel_operator_intent_binding_model",
+    "build_panel_operator_intent_binding_contract",
+    "build_operator_approval_decision_model",
+    "build_operator_approval_decision_contract",
+    "build_operator_control_plane_handoff_model",
+    "build_operator_control_plane_handoff_contract",
+    "OperatorControlPlaneHandoffContract",
+    "OperatorControlPlaneHandoffContractEntry",
+    "build_operator_audit_visibility_model",
+    "OperatorAuditVisibilityEntry",
+    "OperatorAuditVisibilityModel",
+    "build_operator_audit_visibility_contract",
+    "OperatorAuditVisibilityContract",
+    "OperatorAuditVisibilityContractEntry",
+    "build_operator_interaction_read_model_contract",
+    "OperatorInteractionReadModelContract",
+    "OperatorInteractionReadModelEntry",
+    "build_main_operator_interaction_surface_contract",
+    "MainOperatorInteractionSurfaceContract",
+    "MainOperatorInteractionSurfaceEntry",
+    "build_operator_action_queue_panel_contract",
+    "OperatorActionQueuePanelContract",
+    "OperatorActionQueuePanelEntry",
+    "build_operator_approval_queue_panel_contract",
+    "OperatorApprovalQueuePanelContract",
+    "OperatorApprovalQueuePanelEntry",
+    "build_operator_audit_timeline_panel_contract",
+    "OperatorAuditTimelinePanelContract",
+    "OperatorAuditTimelinePanelEntry",
+    "build_display_assignment_registry_contract",
+    "DisplayAssignmentRegistryContract",
+    "DisplayAssignmentRegistryEntry",
+    "build_display_occupancy_contract",
+    "DisplayOccupancyContract",
+    "DisplayOccupancyEntry",
+    "build_display_replacement_policy_contract",
+    "DisplayReplacementPolicyContract",
+    "DisplayReplacementPolicyEntry",
+    "build_free_display_selection_contract",
+    "FreeDisplaySelectionContract",
+    "FreeDisplaySelectionEntry",
+    "build_display_conflict_resolution_contract",
+    "DisplayConflictResolutionContract",
+    "DisplayConflictResolutionEntry",
+    "build_monitor_inventory_contract",
+    "MonitorInventoryContract",
+    "MonitorInventoryEntry",
+    "build_display_assignment_restore_contract",
+    "DisplayAssignmentRestoreContract",
+    "DisplayAssignmentRestoreEntry",
+    "build_display_restore_continuity_contract",
+    "DisplayRestoreContinuityContract",
+    "DisplayRestoreContinuityEntry",
+    "build_display_placement_routing_contract",
+    "DisplayPlacementRoutingContract",
+    "DisplayPlacementRoutingEntry",
+    "build_display_resolver_decision_contract",
+    "DisplayResolverDecisionContract",
+    "DisplayResolverDecisionEntry",
+    "build_display_continuity_snapshot_contract",
+    "DisplayContinuitySnapshotContract",
+    "DisplayContinuitySnapshotEntry",
+    "build_display_visual_projection_contract",
+    "DisplayVisualProjectionContract",
+    "DisplayVisualProjectionEntry",
+    "build_operator_visible_presentation_contract",
+    "OperatorVisiblePresentationContract",
+    "OperatorVisiblePresentationEntry",
+    "build_operator_presentation_bundle_contract",
+    "OperatorPresentationBundleContract",
+    "OperatorPresentationBundleEntry",
+    "build_operator_dashboard_visible_state_contract",
+    "OperatorDashboardVisibleStateContract",
+    "OperatorDashboardVisibleStateEntry",
+    "build_operator_dashboard_screen_state_contract",
+    "OperatorDashboardScreenStateContract",
+    "OperatorDashboardScreenStateEntry",
+    "build_operator_dashboard_render_handoff_contract",
+    "OperatorDashboardRenderHandoffContract",
+    "OperatorDashboardRenderHandoffEntry",
+    "build_operator_dashboard_visible_snapshot_contract",
+    "OperatorDashboardVisibleSnapshotContract",
+    "OperatorDashboardVisibleSnapshotEntry",
+    "build_operator_dashboard_first_honest_view_contract",
+    "OperatorDashboardFirstHonestViewContract",
+    "OperatorDashboardFirstHonestViewEntry",
+    "build_operator_dashboard_visible_output_contract",
+    "OperatorDashboardVisibleOutputContract",
+    "OperatorDashboardVisibleOutputEntry",
+    "build_operator_dashboard_first_real_picture_contract",
+    "OperatorDashboardFirstRealPictureContract",
+    "OperatorDashboardFirstRealPictureEntry",
+    "build_operator_dashboard_final_assembled_state_contract",
+    "OperatorDashboardFinalAssembledStateContract",
+    "OperatorDashboardFinalAssembledStateEntry",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/products_layer/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.products_layer.product_accessor import (
+    get_product_definition,
+    list_product_definitions,
+)
+from MAKSIMAR_CORE_LIB.products_layer.product_summary import (
+    ProductRetrievalSummary,
+    build_product_summary,
+)
+from MAKSIMAR_CORE_LIB.products_layer.query_models import (
+    ProductQuery,
+    ProductRetrievalItem,
+)
+
+__all__ = [
+    "ProductQuery",
+    "ProductRetrievalItem",
+    "ProductRetrievalSummary",
+    "build_product_summary",
+    "get_product_definition",
+    "list_product_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/wrist_psc_display_integration/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.wrist_psc_display_integration.wrist_psc_display_integration_contract import (
+    WristPscDisplayIntegrationContract,
+    WristPscDisplayIntegrationEntry,
+    build_wrist_psc_display_integration_contract,
+)
+
+__all__ = [
+    "WristPscDisplayIntegrationContract",
+    "WristPscDisplayIntegrationEntry",
+    "build_wrist_psc_display_integration_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/runtime_base/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.runtime_base.boot_inspector import inspect_boot_state
+from MAKSIMAR_CORE_LIB.runtime_base.runtime_accessor import (
+    get_runtime_document,
+    list_runtime_documents,
+)
+
+__all__ = [
+    "get_runtime_document",
+    "inspect_boot_state",
+    "list_runtime_documents",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/node_runtime_split/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.node_runtime_split.node_runtime_split_contract import (
+    NodeRuntimeSplitContract,
+    NodeRuntimeSplitEntry,
+    build_node_runtime_split_contract,
+)
+
+__all__ = [
+    "NodeRuntimeSplitContract",
+    "NodeRuntimeSplitEntry",
+    "build_node_runtime_split_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/knowledge_engine/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_accessor import (
+    get_knowledge_definition,
+    list_knowledge_definitions,
+)
+from MAKSIMAR_CORE_LIB.knowledge_engine.query_models import (
+    KnowledgeQuery,
+    KnowledgeRetrievalItem,
+)
+from MAKSIMAR_CORE_LIB.knowledge_engine.retrieval_summary import (
+    KnowledgeRetrievalSummary,
+    build_retrieval_summary,
+)
+
+__all__ = [
+    "KnowledgeQuery",
+    "KnowledgeRetrievalItem",
+    "KnowledgeRetrievalSummary",
+    "build_retrieval_summary",
+    "get_knowledge_definition",
+    "list_knowledge_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/spatial_anchor_resolution/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.spatial_anchor_resolution.spatial_anchor_resolution_contract import (
+    SpatialAnchorResolutionContract,
+    SpatialAnchorResolutionEntry,
+    build_spatial_anchor_resolution_contract,
+)
+
+__all__ = [
+    "SpatialAnchorResolutionContract",
+    "SpatialAnchorResolutionEntry",
+    "build_spatial_anchor_resolution_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/material_registry/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.material_registry.material_registry_contract import (
+    MaterialRegistryContract,
+    MaterialRegistryEntry,
+    build_material_registry_contract,
+)
+
+__all__ = [
+    "MaterialRegistryContract",
+    "MaterialRegistryEntry",
+    "build_material_registry_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/end_to_end_orchestration_runtime/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.end_to_end_orchestration_runtime.end_to_end_orchestration_runtime_contract import (
+    EndToEndOrchestrationRuntimeContract,
+    EndToEndOrchestrationRuntimeEntry,
+    build_end_to_end_orchestration_runtime_contract,
+)
+
+__all__ = [
+    "EndToEndOrchestrationRuntimeContract",
+    "EndToEndOrchestrationRuntimeEntry",
+    "build_end_to_end_orchestration_runtime_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/real_engine_backends/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.real_engine_backends.real_engine_backends_contract import (
+    RealEngineBackendEntry,
+    RealEngineBackendsContract,
+    build_real_engine_backends_contract,
+)
+
+__all__ = [
+    "RealEngineBackendEntry",
+    "RealEngineBackendsContract",
+    "build_real_engine_backends_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/simulation_integration/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.simulation_integration.backend_models import (
+    SimulationBackendRecord,
+    SimulationBackendSummary,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.backend_registry_summary import (
+    build_simulation_backend_summary,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.execution_contract import (
+    build_simulation_execution_contract,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.execution_contract_models import (
+    SimulationExecutionContract,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.execution_envelope import (
+    build_simulation_execution_envelope,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.execution_models import (
+    SimulationExecutionEnvelope,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.request_builder import (
+    build_simulation_request,
+)
+from MAKSIMAR_CORE_LIB.simulation_integration.request_models import (
+    SimulationIntent,
+    SimulationIntegrationRequest,
+)
+
+__all__ = [
+    "SimulationBackendRecord",
+    "SimulationBackendSummary",
+    "SimulationExecutionContract",
+    "SimulationExecutionEnvelope",
+    "SimulationIntent",
+    "SimulationIntegrationRequest",
+    "build_simulation_backend_summary",
+    "build_simulation_execution_contract",
+    "build_simulation_execution_envelope",
+    "build_simulation_request",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/sensor_simulation/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.sensor_simulation.sensor_simulation_contract import (
+    SensorSimulationContract,
+    SensorSimulationEntry,
+    build_sensor_simulation_contract,
+)
+
+__all__ = [
+    "SensorSimulationContract",
+    "SensorSimulationEntry",
+    "build_sensor_simulation_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/control_plane/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.control_plane.orchestration_builder import (
+    build_orchestration_request,
+)
+from MAKSIMAR_CORE_LIB.control_plane.orchestration_executor import (
+    OrchestrationExecutionResult,
+    execute_orchestration,
+)
+from MAKSIMAR_CORE_LIB.control_plane.orchestration_models import (
+    OrchestrationRequest,
+)
+from MAKSIMAR_CORE_LIB.control_plane.request_classifier import classify_request
+from MAKSIMAR_CORE_LIB.control_plane.router_dispatch import dispatch_request
+from MAKSIMAR_CORE_LIB.control_plane.router_models import (
+    DispatchResult,
+    IncomingRequest,
+    RouteDecision,
+)
+
+__all__ = [
+    "DispatchResult",
+    "IncomingRequest",
+    "OrchestrationExecutionResult",
+    "OrchestrationRequest",
+    "RouteDecision",
+    "build_orchestration_request",
+    "classify_request",
+    "dispatch_request",
+    "execute_orchestration",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/real_voice_runtime/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.real_voice_runtime.real_voice_runtime_contract import (
+    RealVoiceRuntimeContract,
+    RealVoiceRuntimeEntry,
+    build_real_voice_runtime_contract,
+)
+
+__all__ = [
+    "RealVoiceRuntimeContract",
+    "RealVoiceRuntimeEntry",
+    "build_real_voice_runtime_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/constraint_profile_registry/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.constraint_profile_registry.constraint_profile_registry_contract import (
+    ConstraintProfileEntry,
+    ConstraintProfileRegistryContract,
+    build_constraint_profile_registry_contract,
+)
+
+__all__ = [
+    "ConstraintProfileEntry",
+    "ConstraintProfileRegistryContract",
+    "build_constraint_profile_registry_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/distributed_lease_artifact_routing/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.distributed_lease_artifact_routing.distributed_lease_artifact_routing_contract import (
+    DistributedLeaseArtifactRoutingContract,
+    DistributedLeaseArtifactRoutingEntry,
+    build_distributed_lease_artifact_routing_contract,
+)
+
+__all__ = [
+    "DistributedLeaseArtifactRoutingContract",
+    "DistributedLeaseArtifactRoutingEntry",
+    "build_distributed_lease_artifact_routing_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/config_loaders/rules/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.config_loaders.rules.naming_rules import validate_config_naming_rules
+from MAKSIMAR_CORE_LIB.config_loaders.rules.shape_rules import validate_config_shape_rules
+
+__all__ = [
+    "validate_config_naming_rules",
+    "validate_config_shape_rules",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/config_loaders/__init__.py ---
+
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/node_topology_runtime/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.node_topology_runtime.node_topology_runtime_contract import (
+    NodeTopologyRuntimeContract,
+    NodeTopologyRuntimeEntry,
+    build_node_topology_runtime_contract,
+)
+
+__all__ = [
+    "NodeTopologyRuntimeContract",
+    "NodeTopologyRuntimeEntry",
+    "build_node_topology_runtime_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/distributed_workload_placement/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.distributed_workload_placement.distributed_workload_placement_contract import (
+    DistributedWorkloadPlacementContract,
+    DistributedWorkloadPlacementEntry,
+    build_distributed_workload_placement_contract,
+)
+
+__all__ = [
+    "DistributedWorkloadPlacementContract",
+    "DistributedWorkloadPlacementEntry",
+    "build_distributed_workload_placement_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/display_topology/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.display_topology.display_topology_contract import (
+    DisplayAvailabilityStatus,
+    DisplayCapability,
+    DisplayTargetRole,
+    DisplayTopologyContract,
+    DisplayTopologyEntry,
+    DisplayVisibilityMode,
+    build_display_topology_contract,
+)
+
+__all__ = [
+    "DisplayAvailabilityStatus",
+    "DisplayCapability",
+    "DisplayTargetRole",
+    "DisplayTopologyContract",
+    "DisplayTopologyEntry",
+    "DisplayVisibilityMode",
+    "build_display_topology_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/event_bus/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.event_bus.event_filters import (
+    filter_events_by_source,
+    filter_events_by_type,
+    get_last_event_by_type,
+)
+from MAKSIMAR_CORE_LIB.event_bus.event_models import (
+    EventRecord,
+    build_event_record,
+)
+from MAKSIMAR_CORE_LIB.event_bus.event_reader import read_event_journal
+from MAKSIMAR_CORE_LIB.event_bus.event_summary import (
+    EventSummary,
+    build_event_summary,
+)
+from MAKSIMAR_CORE_LIB.event_bus.event_writer import append_event_record
+
+__all__ = [
+    "EventRecord",
+    "EventSummary",
+    "append_event_record",
+    "build_event_record",
+    "build_event_summary",
+    "filter_events_by_source",
+    "filter_events_by_type",
+    "get_last_event_by_type",
+    "read_event_journal",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/workers_registry/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.workers_registry.worker_capability_contract import (
+    build_worker_capability_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_capability_models import (
+    WorkerCapability,
+    WorkerCapabilityContract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_io_contract import (
+    build_worker_io_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_io_models import (
+    WorkerIOContract,
+    WorkerIOEntry,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_models import (
+    WorkerEntry,
+    WorkerRegistryContract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_registry_contract import (
+    build_worker_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_shell_contract import (
+    build_worker_registry_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_registry.worker_shell_models import (
+    WorkerRegistryShellContract,
+)
+
+from MAKSIMAR_CORE_LIB.workers_registry.worker_identity_models import (
+    CanonicalWorkerId,
+    CanonicalWorkerIdentity,
+    CanonicalWorkerIdentityContract,
+    CanonicalWorkerType,
+)
+
+__all__ = [
+    "WorkerEntry",
+    "WorkerRegistryContract",
+    "WorkerCapability",
+    "WorkerCapabilityContract",
+    "WorkerIOContract",
+    "WorkerIOEntry",
+    "WorkerRegistryShellContract",
+    "build_worker_capability_contract",
+    "build_worker_io_contract",
+    "build_worker_registry_contract",
+    "build_worker_registry_shell_contract",
+    "CanonicalWorkerId",
+    "CanonicalWorkerIdentity",
+    "CanonicalWorkerIdentityContract",
+    "CanonicalWorkerType",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/ar_glasses_display_contract/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.ar_glasses_display_contract.ar_glasses_display_contract import (
+    ArGlassesDisplayContract,
+    ArGlassesDisplayEntry,
+    build_ar_glasses_display_contract,
+)
+
+__all__ = [
+    "ArGlassesDisplayContract",
+    "ArGlassesDisplayEntry",
+    "build_ar_glasses_display_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/source_of_truth/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.source_of_truth.consistency_models import (
+    ConsistencyCheckLine,
+    ConsistencyCheckResult,
+)
+
+from MAKSIMAR_CORE_LIB.source_of_truth.snapshot_metrics_consistency import (
+    build_snapshot_metrics_consistency_check,
+)
+
+from MAKSIMAR_CORE_LIB.source_of_truth.summary_incident_alert_consistency import (
+    build_summary_incident_alert_consistency_check,
+)
+
+from MAKSIMAR_CORE_LIB.source_of_truth.unified_consistency_report import (
+    UnifiedConsistencyReport,
+    build_unified_consistency_report,
+)
+
+__all__ = [
+    "ConsistencyCheckLine",
+    "ConsistencyCheckResult",
+    "build_snapshot_metrics_consistency_check",
+    "build_summary_incident_alert_consistency_check",
+    "UnifiedConsistencyReport",
+    "build_unified_consistency_report",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/observability_contracts/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.observability_contracts.observability_event_models import (
+    ObservabilityEventKind,
+    ObservabilityEventShapeEntry,
+    ObservabilityShapesContract,
+    ObservabilitySeverity,
+    build_observability_shapes_contract,
+)
+
+__all__ = [
+    "ObservabilityEventKind",
+    "ObservabilityEventShapeEntry",
+    "ObservabilityShapesContract",
+    "ObservabilitySeverity",
+    "build_observability_shapes_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/memory_policy/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.memory_policy.memory_classification_policy import (
+    MemoryApprovalMode,
+    MemoryClassificationPolicyContract,
+    MemoryClassificationPolicyEntry,
+    MemoryConflictMode,
+    MemoryDeduplicationMode,
+    MemoryFactClass,
+    MemoryLanguagePolicy,
+    MemoryProvenancePolicy,
+    MemoryScriptPolicy,
+    MemorySummarizationMode,
+    build_memory_classification_policy_contract,
+)
+
+__all__ = [
+    "MemoryApprovalMode",
+    "MemoryClassificationPolicyContract",
+    "MemoryClassificationPolicyEntry",
+    "MemoryConflictMode",
+    "MemoryDeduplicationMode",
+    "MemoryFactClass",
+    "MemoryLanguagePolicy",
+    "MemoryProvenancePolicy",
+    "MemoryScriptPolicy",
+    "MemorySummarizationMode",
+    "build_memory_classification_policy_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/execution_pressure_completion/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.execution_pressure_completion.execution_pressure_completion_contract import (
+    ExecutionPressureCompletionContract,
+    ExecutionPressureCompletionEntry,
+    build_execution_pressure_completion_contract,
+)
+
+__all__ = [
+    "ExecutionPressureCompletionContract",
+    "ExecutionPressureCompletionEntry",
+    "build_execution_pressure_completion_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/workers_runtime/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.workers_runtime.worker_health_models import (
+    WorkerHealthContract,
+    WorkerHealthEntry,
+)
+from MAKSIMAR_CORE_LIB.workers_runtime.worker_load_contract import (
+    build_worker_load_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_runtime.worker_load_models import (
+    WorkerLoadContract,
+    WorkerLoadEntry,
+)
+from MAKSIMAR_CORE_LIB.workers_runtime.worker_runtime_shell_contract import (
+    build_worker_health_contract,
+    build_worker_runtime_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.workers_runtime.worker_runtime_shell_models import (
+    WorkerRuntimeShellContract,
+)
+
+__all__ = [
+    "WorkerHealthContract",
+    "WorkerHealthEntry",
+    "WorkerLoadContract",
+    "WorkerLoadEntry",
+    "WorkerRuntimeShellContract",
+    "build_worker_health_contract",
+    "build_worker_load_contract",
+    "build_worker_runtime_shell_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/payload_policy_hardening/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.payload_policy_hardening.payload_policy_hardening_contract import (
+    PayloadPolicyHardeningContract,
+    PayloadPolicyHardeningEntry,
+    build_payload_policy_hardening_contract,
+)
+
+__all__ = [
+    "PayloadPolicyHardeningContract",
+    "PayloadPolicyHardeningEntry",
+    "build_payload_policy_hardening_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/data_plane/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.data_plane.artifact_cleanup_contract import (
+    build_artifact_cleanup_contract,
+)
+from MAKSIMAR_CORE_LIB.data_plane.artifact_cleanup_models import (
+    ArtifactCleanupContract,
+    ArtifactCleanupRule,
+)
+from MAKSIMAR_CORE_LIB.data_plane.artifact_ownership_contract import (
+    build_artifact_ownership_contract,
+)
+from MAKSIMAR_CORE_LIB.data_plane.artifact_ownership_models import (
+    ArtifactOwnership,
+    ArtifactOwnershipContract,
+)
+from MAKSIMAR_CORE_LIB.data_plane.artifact_retention_contract import (
+    build_artifact_retention_contract,
+)
+from MAKSIMAR_CORE_LIB.data_plane.artifact_retention_models import (
+    ArtifactRetentionContract,
+    ArtifactRetentionRule,
+)
+from MAKSIMAR_CORE_LIB.data_plane.data_plane_shell_contract import (
+    build_data_plane_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.data_plane.data_plane_shell_models import (
+    DataPlaneShellContract,
+)
+
+__all__ = [
+    "ArtifactOwnership",
+    "ArtifactOwnershipContract",
+    "ArtifactRetentionContract",
+    "ArtifactRetentionRule",
+    "ArtifactCleanupContract",
+    "ArtifactCleanupRule",
+    "DataPlaneShellContract",
+    "build_artifact_ownership_contract",
+    "build_artifact_retention_contract",
+    "build_artifact_cleanup_contract",
+    "build_data_plane_shell_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/network_trust_boundaries/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.network_trust_boundaries.network_trust_boundaries_contract import (
+    NetworkTrustBoundariesContract,
+    NetworkTrustBoundaryEntry,
+    build_network_trust_boundaries_contract,
+)
+
+__all__ = [
+    "NetworkTrustBoundariesContract",
+    "NetworkTrustBoundaryEntry",
+    "build_network_trust_boundaries_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/id_generation/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.id_generation.canonical_id_generation import (
+    CanonicalIdAllocationEntry,
+    CanonicalIdGenerationContract,
+    build_canonical_id_generation_contract,
+)
+
+__all__ = [
+    "CanonicalIdAllocationEntry",
+    "CanonicalIdGenerationContract",
+    "build_canonical_id_generation_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/contract_validation/rules/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.contract_validation.rules.cross_file_rules import apply_cross_file_rules
+from MAKSIMAR_CORE_LIB.contract_validation.rules.field_rules import validate_field_consistency
+from MAKSIMAR_CORE_LIB.contract_validation.rules.naming_rules import validate_file_naming_rules
+from MAKSIMAR_CORE_LIB.contract_validation.rules.top_level_rules import validate_top_level_structure
+
+__all__ = [
+    "apply_cross_file_rules",
+    "validate_field_consistency",
+    "validate_file_naming_rules",
+    "validate_top_level_structure",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/contract_validation/__init__.py ---
+
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/observability_completion/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.observability_completion.observability_completion_contract import (
+    ObservabilityCompletionContract,
+    ObservabilityCompletionEntry,
+    build_observability_completion_contract,
+)
+
+__all__ = [
+    "ObservabilityCompletionContract",
+    "ObservabilityCompletionEntry",
+    "build_observability_completion_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/real_ai_services_model_adapters/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.real_ai_services_model_adapters.real_ai_services_model_adapters_contract import (
+    RealAiServicesModelAdaptersContract,
+    RealAiServicesModelAdaptersEntry,
+    build_real_ai_services_model_adapters_contract,
+)
+
+__all__ = [
+    "RealAiServicesModelAdaptersContract",
+    "RealAiServicesModelAdaptersEntry",
+    "build_real_ai_services_model_adapters_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/node_roles/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.node_roles.node_role_models import (
+    NodeRole,
+    NodeRoleContract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.workload_contract import (
+    build_workload_placement_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.workload_models import (
+    WorkloadPlacementContract,
+    WorkloadPlacementRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.priority_contract import (
+    build_task_priority_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.priority_models import (
+    TaskPriorityContract,
+    TaskPriorityRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.queue_contract import (
+    build_queue_policy_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.queue_models import (
+    QueuePolicyContract,
+    QueuePolicyRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.concurrency_contract import (
+    build_concurrency_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.concurrency_models import (
+    ConcurrencyContract,
+    ConcurrencyRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.backpressure_contract import (
+    build_backpressure_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.backpressure_models import (
+    BackpressureContract,
+    BackpressureRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.degraded_mode_contract import (
+    build_degraded_mode_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.degraded_mode_models import (
+    DegradedModeContract,
+    DegradedModeRule,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.artifact_contract import (
+    build_artifact_reference_contract,
+)
+from MAKSIMAR_CORE_LIB.node_roles.artifact_models import (
+    ArtifactReference,
+    ArtifactReferenceContract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.node_role_contract import (
+    build_node_role_contract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.node_identity_models import (
+    CanonicalNodeId,
+    CanonicalNodeIdentity,
+    CanonicalNodeIdentityContract,
+    CanonicalNodeType,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.node_capacity_class_models import (
+    StaticCapacityClass,
+)
+from MAKSIMAR_CORE_LIB.node_roles.node_capability_models import (
+    AllowedWorkloadClass,
+    NodeCapabilityContract,
+    NodeCapabilityEntry,
+    NodeFeatureFlag,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.node_hardware_profile_models import (
+    CpuHardwareProfile,
+    GpuHardwareProfile,
+    MemoryHardwareProfile,
+    NodeHardwareProfile,
+    NodeHardwareProfileContract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.advanced_memory_profile_models import (
+    AdvancedMemoryProfile,
+    AdvancedMemoryProfileContract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.multi_gpu_profile_models import (
+    AcceleratorProfileEntry,
+    MultiGpuProfile,
+    MultiGpuProfileContract,
+)
+
+from MAKSIMAR_CORE_LIB.node_roles.feature_gating_models import (
+    FeatureGateEntry,
+    FeatureGatingContract,
+)
+
+__all__ = [
+    "NodeRole",
+    "NodeRoleContract",
+    "WorkloadPlacementContract",
+    "WorkloadPlacementRule",
+    "build_workload_placement_contract",
+    "TaskPriorityContract",
+    "TaskPriorityRule",
+    "build_task_priority_contract",
+    "QueuePolicyContract",
+    "QueuePolicyRule",
+    "build_queue_policy_contract",
+    "ConcurrencyContract",
+    "ConcurrencyRule",
+    "build_concurrency_contract",
+    "BackpressureContract",
+    "BackpressureRule",
+    "build_backpressure_contract",
+    "DegradedModeContract",
+    "DegradedModeRule",
+    "build_degraded_mode_contract",
+    "ArtifactReference",
+    "ArtifactReferenceContract",
+    "build_artifact_reference_contract",
+    "build_node_role_contract",
+    "CanonicalNodeId",
+    "CanonicalNodeIdentity",
+    "CanonicalNodeIdentityContract",
+    "CanonicalNodeType",
+    "AllowedWorkloadClass",
+    "NodeCapabilityContract",
+    "NodeCapabilityEntry",
+    "NodeFeatureFlag",
+    "StaticCapacityClass",
+    "CpuHardwareProfile",
+    "GpuHardwareProfile",
+    "MemoryHardwareProfile",
+    "NodeHardwareProfile",
+    "NodeHardwareProfileContract",
+    "AdvancedMemoryProfile",
+    "AdvancedMemoryProfileContract",
+    "AcceleratorProfileEntry",
+    "MultiGpuProfile",
+    "MultiGpuProfileContract",
+    "FeatureGateEntry",
+    "FeatureGatingContract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/physics_validation_gate/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.physics_validation_gate.physics_validation_gate_contract import (
+    PhysicsValidationGateContract,
+    PhysicsValidationGateEntry,
+    build_physics_validation_gate_contract,
+)
+
+__all__ = [
+    "PhysicsValidationGateContract",
+    "PhysicsValidationGateEntry",
+    "build_physics_validation_gate_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/voice_layer/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.voice_layer.voice_command_contract import (
+    VoiceCommandContract,
+    VoiceCommandEntry,
+    VoiceCommandId,
+    VoiceCommandIntent,
+    VoiceDisplayRole,
+    VoiceLanguageCode,
+    VoiceLatencyClass,
+    VoiceResponseMode,
+    VoiceScriptName,
+    VoiceTargetViewId,
+    VoiceUtterancePatternId,
+    build_voice_command_contract,
+)
+
+
+def list_voice_definitions() -> tuple[VoiceCommandEntry, ...]:
+    """Return canonical voice command definitions."""
+    return build_voice_command_contract().entries
+
+
+__all__ = [
+    "VoiceCommandContract",
+    "VoiceCommandEntry",
+    "VoiceCommandId",
+    "VoiceCommandIntent",
+    "VoiceDisplayRole",
+    "VoiceLanguageCode",
+    "VoiceLatencyClass",
+    "VoiceResponseMode",
+    "VoiceScriptName",
+    "VoiceTargetViewId",
+    "VoiceUtterancePatternId",
+    "build_voice_command_contract",
+    "list_voice_definitions",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents.operations_deployment_backup_incidents_contract import (
+    OperationsDeploymentBackupIncidentsContract,
+    OperationsDeploymentBackupIncidentsEntry,
+    build_operations_deployment_backup_incidents_contract,
+)
+
+__all__ = [
+    "OperationsDeploymentBackupIncidentsContract",
+    "OperationsDeploymentBackupIncidentsEntry",
+    "build_operations_deployment_backup_incidents_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/module_manifest/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.module_manifest.module_manifest_schema import (
+    DisplayRole,
+    ModuleDomainClass,
+    ModuleKind,
+    ModuleManifestEntry,
+    ModuleManifestSchemaContract,
+    ModuleObservabilityProfile,
+    ModulePolicyProfile,
+    build_module_manifest_schema_contract,
+)
+
+__all__ = [
+    "DisplayRole",
+    "ModuleDomainClass",
+    "ModuleKind",
+    "ModuleManifestEntry",
+    "ModuleManifestSchemaContract",
+    "ModuleObservabilityProfile",
+    "ModulePolicyProfile",
+    "build_module_manifest_schema_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/full_test_suite/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.full_test_suite.full_test_suite_contract import (
+    FullTestSuiteContract,
+    FullTestSuiteEntry,
+    build_full_test_suite_contract,
+)
+
+__all__ = [
+    "FullTestSuiteContract",
+    "FullTestSuiteEntry",
+    "build_full_test_suite_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/architecture_map/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.architecture_map.dependency_contract import (
+    build_dependency_graph_contract,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.dependency_models import (
+    DependencyEdge,
+    DependencyGraphContract,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.flow_contract import (
+    build_flow_map_contract,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.flow_models import (
+    FlowMapContract,
+    FlowStep,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.module_registry_contract import (
+    build_module_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.module_registry_models import (
+    ModuleRegistryContract,
+    ModuleRegistryEntry,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.view_contract import (
+    build_dashboard_view_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.architecture_map.view_models import (
+    DashboardViewEntry,
+    DashboardViewRegistryContract,
+)
+
+from MAKSIMAR_CORE_LIB.architecture_map.module_identity_models import (
+    CanonicalModuleId,
+    CanonicalModuleIdentity,
+    CanonicalModuleIdentityContract,
+)
+
+__all__ = [
+    "DashboardViewEntry",
+    "DashboardViewRegistryContract",
+    "DependencyEdge",
+    "DependencyGraphContract",
+    "FlowMapContract",
+    "FlowStep",
+    "ModuleRegistryContract",
+    "ModuleRegistryEntry",
+    "build_dashboard_view_registry_contract",
+    "build_dependency_graph_contract",
+    "build_flow_map_contract",
+    "build_module_registry_contract",
+    "CanonicalModuleId",
+    "CanonicalModuleIdentity",
+    "CanonicalModuleIdentityContract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/mobile_bridge/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.mobile_bridge.request_models import (
+    MobileRequest,
+    MobileRequestContract,
+)
+
+from MAKSIMAR_CORE_LIB.mobile_bridge.task_contract import (
+    build_task_envelope_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.task_models import (
+    TaskEnvelope,
+    TaskEnvelopeContract,
+)
+
+from MAKSIMAR_CORE_LIB.mobile_bridge.result_contract import (
+    build_task_result_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.result_models import (
+    TaskResult,
+    TaskResultContract,
+)
+
+from MAKSIMAR_CORE_LIB.mobile_bridge.bridge_shell_contract import (
+    build_mobile_bridge_shell_contract,
+    build_mobile_request_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.bridge_shell_models import (
+    MobileBridgeShellContract,
+)
+
+__all__ = [
+    "MobileRequest",
+    "MobileRequestContract",
+    "TaskEnvelope",
+    "TaskEnvelopeContract",
+    "build_task_envelope_contract",
+    "TaskResult",
+    "TaskResultContract",
+    "build_task_result_contract",
+    "MobileBridgeShellContract",
+    "build_mobile_request_contract",
+    "build_mobile_bridge_shell_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/backend_selection_policy/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.backend_selection_policy.backend_selection_policy_contract import (
+    BackendSelectionPolicyContract,
+    BackendSelectionPolicyEntry,
+    build_backend_selection_policy_contract,
+)
+
+__all__ = [
+    "BackendSelectionPolicyContract",
+    "BackendSelectionPolicyEntry",
+    "build_backend_selection_policy_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/physics_simulation_mode/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.physics_simulation_mode.physics_simulation_mode_contract import (
+    PhysicsSimulationModeContract,
+    PhysicsSimulationModeEntry,
+    build_physics_simulation_mode_contract,
+)
+
+__all__ = [
+    "PhysicsSimulationModeContract",
+    "PhysicsSimulationModeEntry",
+    "build_physics_simulation_mode_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/execution_control/__init__.py ---
+
+
+from MAKSIMAR_CORE_LIB.execution_control.admission_models import (
+    AdmissionContract,
+    AdmissionDecision,
+)
+from MAKSIMAR_CORE_LIB.execution_control.lease_models import (
+    ExecutionLease,
+    ExecutionLeaseContract,
+)
+from MAKSIMAR_CORE_LIB.execution_control.queue_models import (
+    ExecutionQueueContract,
+    ExecutionQueueState,
+)
+from MAKSIMAR_CORE_LIB.execution_control.router_models import (
+    ExecutionRoute,
+    ExecutionRouterContract,
+)
+from MAKSIMAR_CORE_LIB.execution_control.scheduler_models import (
+    SchedulerContract,
+    SchedulerState,
+)
+from MAKSIMAR_CORE_LIB.execution_control.shell_contract import (
+    build_execution_control_shell_contract,
+    build_execution_lease_contract,
+    build_execution_queue_contract,
+    build_execution_state_contract,
+    build_scheduler_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_control.shell_models import (
+    ExecutionControlShellContract,
+)
+from MAKSIMAR_CORE_LIB.execution_control.state_models import (
+    ExecutionState,
+    ExecutionStateContract,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.queue_identity_models import (
+    CanonicalQueueIdentity,
+    CanonicalQueueIdentityContract,
+    CanonicalQueueName,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.queue_runtime_models import (
+    QueueRuntimeContract,
+    QueueRuntimeState,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.lease_runtime_models import (
+    LeaseRuntimeContract,
+    LeaseRuntimeState,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.scheduler_runtime_models import (
+    SchedulerRuntimeContract,
+    SchedulerRuntimeState,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.admission_runtime_models import (
+    AdmissionRuntimeContract,
+    AdmissionRuntimeState,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.degraded_runtime_models import (
+    DegradedRuntimeContract,
+    DegradedRuntimeState,
+)
+
+from MAKSIMAR_CORE_LIB.execution_control.execution_runtime_shell_contract import (
+    build_admission_runtime_contract,
+    build_degraded_runtime_contract,
+    build_execution_runtime_shell_contract,
+    build_lease_runtime_contract,
+    build_queue_runtime_contract,
+    build_scheduler_runtime_contract,
+)
+from MAKSIMAR_CORE_LIB.execution_control.execution_runtime_shell_models import (
+    ExecutionRuntimeShellContract,
+)
+
+__all__ = [
+    "AdmissionContract",
+    "AdmissionDecision",
+    "ExecutionControlShellContract",
+    "ExecutionLease",
+    "ExecutionLeaseContract",
+    "ExecutionQueueContract",
+    "ExecutionQueueState",
+    "ExecutionRoute",
+    "ExecutionRouterContract",
+    "ExecutionState",
+    "ExecutionStateContract",
+    "SchedulerContract",
+    "SchedulerState",
+    "build_execution_control_shell_contract",
+    "build_execution_lease_contract",
+    "build_execution_queue_contract",
+    "build_execution_state_contract",
+    "build_scheduler_contract",
+    "CanonicalQueueIdentity",
+    "CanonicalQueueIdentityContract",
+    "CanonicalQueueName",
+    "QueueRuntimeContract",
+    "QueueRuntimeState",
+    "LeaseRuntimeContract",
+    "LeaseRuntimeState",
+    "SchedulerRuntimeContract",
+    "SchedulerRuntimeState",
+    "AdmissionRuntimeContract",
+    "AdmissionRuntimeState",
+    "DegradedRuntimeContract",
+    "DegradedRuntimeState",
+    "ExecutionRuntimeShellContract",
+    "build_admission_runtime_contract",
+    "build_degraded_runtime_contract",
+    "build_execution_runtime_shell_contract",
+    "build_lease_runtime_contract",
+    "build_queue_runtime_contract",
+    "build_scheduler_runtime_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/engine_capability_contract/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.engine_capability_contract.engine_capability_contract import (
+    EngineCapabilityContract,
+    EngineCapabilityEntry,
+    build_engine_capability_contract,
+)
+
+__all__ = [
+    "EngineCapabilityContract",
+    "EngineCapabilityEntry",
+    "build_engine_capability_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/runtime_observability/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.runtime_observability.alert_models import (
+    AlertLevel,
+    AlertPolicyResult,
+    AlertSignal,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.alert_policy import (
+    evaluate_alert_policy,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.incident_models import (
+    PlatformIncidentRecord,
+    PlatformIncidentSnapshot,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.incident_snapshot import (
+    build_platform_incident_snapshot,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.metrics_models import (
+    RuntimeMetric,
+    RuntimeSnapshot,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.observability_summary import (
+    ObservabilitySummaryLine,
+    RuntimeObservabilitySummary,
+    build_runtime_observability_summary,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.snapshot_loader import (
+    build_runtime_metrics,
+    build_runtime_snapshot,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.extended_metrics_contract import (
+    build_extended_runtime_metrics_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.extended_metrics_models import (
+    ExtendedRuntimeMetric,
+    ExtendedRuntimeMetricsContract,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.extended_summary_contract import (
+    build_extended_observability_summary,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.extended_summary_models import (
+    ExtendedObservabilitySummary,
+    ExtendedSummaryLine,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.visual_panel_contract import (
+    build_runtime_observability_visual_panel,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.visual_panel_models import (
+    RuntimeObservabilityVisualPanel,
+    VisualPanelMetric,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.trace_contract import (
+    build_trace_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.trace_models import (
+    TraceContext,
+    TraceContract,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.logging_contract import (
+    build_structured_logging_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.logging_models import (
+    StructuredLogRecord,
+    StructuredLoggingContract,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.config_boundary_contract import (
+    build_typed_config_boundary_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.config_boundary_models import (
+    TypedConfigBoundaryContract,
+    TypedConfigEntry,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.slo_contract import (
+    build_slo_alert_semantics_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.slo_models import (
+    SLOAlertSemanticsContract,
+    SLOIndicator,
+)
+
+from MAKSIMAR_CORE_LIB.runtime_observability.observability_shell_contract import (
+    build_runtime_observability_shell_contract,
+)
+from MAKSIMAR_CORE_LIB.runtime_observability.observability_shell_models import (
+    RuntimeObservabilityShellContract,
+)
+
+__all__ = [
+    "AlertLevel",
+    "AlertPolicyResult",
+    "AlertSignal",
+    "ObservabilitySummaryLine",
+    "PlatformIncidentRecord",
+    "PlatformIncidentSnapshot",
+    "RuntimeMetric",
+    "RuntimeObservabilitySummary",
+    "RuntimeSnapshot",
+    "build_platform_incident_snapshot",
+    "build_runtime_metrics",
+    "build_runtime_observability_summary",
+    "build_runtime_snapshot",
+    "evaluate_alert_policy",
+    "ExtendedRuntimeMetric",
+    "ExtendedRuntimeMetricsContract",
+    "build_extended_runtime_metrics_contract",
+    "ExtendedObservabilitySummary",
+    "ExtendedSummaryLine",
+    "build_extended_observability_summary",
+    "RuntimeObservabilityVisualPanel",
+    "VisualPanelMetric",
+    "build_runtime_observability_visual_panel",
+    "TraceContext",
+    "TraceContract",
+    "build_trace_contract",
+    "StructuredLogRecord",
+    "StructuredLoggingContract",
+    "build_structured_logging_contract",
+    "TypedConfigBoundaryContract",
+    "TypedConfigEntry",
+    "build_typed_config_boundary_contract",
+    "SLOAlertSemanticsContract",
+    "SLOIndicator",
+    "build_slo_alert_semantics_contract",
+    "RuntimeObservabilityShellContract",
+    "build_runtime_observability_shell_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/validation_policy/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.validation_policy.validation_builders import (
+    BuiltValidationPlan,
+    build_validation_error_entry,
+    build_validation_plan,
+)
+from MAKSIMAR_CORE_LIB.validation_policy.validation_error_models import (
+    ValidationErrorCategory,
+    ValidationErrorCode,
+    ValidationErrorContract,
+    ValidationErrorEntry,
+    ValidationErrorSeverity,
+    build_validation_error_contract,
+)
+from MAKSIMAR_CORE_LIB.validation_policy.validation_payload_class_models import (
+    ValidationPayloadClassContract,
+    ValidationPayloadClassEntry,
+    ValidationPayloadRiskLevel,
+    build_validation_payload_class_contract,
+)
+from MAKSIMAR_CORE_LIB.validation_policy.validation_policy_contract import (
+    ValidationPolicyContract,
+    ValidationPolicyRuleEntry,
+    build_validation_policy_contract,
+)
+from MAKSIMAR_CORE_LIB.validation_policy.validation_task_class_models import (
+    ValidationRiskLevel,
+    ValidationTaskClass,
+    ValidationTaskClassContract,
+    ValidationTaskClassEntry,
+    build_validation_task_class_contract,
+)
+from MAKSIMAR_CORE_LIB.validation_policy.validation_tier_models import (
+    ValidationTier,
+    ValidationTierContract,
+    ValidationTierEntry,
+    build_validation_tier_contract,
+)
+
+__all__ = [
+    "BuiltValidationPlan",
+    "ValidationErrorCategory",
+    "ValidationErrorCode",
+    "ValidationErrorContract",
+    "ValidationErrorEntry",
+    "ValidationErrorSeverity",
+    "ValidationPayloadClassContract",
+    "ValidationPayloadClassEntry",
+    "ValidationPayloadRiskLevel",
+    "ValidationPolicyContract",
+    "ValidationPolicyRuleEntry",
+    "ValidationRiskLevel",
+    "ValidationTaskClass",
+    "ValidationTaskClassContract",
+    "ValidationTaskClassEntry",
+    "ValidationTier",
+    "ValidationTierContract",
+    "ValidationTierEntry",
+    "build_validation_error_contract",
+    "build_validation_error_entry",
+    "build_validation_payload_class_contract",
+    "build_validation_plan",
+    "build_validation_policy_contract",
+    "build_validation_task_class_contract",
+    "build_validation_tier_contract",
+]
+
+--- /home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/wrist_autonomy_path/__init__.py ---
+
+from MAKSIMAR_CORE_LIB.wrist_autonomy_path.wrist_autonomy_path_contract import (
+    WristAutonomyPathContract,
+    WristAutonomyPathEntry,
+    build_wrist_autonomy_path_contract,
+)
+
+__all__ = [
+    "WristAutonomyPathContract",
+    "WristAutonomyPathEntry",
+    "build_wrist_autonomy_path_contract",
+]
