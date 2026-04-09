@@ -82,6 +82,28 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_continuity_snapshot_contract import
     DisplayContinuitySnapshotEntry,
 )
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.monitor_metadata_contract import (
+    build_monitor_metadata_contract,
+    MonitorMetadataContract,
+    MonitorMetadataEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_restore_contract import (
+    build_workspace_restore_contract,
+    WorkspaceRestoreContract,
+    WorkspaceRestoreEntry,
+)
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_session_restore_contract import (
+    build_dashboard_session_restore_contract,
+    DashboardSessionRestoreContract,
+    DashboardSessionRestoreEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_placement_restore_contract import (
+    build_panel_placement_restore_contract,
+    PanelPlacementRestoreContract,
+    PanelPlacementRestoreEntry,
+)
+
 __all__ = [
     "build_display_target_vocabulary_contract",
     "DisplayTargetVocabularyContract",
@@ -122,4 +144,16 @@ __all__ = [
     "build_display_continuity_snapshot_contract",
     "DisplayContinuitySnapshotContract",
     "DisplayContinuitySnapshotEntry",
+    "build_monitor_metadata_contract",
+    "MonitorMetadataContract",
+    "MonitorMetadataEntry",
+    "build_workspace_restore_contract",
+    "WorkspaceRestoreContract",
+    "WorkspaceRestoreEntry",
+    "build_dashboard_session_restore_contract",
+    "DashboardSessionRestoreContract",
+    "DashboardSessionRestoreEntry",
+    "build_panel_placement_restore_contract",
+    "PanelPlacementRestoreContract",
+    "PanelPlacementRestoreEntry",
 ]
