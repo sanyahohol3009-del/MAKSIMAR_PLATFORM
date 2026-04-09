@@ -77,7 +77,9 @@ def build_visual_first_screen_render_contract() -> VisualFirstScreenRenderContra
         contract_id="visual_first_screen_render_contract_001",
         total_entries=len(entries),
         ready_entries=sum(
-            1 for entry in entries if entry.screen_render_status == "first_screen_render_ready"
+            1
+            for entry in entries
+            if entry.screen_render_status == "first_screen_render_ready"
         ),
         read_only_entries=sum(1 for entry in entries if entry.read_only),
         entries=entries,

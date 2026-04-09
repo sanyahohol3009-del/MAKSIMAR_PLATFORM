@@ -1,0 +1,142 @@
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:4:    build_visual_first_screen_present_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:8:def test_visual_first_screen_present_ready_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:10:    contract = build_visual_first_screen_present_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_present_ready_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:18:def test_visual_first_screen_present_ready_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:20:    contract = build_visual_first_screen_present_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:23:    assert entry.screen_present_ready_id == "visual_first_screen_present_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:24:    assert entry.screen_present_delivery_id == "visual_first_screen_present_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:29:def test_visual_first_screen_present_ready_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:31:    contract = build_visual_first_screen_present_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:40:def test_visual_first_screen_present_ready_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_ready_contract_smoke.py:42:    contract = build_visual_first_screen_present_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:4:    build_visual_first_screen_view_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:8:def test_visual_first_screen_view_delivery_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:10:    contract = build_visual_first_screen_view_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_view_delivery_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:18:def test_visual_first_screen_view_delivery_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:20:    contract = build_visual_first_screen_view_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:23:    assert entry.screen_view_delivery_id == "visual_first_screen_view_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:24:    assert entry.screen_view_id == "visual_first_screen_view_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:29:def test_visual_first_screen_view_delivery_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:31:    contract = build_visual_first_screen_view_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:40:def test_visual_first_screen_view_delivery_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_delivery_contract_smoke.py:42:    contract = build_visual_first_screen_view_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_result_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:4:    build_visual_first_screen_result_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:8:def test_visual_first_screen_result_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:10:    contract = build_visual_first_screen_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_result_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:18:def test_visual_first_screen_result_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:20:    contract = build_visual_first_screen_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:23:    assert entry.screen_result_id == "visual_first_screen_result_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:26:        == "visual_first_screen_presentable_result_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:32:def test_visual_first_screen_result_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:34:    contract = build_visual_first_screen_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:43:def test_visual_first_screen_result_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_result_contract_smoke.py:45:    contract = build_visual_first_screen_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:4:    build_visual_first_screen_present_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:8:def test_visual_first_screen_present_delivery_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:10:    contract = build_visual_first_screen_present_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_present_delivery_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:18:def test_visual_first_screen_present_delivery_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:20:    contract = build_visual_first_screen_present_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:23:    assert entry.screen_present_delivery_id == "visual_first_screen_present_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:24:    assert entry.screen_present_id == "visual_first_screen_present_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:29:def test_visual_first_screen_present_delivery_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:31:    contract = build_visual_first_screen_present_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:40:def test_visual_first_screen_present_delivery_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_delivery_contract_smoke.py:42:    contract = build_visual_first_screen_present_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:4:    build_visual_first_screen_view_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:8:def test_visual_first_screen_view_ready_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:10:    contract = build_visual_first_screen_view_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_view_ready_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:18:def test_visual_first_screen_view_ready_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:20:    contract = build_visual_first_screen_view_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:23:    assert entry.screen_view_ready_id == "visual_first_screen_view_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:24:    assert entry.screen_view_delivery_id == "visual_first_screen_view_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:29:def test_visual_first_screen_view_ready_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:31:    contract = build_visual_first_screen_view_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:40:def test_visual_first_screen_view_ready_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_ready_contract_smoke.py:42:    contract = build_visual_first_screen_view_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_present_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:4:    build_visual_first_screen_present_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:8:def test_visual_first_screen_present_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:10:    contract = build_visual_first_screen_present_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_present_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:18:def test_visual_first_screen_present_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:20:    contract = build_visual_first_screen_present_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:23:    assert entry.screen_present_id == "visual_first_screen_present_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:24:    assert entry.screen_render_ready_id == "visual_first_screen_render_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:29:def test_visual_first_screen_present_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:31:    contract = build_visual_first_screen_present_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:40:def test_visual_first_screen_present_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_present_contract_smoke.py:42:    contract = build_visual_first_screen_present_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:4:    build_visual_first_screen_render_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:8:def test_visual_first_screen_render_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:10:    contract = build_visual_first_screen_render_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_render_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:18:def test_visual_first_screen_render_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:20:    contract = build_visual_first_screen_render_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:23:    assert entry.screen_render_id == "visual_first_screen_render_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:24:    assert entry.screen_view_ready_id == "visual_first_screen_view_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:29:def test_visual_first_screen_render_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:31:    contract = build_visual_first_screen_render_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:40:def test_visual_first_screen_render_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_contract_smoke.py:42:    contract = build_visual_first_screen_render_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_showcase_result_contract_smoke.py:24:    assert entry.screen_result_id == "visual_first_screen_result_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_presentable_result_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:4:    build_visual_first_screen_presentable_result_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:8:def test_visual_first_screen_presentable_result_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:10:    contract = build_visual_first_screen_presentable_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_presentable_result_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:18:def test_visual_first_screen_presentable_result_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:20:    contract = build_visual_first_screen_presentable_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:23:    assert entry.screen_presentable_result_id == "visual_first_screen_presentable_result_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:29:def test_visual_first_screen_presentable_result_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:31:    contract = build_visual_first_screen_presentable_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:40:def test_visual_first_screen_presentable_result_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_presentable_result_contract_smoke.py:42:    contract = build_visual_first_screen_presentable_result_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:4:    build_visual_first_screen_render_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:8:def test_visual_first_screen_render_delivery_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:10:    contract = build_visual_first_screen_render_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_render_delivery_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:18:def test_visual_first_screen_render_delivery_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:20:    contract = build_visual_first_screen_render_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:23:    assert entry.screen_render_delivery_id == "visual_first_screen_render_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:24:    assert entry.screen_render_id == "visual_first_screen_render_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:29:def test_visual_first_screen_render_delivery_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:31:    contract = build_visual_first_screen_render_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:40:def test_visual_first_screen_render_delivery_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_delivery_contract_smoke.py:42:    contract = build_visual_first_screen_render_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_render_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:4:    build_visual_first_screen_render_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:8:def test_visual_first_screen_render_ready_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:10:    contract = build_visual_first_screen_render_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_render_ready_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:18:def test_visual_first_screen_render_ready_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:20:    contract = build_visual_first_screen_render_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:23:    assert entry.screen_render_ready_id == "visual_first_screen_render_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:24:    assert entry.screen_render_delivery_id == "visual_first_screen_render_delivery_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:29:def test_visual_first_screen_render_ready_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:31:    contract = build_visual_first_screen_render_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:40:def test_visual_first_screen_render_ready_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_render_ready_contract_smoke.py:42:    contract = build_visual_first_screen_render_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:3:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_view_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:4:    build_visual_first_screen_view_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:8:def test_visual_first_screen_view_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:10:    contract = build_visual_first_screen_view_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:12:    assert contract.contract_id == "visual_first_screen_view_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:18:def test_visual_first_screen_view_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:20:    contract = build_visual_first_screen_view_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:23:    assert entry.screen_view_id == "visual_first_screen_view_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:29:def test_visual_first_screen_view_preserves_truth_bound_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:31:    contract = build_visual_first_screen_view_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:40:def test_visual_first_screen_view_binds_expected_visual_targets() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_visual_first_screen_view_contract_smoke.py:42:    contract = build_visual_first_screen_view_contract()

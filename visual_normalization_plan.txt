@@ -1,0 +1,94 @@
+VISUAL NORMALIZATION PLAN
+=========================
+
+RULES
+-----
+1. foundation dashboards remain canonical read-only base
+2. no parallel dashboard world allowed
+3. no new visual contracts before semantic cleanup
+4. visual layer must extend canonical base
+5. frontend/display shell is not source of truth
+
+SEMANTIC GROUPS
+---------------
+state
+artifact
+export
+delivery
+readiness
+handoff
+result
+preview/demo
+
+FAMILY 1 — visual_first_*
+-------------------------
+Canonical candidates:
+-
+Potential duplicates:
+-
+Deprecated candidates:
+-
+Reason:
+-
+Action:
+-
+
+FAMILY 2 — visual_first_screen_*
+--------------------------------
+Canonical candidates:
+-
+Potential duplicates:
+-
+Deprecated candidates:
+-
+Reason:
+-
+Action:
+-
+
+FAMILY 3 — visual_first_renderer_*
+----------------------------------
+Canonical candidates:
+-
+Potential duplicates:
+-
+Deprecated candidates:
+-
+Reason:
+-
+Action:
+-
+
+FAMILY 4 — visual_premium_demo_*
+--------------------------------
+Canonical candidates:
+-
+Potential duplicates:
+-
+Deprecated candidates:
+-
+Reason:
+-
+Action:
+-
+
+HUD / VISUAL CHAIN TARGET
+-------------------------
+visual_shell_ready
+-> visual shell
+-> HUD composition
+-> HUD screen
+-> render result
+-> first truthful live operator screen
+
+FORBIDDEN DRIFT
+---------------
+- no new root
+- no duplicate result/output/present/render ladders
+- no beautification before semantic cleanup
+- no action leakage into visual layer
+- no topology truth duplication inside visual layer
+
+NEXT STEP AFTER THIS PLAN
+-------------------------
+STEP 24 — visual dedup pass

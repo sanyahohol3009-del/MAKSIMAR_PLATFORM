@@ -83,7 +83,9 @@ def build_visual_first_screen_result_contract() -> VisualFirstScreenResultContra
         contract_id="visual_first_screen_result_contract_001",
         total_entries=len(entries),
         ready_entries=sum(
-            1 for entry in entries if entry.screen_result_status == "screen_result_ready"
+            1
+            for entry in entries
+            if entry.screen_result_status == "screen_result_ready"
         ),
         read_only_entries=sum(1 for entry in entries if entry.read_only),
         entries=entries,
