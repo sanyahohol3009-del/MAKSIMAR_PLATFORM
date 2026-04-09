@@ -146,6 +146,22 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_final_assembled_state_co
     OperatorDashboardFinalAssembledStateEntry,
 )
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_first_system_view_artifact_contract import (
+    build_operator_dashboard_first_system_view_artifact_contract,
+    OperatorDashboardFirstSystemViewArtifactContract,
+    OperatorDashboardFirstSystemViewArtifactEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_operator_surface_export_contract import (
+    build_operator_dashboard_operator_surface_export_contract,
+    OperatorDashboardOperatorSurfaceExportContract,
+    OperatorDashboardOperatorSurfaceExportEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visual_shell_ready_contract import (
+    build_operator_dashboard_visual_shell_ready_contract,
+    OperatorDashboardVisualShellReadyContract,
+    OperatorDashboardVisualShellReadyEntry,
+)
+
 __all__ = [
     "build_operator_intent_contract",
     "OperatorIntentContract",
@@ -211,4 +227,13 @@ __all__ = [
     "build_operator_dashboard_final_assembled_state_contract",
     "OperatorDashboardFinalAssembledStateContract",
     "OperatorDashboardFinalAssembledStateEntry",
+    "build_operator_dashboard_first_system_view_artifact_contract",
+    "OperatorDashboardFirstSystemViewArtifactContract",
+    "OperatorDashboardFirstSystemViewArtifactEntry",
+    "build_operator_dashboard_operator_surface_export_contract",
+    "OperatorDashboardOperatorSurfaceExportContract",
+    "OperatorDashboardOperatorSurfaceExportEntry",
+    "build_operator_dashboard_visual_shell_ready_contract",
+    "OperatorDashboardVisualShellReadyContract",
+    "OperatorDashboardVisualShellReadyEntry",
 ]
