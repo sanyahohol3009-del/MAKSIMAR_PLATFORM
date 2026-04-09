@@ -104,6 +104,17 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.panel_placement_restore_contract import (
     PanelPlacementRestoreEntry,
 )
 
+from MAKSIMAR_CORE_LIB.oob_dashboard.input_mode_restore_contract import (
+    build_input_mode_restore_contract,
+    InputModeRestoreContract,
+    InputModeRestoreEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_boot_restore_sequence_contract import (
+    build_dashboard_boot_restore_sequence_contract,
+    DashboardBootRestoreSequenceContract,
+    DashboardBootRestoreSequenceEntry,
+)
+
 __all__ = [
     "build_display_target_vocabulary_contract",
     "DisplayTargetVocabularyContract",
@@ -156,4 +167,10 @@ __all__ = [
     "build_panel_placement_restore_contract",
     "PanelPlacementRestoreContract",
     "PanelPlacementRestoreEntry",
+    "build_input_mode_restore_contract",
+    "InputModeRestoreContract",
+    "InputModeRestoreEntry",
+    "build_dashboard_boot_restore_sequence_contract",
+    "DashboardBootRestoreSequenceContract",
+    "DashboardBootRestoreSequenceEntry",
 ]
