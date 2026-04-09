@@ -1,0 +1,5 @@
+248:    "build_visual_first_renderer_realization_contract",
+249:    "build_visual_first_renderer_view_contract",
+250:    "build_visual_first_renderer_view_delivery_contract",
+251:    "build_visual_first_renderer_view_ready_contract",
+252:    "build_visual_first_renderer_screen_handoff_contract",

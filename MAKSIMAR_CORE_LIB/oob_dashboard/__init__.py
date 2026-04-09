@@ -247,8 +247,6 @@ __all__ = [
     "build_visual_premium_demo_first_picture_contract",
     "build_visual_first_renderer_realization_contract",
     "build_visual_first_renderer_view_contract",
-    "build_visual_first_renderer_view_delivery_contract",
-    "build_visual_first_renderer_view_ready_contract",
     "build_visual_first_renderer_screen_handoff_contract",
     "build_visual_first_screen_view_contract",
     "build_visual_first_screen_render_contract",
