@@ -1,0 +1,38 @@
+VISUAL_FIRST_SCREEN COMPATIBILITY MAP
+=====================================
+
+CANONICAL RETAIN
+----------------
+visual_first_screen_view_contract
+visual_first_screen_render_contract
+visual_first_screen_present_contract
+visual_first_screen_result_contract
+
+TRANSITIONAL / COMPATIBILITY ONLY
+---------------------------------
+visual_first_screen_view_delivery_contract
+visual_first_screen_view_ready_contract
+visual_first_screen_render_delivery_contract
+visual_first_screen_render_ready_contract
+visual_first_screen_present_delivery_contract
+visual_first_screen_present_ready_contract
+visual_first_screen_presentable_result_contract
+
+RULES
+-----
+1. canonical chain remains:
+   view -> render -> present -> result
+
+2. transitional files are not removed yet
+
+3. transitional files should eventually stop being top-level exported
+
+4. internal imports are not cut yet until export reduction is done
+
+5. no new screen-family contracts are allowed
+
+NEXT ACTION
+-----------
+reduce external export surface first
+then mark transitional screen-family files as compatibility layer
+then staged refactor
