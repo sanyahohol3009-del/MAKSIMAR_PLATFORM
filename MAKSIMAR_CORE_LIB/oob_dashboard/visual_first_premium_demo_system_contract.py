@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_showable_system_contract import (
-    build_visual_first_premium_showable_system_contract,
-)
-
 
 PremiumDemoSystemMode = Literal[
     "first_premium_demo_system",
@@ -50,6 +46,10 @@ class VisualFirstPremiumDemoSystemContract:
 def build_visual_first_premium_demo_system_contract(
 ) -> VisualFirstPremiumDemoSystemContract:
     """Build canonical first premium demo system contract."""
+    from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_showable_system_contract import (
+        build_visual_first_premium_showable_system_contract,
+    )
+
     premium_showable_system_contract = (
         build_visual_first_premium_showable_system_contract()
     )

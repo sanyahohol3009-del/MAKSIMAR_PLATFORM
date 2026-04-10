@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_operator_viewable_live_result_contract import (
-    build_visual_first_operator_viewable_live_result_contract,
-)
-
 
 LiveOperatorShowcaseMode = Literal[
     "first_live_operator_showcase",
@@ -50,6 +46,10 @@ class VisualFirstLiveOperatorShowcaseContract:
 def build_visual_first_live_operator_showcase_contract(
 ) -> VisualFirstLiveOperatorShowcaseContract:
     """Build canonical first live operator showcase contract."""
+    from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_operator_viewable_live_result_contract import (
+        build_visual_first_operator_viewable_live_result_contract,
+    )
+
     operator_viewable_live_result_contract = (
         build_visual_first_operator_viewable_live_result_contract()
     )
@@ -88,8 +88,7 @@ def build_visual_first_live_operator_showcase_contract(
         ready_entries=sum(
             1
             for entry in entries
-            if entry.live_operator_showcase_status
-            == "live_operator_showcase_ready"
+            if entry.live_operator_showcase_status == "live_operator_showcase_ready"
         ),
         read_only_entries=sum(1 for entry in entries if entry.read_only),
         entries=entries,

@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_operator_showcase_contract import (
-    build_visual_first_live_operator_showcase_contract,
-)
-
 
 DemoReadyLiveOperatorMode = Literal[
     "first_demo_ready_live_operator",
@@ -50,6 +46,10 @@ class VisualFirstDemoReadyLiveOperatorContract:
 def build_visual_first_demo_ready_live_operator_contract(
 ) -> VisualFirstDemoReadyLiveOperatorContract:
     """Build canonical first demo-ready live operator contract."""
+    from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_operator_showcase_contract import (
+        build_visual_first_live_operator_showcase_contract,
+    )
+
     live_operator_showcase_contract = (
         build_visual_first_live_operator_showcase_contract()
     )
