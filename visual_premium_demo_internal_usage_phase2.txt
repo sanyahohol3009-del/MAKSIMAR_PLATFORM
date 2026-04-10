@@ -1,0 +1,79 @@
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_artifact_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_artifact_contract.py:7:    build_visual_premium_demo_picture_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_artifact_contract.py:53:    picture_ready_contract = build_visual_premium_demo_picture_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:574:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_delivery_bridge_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:575:    build_visual_premium_demo_delivery_bridge_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:582:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:583:    build_visual_premium_demo_realization_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:586:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_screen_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:587:    build_visual_premium_demo_screen_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:590:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_boundary_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:591:    build_visual_premium_demo_picture_boundary_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:594:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:595:    build_visual_premium_demo_picture_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:602:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_materialized_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:603:    build_visual_premium_demo_materialized_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:610:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:611:    build_visual_premium_demo_realization_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:964:    "build_visual_premium_demo_delivery_bridge_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:966:    "build_visual_premium_demo_realization_ready_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:967:    "build_visual_premium_demo_screen_delivery_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:968:    "build_visual_premium_demo_picture_boundary_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:969:    "build_visual_premium_demo_picture_ready_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:971:    "build_visual_premium_demo_realization_output_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py.bak:972:    "build_visual_premium_demo_materialized_output_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:7:    build_visual_premium_demo_realization_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:50:def build_visual_premium_demo_materialized_output_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:53:    realization_output_contract = build_visual_premium_demo_realization_output_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:58:            materialized_output_id="visual_premium_demo_materialized_output_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_materialized_output_contract.py:78:        contract_id="visual_premium_demo_materialized_output_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_screen_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:7:    build_visual_premium_demo_screen_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:50:def build_visual_premium_demo_picture_boundary_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:53:    screen_delivery_contract = build_visual_premium_demo_screen_delivery_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:58:            picture_boundary_id="visual_premium_demo_picture_boundary_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_boundary_contract.py:78:        contract_id="visual_premium_demo_picture_boundary_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_bridge_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_delivery_bridge_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_bridge_contract.py:7:    build_visual_premium_demo_delivery_bridge_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_bridge_contract.py:53:    delivery_bridge_contract = build_visual_premium_demo_delivery_bridge_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_output_contract.py:50:def build_visual_premium_demo_realization_output_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_output_contract.py:58:            realization_output_id="visual_premium_demo_realization_output_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_output_contract.py:78:        contract_id="visual_premium_demo_realization_output_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:7:    build_visual_premium_demo_realization_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:50:def build_visual_premium_demo_screen_delivery_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:53:    realization_ready_contract = build_visual_premium_demo_realization_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:58:            screen_delivery_id="visual_premium_demo_screen_delivery_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_screen_delivery_contract.py:78:        contract_id="visual_premium_demo_screen_delivery_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__init__.py:217:    "build_visual_premium_demo_screen_delivery_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_boundary_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:7:    build_visual_premium_demo_picture_boundary_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:50:def build_visual_premium_demo_picture_ready_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:53:    picture_boundary_contract = build_visual_premium_demo_picture_boundary_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:58:            picture_ready_id="visual_premium_demo_picture_ready_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_picture_ready_contract.py:78:        contract_id="visual_premium_demo_picture_ready_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:219:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_delivery_bridge_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:220:    build_visual_premium_demo_delivery_bridge_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:227:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:228:    build_visual_premium_demo_realization_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:231:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_screen_delivery_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:232:    build_visual_premium_demo_screen_delivery_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:235:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_boundary_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:236:    build_visual_premium_demo_picture_boundary_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:239:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_picture_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:240:    build_visual_premium_demo_picture_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:247:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_materialized_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:248:    build_visual_premium_demo_materialized_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:255:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:256:    build_visual_premium_demo_realization_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_visual.py:362:    "build_visual_premium_demo_screen_delivery_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_ready_contract.py:50:def build_visual_premium_demo_realization_ready_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_ready_contract.py:58:            realization_ready_id="visual_premium_demo_realization_ready_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_realization_ready_contract.py:78:        contract_id="visual_premium_demo_realization_ready_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_first_picture_contract.py:6:from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_materialized_output_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_first_picture_contract.py:7:    build_visual_premium_demo_materialized_output_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_first_picture_contract.py:53:    materialized_output_contract = build_visual_premium_demo_materialized_output_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_delivery_bridge_contract.py:50:def build_visual_premium_demo_delivery_bridge_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_delivery_bridge_contract.py:58:            delivery_bridge_id="visual_premium_demo_delivery_bridge_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/visual_premium_demo_delivery_bridge_contract.py:78:        contract_id="visual_premium_demo_delivery_bridge_contract_001",

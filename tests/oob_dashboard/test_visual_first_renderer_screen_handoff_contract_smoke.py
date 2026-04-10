@@ -8,7 +8,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_screen_handoff_contra
 def test_visual_first_renderer_screen_handoff_contract_builds() -> None:
     """First renderer-screen handoff contract should build successfully."""
     contract = build_visual_first_renderer_screen_handoff_contract()
-
     assert contract.contract_id == "visual_first_renderer_screen_handoff_contract_001"
     assert contract.total_entries == 1
     assert contract.ready_entries == 1
@@ -21,7 +20,7 @@ def test_visual_first_renderer_screen_handoff_contains_expected_entry() -> None:
     entry = contract.entries[0]
 
     assert entry.renderer_screen_handoff_id == "visual_first_renderer_screen_handoff_001"
-    assert entry.renderer_view_ready_id == "visual_first_renderer_view_ready_001"
+    assert entry.renderer_view_id == "visual_first_renderer_view_001"
     assert entry.renderer_screen_handoff_mode == "first_renderer_screen_handoff"
     assert entry.renderer_screen_handoff_status == "first_renderer_screen_handoff_ready"
 

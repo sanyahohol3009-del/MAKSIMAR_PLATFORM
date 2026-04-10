@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_view_ready_contract import (
-    build_visual_first_renderer_view_ready_contract,
+from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_renderer_view_contract import (
+    build_visual_first_renderer_view_contract,
 )
 
 
@@ -22,7 +22,7 @@ class VisualFirstRendererScreenHandoffEntry:
     """Canonical first renderer-screen handoff entry."""
 
     renderer_screen_handoff_id: str
-    renderer_view_ready_id: str
+    renderer_view_id: str
     renderer_screen_handoff_mode: RendererScreenHandoffMode
     renderer_screen_handoff_status: RendererScreenHandoffStatus
     renderer_surface_id: str
@@ -50,26 +50,26 @@ class VisualFirstRendererScreenHandoffContract:
 def build_visual_first_renderer_screen_handoff_contract(
 ) -> VisualFirstRendererScreenHandoffContract:
     """Build canonical first renderer-screen handoff contract."""
-    renderer_view_ready_contract = build_visual_first_renderer_view_ready_contract()
-    renderer_view_ready_entry = renderer_view_ready_contract.entries[0]
+    renderer_view_contract = build_visual_first_renderer_view_contract()
+    renderer_view_entry = renderer_view_contract.entries[0]
 
     entries = (
         VisualFirstRendererScreenHandoffEntry(
             renderer_screen_handoff_id="visual_first_renderer_screen_handoff_001",
-            renderer_view_ready_id=renderer_view_ready_entry.renderer_view_ready_id,
+            renderer_view_id=renderer_view_entry.renderer_view_id,
             renderer_screen_handoff_mode="first_renderer_screen_handoff",
             renderer_screen_handoff_status="first_renderer_screen_handoff_ready",
-            renderer_surface_id=renderer_view_ready_entry.renderer_surface_id,
-            theme_id=renderer_view_ready_entry.theme_id,
-            screen_id=renderer_view_ready_entry.screen_id,
-            preview_artifact_id=renderer_view_ready_entry.preview_artifact_id,
-            renderer_view_ready=renderer_view_ready_entry.renderer_view_ready,
+            renderer_surface_id=renderer_view_entry.renderer_surface_id,
+            theme_id=renderer_view_entry.theme_id,
+            screen_id=renderer_view_entry.screen_id,
+            preview_artifact_id=renderer_view_entry.preview_artifact_id,
+            renderer_view_ready=renderer_view_entry.renderer_view_ready,
             renderer_screen_handoff_ready=True,
             truth_bound_renderer_screen_handoff=True,
             read_only=True,
             description=(
                 "Canonical first renderer-screen handoff entry after assembly "
-                "of the first truth-preserving renderer-view ready layer."
+                "of the first truth-preserving renderer view."
             ),
         ),
     )

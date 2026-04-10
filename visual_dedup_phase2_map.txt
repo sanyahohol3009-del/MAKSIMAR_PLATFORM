@@ -1,0 +1,135 @@
+VISUAL DEDUP PHASE 2 MAP
+========================
+
+STATUS
+------
+PHASE: D
+STEP: 24
+MODE: compatibility-first dedup
+RULE: no direct deletion yet
+
+GLOBAL RULES
+------------
+1. canonical visual base remains untouched
+2. public export surface is already reduced
+3. transitional families remain in code for compatibility
+4. transitional files are no longer canonical public API
+5. direct deletion is forbidden until dependency rewiring + test rewiring are complete
+
+FAMILY 1 — visual_first_screen_*
+--------------------------------
+CANONICAL
+- build_visual_first_screen_view_contract
+- build_visual_first_screen_render_contract
+- build_visual_first_screen_present_contract
+- build_visual_first_screen_result_contract
+
+TRANSITIONAL / INTERNAL ONLY
+- build_visual_first_screen_view_delivery_contract
+- build_visual_first_screen_view_ready_contract
+- build_visual_first_screen_render_delivery_contract
+- build_visual_first_screen_render_ready_contract
+- build_visual_first_screen_present_delivery_contract
+- build_visual_first_screen_present_ready_contract
+- build_visual_first_screen_presentable_result_contract
+
+DELETE PATH LATER
+- remove public exports first ✅
+- keep internal imports for now ✅
+- rewire canonical chain later
+- migrate tests later
+- delete only after full green pass
+
+FAMILY 2 — visual_first_renderer_*
+----------------------------------
+CANONICAL
+- build_visual_first_renderer_view_contract
+- build_visual_first_renderer_screen_handoff_contract
+- build_visual_first_renderer_realization_contract
+
+TRANSITIONAL / INTERNAL ONLY
+- build_visual_first_renderer_view_delivery_contract
+- build_visual_first_renderer_view_ready_contract
+
+DELETE PATH LATER
+- remove public exports first ✅
+- keep internal imports for now ✅
+- rewire view chain later
+- migrate tests later
+- delete only after full green pass
+
+FAMILY 3 — visual_premium_demo_*
+--------------------------------
+CANONICAL
+- build_visual_premium_demo_realization_artifact_contract
+- build_visual_premium_demo_realization_bridge_contract
+- build_visual_premium_demo_screen_delivery_contract
+- build_visual_premium_demo_first_picture_contract
+
+TRANSITIONAL / INTERNAL ONLY
+- build_visual_premium_demo_delivery_bridge_contract
+- build_visual_premium_demo_realization_ready_contract
+- build_visual_premium_demo_picture_boundary_contract
+- build_visual_premium_demo_picture_ready_contract
+- build_visual_premium_demo_realization_output_contract
+- build_visual_premium_demo_materialized_output_contract
+
+DELETE PATH LATER
+- remove public exports first ✅
+- keep internal imports for now ✅
+- rewire premium demo chain later
+- migrate tests later
+- delete only after full green pass
+
+FAMILY 4 — visual_first_*
+-------------------------
+CANONICAL
+- build_visual_first_viewable_premium_preview_contract
+- build_visual_first_presentable_preview_contract
+- build_visual_first_view_layer_contract
+- build_visual_first_shell_handoff_contract
+- build_visual_first_screen_result_contract
+- build_visual_first_showcase_result_contract
+- build_visual_first_operator_viewable_live_result_contract
+- build_visual_first_premium_demo_system_contract
+
+TRANSITIONAL / INTERNAL ONLY
+- build_visual_first_showable_view_contract
+- build_visual_first_observable_view_contract
+- build_visual_first_displayable_view_contract
+- build_visual_first_presentable_display_contract
+- build_visual_first_demo_display_contract
+- build_visual_first_watchable_display_contract
+- build_visual_first_presented_display_contract
+- build_visual_first_renderable_display_contract
+- build_visual_first_output_ready_display_contract
+- build_visual_first_result_display_contract
+- build_visual_first_viewable_result_contract
+- build_visual_first_display_output_contract
+- build_visual_first_presentable_result_contract
+- build_visual_first_presented_result_contract
+- build_visual_first_live_presentable_result_contract
+- build_visual_first_live_screen_result_contract
+- build_visual_first_live_showcase_result_contract
+- build_visual_first_live_operator_showcase_contract
+- build_visual_first_demo_ready_live_operator_contract
+- build_visual_first_investor_presentable_live_operator_contract
+- build_visual_first_premium_live_operator_contract
+- build_visual_first_premium_showable_system_contract
+
+DELETE PATH LATER
+- remove public exports first ✅
+- keep internal imports for now ✅
+- consolidate high-level semantic chain later
+- migrate tests later
+- delete only after full green pass
+
+NEXT STAGE
+----------
+STEP 24 phase 3:
+- build internal-only reduction plan
+- identify files that still import transitional families
+- prepare rewiring order
+
+STEP 25:
+- bind visual_shell_ready to cleaned visual chain

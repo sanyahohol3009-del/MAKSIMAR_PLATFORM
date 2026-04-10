@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_result_contract import (
-    build_visual_first_screen_result_contract,
-)
-
 
 ShowcaseResultMode = Literal[
     "first_showcase_result",
@@ -49,6 +45,10 @@ class VisualFirstShowcaseResultContract:
 
 def build_visual_first_showcase_result_contract() -> VisualFirstShowcaseResultContract:
     """Build canonical first showcase result contract."""
+    from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_screen_result_contract import (
+        build_visual_first_screen_result_contract,
+    )
+
     screen_result_contract = build_visual_first_screen_result_contract()
     screen_result_entry = screen_result_contract.entries[0]
 
@@ -77,7 +77,9 @@ def build_visual_first_showcase_result_contract() -> VisualFirstShowcaseResultCo
         contract_id="visual_first_showcase_result_contract_001",
         total_entries=len(entries),
         ready_entries=sum(
-            1 for entry in entries if entry.showcase_result_status == "showcase_result_ready"
+            1
+            for entry in entries
+            if entry.showcase_result_status == "showcase_result_ready"
         ),
         read_only_entries=sum(1 for entry in entries if entry.read_only),
         entries=entries,

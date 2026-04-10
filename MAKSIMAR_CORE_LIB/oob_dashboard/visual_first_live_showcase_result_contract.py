@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_screen_result_contract import (
-    build_visual_first_live_screen_result_contract,
-)
-
 
 LiveShowcaseResultMode = Literal[
     "first_live_showcase_result",
@@ -50,6 +46,10 @@ class VisualFirstLiveShowcaseResultContract:
 def build_visual_first_live_showcase_result_contract(
 ) -> VisualFirstLiveShowcaseResultContract:
     """Build canonical first live showcase result contract."""
+    from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_live_screen_result_contract import (
+        build_visual_first_live_screen_result_contract,
+    )
+
     live_screen_result_contract = build_visual_first_live_screen_result_contract()
     live_screen_result_entry = live_screen_result_contract.entries[0]
 
