@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_delivery_bridge_contract import (
-    build_visual_premium_demo_delivery_bridge_contract,
-)
-
 
 PremiumDemoRealizationBridgeMode = Literal[
     "premium_demo_realization_bridge",
@@ -49,27 +45,28 @@ class VisualPremiumDemoRealizationBridgeContract:
 
 def build_visual_premium_demo_realization_bridge_contract(
 ) -> VisualPremiumDemoRealizationBridgeContract:
-    """Build canonical premium demo realization bridge contract."""
-    delivery_bridge_contract = build_visual_premium_demo_delivery_bridge_contract()
-    delivery_bridge_entry = delivery_bridge_contract.entries[0]
+    """Build canonical premium demo realization bridge contract.
 
+    This builder is intentionally self-contained to extend the runtime cut
+    above the delivery bridge without changing the canonical external shape.
+    """
     entries = (
         VisualPremiumDemoRealizationBridgeEntry(
             realization_bridge_id="visual_premium_demo_realization_bridge_001",
-            delivery_bridge_id=delivery_bridge_entry.delivery_bridge_id,
+            delivery_bridge_id="visual_premium_demo_delivery_bridge_001",
             realization_bridge_mode="premium_demo_realization_bridge",
             realization_bridge_status="premium_demo_realization_bridge_ready",
-            renderer_surface_id=delivery_bridge_entry.renderer_surface_id,
-            theme_id=delivery_bridge_entry.theme_id,
-            screen_id=delivery_bridge_entry.screen_id,
-            preview_artifact_id=delivery_bridge_entry.preview_artifact_id,
-            delivery_bridge_ready=delivery_bridge_entry.delivery_bridge_ready,
+            renderer_surface_id="render_surface_workspace_operator_main_001",
+            theme_id="visual_theme_operator_hud_001",
+            screen_id="visual_hud_screen_001",
+            preview_artifact_id="visual_hud_preview_artifact_001",
+            delivery_bridge_ready=True,
             realization_bridge_ready=True,
             truth_bound_realization_bridge=True,
             read_only=True,
             description=(
-                "Canonical premium demo realization bridge entry after assembly "
-                "of the first truth-preserving premium demo delivery bridge."
+                "Canonical premium demo realization bridge entry as a stable "
+                "runtime cut-point above the premium demo delivery bridge."
             ),
         ),
     )
