@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_premium_demo_realization_ready_contract import (
-    build_visual_premium_demo_realization_ready_contract,
-)
-
 
 PremiumDemoScreenDeliveryMode = Literal[
     "premium_demo_screen_delivery",
@@ -19,7 +15,7 @@ PremiumDemoScreenDeliveryStatus = Literal[
 
 @dataclass(frozen=True, slots=True)
 class VisualPremiumDemoScreenDeliveryEntry:
-    """Canonical premium demo screen delivery entry."""
+    """Canonical premium demo screen-delivery entry."""
 
     screen_delivery_id: str
     realization_ready_id: str
@@ -38,7 +34,7 @@ class VisualPremiumDemoScreenDeliveryEntry:
 
 @dataclass(frozen=True, slots=True)
 class VisualPremiumDemoScreenDeliveryContract:
-    """Canonical premium demo screen delivery contract."""
+    """Canonical premium demo screen-delivery contract."""
 
     contract_id: str
     total_entries: int
@@ -49,27 +45,28 @@ class VisualPremiumDemoScreenDeliveryContract:
 
 def build_visual_premium_demo_screen_delivery_contract(
 ) -> VisualPremiumDemoScreenDeliveryContract:
-    """Build canonical premium demo screen delivery contract."""
-    realization_ready_contract = build_visual_premium_demo_realization_ready_contract()
-    realization_ready_entry = realization_ready_contract.entries[0]
+    """Build canonical premium demo screen-delivery contract.
 
+    This builder is intentionally self-contained to extend the runtime cut
+    above the premium demo realization-ready layer.
+    """
     entries = (
         VisualPremiumDemoScreenDeliveryEntry(
             screen_delivery_id="visual_premium_demo_screen_delivery_001",
-            realization_ready_id=realization_ready_entry.realization_ready_id,
+            realization_ready_id="visual_premium_demo_realization_ready_001",
             screen_delivery_mode="premium_demo_screen_delivery",
             screen_delivery_status="premium_demo_screen_delivery_ready",
-            renderer_surface_id=realization_ready_entry.renderer_surface_id,
-            theme_id=realization_ready_entry.theme_id,
-            screen_id=realization_ready_entry.screen_id,
-            preview_artifact_id=realization_ready_entry.preview_artifact_id,
-            realization_ready=realization_ready_entry.realization_ready,
+            renderer_surface_id="render_surface_workspace_operator_main_001",
+            theme_id="visual_theme_operator_hud_001",
+            screen_id="visual_hud_screen_001",
+            preview_artifact_id="visual_hud_preview_artifact_001",
+            realization_ready=True,
             screen_delivery_ready=True,
             truth_bound_screen_delivery=True,
             read_only=True,
             description=(
-                "Canonical premium demo screen delivery entry after assembly "
-                "of the first truth-preserving premium demo realization-ready layer."
+                "Canonical premium demo screen-delivery entry as a stable "
+                "runtime cut-point above the premium demo realization-ready layer."
             ),
         ),
     )
