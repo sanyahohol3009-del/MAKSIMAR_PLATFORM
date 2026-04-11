@@ -3,10 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.visual_first_premium_demo_system_contract import (
-    build_visual_first_premium_demo_system_contract,
-)
-
 
 PremiumDemoDeliveryBridgeMode = Literal[
     "premium_demo_delivery_bridge",
@@ -49,27 +45,29 @@ class VisualPremiumDemoDeliveryBridgeContract:
 
 def build_visual_premium_demo_delivery_bridge_contract(
 ) -> VisualPremiumDemoDeliveryBridgeContract:
-    """Build canonical premium demo delivery bridge contract."""
-    premium_demo_system_contract = build_visual_first_premium_demo_system_contract()
-    premium_demo_system_entry = premium_demo_system_contract.entries[0]
+    """Build canonical premium demo delivery bridge contract.
 
+    This builder is intentionally self-contained to act as a runtime cycle
+    cut-point between the premium demo bridge chain and the upper premium/live
+    visual chain. The canonical external shape remains unchanged.
+    """
     entries = (
         VisualPremiumDemoDeliveryBridgeEntry(
             delivery_bridge_id="visual_premium_demo_delivery_bridge_001",
-            premium_demo_system_id=premium_demo_system_entry.premium_demo_system_id,
+            premium_demo_system_id="visual_first_premium_demo_system_001",
             delivery_bridge_mode="premium_demo_delivery_bridge",
             delivery_bridge_status="premium_demo_delivery_bridge_ready",
-            renderer_surface_id=premium_demo_system_entry.renderer_surface_id,
-            theme_id=premium_demo_system_entry.theme_id,
-            screen_id=premium_demo_system_entry.screen_id,
-            preview_artifact_id=premium_demo_system_entry.preview_artifact_id,
-            premium_demo_system_ready=premium_demo_system_entry.premium_demo_system_ready,
+            renderer_surface_id="render_surface_workspace_operator_main_001",
+            theme_id="visual_theme_operator_hud_001",
+            screen_id="visual_hud_screen_001",
+            preview_artifact_id="visual_hud_preview_artifact_001",
+            premium_demo_system_ready=True,
             delivery_bridge_ready=True,
             truth_bound_delivery_bridge=True,
             read_only=True,
             description=(
-                "Canonical premium demo delivery bridge entry after assembly of "
-                "the first truth-preserving premium demo system."
+                "Canonical premium demo delivery bridge entry as a stable "
+                "runtime cut-point for the premium demo visual bridge chain."
             ),
         ),
     )

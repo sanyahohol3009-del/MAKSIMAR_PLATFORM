@@ -1,0 +1,74 @@
+VISUAL BUILDER CALL CYCLE MAP
+=============================
+
+CONFIRMED SAFE
+--------------
+- public export reduction completed
+- renderer rewiring completed
+- import-hardening batch 1 completed
+- import-hardening batch 2 completed
+- repository returned to green safe point
+
+FAILED RUNTIME REWIRING
+-----------------------
+attempt:
+- visual_first_showcase_result_contract
+  screen_result -> screen_present
+
+result:
+- runtime recursion loop
+- not import-time circular import
+- builder call graph loops back into screen_present
+
+CURRENT CANONICAL RUNTIME LADDER
+--------------------------------
+screen_present
+-> screen_render_ready
+-> screen_render_delivery
+-> screen_render
+-> screen_view_ready
+-> screen_view_delivery
+-> screen_view
+-> renderer_screen_handoff
+-> renderer_view
+-> renderer_realization
+-> premium_demo_first_picture
+-> premium_demo_materialized_output
+-> premium_demo_realization_output
+-> premium_demo_realization_artifact
+-> premium_demo_picture_ready
+-> premium_demo_picture_boundary
+-> premium_demo_screen_delivery
+-> premium_demo_realization_ready
+-> premium_demo_realization_bridge
+-> premium_demo_delivery_bridge
+-> premium_demo_system
+-> premium_showable_system
+-> premium_live_operator
+-> investor_presentable_live_operator
+-> demo_ready_live_operator
+-> live_operator_showcase
+-> operator_viewable_live_result
+-> live_showcase_result
+-> live_screen_result
+-> live_presentable_result
+-> showcase_result
+-> screen_present
+
+CONFIRMED PROBLEM
+-----------------
+This is a runtime builder-call cycle.
+It is not solved by import hardening alone.
+
+NEXT TASK
+---------
+Find the first safe cut point that can be changed without re-entering:
+- screen_present
+- screen_render_ready
+- screen_view_ready
+- premium_demo_delivery_bridge
+- showcase_result
+
+RULE
+----
+No semantic rewiring until the first safe cut point is selected.
