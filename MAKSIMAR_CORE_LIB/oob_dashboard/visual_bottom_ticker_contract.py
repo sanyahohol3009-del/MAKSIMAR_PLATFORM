@@ -10,7 +10,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.visual_render_surface_contract import (
     build_visual_render_surface_contract,
 )
 
-
 TickerSeverity = Literal[
     "normal",
     "warning",
@@ -76,9 +75,13 @@ def build_visual_bottom_ticker_contract() -> VisualBottomTickerContract:
     renderer_surface_id = render_surface_contract.entries[0].render_surface_id
     logs_entry = logs_contract.entries[0]
 
-    total_log_sources = 4
-    active_log_sources = 4
-    highlighted_log_sources = 0
+    total_log_sources = logs_entry.total_log_related_entries
+    highlighted_log_sources = (
+        logs_entry.critical_entries
+        + logs_entry.warning_entries
+        + logs_entry.failure_visible_entries
+    )
+    active_log_sources = max(total_log_sources - highlighted_log_sources, 0)
 
     entries = (
         VisualBottomTickerEntry(
@@ -97,7 +100,8 @@ def build_visual_bottom_ticker_contract() -> VisualBottomTickerContract:
             visible=True,
             read_only=True,
             description=(
-                "Canonical visual bottom ticker entry for HUD log stream."
+                "Canonical visual bottom ticker entry derived from "
+                "logs panel content."
             ),
         ),
     )

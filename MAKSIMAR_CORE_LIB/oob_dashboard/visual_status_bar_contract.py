@@ -10,7 +10,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.visual_render_surface_contract import (
     build_visual_render_surface_contract,
 )
 
-
 StatusBarSeverity = Literal[
     "normal",
     "warning",
@@ -76,9 +75,13 @@ def build_visual_status_bar_contract() -> VisualStatusBarContract:
     renderer_surface_id = render_surface_contract.entries[0].render_surface_id
     system_status_entry = system_status_contract.entries[0]
 
-    total_runtime_surfaces = 4
-    active_runtime_surfaces = 4
-    warning_runtime_surfaces = 0
+    total_runtime_surfaces = system_status_entry.total_foundation_entries
+    if system_status_entry.unified_system_status == "active":
+        active_runtime_surfaces = total_runtime_surfaces
+        warning_runtime_surfaces = 0
+    else:
+        active_runtime_surfaces = max(total_runtime_surfaces - 1, 0)
+        warning_runtime_surfaces = 1
 
     entries = (
         VisualStatusBarEntry(
@@ -97,7 +100,8 @@ def build_visual_status_bar_contract() -> VisualStatusBarContract:
             visible=True,
             read_only=True,
             description=(
-                "Canonical visual status bar entry for top HUD summary."
+                "Canonical visual status bar entry derived from "
+                "system-status panel content."
             ),
         ),
     )

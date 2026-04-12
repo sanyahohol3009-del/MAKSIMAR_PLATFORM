@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MAKSIMAR Operator Screen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: #0f1b2b;
+      --panel-2: #132338;
+      --text: #e6f0ff;
+      --muted: #8ea3bf;
+      --accent: #5ee7ff;
+      --line: #1f3550;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #040b14 0%, #081220 100%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr 320px;
+      grid-template-rows: 76px 1fr 88px;
+      grid-template-areas:
+        "top top top"
+        "left center right"
+        "bottom bottom bottom";
+      gap: 12px;
+      padding: 12px;
+    }
+    .card {
+      background: rgba(15, 27, 43, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+      overflow: hidden;
+    }
+    .top {
+      grid-area: top;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: stretch;
+      padding: 10px;
+    }
+    .left {
+      grid-area: left;
+      padding: 14px;
+    }
+    .center {
+      grid-area: center;
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+    .right {
+      grid-area: right;
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+    }
+    .bottom {
+      grid-area: bottom;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .headline {
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .nav-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .nav-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      font-size: 14px;
+    }
+    .center-top {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .mini {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+    .core-box {
+      min-height: 430px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(94, 231, 255, 0.08), transparent 45%),
+        linear-gradient(180deg, rgba(19, 35, 56, 0.95), rgba(10, 20, 34, 0.95));
+      padding: 16px;
+    }
+    .right-block {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+    .severity-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      font-size: 14px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .kv:last-child { border-bottom: 0; }
+    .mono {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      color: #c5d8f3;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card top">
+      <div class="card" style="padding:12px;">
+        <div class="headline">System Health</div>
+        <div class="value">Status: WARNING</div>
+        <div class="severity-pill">
+          <span class="dot" style="background:#ffbd2e;"></span>
+          runtime truthful state
+        </div>
+        <div class="sub">status=warning; runtime=3/4; warnings=1</div>
+      </div>
+
+      <div class="card" style="padding:12px;">
+        <div class="headline">Display Role</div>
+        <div class="value">Primary Operator</div>
+        <div class="sub">surface=render_surface_workspace_operator_main_001</div>
+      </div>
+
+      <div class="card" style="padding:12px;">
+        <div class="headline">Scene Mode</div>
+        <div class="value">truthful_live_operator_screen</div>
+        <div class="sub">screen=visual_hud_screen_001</div>
+      </div>
+
+      <div class="card" style="padding:12px;">
+        <div class="headline">Layers</div>
+        <div class="value">6/6</div>
+        <div class="sub">render_state=render_complete</div>
+      </div>
+    </div>
+
+    <div class="card left">
+      <div class="headline">Sidebar</div>
+      <div class="nav-list">
+        <div class="nav-item">Monitoring</div>
+        <div class="nav-item">Projects</div>
+        <div class="nav-item">Memory</div>
+        <div class="nav-item">Simulation</div>
+        <div class="nav-item">Physics</div>
+        <div class="nav-item">Voice</div>
+        <div class="nav-item">AI Services</div>
+        <div class="nav-item">Settings</div>
+      </div>
+      <div class="sub" style="margin-top:14px;">
+        workspace=workspace_operator_main<br/>
+        dashboard=dashboard_main_operator_001
+      </div>
+    </div>
+
+    <div class="card center">
+      <div class="center-top">
+        <div class="mini">
+          <div class="headline">Topology</div>
+          <div class="value">12</div>
+          <div class="sub">overlay entries</div>
+        </div>
+        <div class="mini">
+          <div class="headline">Signals</div>
+          <div class="value">19</div>
+          <div class="sub">overlay entries</div>
+        </div>
+        <div class="mini">
+          <div class="headline">Explainability</div>
+          <div class="value">8</div>
+          <div class="sub">sidebar entries</div>
+        </div>
+        <div class="mini">
+          <div class="headline">Ticker</div>
+          <div class="value">WARNING</div>
+          <div class="sub">log stream state</div>
+        </div>
+      </div>
+
+      <div class="core-box">
+        <div class="headline">Main Workspace / Operator Core</div>
+        <svg viewBox="0 0 600 420" width="100%" height="100%" aria-label="Operator core topology">
+  <defs>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5ee7ff" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#5ee7ff" stop-opacity="0.05"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="300" cy="210" r="62" fill="url(#coreGlow)" stroke="#5ee7ff" stroke-width="2"/>
+  <circle cx="300" cy="210" r="110" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <circle cx="300" cy="210" r="160" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="10 8"/>
+
+  <text x="300" y="200" text-anchor="middle" fill="#e5f4ff" font-size="24" font-family="Arial">CORE</text>
+  <text x="300" y="224" text-anchor="middle" fill="#93c5fd" font-size="12" font-family="Arial">truth-bound operator center</text>
+
+  <circle cx="300" cy="50" r="10" fill="#3b82f6"/>
+  <text x="300" y="32" text-anchor="middle" fill="#93c5fd" font-size="11" font-family="Arial">TOP STATUS</text>
+
+  <circle cx="462" cy="210" r="10" fill="#22c55e"/>
+  <text x="510" y="214" text-anchor="middle" fill="#86efac" font-size="11" font-family="Arial">EXPLAIN</text>
+
+  <circle cx="300" cy="370" r="10" fill="#f59e0b"/>
+  <text x="300" y="395" text-anchor="middle" fill="#fcd34d" font-size="11" font-family="Arial">TICKER</text>
+
+  <circle cx="138" cy="210" r="10" fill="#8b5cf6"/>
+  <text x="92" y="214" text-anchor="middle" fill="#c4b5fd" font-size="11" font-family="Arial">NAV</text>
+
+  <line x1="300" y1="60" x2="300" y2="148" stroke="#60a5fa" stroke-width="1.5"/>
+  <line x1="452" y1="210" x2="370" y2="210" stroke="#4ade80" stroke-width="1.5"/>
+  <line x1="300" y1="360" x2="300" y2="272" stroke="#fbbf24" stroke-width="1.5"/>
+  <line x1="148" y1="210" x2="230" y2="210" stroke="#a78bfa" stroke-width="1.5"/>
+</svg>
+      </div>
+
+      <div class="mini">
+        <div class="headline">Center Summary</div>
+        <div class="mono">screen=visual_hud_screen_001; layers=6/6; topology_overlays=12; signal_overlays=19</div>
+      </div>
+    </div>
+
+    <div class="card right">
+      <div class="right-block">
+        <div class="headline">Explain Panel</div>
+        <div class="mono">explainability_entries=8</div>
+      </div>
+
+      <div class="right-block">
+        <div class="headline">Top Summary</div>
+        <div class="mono">status=warning; runtime=3/4; warnings=1</div>
+      </div>
+
+      <div class="right-block">
+        <div class="headline">Why this state</div>
+        <div class="kv"><span>Status severity</span><span>warning</span></div>
+        <div class="kv"><span>Ticker severity</span><span>warning</span></div>
+        <div class="kv"><span>Renderer surface</span><span>render_surface_workspace_operator_main_001</span></div>
+        <div class="kv"><span>Theme</span><span>visual_theme_operator_hud_001</span></div>
+        <div class="kv"><span>Screen</span><span>visual_hud_screen_001</span></div>
+      </div>
+    </div>
+
+    <div class="card bottom">
+      <div>
+        <div class="headline">Command Strip</div>
+        <div class="mono">open monitoring · open diagnostics · explain current state · show routing · show active alerts</div>
+      </div>
+      <div>
+        <div class="headline">Bottom Summary</div>
+        <div class="mono">ticker=warning; logs=2/4; highlighted=2</div>
+      </div>
+      <div>
+        <div class="headline">Artifact</div>
+        <div class="mono">first truthful live operator screen (HTML artifact)</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

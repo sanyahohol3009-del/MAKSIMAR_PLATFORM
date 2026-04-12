@@ -1,0 +1,64 @@
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_contract_classes_inventory.txt:103:/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:38:class OperatorDashboardVisualShellReadyEntry:
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_contract_classes_inventory.txt:104:/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:113:class OperatorDashboardVisualShellReadyContract:
+/home/aleksandr/MAKSIMAR_PLATFORM/refactor.py:318:        "operator_dashboard_visual_shell_ready_",
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_tree_inventory.txt:18:/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/__pycache__/operator_dashboard_visual_shell_ready_contract.cpython-312.pyc
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_tree_inventory.txt:123:/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py
+/home/aleksandr/MAKSIMAR_PLATFORM/.pytest_cache/v/cache/nodeids:668:  "tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py::test_operator_dashboard_visual_shell_ready_contract_builds",
+/home/aleksandr/MAKSIMAR_PLATFORM/.pytest_cache/v/cache/nodeids:669:  "tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py::test_operator_dashboard_visual_shell_ready_contract_contains_expected_entry",
+/home/aleksandr/MAKSIMAR_PLATFORM/.pytest_cache/v/cache/nodeids:670:  "tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py::test_operator_dashboard_visual_shell_ready_entry_rejects_non_read_only_boundary",
+/home/aleksandr/MAKSIMAR_PLATFORM/.pytest_cache/v/cache/nodeids:671:  "tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py::test_operator_dashboard_visual_shell_ready_entry_rejects_non_shell_bound",
+/home/aleksandr/MAKSIMAR_PLATFORM/.pytest_cache/v/cache/nodeids:672:  "tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py::test_operator_dashboard_visual_shell_ready_entry_rejects_non_truth_bound",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_operator.py:159:from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visual_shell_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_operator.py:160:    build_operator_dashboard_visual_shell_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_operator.py:161:    OperatorDashboardVisualShellReadyContract,
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_operator.py:236:    "build_operator_dashboard_visual_shell_ready_contract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/exports_operator.py:237:    "OperatorDashboardVisualShellReadyContract",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:15:    "visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:19:    "main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:23:    "visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:27:    "main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:41:    visual_shell_ready_id: str
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:45:    visual_shell_ready_state: VisualShellReadyState
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:46:    visual_shell_ready_class: VisualShellReadyClass
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:57:        _require_non_empty(self.visual_shell_ready_id, "visual_shell_ready_id")
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:63:        if self.visual_shell_ready_state not in ALL_VISUAL_SHELL_READY_STATES:
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:65:                "visual_shell_ready_state must be one of "
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:67:                f"got {self.visual_shell_ready_state!r}."
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:70:        if self.visual_shell_ready_class not in ALL_VISUAL_SHELL_READY_CLASSES:
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:72:                "visual_shell_ready_class must be one of "
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:74:                f"got {self.visual_shell_ready_class!r}."
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:113:class OperatorDashboardVisualShellReadyContract:
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:135:            if entry.visual_shell_ready_state == "visual_shell_ready"
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:137:            raise ValueError("ready_entries must match visual_shell_ready count.")
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:152:def build_operator_dashboard_visual_shell_ready_contract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:153:) -> OperatorDashboardVisualShellReadyContract:
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:164:            visual_shell_ready_id="operator_dashboard_visual_shell_ready_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:168:            visual_shell_ready_state="visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:169:            visual_shell_ready_class="main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:186:    return OperatorDashboardVisualShellReadyContract(
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:187:        contract_id="operator_dashboard_visual_shell_ready_contract_001",
+/home/aleksandr/MAKSIMAR_PLATFORM/MAKSIMAR_CORE_LIB/oob_dashboard/operator_dashboard_visual_shell_ready_contract.py:192:            if entry.visual_shell_ready_state == "visual_shell_ready"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:5:from MAKSIMAR_CORE_LIB.oob_dashboard.operator_dashboard_visual_shell_ready_contract import (
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:7:    build_operator_dashboard_visual_shell_ready_contract,
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:11:def test_operator_dashboard_visual_shell_ready_contract_builds() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:12:    contract = build_operator_dashboard_visual_shell_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:14:    assert contract.contract_id == "operator_dashboard_visual_shell_ready_contract_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:21:def test_operator_dashboard_visual_shell_ready_contract_contains_expected_entry() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:22:    contract = build_operator_dashboard_visual_shell_ready_contract()
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:25:    assert entry.visual_shell_ready_id == "operator_dashboard_visual_shell_ready_001"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:29:    assert entry.visual_shell_ready_state == "visual_shell_ready"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:30:    assert entry.visual_shell_ready_class == "main_operator_visual_shell_ready"
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:39:def test_operator_dashboard_visual_shell_ready_entry_rejects_non_truth_bound() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:42:            visual_shell_ready_id="invalid_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:46:            visual_shell_ready_state="visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:47:            visual_shell_ready_class="main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:58:def test_operator_dashboard_visual_shell_ready_entry_rejects_non_read_only_boundary() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:61:            visual_shell_ready_id="invalid_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:65:            visual_shell_ready_state="visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:66:            visual_shell_ready_class="main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:77:def test_operator_dashboard_visual_shell_ready_entry_rejects_non_shell_bound() -> None:
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:80:            visual_shell_ready_id="invalid_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:84:            visual_shell_ready_state="visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/tests/oob_dashboard/test_operator_dashboard_visual_shell_ready_contract_smoke.py:85:            visual_shell_ready_class="main_operator_visual_shell_ready",
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_dedup_phase2_map.txt:135:- bind visual_shell_ready to cleaned visual chain
+/home/aleksandr/MAKSIMAR_PLATFORM/visual_normalization_plan.txt:77:visual_shell_ready
