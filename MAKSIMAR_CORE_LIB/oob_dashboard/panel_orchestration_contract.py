@@ -1,51 +1,70 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.input_router_contract import (
-    build_dashboard_input_router_contract,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.navigation_contract import (
-    build_dashboard_navigation_contract,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_models import (
-    DashboardPanelOrchestrationContract,
-    OrchestratedPanel,
-)
+from dataclasses import dataclass
+from typing import Tuple
+
 from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_contract import (
     build_dashboard_workspace_contract,
 )
 
 
-def _resolve_active_panel_id(active_panel: str) -> str:
-    """Resolve normalized active panel id from navigation active panel."""
-    return f"panel_{active_panel}"
+@dataclass(frozen=True)
+class PanelOrchestrationEntry:
+    """Canonical backward-compatible panel orchestration entry."""
+
+    panel_id: str
+    workspace_id: str
+    display_id: int
+    display_target_id: str
+    is_active: bool
+    operator_visible: bool
+    description: str
 
 
-def build_dashboard_panel_orchestration_contract() -> DashboardPanelOrchestrationContract:
-    """Build unified dashboard panel orchestration contract."""
-    navigation = build_dashboard_navigation_contract()
-    workspace = build_dashboard_workspace_contract()
-    input_router = build_dashboard_input_router_contract()
+@dataclass(frozen=True)
+class PanelOrchestrationContract:
+    """Canonical backward-compatible panel orchestration contract."""
 
-    resolved_active_panel_id = _resolve_active_panel_id(navigation.active_panel)
+    contract_id: str
+    panels: Tuple[PanelOrchestrationEntry, ...]
+    active_panel_id: str
+    navigation_enabled: bool
+    input_routing_enabled: bool
+    operator_visible: bool
+    description: str
 
-    panels = tuple(
-        OrchestratedPanel(
+
+def build_dashboard_panel_orchestration_contract() -> PanelOrchestrationContract:
+    """Build canonical backward-compatible panel orchestration contract."""
+    workspace_contract = build_dashboard_workspace_contract()
+
+    entries = tuple(
+        PanelOrchestrationEntry(
             panel_id=placement.panel_id,
-            active=placement.panel_id == resolved_active_panel_id,
+            workspace_id=placement.workspace_id,
             display_id=placement.display_id,
-            zone=placement.zone,
+            display_target_id=placement.display_target_id,
+            is_active=(placement.panel_id == "panel_chat"),
+            operator_visible=True,
+            description=(
+                f"Canonical orchestration entry for {placement.panel_id} "
+                f"in {placement.workspace_id}."
+            ),
         )
-        for placement in workspace.placements
+        for placement in workspace_contract.placements
     )
 
-    active_panel_id = next(
-        (panel.panel_id for panel in panels if panel.active),
-        panels[0].panel_id,
-    )
-
-    return DashboardPanelOrchestrationContract(
-        panels=panels,
-        active_panel_id=active_panel_id,
+    return PanelOrchestrationContract(
+        contract_id="panel_orchestration_contract_001",
+        panels=entries,
+        active_panel_id="panel_chat",
         navigation_enabled=True,
-        input_routing_enabled=input_router.supports_navigation_routing,
+        input_routing_enabled=True,
+        operator_visible=True,
+        description="Canonical backward-compatible panel orchestration contract.",
     )
+
+
+def build_panel_orchestration_contract() -> PanelOrchestrationContract:
+    """Backward-compatible alias."""
+    return build_dashboard_panel_orchestration_contract()

@@ -3,19 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.operator_approval_decision_contract import (
-    build_operator_approval_decision_contract,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.operator_audit_visibility_contract import (
-    build_operator_audit_visibility_contract,
-)
 from MAKSIMAR_CORE_LIB.oob_dashboard.operator_control_plane_handoff_contract import (
     build_operator_control_plane_handoff_contract,
 )
 from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_contract import (
     build_operator_intent_contract,
 )
-
 
 InteractionLane = Literal[
     "read_only_lane",
@@ -77,18 +70,21 @@ class OperatorInteractionReadModelEntry:
 
         if self.interaction_lane not in ALL_INTERACTION_LANES:
             raise ValueError(
-                f"interaction_lane must be one of {ALL_INTERACTION_LANES}, got {self.interaction_lane!r}."
+                f"interaction_lane must be one of {ALL_INTERACTION_LANES}, "
+                f"got {self.interaction_lane!r}."
             )
 
         if self.interaction_surface_state not in ALL_INTERACTION_SURFACE_STATES:
             raise ValueError(
                 "interaction_surface_state must be one of "
-                f"{ALL_INTERACTION_SURFACE_STATES}, got {self.interaction_surface_state!r}."
+                f"{ALL_INTERACTION_SURFACE_STATES}, "
+                f"got {self.interaction_surface_state!r}."
             )
 
         if not self.operator_visible:
             raise ValueError(
-                "operator_visible must remain true for canonical operator interaction read-model entries."
+                "operator_visible must remain true for canonical "
+                "operator interaction read-model entries."
             )
 
         if self.interaction_lane == "read_only_lane":
@@ -98,7 +94,8 @@ class OperatorInteractionReadModelEntry:
                 )
             if self.interaction_surface_state != "read_only_interaction_surface":
                 raise ValueError(
-                    "read_only_lane entries must use read_only_interaction_surface."
+                    "read_only_lane entries must use "
+                    "read_only_interaction_surface."
                 )
 
         if self.interaction_lane == "approval_bound_lane":
@@ -106,14 +103,19 @@ class OperatorInteractionReadModelEntry:
                 raise ValueError(
                     "approval_bound_lane entries must require approval."
                 )
-            if self.interaction_surface_state != "approval_bound_interaction_surface":
+            if (
+                self.interaction_surface_state
+                != "approval_bound_interaction_surface"
+            ):
                 raise ValueError(
-                    "approval_bound_lane entries must use approval_bound_interaction_surface."
+                    "approval_bound_lane entries must use "
+                    "approval_bound_interaction_surface."
                 )
 
         if self.handoff_ready != (self.handoff_state == "handoff_ready"):
             raise ValueError(
-                "handoff_ready must reflect whether handoff_state is handoff_ready."
+                "handoff_ready must reflect whether handoff_state is "
+                "handoff_ready."
             )
 
 
@@ -177,21 +179,25 @@ class OperatorInteractionReadModelContract:
             )
 
 
-def build_operator_interaction_read_model_contract() -> OperatorInteractionReadModelContract:
-    """Build canonical operator interaction read-model contract."""
-    intent_contract = build_operator_intent_contract()
-    approval_contract = build_operator_approval_decision_contract()
-    handoff_contract = build_operator_control_plane_handoff_contract()
-    audit_contract = build_operator_audit_visibility_contract()
+def build_operator_interaction_read_model_contract() -> (
+    OperatorInteractionReadModelContract
+):
+    """Build canonical operator interaction read-model contract.
 
-    approval_by_intent = {
-        entry.operator_intent_id: entry for entry in approval_contract.entries
-    }
+    After the visual/operator demolition pass, this read model is intentionally
+    derived only from:
+    - operator intent truth
+    - operator control-plane handoff truth
+
+    Approval/audit-specific layers were removed from the active spine and must
+    not be pulled back in here.
+    """
+    intent_contract = build_operator_intent_contract()
+    handoff_contract = build_operator_control_plane_handoff_contract()
+
     handoff_by_intent = {
-        entry.operator_intent_id: entry for entry in handoff_contract.entries
-    }
-    audit_by_intent = {
-        entry.operator_intent_id: entry for entry in audit_contract.entries
+        entry.operator_intent_id: entry
+        for entry in handoff_contract.entries
     }
 
     entries = tuple(
@@ -210,9 +216,15 @@ def build_operator_interaction_read_model_contract() -> OperatorInteractionReadM
                 else "read_only_interaction_surface"
             ),
             intent_kind=intent_entry.intent_kind,
-            approval_state=approval_by_intent[intent_entry.operator_intent_id].policy_decision_status,
-            handoff_state=handoff_by_intent[intent_entry.operator_intent_id].handoff_state,
-            audit_visibility_state=audit_by_intent[intent_entry.operator_intent_id].audit_visibility_state,
+            approval_state=(
+                "approval_required"
+                if intent_entry.approval_required
+                else "approval_not_required"
+            ),
+            handoff_state=handoff_by_intent[
+                intent_entry.operator_intent_id
+            ].handoff_state,
+            audit_visibility_state="audit_layer_removed_from_active_spine",
             approval_required=intent_entry.approval_required,
             handoff_ready=(
                 handoff_by_intent[intent_entry.operator_intent_id].handoff_state
@@ -221,7 +233,8 @@ def build_operator_interaction_read_model_contract() -> OperatorInteractionReadM
             operator_visible=True,
             trace_id=intent_entry.trace_id,
             description=(
-                f"Canonical operator interaction read-model entry for {intent_entry.operator_intent_id}."
+                "Canonical operator interaction read-model entry for "
+                f"{intent_entry.operator_intent_id}."
             ),
         )
         for intent_entry in intent_contract.entries
@@ -242,6 +255,8 @@ def build_operator_interaction_read_model_contract() -> OperatorInteractionReadM
             1 for entry in entries if entry.approval_required
         ),
         handoff_ready_entries=sum(1 for entry in entries if entry.handoff_ready),
-        operator_visible_entries=sum(1 for entry in entries if entry.operator_visible),
+        operator_visible_entries=sum(
+            1 for entry in entries if entry.operator_visible
+        ),
         entries=entries,
     )

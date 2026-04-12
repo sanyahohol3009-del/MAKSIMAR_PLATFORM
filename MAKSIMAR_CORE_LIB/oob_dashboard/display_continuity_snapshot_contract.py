@@ -9,10 +9,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_assignment_registry_contract import
 from MAKSIMAR_CORE_LIB.oob_dashboard.display_resolver_decision_contract import (
     build_display_resolver_decision_contract,
 )
-from MAKSIMAR_CORE_LIB.oob_dashboard.monitor_inventory_contract import (
-    build_monitor_inventory_contract,
-)
-
 
 ContinuitySnapshotState = Literal[
     "snapshot_ready",
@@ -73,19 +69,19 @@ class DisplayContinuitySnapshotEntry:
                 f"{ALL_CONTINUITY_SNAPSHOT_CLASSES}, got {self.snapshot_class!r}."
             )
 
-        if not self.operator_visible:
-            raise ValueError(
-                "operator_visible must remain true for canonical continuity snapshot entries."
-            )
-
         if self.active_assignments < 1:
             raise ValueError(
-                "active_assignments must be at least 1 for canonical continuity snapshots."
+                "active_assignments must be at least 1 for canonical continuity snapshot entries."
             )
 
         if not self.selected_assignment_present:
             raise ValueError(
-                "selected_assignment_present must remain true for canonical continuity snapshots."
+                "selected_assignment_present must remain true for canonical continuity snapshot entries."
+            )
+
+        if not self.operator_visible:
+            raise ValueError(
+                "operator_visible must remain true for canonical continuity snapshot entries."
             )
 
 
@@ -104,29 +100,22 @@ class DisplayContinuitySnapshotContract:
         _require_non_empty(self.contract_id, "contract_id")
 
         if self.total_entries != len(self.entries):
-            raise ValueError(
-                "total_entries must match the number of entries in the contract."
-            )
+            raise ValueError("total_entries must match the number of entries in the contract.")
 
         if self.shared_surface_entries != sum(
             1 for entry in self.entries if entry.shared_surface
         ):
-            raise ValueError(
-                "shared_surface_entries must match shared_surface count."
-            )
+            raise ValueError("shared_surface_entries must match shared_surface count.")
 
         if self.operator_visible_entries != sum(
             1 for entry in self.entries if entry.operator_visible
         ):
-            raise ValueError(
-                "operator_visible_entries must match operator_visible count."
-            )
+            raise ValueError("operator_visible_entries must match operator_visible count.")
 
 
 def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotContract:
     """Build canonical display continuity snapshot contract."""
     assignment_contract = build_display_assignment_registry_contract()
-    monitor_inventory_contract = build_monitor_inventory_contract()
     resolver_contract = build_display_resolver_decision_contract()
 
     active_assignments_by_display: dict[str, int] = {}
@@ -135,19 +124,21 @@ def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotCon
             active_assignments_by_display.get(entry.display_target_id, 0) + 1
         )
 
-    shared_surface_by_display = {
-        entry.display_target_id: entry.shared_surface
-        for entry in monitor_inventory_contract.entries
-    }
-
     resolved_display_ids = {
-        entry.display_target_id for entry in resolver_contract.entries
+        entry.display_target_id
+        for entry in resolver_contract.entries
     }
 
     snapshot_class_map = {
         "display_primary_operator": "primary_snapshot",
         "display_secondary_diagnostics": "secondary_snapshot",
         "display_tertiary_expansion": "tertiary_snapshot",
+    }
+
+    shared_surface_map = {
+        "display_primary_operator": False,
+        "display_secondary_diagnostics": True,
+        "display_tertiary_expansion": False,
     }
 
     entries = tuple(
@@ -161,7 +152,7 @@ def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotCon
                 display_target_id in resolved_display_ids
                 or display_target_id == "display_tertiary_expansion"
             ),
-            shared_surface=shared_surface_by_display[display_target_id],
+            shared_surface=shared_surface_map[display_target_id],
             operator_visible=True,
             description=(
                 f"Canonical continuity snapshot entry for {display_target_id}."

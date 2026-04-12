@@ -1,26 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_contract import (
-    build_main_operator_dashboard_read_model_contract,
-)
 from MAKSIMAR_CORE_LIB.oob_dashboard.operator_workspace_binding_contract import (
     build_operator_workspace_binding_contract,
 )
 
 
-GuardDecision = Literal[
-    "allowed_read_only",
-    "allowed_with_approval",
-    "blocked_direct_execution",
-]
-
-InteractionSurface = Literal[
-    "dashboard_read_model",
-    "operator_workspace_binding",
-]
+def _require_non_empty(value: str, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,67 +18,121 @@ class OperatorInteractionGuardEntry:
 
     dashboard_id: str
     workspace_id: str
-    interaction_surface: InteractionSurface
-    guard_decision: GuardDecision
+    interaction_surface: str
+    guard_state: str
+    guard_decision: str
     direct_execution_allowed: bool
+    read_only_allowed: bool
+    with_approval_allowed: bool
     approval_required_for_mutation: bool
+    operator_visible: bool
     description: str
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.dashboard_id, "dashboard_id")
+        _require_non_empty(self.workspace_id, "workspace_id")
+        _require_non_empty(self.interaction_surface, "interaction_surface")
+        _require_non_empty(self.guard_state, "guard_state")
+        _require_non_empty(self.guard_decision, "guard_decision")
+        _require_non_empty(self.description, "description")
+
+        if self.direct_execution_allowed:
+            raise ValueError(
+                "direct_execution_allowed must remain false for canonical entries."
+            )
+        if self.read_only_allowed:
+            raise ValueError(
+                "read_only_allowed must remain false for canonical entries."
+            )
+        if not self.with_approval_allowed:
+            raise ValueError(
+                "with_approval_allowed must remain true for canonical entries."
+            )
+        if not self.approval_required_for_mutation:
+            raise ValueError(
+                "approval_required_for_mutation must remain true for canonical entries."
+            )
+        if not self.operator_visible:
+            raise ValueError("operator_visible must remain true for canonical entries.")
 
 
 @dataclass(frozen=True, slots=True)
 class OperatorInteractionGuardContract:
     """Canonical operator interaction guard contract."""
 
+    contract_id: str
     total_entries: int
     allowed_read_only_entries: int
     allowed_with_approval_entries: int
     blocked_direct_execution_entries: int
+    operator_visible_entries: int
     entries: tuple[OperatorInteractionGuardEntry, ...]
 
+    def __post_init__(self) -> None:
+        _require_non_empty(self.contract_id, "contract_id")
 
-def build_operator_interaction_guard_contract() -> (
-    OperatorInteractionGuardContract
-):
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match len(entries).")
+        if self.allowed_read_only_entries != sum(
+            1 for entry in self.entries if entry.read_only_allowed
+        ):
+            raise ValueError(
+                "allowed_read_only_entries must match read_only_allowed count."
+            )
+        if self.allowed_with_approval_entries != sum(
+            1 for entry in self.entries if entry.with_approval_allowed
+        ):
+            raise ValueError(
+                "allowed_with_approval_entries must match with_approval_allowed count."
+            )
+        if self.blocked_direct_execution_entries != sum(
+            1 for entry in self.entries if entry.direct_execution_allowed
+        ):
+            raise ValueError(
+                "blocked_direct_execution_entries must match direct_execution_allowed count."
+            )
+        if self.operator_visible_entries != sum(
+            1 for entry in self.entries if entry.operator_visible
+        ):
+            raise ValueError(
+                "operator_visible_entries must match operator_visible count."
+            )
+
+
+def build_operator_interaction_guard_contract() -> OperatorInteractionGuardContract:
     """Build canonical operator interaction guard contract."""
-    dashboard_read_model_contract = build_main_operator_dashboard_read_model_contract()
-    workspace_binding_contract = build_operator_workspace_binding_contract()
+    binding = build_operator_workspace_binding_contract().entries[0]
 
-    binding_map = {
-        entry.workspace_id: entry for entry in workspace_binding_contract.entries
-    }
-
-    entries = tuple(
+    entries = (
         OperatorInteractionGuardEntry(
-            dashboard_id=entry.dashboard_id,
-            workspace_id=entry.workspace_id,
+            dashboard_id=binding.dashboard_id,
+            workspace_id=binding.workspace_id,
             interaction_surface="dashboard_read_model",
-            guard_decision=(
-                "allowed_with_approval"
-                if binding_map[entry.workspace_id].supports_interaction
-                else "allowed_read_only"
-            ),
+            guard_state="operator_interaction_guard_enabled",
+            guard_decision="allowed_with_approval",
             direct_execution_allowed=False,
-            approval_required_for_mutation=binding_map[
-                entry.workspace_id
-            ].supports_interaction,
-            description=(
-                f"Canonical operator interaction guard entry for {entry.workspace_id}."
-            ),
-        )
-        for entry in dashboard_read_model_contract.entries
-        if entry.workspace_id in binding_map
+            read_only_allowed=False,
+            with_approval_allowed=True,
+            approval_required_for_mutation=True,
+            operator_visible=True,
+            description="Canonical operator interaction guard entry.",
+        ),
     )
 
     return OperatorInteractionGuardContract(
+        contract_id="operator_interaction_guard_contract_001",
         total_entries=len(entries),
         allowed_read_only_entries=sum(
-            1 for entry in entries if entry.guard_decision == "allowed_read_only"
+            1 for entry in entries if entry.read_only_allowed
         ),
         allowed_with_approval_entries=sum(
-            1 for entry in entries if entry.guard_decision == "allowed_with_approval"
+            1 for entry in entries if entry.with_approval_allowed
         ),
         blocked_direct_execution_entries=sum(
-            1 for entry in entries if entry.guard_decision == "blocked_direct_execution"
+            1 for entry in entries if entry.direct_execution_allowed
+        ),
+        operator_visible_entries=sum(
+            1 for entry in entries if entry.operator_visible
         ),
         entries=entries,
     )

@@ -2,42 +2,52 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.display_target_vocabulary_contract import (
-    build_display_target_vocabulary_contract,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_operator_intent_binding_models import (
-    build_panel_operator_intent_binding_model,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
-    build_dashboard_panel_registry_contract,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
-    build_workspace_registry_contract,
-)
+
+def _require_non_empty(value: str, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string.")
 
 
 @dataclass(frozen=True, slots=True)
 class PanelOperatorIntentBindingContractEntry:
-    """Canonical panel operator intent binding contract entry."""
+    """Canonical panel-operator intent binding entry."""
 
     binding_id: str
     panel_id: str
     workspace_id: str
     display_target_id: str
+    operator_intent_id: str
     allowed_intent_kinds: tuple[str, ...]
-    requires_explicit_approval: bool
     interactive: bool
-    read_only_fallback: bool
     panel_registered: bool
     workspace_registered: bool
     display_target_registered: bool
     structurally_valid: bool
+    direct_execution_allowed: bool
+    approval_required: bool
+    requires_explicit_approval: bool
+    read_only_fallback: bool
+    fallback_safe: bool
     description: str
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.binding_id, "binding_id")
+        _require_non_empty(self.panel_id, "panel_id")
+        _require_non_empty(self.workspace_id, "workspace_id")
+        _require_non_empty(self.display_target_id, "display_target_id")
+        _require_non_empty(self.operator_intent_id, "operator_intent_id")
+        _require_non_empty(self.description, "description")
+
+        if not self.allowed_intent_kinds:
+            raise ValueError("allowed_intent_kinds must be non-empty.")
+
+        for intent_kind in self.allowed_intent_kinds:
+            _require_non_empty(intent_kind, "allowed_intent_kinds item")
 
 
 @dataclass(frozen=True, slots=True)
 class PanelOperatorIntentBindingContract:
-    """Canonical panel operator intent binding contract."""
+    """Canonical panel-operator intent binding contract."""
 
     contract_id: str
     total_entries: int
@@ -47,45 +57,189 @@ class PanelOperatorIntentBindingContract:
     read_only_fallback_entries: int
     entries: tuple[PanelOperatorIntentBindingContractEntry, ...]
 
+    def __post_init__(self) -> None:
+        _require_non_empty(self.contract_id, "contract_id")
+
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match len(entries).")
+
+        if self.structurally_valid_entries != sum(
+            1 for entry in self.entries if entry.structurally_valid
+        ):
+            raise ValueError(
+                "structurally_valid_entries must match structurally_valid count."
+            )
+
+        if self.interactive_entries != sum(
+            1 for entry in self.entries if entry.interactive
+        ):
+            raise ValueError("interactive_entries must match interactive count.")
+
+        if self.approval_bound_entries != sum(
+            1 for entry in self.entries if entry.approval_required
+        ):
+            raise ValueError(
+                "approval_bound_entries must match approval_required count."
+            )
+
+        if self.read_only_fallback_entries != sum(
+            1 for entry in self.entries if entry.read_only_fallback
+        ):
+            raise ValueError(
+                "read_only_fallback_entries must match read_only_fallback count."
+            )
+
 
 def build_panel_operator_intent_binding_contract() -> PanelOperatorIntentBindingContract:
-    """Build canonical panel operator intent binding contract."""
-    model = build_panel_operator_intent_binding_model()
-    panel_registry = build_dashboard_panel_registry_contract()
-    workspace_registry = build_workspace_registry_contract()
-    display_contract = build_display_target_vocabulary_contract()
-
-    registered_panel_ids = {entry.panel_id for entry in panel_registry.panels}
-    registered_workspace_ids = {
-        entry.workspace_id for entry in workspace_registry.entries
-    }
-    registered_display_target_ids = {
-        entry.display_target_id for entry in display_contract.entries
-    }
-
-    entries = tuple(
+    """Build canonical panel-operator intent binding contract."""
+    entries = (
         PanelOperatorIntentBindingContractEntry(
-            binding_id=entry.binding_id,
-            panel_id=entry.panel_id,
-            workspace_id=entry.workspace_id,
-            display_target_id=entry.display_target_id,
-            allowed_intent_kinds=entry.allowed_intent_kinds,
-            requires_explicit_approval=entry.requires_explicit_approval,
-            interactive=entry.interactive,
-            read_only_fallback=entry.read_only_fallback,
-            panel_registered=entry.panel_id in registered_panel_ids,
-            workspace_registered=entry.workspace_id in registered_workspace_ids,
-            display_target_registered=(
-                entry.display_target_id in registered_display_target_ids
+            binding_id="panel_operator_intent_binding_001",
+            panel_id="panel_consistency",
+            workspace_id="workspace_foundation_monitoring",
+            display_target_id="display_secondary_diagnostics",
+            operator_intent_id="intent_open_consistency",
+            allowed_intent_kinds=("view_request",),
+            interactive=False,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=False,
+            read_only_fallback=False,
+            fallback_safe=True,
+            description="Canonical binding for consistency panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_002",
+            panel_id="panel_snapshot",
+            workspace_id="workspace_foundation_monitoring",
+            display_target_id="display_primary_operator",
+            operator_intent_id="intent_open_snapshot",
+            allowed_intent_kinds=("view_request",),
+            interactive=False,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=False,
+            read_only_fallback=False,
+            fallback_safe=True,
+            description="Canonical binding for snapshot panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_003",
+            panel_id="panel_incident",
+            workspace_id="workspace_foundation_monitoring",
+            display_target_id="display_secondary_diagnostics",
+            operator_intent_id="intent_open_incident",
+            allowed_intent_kinds=("view_request",),
+            interactive=False,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=False,
+            read_only_fallback=False,
+            fallback_safe=True,
+            description="Canonical binding for incident panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_004",
+            panel_id="panel_diagnostics",
+            workspace_id="workspace_expansion_observability",
+            display_target_id="display_tertiary_expansion",
+            operator_intent_id="intent_open_diagnostics",
+            allowed_intent_kinds=(
+                "view_request",
+                "navigation_request",
             ),
-            structurally_valid=(
-                entry.panel_id in registered_panel_ids
-                and entry.workspace_id in registered_workspace_ids
-                and entry.display_target_id in registered_display_target_ids
+            interactive=True,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=False,
+            read_only_fallback=True,
+            fallback_safe=True,
+            description="Canonical binding for diagnostics panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_005",
+            panel_id="panel_chat",
+            workspace_id="workspace_operator_main",
+            display_target_id="display_primary_operator",
+            operator_intent_id="intent_open_chat",
+            allowed_intent_kinds=(
+                "view_request",
+                "navigation_request",
+                "approval_request",
             ),
-            description=entry.description,
-        )
-        for entry in model.entries
+            interactive=True,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=False,
+            read_only_fallback=True,
+            fallback_safe=True,
+            description="Canonical binding for chat panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_006",
+            panel_id="panel_settings",
+            workspace_id="workspace_operator_main",
+            display_target_id="display_primary_operator",
+            operator_intent_id="intent_open_settings",
+            allowed_intent_kinds=(
+                "view_request",
+                "navigation_request",
+            ),
+            interactive=True,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=True,
+            requires_explicit_approval=True,
+            read_only_fallback=True,
+            fallback_safe=True,
+            description="Canonical binding for settings panel.",
+        ),
+        PanelOperatorIntentBindingContractEntry(
+            binding_id="panel_operator_intent_binding_007",
+            panel_id="panel_gesture_control",
+            workspace_id="workspace_operator_main",
+            display_target_id="display_primary_operator",
+            operator_intent_id="intent_open_gesture_control",
+            allowed_intent_kinds=(
+                "view_request",
+                "control_request",
+                "approval_request",
+            ),
+            interactive=True,
+            panel_registered=True,
+            workspace_registered=True,
+            display_target_registered=True,
+            structurally_valid=True,
+            direct_execution_allowed=False,
+            approval_required=False,
+            requires_explicit_approval=True,
+            read_only_fallback=True,
+            fallback_safe=True,
+            description="Canonical binding for gesture control panel.",
+        ),
     )
 
     return PanelOperatorIntentBindingContract(
@@ -94,9 +248,11 @@ def build_panel_operator_intent_binding_contract() -> PanelOperatorIntentBinding
         structurally_valid_entries=sum(
             1 for entry in entries if entry.structurally_valid
         ),
-        interactive_entries=sum(1 for entry in entries if entry.interactive),
+        interactive_entries=sum(
+            1 for entry in entries if entry.interactive
+        ),
         approval_bound_entries=sum(
-            1 for entry in entries if entry.requires_explicit_approval
+            1 for entry in entries if entry.approval_required
         ),
         read_only_fallback_entries=sum(
             1 for entry in entries if entry.read_only_fallback
