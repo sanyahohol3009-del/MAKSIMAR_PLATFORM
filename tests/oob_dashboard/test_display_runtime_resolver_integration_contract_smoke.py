@@ -1,55 +1,53 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard import (
+from MAKSIMAR_CORE_LIB.oob_dashboard.display_runtime_resolver_integration_contract import (
     build_display_runtime_resolver_integration_contract,
+    resolve_fallback_display_target_id,
 )
 
 
 def test_display_runtime_resolver_integration_contract_builds() -> None:
-    """Display runtime/resolver integration contract should build successfully."""
     contract = build_display_runtime_resolver_integration_contract()
 
-    assert contract.total_entries == 19
-    assert contract.resolved_entries == 18
-    assert contract.hidden_internal_entries == 1
-    assert contract.runtime_resolved_entries == 18
+    assert len(contract.entries) == 8
+    assert contract.entries[0].panel_id == "system_status"
+    assert contract.entries[-1].panel_id == "audit_timeline"
 
 
-def test_display_runtime_resolver_chat_entry() -> None:
-    """Chat panel should participate in runtime resolution."""
+def test_display_runtime_resolver_integration_foundation_entries() -> None:
     contract = build_display_runtime_resolver_integration_contract()
-    entry = next(entry for entry in contract.entries if entry.panel_id == "panel_chat")
+    resolver_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.view_id == "view_chat"
-    assert entry.display_target_id == "display_primary_operator"
-    assert entry.resolver_state == "resolved"
-    assert entry.display_availability == "available"
-    assert entry.participates_in_runtime_resolution is True
-
-
-def test_display_runtime_resolver_foundation_runtime_entry() -> None:
-    """Foundation runtime panel should resolve to diagnostics display."""
-    contract = build_display_runtime_resolver_integration_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.panel_id == "panel_foundation_runtime_status_001"
+    assert resolver_map["system_status"].display_target_id == "display_foundation_primary"
+    assert resolver_map["system_status"].fallback_display_target_id == (
+        "display_foundation_secondary"
+    )
+    assert resolver_map["logs"].display_target_id == "display_foundation_secondary"
+    assert resolver_map["logs"].fallback_display_target_id == (
+        "display_foundation_primary"
     )
 
-    assert entry.view_id == "view_foundation_runtime"
-    assert entry.display_target_id == "display_secondary_diagnostics"
-    assert entry.resolver_state == "resolved"
-    assert entry.participates_in_runtime_resolution is True
 
-
-def test_display_runtime_resolver_navigation_entry() -> None:
-    """Navigation panel should remain hidden internal."""
+def test_display_runtime_resolver_integration_interaction_entries() -> None:
     contract = build_display_runtime_resolver_integration_contract()
-    entry = next(
-        entry for entry in contract.entries if entry.panel_id == "panel_navigation"
+    resolver_map = {entry.panel_id: entry for entry in contract.entries}
+
+    assert resolver_map["action_queue"].display_target_id == "display_operator_interaction"
+    assert resolver_map["action_queue"].fallback_display_target_id == (
+        "display_operator_interaction"
+    )
+    assert resolver_map["audit_timeline"].resolved_display_role == (
+        "operator_interaction_display"
     )
 
-    assert entry.view_id == "view_navigation"
-    assert entry.display_target_id == "display_tertiary_expansion"
-    assert entry.resolver_state == "hidden_internal"
-    assert entry.participates_in_runtime_resolution is False
+
+def test_resolve_fallback_display_target_id_smoke() -> None:
+    assert resolve_fallback_display_target_id("display_foundation_primary") == (
+        "display_foundation_secondary"
+    )
+    assert resolve_fallback_display_target_id("display_foundation_secondary") == (
+        "display_foundation_primary"
+    )
+    assert resolve_fallback_display_target_id("display_operator_interaction") == (
+        "display_operator_interaction"
+    )

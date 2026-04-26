@@ -17,7 +17,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_read_model_contract import (
 WorkspaceRestoreState = Literal[
     "workspace_restore_ready",
 ]
-
 WorkspaceRestoreClass = Literal[
     "dashboard_workspace_restore",
 ]
@@ -25,7 +24,6 @@ WorkspaceRestoreClass = Literal[
 ALL_WORKSPACE_RESTORE_STATES: tuple[WorkspaceRestoreState, ...] = (
     "workspace_restore_ready",
 )
-
 ALL_WORKSPACE_RESTORE_CLASSES: tuple[WorkspaceRestoreClass, ...] = (
     "dashboard_workspace_restore",
 )
@@ -149,17 +147,21 @@ def build_workspace_restore_contract() -> WorkspaceRestoreContract:
     display_assignment_restore_contract = build_display_assignment_restore_contract()
     display_restore_continuity_contract = build_display_restore_continuity_contract()
 
-    workspace_read_model_entry = workspace_read_model_contract.entries[0]
+    workspace_read_model_row = workspace_read_model_contract.rows[0]
 
     entries = (
         WorkspaceRestoreEntry(
             workspace_restore_id="workspace_restore_001",
-            workspace_id=workspace_read_model_entry.workspace_id,
+            workspace_id=workspace_read_model_row.workspace_id,
             workspace_restore_state="workspace_restore_ready",
             workspace_restore_class="dashboard_workspace_restore",
             workspace_read_model_ready=True,
-            display_assignment_restore_ready=bool(display_assignment_restore_contract),
-            display_restore_continuity_ready=bool(display_restore_continuity_contract),
+            display_assignment_restore_ready=bool(
+                display_assignment_restore_contract.entries
+            ),
+            display_restore_continuity_ready=bool(
+                display_restore_continuity_contract.entries
+            ),
             operator_visible=True,
             truth_bound=True,
             description=(

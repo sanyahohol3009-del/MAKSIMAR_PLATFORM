@@ -23,17 +23,17 @@ def test_display_continuity_snapshot_contract_contains_expected_entries() -> Non
     contract = build_display_continuity_snapshot_contract()
     entry_map = {entry.display_target_id: entry for entry in contract.entries}
 
-    assert entry_map["display_primary_operator"].snapshot_class == "primary_snapshot"
-    assert entry_map["display_primary_operator"].shared_surface is False
-    assert entry_map["display_primary_operator"].selected_assignment_present is True
+    assert entry_map["display_foundation_primary"].snapshot_class == "foundation_primary_snapshot"
+    assert entry_map["display_foundation_primary"].shared_surface is False
+    assert entry_map["display_foundation_primary"].selected_assignment_present is True
 
-    assert entry_map["display_secondary_diagnostics"].snapshot_class == "secondary_snapshot"
-    assert entry_map["display_secondary_diagnostics"].shared_surface is True
-    assert entry_map["display_secondary_diagnostics"].selected_assignment_present is True
+    assert entry_map["display_foundation_secondary"].snapshot_class == "foundation_secondary_snapshot"
+    assert entry_map["display_foundation_secondary"].shared_surface is True
+    assert entry_map["display_foundation_secondary"].selected_assignment_present is True
 
-    assert entry_map["display_tertiary_expansion"].snapshot_class == "tertiary_snapshot"
-    assert entry_map["display_tertiary_expansion"].shared_surface is False
-    assert entry_map["display_tertiary_expansion"].selected_assignment_present is True
+    assert entry_map["display_operator_interaction"].snapshot_class == "operator_interaction_snapshot"
+    assert entry_map["display_operator_interaction"].shared_surface is False
+    assert entry_map["display_operator_interaction"].selected_assignment_present is True
 
 
 def test_display_continuity_snapshot_entry_rejects_missing_selected_assignment() -> None:
@@ -41,9 +41,9 @@ def test_display_continuity_snapshot_entry_rejects_missing_selected_assignment()
     with pytest.raises(ValueError, match="selected_assignment_present must remain true"):
         DisplayContinuitySnapshotEntry(
             snapshot_id="display_continuity_snapshot_invalid",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             snapshot_state="snapshot_ready",
-            snapshot_class="primary_snapshot",
+            snapshot_class="foundation_primary_snapshot",
             active_assignments=1,
             selected_assignment_present=False,
             shared_surface=False,

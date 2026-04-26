@@ -1,213 +1,122 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
     build_panel_metadata_contract,
 )
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
-    PanelMetadataEntry,
-)
-
-
-ExposureLevel = Literal[
-    "oob_only",
-    "main_dashboard_visible",
-    "shared_visible",
-    "hidden_internal",
-]
-
-VisibilityPolicy = Literal[
-    "read_only_public",
-    "restricted_operator",
-    "hidden_internal",
-]
 
 
 @dataclass(frozen=True, slots=True)
 class PanelExposureEntry:
-    """Canonical exposure policy entry for one panel."""
+    """Canonical exposure policy entry for a panel."""
 
     panel_id: str
-    exposure_level: ExposureLevel
-    visibility_policy: VisibilityPolicy
+    exposure_level: str
+    visibility_policy: str
     visible_in_oob_dashboard: bool
     visible_in_main_dashboard: bool
     visible_in_navigation: bool
     description: str
 
+    def __post_init__(self) -> None:
+        """Validate exposure entry invariants."""
+        if not self.panel_id.strip():
+            raise ValueError("panel_id must not be empty")
+        if not self.exposure_level.strip():
+            raise ValueError("exposure_level must not be empty")
+        if not self.visibility_policy.strip():
+            raise ValueError("visibility_policy must not be empty")
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
+
 
 @dataclass(frozen=True, slots=True)
 class PanelExposurePolicyContract:
-    """Canonical exposure/visibility policy contract for panels."""
+    """Canonical exposure policy contract."""
 
-    total_entries: int
-    oob_only_entries: int
-    main_dashboard_visible_entries: int
-    shared_visible_entries: int
-    hidden_internal_entries: int
     entries: tuple[PanelExposureEntry, ...]
-    metadata_entries: tuple[PanelMetadataEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate contract invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
+
+        seen_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.panel_id in seen_ids:
+                raise ValueError(f"duplicate panel_id detected: {entry.panel_id}")
+            seen_ids.add(entry.panel_id)
 
 
 def build_panel_exposure_policy_contract() -> PanelExposurePolicyContract:
-    """Build canonical panel exposure/visibility policy contract."""
+    """Build the canonical panel exposure policy contract."""
     metadata_contract = build_panel_metadata_contract()
-    metadata_entries = metadata_contract.entries
 
-    exposure_map: dict[str, tuple[ExposureLevel, VisibilityPolicy, bool, bool, bool, str]] = {
-        "panel_consistency": (
-            "shared_visible",
-            "read_only_public",
+    exposure_map: dict[str, tuple[str, str, bool, bool, bool, str]] = {
+        "system_status": (
+            "operator_visible",
+            "always_visible",
             True,
             True,
             True,
-            "Consistency panel is visible in OOB and main dashboard surfaces.",
+            "System status is always visible to the operator.",
         ),
-        "panel_snapshot": (
-            "shared_visible",
-            "read_only_public",
+        "guard_chain": (
+            "operator_visible",
+            "always_visible",
             True,
             True,
             True,
-            "Snapshot panel is visible in OOB and main dashboard surfaces.",
+            "Guard chain visibility is always available to the operator.",
         ),
-        "panel_incident": (
-            "shared_visible",
-            "read_only_public",
+        "incidents": (
+            "operator_visible",
+            "always_visible",
             True,
             True,
             True,
-            "Incident panel is visible in OOB and main dashboard surfaces.",
+            "Incident visibility is always available to the operator.",
         ),
-        "panel_diagnostics": (
-            "shared_visible",
-            "read_only_public",
+        "logs": (
+            "operator_visible",
+            "always_visible",
             True,
             True,
             True,
-            "Diagnostics panel is visible in OOB and main dashboard surfaces.",
+            "Logs visibility is always available to the operator.",
         ),
-        "panel_chat": (
-            "main_dashboard_visible",
-            "restricted_operator",
-            False,
+        "topology": (
+            "operator_visible",
+            "always_visible",
             True,
             True,
-            "Chat panel is restricted to main dashboard operator surfaces.",
+            True,
+            "Topology visibility is always available to the operator.",
         ),
-        "panel_settings": (
-            "main_dashboard_visible",
-            "restricted_operator",
-            False,
+        "action_queue": (
+            "operator_visible",
+            "policy_visible",
             True,
             True,
-            "Settings panel is restricted to main dashboard operator surfaces.",
+            True,
+            "Action queue is visible through the operator interaction path.",
         ),
-        "panel_gesture_control": (
-            "main_dashboard_visible",
-            "restricted_operator",
-            False,
+        "approval_queue": (
+            "operator_visible",
+            "policy_visible",
             True,
             True,
-            "Gesture control panel is restricted to main dashboard operator surfaces.",
+            True,
+            "Approval queue is visible through the operator interaction path.",
         ),
-        "panel_queue_load": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Queue/load panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_node_topology": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Node topology panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_degraded_mode": (
-            "shared_visible",
-            "read_only_public",
+        "audit_timeline": (
+            "operator_visible",
+            "policy_visible",
             True,
             True,
             True,
-            "Degraded mode panel is visible in OOB and main dashboard surfaces.",
-        ),
-        "panel_project_map": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Project map panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_data_flow": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Data flow panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_dependency_map": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Dependency map panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_version_control_dashboard": (
-            "main_dashboard_visible",
-            "read_only_public",
-            False,
-            True,
-            True,
-            "Version control panel is visible in main dashboard observability surfaces.",
-        ),
-        "panel_foundation_runtime_status_001": (
-            "shared_visible",
-            "read_only_public",
-            True,
-            True,
-            True,
-            "Foundation runtime status panel is visible in both monitoring worlds.",
-        ),
-        "panel_foundation_guard_status_001": (
-            "shared_visible",
-            "read_only_public",
-            True,
-            True,
-            True,
-            "Foundation guard status panel is visible in both monitoring worlds.",
-        ),
-        "panel_foundation_core_guard_status_001": (
-            "shared_visible",
-            "read_only_public",
-            True,
-            True,
-            True,
-            "Foundation core guard status panel is visible in both monitoring worlds.",
-        ),
-        "panel_foundation_kernel_guard_status_001": (
-            "shared_visible",
-            "read_only_public",
-            True,
-            True,
-            True,
-            "Foundation kernel guard status panel is visible in both monitoring worlds.",
-        ),
-        "panel_navigation": (
-            "hidden_internal",
-            "hidden_internal",
-            False,
-            False,
-            False,
-            "Navigation panel remains internal and is not exposed directly.",
+            "Audit timeline is visible through the operator interaction path.",
         ),
     }
 
@@ -221,23 +130,7 @@ def build_panel_exposure_policy_contract() -> PanelExposurePolicyContract:
             visible_in_navigation=exposure_map[entry.panel_id][4],
             description=exposure_map[entry.panel_id][5],
         )
-        for entry in metadata_entries
+        for entry in metadata_contract.entries
     )
 
-    return PanelExposurePolicyContract(
-        total_entries=len(entries),
-        oob_only_entries=sum(
-            1 for entry in entries if entry.exposure_level == "oob_only"
-        ),
-        main_dashboard_visible_entries=sum(
-            1 for entry in entries if entry.exposure_level == "main_dashboard_visible"
-        ),
-        shared_visible_entries=sum(
-            1 for entry in entries if entry.exposure_level == "shared_visible"
-        ),
-        hidden_internal_entries=sum(
-            1 for entry in entries if entry.exposure_level == "hidden_internal"
-        ),
-        entries=entries,
-        metadata_entries=metadata_entries,
-    )
+    return PanelExposurePolicyContract(entries=entries)

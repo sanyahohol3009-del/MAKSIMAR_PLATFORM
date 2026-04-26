@@ -1,0 +1,20 @@
+{
+  "panel_id": "topology",
+  "panel_state": "stale",
+  "nodes": {
+    "total_topology_entries": 4,
+    "runtime_nodes": 1,
+    "guard_nodes": 1,
+    "core_guard_nodes": 1,
+    "kernel_guard_nodes": 1
+  },
+  "relationships": {
+    "topology_relationships": 3,
+    "startup_order_valid": true
+  },
+  "truth": {
+    "truth_consistent_nodes": 2,
+    "truth_partial_nodes": 1,
+    "truth_mismatch_nodes": 1
+  }
+}

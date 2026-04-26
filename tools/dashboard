@@ -8,8 +8,23 @@ SESSION_RUNTIME="maksimar"
 SESSION_GUARD="maksimar_guard"
 SESSION_CORE="maksimar_core_guard"
 SESSION_KERNEL="maksimar_kernel_guard"
+SESSION_OOB="maksimar_oob"
 
 WINDOW_NAME="dash"
+
+TERMINAL_KIND=""
+TERMINAL_BIN=""
+
+if command -v xfce4-terminal >/dev/null 2>&1; then
+  TERMINAL_KIND="xfce4-terminal"
+  TERMINAL_BIN="$(command -v xfce4-terminal)"
+elif command -v xterm >/dev/null 2>&1; then
+  TERMINAL_KIND="xterm"
+  TERMINAL_BIN="$(command -v xterm)"
+elif command -v x-terminal-emulator >/dev/null 2>&1; then
+  TERMINAL_KIND="x-terminal-emulator"
+  TERMINAL_BIN="$(command -v x-terminal-emulator)"
+fi
 
 log() {
   echo "[dashboard] $1"
@@ -127,6 +142,56 @@ attach_kernel() {
   fi
 }
 
+attach_oob() {
+  if ! session_exists "$SESSION_OOB"; then
+    log "oob session missing"
+    exit 1
+  fi
+
+  tmux attach -t "$SESSION_OOB"
+}
+
+open_desktop_tabs() {
+  if [[ "$TERMINAL_KIND" == "xfce4-terminal" ]]; then
+    nohup "$TERMINAL_BIN" \
+      --window \
+      --title="MAKSIMAR Dashboards" \
+      --tab --title="Runtime" --command="bash -lc \"cd '$ROOT' && tmux attach -t '${SESSION_RUNTIME}:${WINDOW_NAME}' || tmux attach -t '$SESSION_RUNTIME'\"" \
+      --tab --title="Guard" --command="bash -lc \"cd '$ROOT' && tmux attach -t '${SESSION_GUARD}:${WINDOW_NAME}' || tmux attach -t '$SESSION_GUARD'\"" \
+      --tab --title="Core" --command="bash -lc \"cd '$ROOT' && tmux attach -t '${SESSION_CORE}:${WINDOW_NAME}' || tmux attach -t '$SESSION_CORE'\"" \
+      --tab --title="Kernel" --command="bash -lc \"cd '$ROOT' && tmux attach -t '${SESSION_KERNEL}:${WINDOW_NAME}' || tmux attach -t '$SESSION_KERNEL'\"" \
+      --tab --title="OOB" --command="bash -lc \"cd '$ROOT' && tmux attach -t '$SESSION_OOB'\"" \
+      --tab --title="Command Console" --command="bash -lc \"cd '$ROOT' && exec bash\"" \
+      >/dev/null 2>&1 &
+    log "desktop terminal tabs launched via xfce4-terminal"
+    return 0
+  fi
+
+  if [[ "$TERMINAL_KIND" == "xterm" ]]; then
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR Runtime" -e bash -lc "cd '$ROOT' && tmux attach -t '${SESSION_RUNTIME}:${WINDOW_NAME}' || tmux attach -t '$SESSION_RUNTIME'" >/dev/null 2>&1 &
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR Guard" -e bash -lc "cd '$ROOT' && tmux attach -t '${SESSION_GUARD}:${WINDOW_NAME}' || tmux attach -t '$SESSION_GUARD'" >/dev/null 2>&1 &
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR Core" -e bash -lc "cd '$ROOT' && tmux attach -t '${SESSION_CORE}:${WINDOW_NAME}' || tmux attach -t '$SESSION_CORE'" >/dev/null 2>&1 &
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR Kernel" -e bash -lc "cd '$ROOT' && tmux attach -t '${SESSION_KERNEL}:${WINDOW_NAME}' || tmux attach -t '$SESSION_KERNEL'" >/dev/null 2>&1 &
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR OOB" -e bash -lc "cd '$ROOT' && tmux attach -t '$SESSION_OOB'" >/dev/null 2>&1 &
+    nohup "$TERMINAL_BIN" -T "MAKSIMAR Command Console" -e bash -lc "cd '$ROOT' && exec bash" >/dev/null 2>&1 &
+    log "desktop terminal windows launched via xterm fallback"
+    return 0
+  fi
+
+  if [[ -n "$TERMINAL_BIN" ]]; then
+    nohup "$TERMINAL_BIN" -e bash -lc "cd '$ROOT' && tmux attach -t '${SESSION_RUNTIME}:${WINDOW_NAME}' || tmux attach -t '$SESSION_RUNTIME'" >/dev/null 2>&1 &
+    log "desktop terminal launched via generic fallback"
+    return 0
+  fi
+
+  log "no terminal emulator available"
+  return 1
+}
+
+open_desktop() {
+  open_desktop_tabs
+}
+
 status() {
   for session_name in \
     "$SESSION_RUNTIME" \
@@ -147,7 +212,7 @@ status() {
 
 usage() {
   cat <<'EOF'
-Usage: ./tools/dashboard {open|close|status|attach-runtime|attach-guard|attach-core|attach-kernel}
+Usage: ./tools/dashboard {open|open-desktop|close|status|attach-runtime|attach-guard|attach-core|attach-kernel|attach-oob}
 EOF
 }
 
@@ -157,6 +222,9 @@ main() {
   case "$cmd" in
     open)
       open
+      ;;
+    open-desktop)
+      open_desktop
       ;;
     close)
       close
@@ -175,6 +243,9 @@ main() {
       ;;
     attach-kernel)
       attach_kernel
+      ;;
+    attach-oob)
+      attach_oob
       ;;
     *)
       usage

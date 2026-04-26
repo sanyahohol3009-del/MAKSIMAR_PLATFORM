@@ -15,8 +15,8 @@ from CORE_ROOT.runtime_paths import (
     RUNTIME_HEARTBEAT_FILE,
     ROOT,
     SYSTEM_LOG_FILE,
-    VENV_PYTHON,
     ensure_runtime_layout,
+    resolve_canonical_python,
 )
 
 RESTART_DELAY_SEC = 2
@@ -41,9 +41,10 @@ def write_heartbeat(status: str = "alive") -> None:
 
 
 def build_command() -> list[str]:
-    """Return command for starting Control Plane with the venv interpreter."""
+    """Return command for starting Control Plane with canonical interpreter."""
+    python_path = resolve_canonical_python()
     return [
-        str(VENV_PYTHON),
+        str(python_path),
         "-m",
         "uvicorn",
         "CONTROL_PLANE.api_server:app",
@@ -58,14 +59,22 @@ def main() -> None:
     """Run supervisor loop and restart child if it exits unexpectedly."""
     ensure_runtime_layout()
 
-    if not VENV_PYTHON.exists():
-        log(f"Missing venv python: {VENV_PYTHON}")
+    try:
+        canonical_python = resolve_canonical_python()
+    except FileNotFoundError as exc:
+        log(f"Missing canonical python: {exc}")
+        sys.exit(1)
+
+    if not canonical_python.exists():
+        log(f"Canonical python does not exist: {canonical_python}")
         sys.exit(1)
 
     process: subprocess.Popen[str] | None = None
     stop_requested = False
 
     def handle_stop(signum: int, frame: object) -> None:
+        """Handle termination signals."""
+        del frame
         nonlocal stop_requested, process
         stop_requested = True
         log(f"Received stop signal: {signum}")
@@ -76,9 +85,8 @@ def main() -> None:
     signal.signal(signal.SIGTERM, handle_stop)
 
     while not stop_requested:
-        write_heartbeat("alive")
-
         cmd = build_command()
+        write_heartbeat("booting")
         log(f"Starting Control Plane: {' '.join(cmd)}")
 
         process = subprocess.Popen(
@@ -88,12 +96,11 @@ def main() -> None:
         )
 
         while True:
-            write_heartbeat("alive")
-
             return_code = process.poll()
             if return_code is not None:
                 break
 
+            write_heartbeat("alive")
             time.sleep(POLL_INTERVAL_SEC)
 
         if stop_requested:
@@ -101,6 +108,7 @@ def main() -> None:
             log(f"Supervisor stopped. Child exit code: {return_code}")
             return
 
+        write_heartbeat("broken")
         log(
             f"Control Plane exited with code {return_code}. "
             f"Restarting in {RESTART_DELAY_SEC}s..."

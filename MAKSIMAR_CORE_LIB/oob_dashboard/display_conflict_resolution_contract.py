@@ -18,20 +18,18 @@ ConflictDecision = Literal[
     "retain_pinned_surface",
     "replace_replaceable_surface",
 ]
-
 ConflictClass = Literal[
-    "pinned_primary_conflict",
-    "replaceable_secondary_conflict",
+    "foundation_primary_conflict",
+    "foundation_secondary_conflict",
 ]
 
 ALL_CONFLICT_DECISIONS: tuple[ConflictDecision, ...] = (
     "retain_pinned_surface",
     "replace_replaceable_surface",
 )
-
 ALL_CONFLICT_CLASSES: tuple[ConflictClass, ...] = (
-    "pinned_primary_conflict",
-    "replaceable_secondary_conflict",
+    "foundation_primary_conflict",
+    "foundation_secondary_conflict",
 )
 
 
@@ -78,12 +76,18 @@ class DisplayConflictResolutionEntry:
                 "operator_visible must remain true for canonical conflict-resolution entries."
             )
 
-        if self.conflict_decision == "retain_pinned_surface" and self.candidate_display_target_id is not None:
+        if (
+            self.conflict_decision == "retain_pinned_surface"
+            and self.candidate_display_target_id is not None
+        ):
             raise ValueError(
                 "retain_pinned_surface entries must not expose candidate_display_target_id."
             )
 
-        if self.conflict_decision == "replace_replaceable_surface" and self.candidate_display_target_id is None:
+        if (
+            self.conflict_decision == "replace_replaceable_surface"
+            and self.candidate_display_target_id is None
+        ):
             raise ValueError(
                 "replace_replaceable_surface entries must expose candidate_display_target_id."
             )
@@ -110,19 +114,21 @@ class DisplayConflictResolutionContract:
             )
 
         if self.pinned_conflict_entries != sum(
-            1 for entry in self.entries if entry.conflict_class == "pinned_primary_conflict"
+            1
+            for entry in self.entries
+            if entry.conflict_class == "foundation_primary_conflict"
         ):
             raise ValueError(
-                "pinned_conflict_entries must match pinned_primary_conflict count."
+                "pinned_conflict_entries must match foundation_primary_conflict count."
             )
 
         if self.replaceable_conflict_entries != sum(
             1
             for entry in self.entries
-            if entry.conflict_class == "replaceable_secondary_conflict"
+            if entry.conflict_class == "foundation_secondary_conflict"
         ):
             raise ValueError(
-                "replaceable_conflict_entries must match replaceable_secondary_conflict count."
+                "replaceable_conflict_entries must match foundation_secondary_conflict count."
             )
 
         if self.operator_visible_entries != sum(
@@ -153,44 +159,46 @@ def build_display_conflict_resolution_contract() -> DisplayConflictResolutionCon
     entries = (
         DisplayConflictResolutionEntry(
             conflict_id="display_conflict_001",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             conflict_decision="retain_pinned_surface",
-            conflict_class="pinned_primary_conflict",
-            incumbent_assignment_id=assignments_by_display["display_primary_operator"][0],
+            conflict_class="foundation_primary_conflict",
+            incumbent_assignment_id=assignments_by_display["display_foundation_primary"][0],
             candidate_display_target_id=None,
             operator_visible=True,
             description=(
-                "Canonical conflict-resolution entry retaining the pinned primary operator surface."
+                "Canonical conflict-resolution entry retaining the pinned foundation primary surface."
             ),
         ),
         DisplayConflictResolutionEntry(
             conflict_id="display_conflict_002",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             conflict_decision="replace_replaceable_surface",
-            conflict_class="replaceable_secondary_conflict",
-            incumbent_assignment_id=assignments_by_display["display_secondary_diagnostics"][0],
+            conflict_class="foundation_secondary_conflict",
+            incumbent_assignment_id=assignments_by_display["display_foundation_secondary"][0],
             candidate_display_target_id=selection_entry.candidate_display_target_id,
             operator_visible=True,
             description=(
-                "Canonical conflict-resolution entry allowing replacement on a replaceable secondary diagnostics surface."
+                "Canonical conflict-resolution entry allowing replacement on a replaceable foundation secondary surface."
             ),
         ),
     )
 
     # Touch replacement policy to ensure this layer remains aligned with it.
-    _ = replacement_by_display["display_primary_operator"]
-    _ = replacement_by_display["display_secondary_diagnostics"]
+    _ = replacement_by_display["display_foundation_primary"]
+    _ = replacement_by_display["display_foundation_secondary"]
 
     return DisplayConflictResolutionContract(
         contract_id="display_conflict_resolution_contract_001",
         total_entries=len(entries),
         pinned_conflict_entries=sum(
-            1 for entry in entries if entry.conflict_class == "pinned_primary_conflict"
+            1
+            for entry in entries
+            if entry.conflict_class == "foundation_primary_conflict"
         ),
         replaceable_conflict_entries=sum(
             1
             for entry in entries
-            if entry.conflict_class == "replaceable_secondary_conflict"
+            if entry.conflict_class == "foundation_secondary_conflict"
         ),
         operator_visible_entries=sum(1 for entry in entries if entry.operator_visible),
         entries=entries,

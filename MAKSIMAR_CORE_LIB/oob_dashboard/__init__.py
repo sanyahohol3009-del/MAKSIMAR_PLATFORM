@@ -98,7 +98,7 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.panel_orchestration_contract import (
     build_dashboard_panel_orchestration_contract,
 )
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
-    build_dashboard_panel_registry_contract,
+    build_panel_registry_contract,
 )
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_source_binding_contract import (
     build_panel_source_binding_contract,
@@ -182,7 +182,7 @@ __all__ = [
     "build_dashboard_execution_panels_shell_contract",
     "build_dashboard_incident_view",
     "build_dashboard_panel_orchestration_contract",
-    "build_dashboard_panel_registry_contract",
+    "build_panel_registry_contract",
     "build_dashboard_state_snapshot",
     "build_dashboard_view_composition_contract",
     "build_dashboard_workspace_contract",

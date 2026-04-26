@@ -27,21 +27,24 @@ def test_display_resolver_decision_contract_contains_expected_entries() -> None:
     pinned_entry = entry_map["display_resolver_decision_001"]
     replaceable_entry = entry_map["display_resolver_decision_002"]
 
-    assert pinned_entry.display_target_id == "display_primary_operator"
+    assert pinned_entry.display_target_id == "display_foundation_primary"
     assert pinned_entry.resolver_decision_class == "pinned_display_resolution"
     assert pinned_entry.routed_candidate_display_target_id is None
 
-    assert replaceable_entry.display_target_id == "display_secondary_diagnostics"
+    assert replaceable_entry.display_target_id == "display_foundation_secondary"
     assert replaceable_entry.resolver_decision_class == "replaceable_display_resolution"
-    assert replaceable_entry.routed_candidate_display_target_id == "display_secondary_diagnostics"
+    assert replaceable_entry.routed_candidate_display_target_id == "display_foundation_secondary"
 
 
 def test_display_resolver_decision_entry_rejects_missing_candidate() -> None:
     """Replaceable resolver decisions must expose routed candidate display ids."""
-    with pytest.raises(ValueError, match="replaceable_display_resolution entries must expose routed_candidate_display_target_id."):
+    with pytest.raises(
+        ValueError,
+        match="replaceable_display_resolution entries must expose routed_candidate_display_target_id.",
+    ):
         DisplayResolverDecisionEntry(
             resolver_decision_id="display_resolver_decision_invalid",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             resolver_decision_state="resolver_decision_ready",
             resolver_decision_class="replaceable_display_resolution",
             selected_assignment_id="display_assignment_002",

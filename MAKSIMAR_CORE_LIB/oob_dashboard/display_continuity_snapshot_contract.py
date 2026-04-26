@@ -10,24 +10,23 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_resolver_decision_contract import (
     build_display_resolver_decision_contract,
 )
 
+
 ContinuitySnapshotState = Literal[
     "snapshot_ready",
 ]
-
 ContinuitySnapshotClass = Literal[
-    "primary_snapshot",
-    "secondary_snapshot",
-    "tertiary_snapshot",
+    "foundation_primary_snapshot",
+    "foundation_secondary_snapshot",
+    "operator_interaction_snapshot",
 ]
 
 ALL_CONTINUITY_SNAPSHOT_STATES: tuple[ContinuitySnapshotState, ...] = (
     "snapshot_ready",
 )
-
 ALL_CONTINUITY_SNAPSHOT_CLASSES: tuple[ContinuitySnapshotClass, ...] = (
-    "primary_snapshot",
-    "secondary_snapshot",
-    "tertiary_snapshot",
+    "foundation_primary_snapshot",
+    "foundation_secondary_snapshot",
+    "operator_interaction_snapshot",
 )
 
 
@@ -129,17 +128,22 @@ def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotCon
         for entry in resolver_contract.entries
     }
 
-    snapshot_class_map = {
-        "display_primary_operator": "primary_snapshot",
-        "display_secondary_diagnostics": "secondary_snapshot",
-        "display_tertiary_expansion": "tertiary_snapshot",
+    snapshot_class_map: dict[str, ContinuitySnapshotClass] = {
+        "display_foundation_primary": "foundation_primary_snapshot",
+        "display_foundation_secondary": "foundation_secondary_snapshot",
+        "display_operator_interaction": "operator_interaction_snapshot",
+    }
+    shared_surface_map = {
+        "display_foundation_primary": False,
+        "display_foundation_secondary": True,
+        "display_operator_interaction": False,
     }
 
-    shared_surface_map = {
-        "display_primary_operator": False,
-        "display_secondary_diagnostics": True,
-        "display_tertiary_expansion": False,
-    }
+    ordered_display_targets = (
+        "display_foundation_primary",
+        "display_foundation_secondary",
+        "display_operator_interaction",
+    )
 
     entries = tuple(
         DisplayContinuitySnapshotEntry(
@@ -148,10 +152,7 @@ def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotCon
             snapshot_state="snapshot_ready",
             snapshot_class=snapshot_class_map[display_target_id],
             active_assignments=active_assignments_by_display[display_target_id],
-            selected_assignment_present=(
-                display_target_id in resolved_display_ids
-                or display_target_id == "display_tertiary_expansion"
-            ),
+            selected_assignment_present=True,
             shared_surface=shared_surface_map[display_target_id],
             operator_visible=True,
             description=(
@@ -159,11 +160,7 @@ def build_display_continuity_snapshot_contract() -> DisplayContinuitySnapshotCon
             ),
         )
         for index, display_target_id in enumerate(
-            (
-                "display_primary_operator",
-                "display_secondary_diagnostics",
-                "display_tertiary_expansion",
-            ),
+            ordered_display_targets,
             start=1,
         )
     )

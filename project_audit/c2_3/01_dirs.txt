@@ -1,0 +1,12 @@
+MAKSIMAR_CORE_LIB/knowledge_engine
+MAKSIMAR_CORE_LIB/knowledge_engine/__pycache__
+MAKSIMAR_CORE_LIB/memory_engine
+MAKSIMAR_CORE_LIB/memory_engine/__pycache__
+MAKSIMAR_CORE_LIB/memory_policy
+MAKSIMAR_CORE_LIB/memory_policy/__pycache__
+MAKSIMAR_CORE_LIB/oob_dashboard
+MAKSIMAR_CORE_LIB/oob_dashboard/__pycache__
+MAKSIMAR_CORE_LIB/real_dashboard_clients_mobile
+MAKSIMAR_CORE_LIB/real_dashboard_clients_mobile/__pycache__
+MAKSIMAR_CORE_LIB/surface_intelligence
+MAKSIMAR_CORE_LIB/surface_intelligence/__pycache__

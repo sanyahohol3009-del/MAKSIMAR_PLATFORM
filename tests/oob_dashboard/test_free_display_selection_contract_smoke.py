@@ -28,7 +28,7 @@ def test_free_display_selection_contract_contains_expected_entry() -> None:
     assert entry.requested_role_hint == "operator_auxiliary_surface"
     assert entry.selection_decision == "replaceable_display_candidate_available"
     assert entry.selection_reason == "replaceable_secondary_or_tertiary_available"
-    assert entry.candidate_display_target_id == "display_secondary_diagnostics"
+    assert entry.candidate_display_target_id == "display_foundation_secondary"
     assert entry.operator_visible is True
 
 
@@ -40,7 +40,7 @@ def test_free_display_selection_entry_rejects_candidate_on_no_free_decision() ->
             requested_role_hint="operator_auxiliary_surface",
             selection_decision="no_free_display_available",
             selection_reason="no_replaceable_display_available",
-            candidate_display_target_id="display_secondary_diagnostics",
+            candidate_display_target_id="display_foundation_secondary",
             operator_visible=True,
             description="Invalid free-display selection entry.",
         )
@@ -54,7 +54,7 @@ def test_free_display_selection_entry_requires_reason_alignment() -> None:
             requested_role_hint="operator_auxiliary_surface",
             selection_decision="replaceable_display_candidate_available",
             selection_reason="no_replaceable_display_available",
-            candidate_display_target_id="display_secondary_diagnostics",
+            candidate_display_target_id="display_foundation_secondary",
             operator_visible=True,
             description="Invalid free-display selection reason alignment.",
         )

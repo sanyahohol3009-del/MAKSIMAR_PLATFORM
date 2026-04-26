@@ -1,0 +1,935 @@
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_contract.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_ids import build_canonical_panel_ids
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_models import (
+    PanelRegistryContract,
+    PanelRegistryEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_vocabulary_contract import (
+    build_panel_vocabulary_contract,
+)
+
+
+def build_panel_registry_contract() -> PanelRegistryContract:
+    """Build the canonical panel registry contract."""
+    vocabulary = build_panel_vocabulary_contract()
+
+    entries = tuple(
+        PanelRegistryEntry(
+            panel_id=entry.panel_id,
+            title=entry.title,
+            panel_family=entry.panel_family,
+            panel_kind=entry.panel_kind,
+            source_binding_required=True,
+            visibility_policy_required=True,
+        )
+        for entry in vocabulary.entries
+    )
+
+    contract = PanelRegistryContract(entries=entries)
+
+    canonical_ids = build_canonical_panel_ids()
+    registry_ids = tuple(entry.panel_id for entry in contract.entries)
+    if registry_ids != canonical_ids:
+        raise ValueError("panel registry order must match canonical panel id order")
+
+    return contract
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_ids import PanelId
+
+
+@dataclass(frozen=True, slots=True)
+class PanelRegistryEntry:
+    """Canonical registry entry for a known panel."""
+
+    panel_id: PanelId
+    title: str
+    panel_family: str
+    panel_kind: str
+    source_binding_required: bool
+    visibility_policy_required: bool
+
+    def __post_init__(self) -> None:
+        """Validate registry entry invariants."""
+        if not self.panel_id.strip():
+            raise ValueError("panel_id must not be empty")
+
+        if not self.title.strip():
+            raise ValueError("title must not be empty")
+
+        if not self.panel_family.strip():
+            raise ValueError("panel_family must not be empty")
+
+        if not self.panel_kind.strip():
+            raise ValueError("panel_kind must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class PanelRegistryContract:
+    """Canonical ordered registry of known panels."""
+
+    entries: tuple[PanelRegistryEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate registry-level invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
+
+        seen_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.panel_id in seen_ids:
+                raise ValueError(f"duplicate panel_id detected: {entry.panel_id}")
+            seen_ids.add(entry.panel_id)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/panel_registry_read_model.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
+    build_panel_registry_contract,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PanelRegistryReadRow:
+    """Read-only row used for terminal/operator preview."""
+
+    panel_id: str
+    title: str
+    panel_family: str
+    panel_kind: str
+    source_binding_required: bool
+    visibility_policy_required: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PanelRegistryReadModel:
+    """Read-only registry view for operator/developer inspection."""
+
+    rows: tuple[PanelRegistryReadRow, ...]
+
+    def __post_init__(self) -> None:
+        """Validate read-model invariants."""
+        if not self.rows:
+            raise ValueError("rows must not be empty")
+
+
+def build_panel_registry_read_model() -> PanelRegistryReadModel:
+    """Build the canonical panel registry read model."""
+    registry = build_panel_registry_contract()
+
+    rows = tuple(
+        PanelRegistryReadRow(
+            panel_id=entry.panel_id,
+            title=entry.title,
+            panel_family=entry.panel_family,
+            panel_kind=entry.panel_kind,
+            source_binding_required=entry.source_binding_required,
+            visibility_policy_required=entry.visibility_policy_required,
+        )
+        for entry in registry.entries
+    )
+
+    return PanelRegistryReadModel(rows=rows)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_contract.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_view_display_chain_contract import (
+    build_panel_view_display_chain_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_models import (
+    WorkspaceRegistryContract,
+    WorkspaceRegistryEntry,
+)
+
+
+def build_workspace_registry_contract() -> WorkspaceRegistryContract:
+    """Build the canonical workspace registry contract."""
+    chain_contract = build_panel_view_display_chain_contract()
+
+    foundation_panels = tuple(
+        entry.panel_id
+        for entry in chain_contract.entries
+        if entry.display_target_id in {
+            "display_foundation_primary",
+            "display_foundation_secondary",
+        }
+    )
+    interaction_panels = tuple(
+        entry.panel_id
+        for entry in chain_contract.entries
+        if entry.display_target_id == "display_operator_interaction"
+    )
+
+    entries = (
+        WorkspaceRegistryEntry(
+            workspace_id="workspace_foundation_monitoring",
+            workspace_role="foundation_monitoring",
+            primary_display_target_id="display_foundation_primary",
+            included_panel_ids=foundation_panels,
+            description="Canonical workspace for foundation monitoring panels.",
+        ),
+        WorkspaceRegistryEntry(
+            workspace_id="workspace_operator_interaction",
+            workspace_role="operator_interaction",
+            primary_display_target_id="display_operator_interaction",
+            included_panel_ids=interaction_panels,
+            description="Canonical workspace for operator interaction panels.",
+        ),
+    )
+
+    return WorkspaceRegistryContract(entries=entries)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/workspace_registry_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceRegistryEntry:
+    """Canonical workspace registry entry."""
+
+    workspace_id: str
+    workspace_role: str
+    primary_display_target_id: str
+    included_panel_ids: tuple[str, ...]
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate workspace registry entry invariants."""
+        if not self.workspace_id.strip():
+            raise ValueError("workspace_id must not be empty")
+
+        if not self.workspace_role.strip():
+            raise ValueError("workspace_role must not be empty")
+
+        if not self.primary_display_target_id.strip():
+            raise ValueError("primary_display_target_id must not be empty")
+
+        if not self.included_panel_ids:
+            raise ValueError("included_panel_ids must not be empty")
+
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceRegistryContract:
+    """Canonical ordered workspace registry contract."""
+
+    entries: tuple[WorkspaceRegistryEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate workspace registry contract invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
+
+        seen_workspace_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.workspace_id in seen_workspace_ids:
+                raise ValueError(
+                    f"duplicate workspace_id detected: {entry.workspace_id}"
+                )
+            seen_workspace_ids.add(entry.workspace_id)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_contract.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_models import (
+    MainOperatorDashboardContract,
+    MainOperatorDashboardEntry,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+def build_main_operator_dashboard_contract() -> MainOperatorDashboardContract:
+    """Build the canonical main-operator dashboard contract."""
+    workspace_contract = build_workspace_registry_contract()
+    workspace_ids = {entry.workspace_id for entry in workspace_contract.entries}
+
+    primary_workspace_id = "workspace_operator_interaction"
+    secondary_workspace_ids = ("workspace_foundation_monitoring",)
+
+    if primary_workspace_id not in workspace_ids:
+        raise ValueError(
+            f"primary workspace missing from registry: {primary_workspace_id}"
+        )
+
+    for workspace_id in secondary_workspace_ids:
+        if workspace_id not in workspace_ids:
+            raise ValueError(
+                f"secondary workspace missing from registry: {workspace_id}"
+            )
+
+    entries = (
+        MainOperatorDashboardEntry(
+            dashboard_id="main_operator_dashboard",
+            dashboard_role="main_operator",
+            primary_workspace_id=primary_workspace_id,
+            secondary_workspace_ids=secondary_workspace_ids,
+            read_only_foundation_reuse=True,
+            creates_second_root=False,
+            description=(
+                "Canonical main operator dashboard contract reusing foundation "
+                "workspaces without creating a second dashboard root."
+            ),
+        ),
+    )
+
+    return MainOperatorDashboardContract(entries=entries)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardEntry:
+    """Canonical main-operator dashboard entry."""
+
+    dashboard_id: str
+    dashboard_role: str
+    primary_workspace_id: str
+    secondary_workspace_ids: tuple[str, ...]
+    read_only_foundation_reuse: bool
+    creates_second_root: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate main-operator dashboard entry invariants."""
+        if not self.dashboard_id.strip():
+            raise ValueError("dashboard_id must not be empty")
+
+        if not self.dashboard_role.strip():
+            raise ValueError("dashboard_role must not be empty")
+
+        if not self.primary_workspace_id.strip():
+            raise ValueError("primary_workspace_id must not be empty")
+
+        if self.read_only_foundation_reuse is not True:
+            raise ValueError("read_only_foundation_reuse must be True")
+
+        if self.creates_second_root is not False:
+            raise ValueError("creates_second_root must be False")
+
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardContract:
+    """Canonical main-operator dashboard contract."""
+
+    entries: tuple[MainOperatorDashboardEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate dashboard contract invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
+
+        seen_dashboard_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.dashboard_id in seen_dashboard_ids:
+                raise ValueError(
+                    f"duplicate dashboard_id detected: {entry.dashboard_id}"
+                )
+            seen_dashboard_ids.add(entry.dashboard_id)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_models import (
+    MainOperatorDashboardReadModelContract,
+    MainOperatorDashboardReadRow,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+def build_main_operator_dashboard_read_model_contract() -> (
+    MainOperatorDashboardReadModelContract
+):
+    """Build the canonical read-model contract for the main operator dashboard."""
+    dashboard_contract = build_main_operator_dashboard_contract()
+    workspace_contract = build_workspace_registry_contract()
+
+    workspace_map = {entry.workspace_id: entry for entry in workspace_contract.entries}
+
+    rows: list[MainOperatorDashboardReadRow] = []
+
+    for entry in dashboard_contract.entries:
+        workspace_ids = (entry.primary_workspace_id,) + entry.secondary_workspace_ids
+        total_panel_count = 0
+
+        for workspace_id in workspace_ids:
+            if workspace_id not in workspace_map:
+                raise ValueError(f"workspace missing from registry: {workspace_id}")
+            total_panel_count += len(workspace_map[workspace_id].included_panel_ids)
+
+        rows.append(
+            MainOperatorDashboardReadRow(
+                dashboard_id=entry.dashboard_id,
+                dashboard_role=entry.dashboard_role,
+                primary_workspace_id=entry.primary_workspace_id,
+                secondary_workspace_ids=entry.secondary_workspace_ids,
+                total_workspace_count=len(workspace_ids),
+                total_panel_count=total_panel_count,
+                read_only_foundation_reuse=entry.read_only_foundation_reuse,
+                supports_multimonitor_layout=True,
+                supports_voice_gesture_addressing=True,
+                description=(
+                    "Canonical read-model row for the main operator dashboard with "
+                    "workspace reuse, multimonitor awareness, and future voice/gesture "
+                    "addressability."
+                ),
+            )
+        )
+
+    return MainOperatorDashboardReadModelContract(rows=tuple(rows))
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadRow:
+    """Read-only row describing the assembled main operator dashboard."""
+
+    dashboard_id: str
+    dashboard_role: str
+    primary_workspace_id: str
+    secondary_workspace_ids: tuple[str, ...]
+    total_workspace_count: int
+    total_panel_count: int
+    read_only_foundation_reuse: bool
+    supports_multimonitor_layout: bool
+    supports_voice_gesture_addressing: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate read-row invariants."""
+        if not self.dashboard_id.strip():
+            raise ValueError("dashboard_id must not be empty")
+
+        if not self.dashboard_role.strip():
+            raise ValueError("dashboard_role must not be empty")
+
+        if not self.primary_workspace_id.strip():
+            raise ValueError("primary_workspace_id must not be empty")
+
+        if self.total_workspace_count < 1:
+            raise ValueError("total_workspace_count must be >= 1")
+
+        if self.total_panel_count < 1:
+            raise ValueError("total_panel_count must be >= 1")
+
+        if self.read_only_foundation_reuse is not True:
+            raise ValueError("read_only_foundation_reuse must be True")
+
+        if self.supports_multimonitor_layout is not True:
+            raise ValueError("supports_multimonitor_layout must be True")
+
+        if self.supports_voice_gesture_addressing is not True:
+            raise ValueError("supports_voice_gesture_addressing must be True")
+
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadModelContract:
+    """Canonical read-model contract for the main operator dashboard."""
+
+    rows: tuple[MainOperatorDashboardReadRow, ...]
+
+    def __post_init__(self) -> None:
+        """Validate read-model contract invariants."""
+        if not self.rows:
+            raise ValueError("rows must not be empty")
+
+        seen_dashboard_ids: set[str] = set()
+        for row in self.rows:
+            if row.dashboard_id in seen_dashboard_ids:
+                raise ValueError(f"duplicate dashboard_id detected: {row.dashboard_id}")
+            seen_dashboard_ids.add(row.dashboard_id)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/dashboard_visible_state_contract.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.preview_surface_contract import (
+    build_preview_surface_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.rollback_readiness_contract import (
+    build_rollback_readiness_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_restore_contract import (
+    build_workspace_restore_contract,
+)
+
+
+def _require_non_empty(value: str, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string.")
+
+
+@dataclass(frozen=True, slots=True)
+class DashboardVisibleStateEntry:
+    """Canonical dashboard-visible state entry."""
+
+    dashboard_visible_state_id: str
+    workspace_id: str
+    dashboard_visible_state: str
+    dashboard_visible_state_class: str
+    preview_surface_ready: bool
+    rollback_readiness_ready: bool
+    workspace_restore_ready: bool
+    operator_visible: bool
+    truth_bound: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        _require_non_empty(
+            self.dashboard_visible_state_id,
+            "dashboard_visible_state_id",
+        )
+        _require_non_empty(self.workspace_id, "workspace_id")
+        _require_non_empty(self.dashboard_visible_state, "dashboard_visible_state")
+        _require_non_empty(
+            self.dashboard_visible_state_class,
+            "dashboard_visible_state_class",
+        )
+        _require_non_empty(self.description, "description")
+
+        if self.dashboard_visible_state != "dashboard_visible_state_ready":
+            raise ValueError(
+                "dashboard_visible_state must remain dashboard_visible_state_ready."
+            )
+
+        if self.dashboard_visible_state_class != "main_operator_dashboard_visible_state":
+            raise ValueError(
+                "dashboard_visible_state_class must remain "
+                "main_operator_dashboard_visible_state."
+            )
+
+        if not self.preview_surface_ready:
+            raise ValueError(
+                "preview_surface_ready must remain true for canonical dashboard visible state."
+            )
+
+        if not self.rollback_readiness_ready:
+            raise ValueError(
+                "rollback_readiness_ready must remain true for canonical dashboard visible state."
+            )
+
+        if not self.workspace_restore_ready:
+            raise ValueError(
+                "workspace_restore_ready must remain true for canonical dashboard visible state."
+            )
+
+        if not self.operator_visible:
+            raise ValueError(
+                "operator_visible must remain true for canonical dashboard visible state."
+            )
+
+        if not self.truth_bound:
+            raise ValueError(
+                "truth_bound must remain true for canonical dashboard visible state."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class DashboardVisibleStateContract:
+    """Canonical dashboard-visible state contract."""
+
+    contract_id: str
+    total_entries: int
+    ready_entries: int
+    operator_visible_entries: int
+    truth_bound_entries: int
+    entries: tuple[DashboardVisibleStateEntry, ...]
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.contract_id, "contract_id")
+
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match len(entries).")
+
+        if self.ready_entries != sum(
+            1
+            for entry in self.entries
+            if entry.dashboard_visible_state == "dashboard_visible_state_ready"
+        ):
+            raise ValueError(
+                "ready_entries must match dashboard_visible_state_ready count."
+            )
+
+        if self.operator_visible_entries != sum(
+            1 for entry in self.entries if entry.operator_visible
+        ):
+            raise ValueError(
+                "operator_visible_entries must match operator_visible count."
+            )
+
+        if self.truth_bound_entries != sum(
+            1 for entry in self.entries if entry.truth_bound
+        ):
+            raise ValueError(
+                "truth_bound_entries must match truth_bound count."
+            )
+
+
+def build_dashboard_visible_state_contract() -> DashboardVisibleStateContract:
+    """Build canonical dashboard-visible state contract."""
+    preview_surface_contract = build_preview_surface_contract()
+    rollback_readiness_contract = build_rollback_readiness_contract()
+    workspace_restore_contract = build_workspace_restore_contract()
+
+    workspace_id = workspace_restore_contract.entries[0].workspace_id
+
+    entries = (
+        DashboardVisibleStateEntry(
+            dashboard_visible_state_id="dashboard_visible_state_001",
+            workspace_id=workspace_id,
+            dashboard_visible_state="dashboard_visible_state_ready",
+            dashboard_visible_state_class="main_operator_dashboard_visible_state",
+            preview_surface_ready=bool(preview_surface_contract.entries),
+            rollback_readiness_ready=bool(rollback_readiness_contract.entries),
+            workspace_restore_ready=bool(workspace_restore_contract.entries),
+            operator_visible=True,
+            truth_bound=True,
+            description=(
+                "Canonical dashboard visible state entry built from preview surface, "
+                "rollback readiness, and workspace restore."
+            ),
+        ),
+    )
+
+    return DashboardVisibleStateContract(
+        contract_id="dashboard_visible_state_contract_001",
+        total_entries=len(entries),
+        ready_entries=sum(
+            1
+            for entry in entries
+            if entry.dashboard_visible_state == "dashboard_visible_state_ready"
+        ),
+        operator_visible_entries=sum(
+            1 for entry in entries if entry.operator_visible
+        ),
+        truth_bound_entries=sum(
+            1 for entry in entries if entry.truth_bound
+        ),
+        entries=entries,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/interaction_exposure_contract.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.gesture_policy_handoff_contract import (
+    build_gesture_policy_handoff_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.voice_display_handoff_contract import (
+    build_voice_display_handoff_contract,
+)
+
+
+def _require_non_empty(value: str, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string.")
+
+
+@dataclass(frozen=True, slots=True)
+class InteractionExposureEntry:
+    exposure_entry_id: str
+    interaction_source: str
+    exposure_channel: str
+    policy_bound: bool
+    direct_execution_allowed: bool
+    operator_visible: bool
+    truth_bound: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.exposure_entry_id, "exposure_entry_id")
+        _require_non_empty(self.interaction_source, "interaction_source")
+        _require_non_empty(self.exposure_channel, "exposure_channel")
+        _require_non_empty(self.description, "description")
+
+        if not self.policy_bound:
+            raise ValueError(
+                "policy_bound must remain true for canonical interaction exposure entries."
+            )
+        if self.direct_execution_allowed:
+            raise ValueError(
+                "direct_execution_allowed must remain false for canonical interaction exposure entries."
+            )
+        if not self.operator_visible:
+            raise ValueError(
+                "operator_visible must remain true for canonical interaction exposure entries."
+            )
+        if not self.truth_bound:
+            raise ValueError(
+                "truth_bound must remain true for canonical interaction exposure entries."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class InteractionExposureContract:
+    contract_id: str
+    total_entries: int
+    policy_bound_entries: int
+    guarded_entries: int
+    operator_visible_entries: int
+    truth_bound_entries: int
+    entries: tuple[InteractionExposureEntry, ...]
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.contract_id, "contract_id")
+
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match len(entries).")
+        if self.policy_bound_entries != sum(
+            1 for entry in self.entries if entry.policy_bound
+        ):
+            raise ValueError("policy_bound_entries must match policy_bound count.")
+        if self.guarded_entries != sum(
+            1 for entry in self.entries if entry.direct_execution_allowed is False
+        ):
+            raise ValueError("guarded_entries must match guarded interaction exposure count.")
+        if self.operator_visible_entries != sum(
+            1 for entry in self.entries if entry.operator_visible
+        ):
+            raise ValueError("operator_visible_entries must match operator_visible count.")
+        if self.truth_bound_entries != sum(
+            1 for entry in self.entries if entry.truth_bound
+        ):
+            raise ValueError("truth_bound_entries must match truth_bound count.")
+
+
+def build_interaction_exposure_contract() -> InteractionExposureContract:
+    gesture_contract = build_gesture_policy_handoff_contract()
+    voice_contract = build_voice_display_handoff_contract()
+
+    entries = (
+        InteractionExposureEntry(
+            exposure_entry_id="interaction_exposure_001",
+            interaction_source=gesture_contract.entries[0].adapter_entry_id,
+            exposure_channel="gesture_policy_exposure",
+            policy_bound=True,
+            direct_execution_allowed=False,
+            operator_visible=True,
+            truth_bound=True,
+            description="Canonical interaction exposure entry for gesture chain.",
+        ),
+        InteractionExposureEntry(
+            exposure_entry_id="interaction_exposure_002",
+            interaction_source=voice_contract.entries[0].routing_entry_id,
+            exposure_channel="voice_display_exposure",
+            policy_bound=True,
+            direct_execution_allowed=False,
+            operator_visible=True,
+            truth_bound=True,
+            description="Canonical interaction exposure entry for voice chain.",
+        ),
+    )
+
+    return InteractionExposureContract(
+        contract_id="interaction_exposure_contract_001",
+        total_entries=len(entries),
+        policy_bound_entries=sum(1 for entry in entries if entry.policy_bound),
+        guarded_entries=sum(1 for entry in entries if entry.direct_execution_allowed is False),
+        operator_visible_entries=sum(1 for entry in entries if entry.operator_visible),
+        truth_bound_entries=sum(1 for entry in entries if entry.truth_bound),
+        entries=entries,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/foundation_status_menu_registry_contract.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+
+FoundationMenuSection = Literal[
+    "foundation_core",
+    "foundation_safety",
+]
+
+FoundationVisualRole = Literal[
+    "central_core",
+    "inner_guard_ring",
+    "outer_guard_ring",
+]
+
+
+@dataclass(frozen=True)
+class FoundationStatusMenuRegistryEntry:
+    """Canonical menu-registry entry for foundation status panels."""
+
+    registry_entry_id: str
+    panel_id: str
+    menu_item_id: str
+    menu_section: FoundationMenuSection
+    menu_order_index: int
+    menu_label: str
+    short_status_label: str
+    visual_role: FoundationVisualRole
+    show_in_left_menu: bool
+    show_in_oob_dashboard: bool
+    show_in_main_dashboard: bool
+    read_only: bool
+    operator_actions_allowed: bool
+    startup_stage_index: int
+    description: str
+
+
+@dataclass(frozen=True)
+class FoundationStatusMenuRegistryContract:
+    """Canonical menu-registry contract for foundation status panels."""
+
+    total_entries: int
+    left_menu_entries: int
+    oob_visible_entries: int
+    main_dashboard_visible_entries: int
+    read_only_entries: int
+    startup_order_valid_entries: int
+    entries: tuple[FoundationStatusMenuRegistryEntry, ...]
+
+
+def build_foundation_status_menu_registry_contract() -> (
+    FoundationStatusMenuRegistryContract
+):
+    """Build canonical menu-registry contract for foundation status panels."""
+    entries = (
+        FoundationStatusMenuRegistryEntry(
+            registry_entry_id="foundationmenuregistry_runtime_001",
+            panel_id="panel_foundation_runtime_status_001",
+            menu_item_id="menu_foundation_runtime_001",
+            menu_section="foundation_core",
+            menu_order_index=1,
+            menu_label="Runtime Core",
+            short_status_label="RUNTIME",
+            visual_role="central_core",
+            show_in_left_menu=True,
+            show_in_oob_dashboard=True,
+            show_in_main_dashboard=True,
+            read_only=True,
+            operator_actions_allowed=False,
+            startup_stage_index=1,
+            description=(
+                "Canonical menu-registry entry for runtime core foundation panel."
+            ),
+        ),
+        FoundationStatusMenuRegistryEntry(
+            registry_entry_id="foundationmenuregistry_guard_001",
+            panel_id="panel_foundation_guard_status_001",
+            menu_item_id="menu_foundation_guard_001",
+            menu_section="foundation_safety",
+            menu_order_index=2,
+            menu_label="Stop-Gate Watcher",
+            short_status_label="STOP-GATE",
+            visual_role="inner_guard_ring",
+            show_in_left_menu=True,
+            show_in_oob_dashboard=True,
+            show_in_main_dashboard=True,
+            read_only=True,
+            operator_actions_allowed=False,
+            startup_stage_index=2,
+            description=(
+                "Canonical menu-registry entry for stop-gate watcher foundation panel."
+            ),
+        ),
+        FoundationStatusMenuRegistryEntry(
+            registry_entry_id="foundationmenuregistry_core_guard_001",
+            panel_id="panel_foundation_core_guard_status_001",
+            menu_item_id="menu_foundation_core_guard_001",
+            menu_section="foundation_safety",
+            menu_order_index=3,
+            menu_label="Core Guard",
+            short_status_label="CORE-GUARD",
+            visual_role="inner_guard_ring",
+            show_in_left_menu=True,
+            show_in_oob_dashboard=True,
+            show_in_main_dashboard=True,
+            read_only=True,
+            operator_actions_allowed=False,
+            startup_stage_index=3,
+            description=(
+                "Canonical menu-registry entry for core guard foundation panel."
+            ),
+        ),
+        FoundationStatusMenuRegistryEntry(
+            registry_entry_id="foundationmenuregistry_kernel_guard_001",
+            panel_id="panel_foundation_kernel_guard_status_001",
+            menu_item_id="menu_foundation_kernel_guard_001",
+            menu_section="foundation_safety",
+            menu_order_index=4,
+            menu_label="Kernel Watchdog",
+            short_status_label="KERNEL",
+            visual_role="outer_guard_ring",
+            show_in_left_menu=True,
+            show_in_oob_dashboard=True,
+            show_in_main_dashboard=True,
+            read_only=True,
+            operator_actions_allowed=False,
+            startup_stage_index=4,
+            description=(
+                "Canonical menu-registry entry for kernel watchdog foundation panel."
+            ),
+        ),
+    )
+
+    startup_order_valid_entries = 0
+    expected_stage = 1
+    for entry in entries:
+        if entry.startup_stage_index == expected_stage:
+            startup_order_valid_entries += 1
+        expected_stage += 1
+
+    return FoundationStatusMenuRegistryContract(
+        total_entries=len(entries),
+        left_menu_entries=sum(1 for entry in entries if entry.show_in_left_menu),
+        oob_visible_entries=sum(
+            1 for entry in entries if entry.show_in_oob_dashboard
+        ),
+        main_dashboard_visible_entries=sum(
+            1 for entry in entries if entry.show_in_main_dashboard
+        ),
+        read_only_entries=sum(1 for entry in entries if entry.read_only),
+        startup_order_valid_entries=startup_order_valid_entries,
+        entries=entries,
+    )
+

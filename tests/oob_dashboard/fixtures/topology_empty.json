@@ -1,0 +1,21 @@
+{
+  "panel_id": "topology",
+  "panel_state": "empty",
+  "nodes": {
+    "total_topology_entries": 0,
+    "runtime_nodes": 0,
+    "guard_nodes": 0,
+    "core_guard_nodes": 0,
+    "kernel_guard_nodes": 0
+  },
+  "relationships": {
+    "topology_relationships": 0,
+    "startup_order_valid": false
+  },
+  "health": {
+    "alive_nodes": 0,
+    "degraded_nodes": 0,
+    "broken_nodes": 0,
+    "dead_nodes": 0
+  }
+}

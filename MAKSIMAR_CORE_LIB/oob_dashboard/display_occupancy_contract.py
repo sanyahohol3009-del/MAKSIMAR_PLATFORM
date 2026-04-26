@@ -12,22 +12,20 @@ DisplayOccupancyState = Literal[
     "occupied_pinned",
     "occupied_replaceable",
 ]
-
 DisplayOccupancyClass = Literal[
-    "primary_operator_display",
-    "secondary_diagnostics_display",
-    "tertiary_expansion_display",
+    "foundation_primary_display",
+    "foundation_secondary_display",
+    "operator_interaction_display",
 ]
 
 ALL_DISPLAY_OCCUPANCY_STATES: tuple[DisplayOccupancyState, ...] = (
     "occupied_pinned",
     "occupied_replaceable",
 )
-
 ALL_DISPLAY_OCCUPANCY_CLASSES: tuple[DisplayOccupancyClass, ...] = (
-    "primary_operator_display",
-    "secondary_diagnostics_display",
-    "tertiary_expansion_display",
+    "foundation_primary_display",
+    "foundation_secondary_display",
+    "operator_interaction_display",
 )
 
 
@@ -145,10 +143,10 @@ def build_display_occupancy_contract() -> DisplayOccupancyContract:
             entry.replaceable
         )
 
-    class_map = {
-        "display_primary_operator": "primary_operator_display",
-        "display_secondary_diagnostics": "secondary_diagnostics_display",
-        "display_tertiary_expansion": "tertiary_expansion_display",
+    class_map: dict[str, DisplayOccupancyClass] = {
+        "display_foundation_primary": "foundation_primary_display",
+        "display_foundation_secondary": "foundation_secondary_display",
+        "display_operator_interaction": "operator_interaction_display",
     }
 
     entries = tuple(

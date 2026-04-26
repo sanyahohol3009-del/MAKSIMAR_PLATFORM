@@ -24,33 +24,36 @@ def test_display_occupancy_contract_contains_expected_entries() -> None:
     contract = build_display_occupancy_contract()
     entry_map = {entry.display_target_id: entry for entry in contract.entries}
 
-    primary_entry = entry_map["display_primary_operator"]
-    secondary_entry = entry_map["display_secondary_diagnostics"]
-    tertiary_entry = entry_map["display_tertiary_expansion"]
+    primary_entry = entry_map["display_foundation_primary"]
+    secondary_entry = entry_map["display_foundation_secondary"]
+    operator_entry = entry_map["display_operator_interaction"]
 
     assert primary_entry.occupancy_state == "occupied_pinned"
     assert primary_entry.total_assignments == 1
     assert primary_entry.pinned_assignments == 1
     assert primary_entry.replaceable_assignments == 0
+    assert primary_entry.occupancy_class == "foundation_primary_display"
 
     assert secondary_entry.occupancy_state == "occupied_replaceable"
     assert secondary_entry.total_assignments == 2
     assert secondary_entry.replaceable_assignments == 2
     assert secondary_entry.pinned_assignments == 0
+    assert secondary_entry.occupancy_class == "foundation_secondary_display"
 
-    assert tertiary_entry.occupancy_state == "occupied_replaceable"
-    assert tertiary_entry.total_assignments == 1
-    assert tertiary_entry.replaceable_assignments == 1
-    assert tertiary_entry.pinned_assignments == 0
+    assert operator_entry.occupancy_state == "occupied_replaceable"
+    assert operator_entry.total_assignments == 1
+    assert operator_entry.replaceable_assignments == 1
+    assert operator_entry.pinned_assignments == 0
+    assert operator_entry.occupancy_class == "operator_interaction_display"
 
 
 def test_display_occupancy_entry_rejects_bad_total() -> None:
     """Display occupancy entry should reject inconsistent totals."""
     with pytest.raises(ValueError, match="total_assignments must equal"):
         DisplayOccupancyEntry(
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             occupancy_state="occupied_pinned",
-            occupancy_class="primary_operator_display",
+            occupancy_class="foundation_primary_display",
             total_assignments=2,
             replaceable_assignments=0,
             pinned_assignments=1,

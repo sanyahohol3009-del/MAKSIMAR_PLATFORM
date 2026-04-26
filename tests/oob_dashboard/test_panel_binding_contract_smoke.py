@@ -1,56 +1,43 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard import (
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_binding_contract import (
     build_panel_binding_contract,
+    resolve_binding_reason,
+    resolve_display_target_id,
 )
 
 
 def test_panel_binding_contract_builds() -> None:
-    """Panel binding contract should build successfully."""
     contract = build_panel_binding_contract()
 
-    assert contract.total_entries == 19
-    assert contract.primary_operator_bindings == 3
-    assert contract.diagnostics_bindings == 8
-    assert contract.expansion_bindings == 8
-    assert contract.default_target_bindings == 19
+    assert len(contract.entries) == 8
+    assert contract.entries[0].panel_id == "system_status"
+    assert contract.entries[-1].panel_id == "audit_timeline"
 
 
-def test_panel_binding_chat_entry() -> None:
-    """Chat panel should bind to primary operator display."""
+def test_panel_binding_contract_assigns_foundation_panels() -> None:
     contract = build_panel_binding_contract()
-    entry = next(entry for entry in contract.entries if entry.panel_id == "panel_chat")
+    binding_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.display_target_id == "display_primary_operator"
-    assert entry.binding_reason == "operator_surface_binding"
-    assert entry.is_default_target is True
-    assert entry.eligible_for_main_dashboard is True
-    assert entry.eligible_for_oob_dashboard is False
+    assert binding_map["system_status"].display_target_id == "display_foundation_primary"
+    assert binding_map["logs"].display_target_id == "display_foundation_secondary"
 
 
-def test_panel_binding_foundation_runtime_entry() -> None:
-    """Foundation runtime panel should bind to diagnostics display."""
+def test_panel_binding_contract_assigns_interaction_panels() -> None:
     contract = build_panel_binding_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.panel_id == "panel_foundation_runtime_status_001"
-    )
+    binding_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.display_target_id == "display_secondary_diagnostics"
-    assert entry.binding_reason == "foundation_monitoring_binding"
-    assert entry.eligible_for_main_dashboard is True
-    assert entry.eligible_for_oob_dashboard is True
+    assert binding_map["action_queue"].display_target_id == "display_operator_interaction"
+    assert binding_map["approval_queue"].display_target_id == "display_operator_interaction"
+    assert binding_map["audit_timeline"].display_target_id == "display_operator_interaction"
 
 
-def test_panel_binding_navigation_entry() -> None:
-    """Navigation panel should bind to expansion display as hidden internal."""
-    contract = build_panel_binding_contract()
-    entry = next(
-        entry for entry in contract.entries if entry.panel_id == "panel_navigation"
-    )
+def test_resolve_display_target_id_smoke() -> None:
+    assert resolve_display_target_id("system_status") == "display_foundation_primary"
+    assert resolve_display_target_id("logs") == "display_foundation_secondary"
+    assert resolve_display_target_id("audit_timeline") == "display_operator_interaction"
 
-    assert entry.display_target_id == "display_tertiary_expansion"
-    assert entry.binding_reason == "hidden_internal_binding"
-    assert entry.eligible_for_main_dashboard is False
-    assert entry.eligible_for_oob_dashboard is False
+
+def test_resolve_binding_reason_smoke() -> None:
+    assert resolve_binding_reason("system_status") == "foundation_visibility"
+    assert resolve_binding_reason("action_queue") == "operator_interaction_visibility"

@@ -1,0 +1,26 @@
+{
+  "panel_id": "guard_chain",
+  "panel_state": "loading",
+  "summary": {
+    "total_chain_entries": 4,
+    "consistent_chain_entries": 4,
+    "partial_chain_entries": 0,
+    "mismatch_chain_entries": 0,
+    "unknown_chain_entries": 0
+  },
+  "chain_health": {
+    "alive_chain_entries": 4,
+    "degraded_chain_entries": 0,
+    "dead_chain_entries": 0,
+    "broken_chain_entries": 0
+  },
+  "presence": {
+    "runtime_entry_present": true,
+    "guard_entry_present": true,
+    "core_guard_entry_present": true,
+    "kernel_guard_entry_present": true
+  },
+  "state_context": {
+    "warming_up_panels": 1
+  }
+}

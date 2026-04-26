@@ -24,14 +24,23 @@ def test_display_visual_projection_contract_contains_expected_entries() -> None:
     contract = build_display_visual_projection_contract()
     entry_map = {entry.display_target_id: entry for entry in contract.entries}
 
-    assert entry_map["display_primary_operator"].projection_class == "primary_projection"
-    assert entry_map["display_primary_operator"].shared_surface is False
+    assert (
+        entry_map["display_foundation_primary"].projection_class
+        == "foundation_primary_projection"
+    )
+    assert entry_map["display_foundation_primary"].shared_surface is False
 
-    assert entry_map["display_secondary_diagnostics"].projection_class == "secondary_projection"
-    assert entry_map["display_secondary_diagnostics"].shared_surface is True
+    assert (
+        entry_map["display_foundation_secondary"].projection_class
+        == "foundation_secondary_projection"
+    )
+    assert entry_map["display_foundation_secondary"].shared_surface is True
 
-    assert entry_map["display_tertiary_expansion"].projection_class == "tertiary_projection"
-    assert entry_map["display_tertiary_expansion"].shared_surface is False
+    assert (
+        entry_map["display_operator_interaction"].projection_class
+        == "operator_interaction_projection"
+    )
+    assert entry_map["display_operator_interaction"].shared_surface is False
 
 
 def test_display_visual_projection_entry_rejects_not_ready_projection() -> None:
@@ -39,9 +48,9 @@ def test_display_visual_projection_entry_rejects_not_ready_projection() -> None:
     with pytest.raises(ValueError, match="projection_ready must remain true"):
         DisplayVisualProjectionEntry(
             projection_id="display_visual_projection_invalid",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             projection_state="projection_ready",
-            projection_class="primary_projection",
+            projection_class="foundation_primary_projection",
             selected_assignment_present=True,
             shared_surface=False,
             projection_ready=False,

@@ -1,0 +1,20 @@
+{
+  "panel_id": "system_status",
+  "panel_state": "normal",
+  "summary": {
+    "total_foundation_panels": 4,
+    "alive_panels": 4,
+    "degraded_panels": 0,
+    "broken_panels": 0,
+    "warming_up_panels": 0
+  },
+  "truth": {
+    "truth_consistent_panels": 4,
+    "truth_partial_panels": 0,
+    "truth_mismatch_panels": 0
+  },
+  "live_historical": {
+    "historical_only_panels": 0,
+    "current_live_visible_panels": 4
+  }
+}

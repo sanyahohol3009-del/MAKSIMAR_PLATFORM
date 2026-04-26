@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Canonical runtime paths for MAKSIMAR foundation services."""
+"""Canonical runtime paths and interpreter resolution for MAKSIMAR foundation services."""
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 ROOT = Path.home() / "MAKSIMAR_PLATFORM"
-
 CORE_ROOT_DIR = ROOT / "CORE_ROOT"
 SUPERVISOR_DIR = ROOT / "SUPERVISOR"
 CONTROL_PLANE_DIR = ROOT / "CONTROL_PLANE"
+TOOLS_DIR = ROOT / "tools"
 
 RUNTIME_DIR = ROOT / "RUNTIME"
 RUNTIME_STATE_DIR = RUNTIME_DIR / "state"
 RUNTIME_PIDS_DIR = RUNTIME_DIR / "pids"
-
 LOGS_DIR = ROOT / "logs"
 
 RUNTIME_HEARTBEAT_FILE = RUNTIME_STATE_DIR / "heartbeat_state.json"
@@ -23,6 +23,7 @@ CORE_GUARD_HEARTBEAT_FILE = RUNTIME_STATE_DIR / "core_guard_heartbeat_state.json
 KERNEL_HEARTBEAT_FILE = RUNTIME_STATE_DIR / "kernel_heartbeat_state.json"
 
 RUN_METADATA_FILE = RUNTIME_STATE_DIR / "run_metadata.json"
+PREFLIGHT_RESULT_FILE = RUNTIME_STATE_DIR / "preflight_result.json"
 INCIDENT_SNAPSHOT_FILE = RUNTIME_STATE_DIR / "last_incident_snapshot.json"
 INCIDENT_HISTORY_FILE = RUNTIME_STATE_DIR / "incident_history.jsonl"
 DIAGNOSTICS_DB_FILE = RUNTIME_STATE_DIR / "diagnostics_db.json"
@@ -32,12 +33,14 @@ RUNTIME_LOG_FILE = LOGS_DIR / "runtime.log"
 GUARD_LOG_FILE = LOGS_DIR / "guard.log"
 CORE_GUARD_LOG_FILE = LOGS_DIR / "core_guard.log"
 KERNEL_GUARD_LOG_FILE = LOGS_DIR / "kernel_guard.log"
+PREFLIGHT_LOG_FILE = LOGS_DIR / "preflight.log"
 
 STOP_GATE_SCRIPT = CORE_ROOT_DIR / "stop_gate.py"
 STOP_GATE_WATCHER_SCRIPT = CORE_ROOT_DIR / "stop_gate_watcher.py"
 CORE_GUARD_SCRIPT = CORE_ROOT_DIR / "core_guard.py"
 KERNEL_WATCHDOG_SCRIPT = CORE_ROOT_DIR / "kernel_watchdog.py"
 PROCESS_SUPERVISOR_SCRIPT = SUPERVISOR_DIR / "process_supervisor.py"
+RUNTIME_PREFLIGHT_SCRIPT = SUPERVISOR_DIR / "runtime_preflight.py"
 
 RUNTIME_SESSION_NAME = "maksimar"
 GUARD_SESSION_NAME = "maksimar_guard"
@@ -47,7 +50,18 @@ KERNEL_GUARD_SESSION_NAME = "maksimar_kernel_guard"
 CONTROL_PLANE_HOST = "127.0.0.1"
 CONTROL_PLANE_PORT = 8000
 
-VENV_PYTHON = ROOT / "venv" / "bin" / "python"
+PYTHON_CANDIDATES = (
+    ROOT / ".venv" / "bin" / "python",
+    ROOT / "venv" / "bin" / "python",
+)
+
+REQUIRED_RUNTIME_IMPORTS = (
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "aiofiles",
+    "yaml",
+)
 
 
 def ensure_runtime_layout() -> None:
@@ -56,3 +70,27 @@ def ensure_runtime_layout() -> None:
     RUNTIME_STATE_DIR.mkdir(parents=True, exist_ok=True)
     RUNTIME_PIDS_DIR.mkdir(parents=True, exist_ok=True)
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def get_python_candidates() -> tuple[Path, ...]:
+    """Return ordered python interpreter candidates."""
+    return PYTHON_CANDIDATES
+
+
+def resolve_canonical_python() -> Path:
+    """Resolve the single canonical python interpreter for runtime services."""
+    override = os.environ.get("MAKSIMAR_PYTHON", "").strip()
+    if override:
+        override_path = Path(override).expanduser().resolve()
+        if override_path.exists() and override_path.is_file():
+            return override_path
+
+    for candidate in PYTHON_CANDIDATES:
+        if candidate.exists() and candidate.is_file():
+            return candidate
+
+    candidate_list = ", ".join(str(path) for path in PYTHON_CANDIDATES)
+    raise FileNotFoundError(
+        "Canonical python interpreter not found. "
+        f"Tried MAKSIMAR_PYTHON and candidates: {candidate_list}"
+    )

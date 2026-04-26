@@ -1,0 +1,28 @@
+{
+  "name": "maksimar-frontend-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "preview:shell": "npm run build && node dist/previews/simple_shell_preview.js",
+    "graph:dev": "vite --config vite.graph-preview.config.ts",
+    "graph:build": "vite build --config vite.graph-preview.config.ts",
+    "graph:preview": "vite preview --config vite.graph-preview.config.ts",
+    "chart:dev": "vite --config vite.chart-preview.config.ts",
+    "chart:build": "vite build --config vite.chart-preview.config.ts",
+    "chart:preview": "vite preview --config vite.chart-preview.config.ts"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.10.2",
+    "echarts": "^5.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "vite": "^6.4.2"
+  }
+}

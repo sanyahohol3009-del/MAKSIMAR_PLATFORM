@@ -10,22 +10,21 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
     build_workspace_registry_contract,
 )
 
-DisplayAssignmentRole = Literal[
-    "primary_operator_surface",
-    "secondary_operator_panel",
-    "diagnostics_timeline_panel",
-]
 
+DisplayAssignmentRole = Literal[
+    "foundation_primary_surface",
+    "foundation_secondary_surface",
+    "operator_interaction_surface",
+]
 DisplayAssignmentState = Literal[
     "display_assignment_active",
 ]
 
 ALL_DISPLAY_ASSIGNMENT_ROLES: tuple[DisplayAssignmentRole, ...] = (
-    "primary_operator_surface",
-    "secondary_operator_panel",
-    "diagnostics_timeline_panel",
+    "foundation_primary_surface",
+    "foundation_secondary_surface",
+    "operator_interaction_surface",
 )
-
 ALL_DISPLAY_ASSIGNMENT_STATES: tuple[DisplayAssignmentState, ...] = (
     "display_assignment_active",
 )
@@ -121,29 +120,59 @@ class DisplayAssignmentRegistryContract:
             )
 
 
+def _resolve_workspace_ids() -> tuple[str, str]:
+    """Resolve canonical foundation and operator workspace ids."""
+    workspace_registry_contract = build_workspace_registry_contract()
+
+    foundation_workspace_id: str | None = None
+    operator_workspace_id: str | None = None
+
+    for entry in workspace_registry_contract.entries:
+        if entry.workspace_role == "foundation_monitoring":
+            foundation_workspace_id = entry.workspace_id
+        elif entry.workspace_role == "operator_interaction":
+            operator_workspace_id = entry.workspace_id
+
+    if foundation_workspace_id is None:
+        raise ValueError(
+            "foundation_monitoring workspace is missing from workspace registry."
+        )
+
+    if operator_workspace_id is None:
+        raise ValueError(
+            "operator_interaction workspace is missing from workspace registry."
+        )
+
+    return foundation_workspace_id, operator_workspace_id
+
+
 def build_display_assignment_registry_contract() -> (
     DisplayAssignmentRegistryContract
 ):
     """Build canonical display assignment registry contract.
 
-    After the demolition pass, this registry must no longer depend on deleted
-    main-operator/demo/queue/timeline layers. It is rebuilt from canonical
-    display targets plus the surviving workspace registry.
+    This canonical version is normalized to the current display target vocabulary:
+    - display_foundation_primary
+    - display_foundation_secondary
+    - display_operator_interaction
+
+    It preserves the original registry semantics:
+    - explicit assignment entries
+    - explicit assignment roles
+    - active/replaceable/operator-visible aggregates
     """
     display_target_contract = build_display_target_vocabulary_contract()
-    workspace_registry_contract = build_workspace_registry_contract()
-
-    primary_workspace_id = workspace_registry_contract.entries[0].workspace_id
+    foundation_workspace_id, operator_workspace_id = _resolve_workspace_ids()
 
     display_target_ids = {
         entry.display_target_id for entry in display_target_contract.entries
     }
-
     required_display_targets = (
-        "display_primary_operator",
-        "display_secondary_diagnostics",
-        "display_tertiary_expansion",
+        "display_foundation_primary",
+        "display_foundation_secondary",
+        "display_operator_interaction",
     )
+
     for display_target_id in required_display_targets:
         if display_target_id not in display_target_ids:
             raise ValueError(
@@ -154,56 +183,56 @@ def build_display_assignment_registry_contract() -> (
     entries = (
         DisplayAssignmentRegistryEntry(
             assignment_id="display_assignment_001",
-            display_target_id="display_primary_operator",
-            panel_or_surface_id="workspace_operator_main_surface",
-            assignment_role="primary_operator_surface",
+            display_target_id="display_foundation_primary",
+            panel_or_surface_id="workspace_foundation_monitoring_surface",
+            assignment_role="foundation_primary_surface",
             assignment_state="display_assignment_active",
-            workspace_id=primary_workspace_id,
+            workspace_id=foundation_workspace_id,
             replaceable=False,
             operator_visible=True,
             description=(
-                "Canonical primary display assignment for the operator "
-                "workspace surface."
+                "Canonical primary display assignment for the foundation "
+                "monitoring workspace surface."
             ),
         ),
         DisplayAssignmentRegistryEntry(
             assignment_id="display_assignment_002",
-            display_target_id="display_secondary_diagnostics",
-            panel_or_surface_id="panel_system_status_001",
-            assignment_role="secondary_operator_panel",
+            display_target_id="display_foundation_secondary",
+            panel_or_surface_id="panel_logs_surface",
+            assignment_role="foundation_secondary_surface",
             assignment_state="display_assignment_active",
-            workspace_id=primary_workspace_id,
+            workspace_id=foundation_workspace_id,
             replaceable=True,
             operator_visible=True,
             description=(
-                "Canonical secondary display assignment for the system "
-                "status panel."
+                "Canonical secondary display assignment for the logs panel surface."
             ),
         ),
         DisplayAssignmentRegistryEntry(
             assignment_id="display_assignment_003",
-            display_target_id="display_secondary_diagnostics",
-            panel_or_surface_id="panel_incidents_001",
-            assignment_role="secondary_operator_panel",
+            display_target_id="display_foundation_secondary",
+            panel_or_surface_id="panel_topology_surface",
+            assignment_role="foundation_secondary_surface",
             assignment_state="display_assignment_active",
-            workspace_id=primary_workspace_id,
+            workspace_id=foundation_workspace_id,
             replaceable=True,
             operator_visible=True,
             description=(
-                "Canonical secondary display assignment for the incidents panel."
+                "Canonical secondary display assignment for the topology panel surface."
             ),
         ),
         DisplayAssignmentRegistryEntry(
             assignment_id="display_assignment_004",
-            display_target_id="display_tertiary_expansion",
-            panel_or_surface_id="panel_logs_001",
-            assignment_role="diagnostics_timeline_panel",
+            display_target_id="display_operator_interaction",
+            panel_or_surface_id="workspace_operator_interaction_surface",
+            assignment_role="operator_interaction_surface",
             assignment_state="display_assignment_active",
-            workspace_id=primary_workspace_id,
+            workspace_id=operator_workspace_id,
             replaceable=True,
             operator_visible=True,
             description=(
-                "Canonical tertiary display assignment for the logs panel."
+                "Canonical operator interaction display assignment for the "
+                "operator interaction workspace surface."
             ),
         ),
     )

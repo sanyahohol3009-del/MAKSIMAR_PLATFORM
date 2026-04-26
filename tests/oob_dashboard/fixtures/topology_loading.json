@@ -1,0 +1,24 @@
+{
+  "panel_id": "topology",
+  "panel_state": "loading",
+  "nodes": {
+    "total_topology_entries": 4,
+    "runtime_nodes": 1,
+    "guard_nodes": 1,
+    "core_guard_nodes": 1,
+    "kernel_guard_nodes": 1
+  },
+  "relationships": {
+    "topology_relationships": 3,
+    "startup_order_valid": true
+  },
+  "health": {
+    "alive_nodes": 2,
+    "degraded_nodes": 0,
+    "broken_nodes": 0,
+    "dead_nodes": 0
+  },
+  "state_context": {
+    "warming_up_nodes": 2
+  }
+}

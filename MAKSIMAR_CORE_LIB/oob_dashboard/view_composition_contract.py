@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
-    build_dashboard_panel_registry_contract,
+    build_panel_registry_contract,
 )
 
 
@@ -46,7 +46,7 @@ def _resolve_panel_entries(panel_registry_contract: object) -> tuple[object, ...
 
 def build_dashboard_view_composition_contract() -> ViewCompositionContract:
     """Build canonical backward-compatible view composition contract."""
-    panel_registry_contract = build_dashboard_panel_registry_contract()
+    panel_registry_contract = build_panel_registry_contract()
     registry_entries = _resolve_panel_entries(panel_registry_contract)
 
     active_panel_id = "panel_consistency"

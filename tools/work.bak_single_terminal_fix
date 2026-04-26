@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+TOOLS_DIR="$ROOT/tools"
+RUNTIME_STATE_DIR="$ROOT/RUNTIME/state"
+LOGS_DIR="$ROOT/logs"
+
+RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
+GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
+CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
+KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
+PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
+
+CANONICAL_PYTHON=""
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/.venv/bin/python"
+elif [[ -x "$ROOT/venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/venv/bin/python"
+else
+  echo "[work] ERROR: canonical python not found in .venv/bin/python or venv/bin/python"
+  exit 1
+fi
+
+log() {
+  echo "[work] $1"
+}
+
+abort() {
+  local reason="$1"
+  log "ERROR: $reason"
+  "$TOOLS_DIR/rest" || true
+  exit 1
+}
+
+wait_for_file() {
+  local file_path="$1"
+  local label="$2"
+  local timeout_sec="$3"
+
+  local started_at
+  started_at="$(date +%s)"
+
+  while true; do
+    if [[ -f "$file_path" ]]; then
+      log "$label file detected: $file_path"
+      return 0
+    fi
+
+    local now
+    now="$(date +%s)"
+    if (( now - started_at >= timeout_sec )); then
+      log "timeout waiting for $label file: $file_path"
+      return 1
+    fi
+
+    sleep 1
+  done
+}
+
+remove_disposable_runtime_artifacts() {
+  log "removing disposable runtime artifacts"
+  mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
+
+  rm -f \
+    "$RUNTIME_HEARTBEAT_FILE" \
+    "$GUARD_HEARTBEAT_FILE" \
+    "$CORE_GUARD_HEARTBEAT_FILE" \
+    "$KERNEL_HEARTBEAT_FILE"
+}
+
+run_preflight() {
+  log "running runtime preflight"
+  "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" || return 1
+
+  if [[ ! -f "$PREFLIGHT_RESULT_FILE" ]]; then
+    log "preflight result file not found: $PREFLIGHT_RESULT_FILE"
+    return 1
+  fi
+
+  "$CANONICAL_PYTHON" - <<'PY'
+import json
+from pathlib import Path
+path = Path.home() / "MAKSIMAR_PLATFORM" / "RUNTIME" / "state" / "preflight_result.json"
+data = json.loads(path.read_text(encoding="utf-8"))
+if not data.get("ok", False):
+    raise SystemExit(1)
+print("[work] preflight result ok=true")
+PY
+}
+
+start_oob_dashboard() {
+  log "starting independent OOB dashboard first..."
+  "$TOOLS_DIR/oob_dashboard_ctl" start || true
+  "$TOOLS_DIR/oob_dashboard_ctl" status || true
+}
+
+start_runtime() {
+  log "starting runtime..."
+  "$TOOLS_DIR/ctl" start
+  "$TOOLS_DIR/ctl" status
+}
+
+wait_for_runtime_readiness() {
+  log "waiting for runtime readiness..."
+  wait_for_file "$RUNTIME_HEARTBEAT_FILE" "runtime heartbeat" 20 || return 1
+}
+
+start_guard() {
+  log "starting supervisor guard..."
+  "$TOOLS_DIR/guard_ctl" start
+  "$TOOLS_DIR/guard_ctl" status
+}
+
+start_core_guard() {
+  log "starting core guard..."
+  "$TOOLS_DIR/core_guard_ctl" start
+  "$TOOLS_DIR/core_guard_ctl" status
+}
+
+start_kernel_watchdog() {
+  log "starting kernel watchdog..."
+  "$TOOLS_DIR/kernel_guard_ctl" start
+  "$TOOLS_DIR/kernel_guard_ctl" status
+}
+
+wait_for_guard_chain() {
+  wait_for_file "$GUARD_HEARTBEAT_FILE" "guard heartbeat" 15 || return 1
+  wait_for_file "$CORE_GUARD_HEARTBEAT_FILE" "core guard heartbeat" 15 || return 1
+  wait_for_file "$KERNEL_HEARTBEAT_FILE" "kernel heartbeat" 15 || return 1
+}
+
+open_dashboard_windows() {
+  log "opening dashboard windows after sessions exist..."
+  "$TOOLS_DIR/dashboards_open" || return 1
+  "$TOOLS_DIR/dashboard" status || true
+}
+
+print_truth_summary() {
+  log "truth summary:"
+  [[ -f "$PREFLIGHT_RESULT_FILE" ]] && log "  preflight_result.json present"
+  [[ -f "$RUNTIME_HEARTBEAT_FILE" ]] && log "  runtime heartbeat present"
+  [[ -f "$GUARD_HEARTBEAT_FILE" ]] && log "  guard heartbeat present"
+  [[ -f "$CORE_GUARD_HEARTBEAT_FILE" ]] && log "  core guard heartbeat present"
+  [[ -f "$KERNEL_HEARTBEAT_FILE" ]] && log "  kernel heartbeat present"
+}
+
+main() {
+  mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
+
+  remove_disposable_runtime_artifacts
+
+  run_preflight || abort "preflight failed"
+
+  # Independent observer starts first and must remain visible
+  # regardless of runtime truthfulness.
+  start_oob_dashboard
+
+  start_runtime || abort "runtime start failed"
+  wait_for_runtime_readiness || abort "runtime readiness timeout"
+
+  start_guard || abort "guard start failed"
+  start_core_guard || abort "core guard start failed"
+  start_kernel_watchdog || abort "kernel watchdog start failed"
+
+  wait_for_guard_chain || abort "guard chain heartbeat timeout"
+
+  # These dashboard windows depend on tmux sessions existing.
+  open_dashboard_windows || abort "dashboard windows open failed"
+  "$TOOLS_DIR/dashboard" open-desktop || true
+
+  print_truth_summary
+  log "done"
+}
+
+main "$@"

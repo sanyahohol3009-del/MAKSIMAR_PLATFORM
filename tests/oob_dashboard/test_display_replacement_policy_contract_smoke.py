@@ -24,23 +24,41 @@ def test_display_replacement_policy_contract_contains_expected_entries() -> None
     contract = build_display_replacement_policy_contract()
     entry_map = {entry.display_target_id: entry for entry in contract.entries}
 
-    assert entry_map["display_primary_operator"].replacement_decision == "not_replaceable"
-    assert entry_map["display_primary_operator"].replacement_class == "pinned_primary_surface"
+    assert (
+        entry_map["display_foundation_primary"].replacement_decision
+        == "not_replaceable"
+    )
+    assert (
+        entry_map["display_foundation_primary"].replacement_class
+        == "foundation_primary_pinned_surface"
+    )
 
-    assert entry_map["display_secondary_diagnostics"].replacement_decision == "replaceable_without_disruption"
-    assert entry_map["display_secondary_diagnostics"].replacement_class == "replaceable_secondary_surface"
+    assert (
+        entry_map["display_foundation_secondary"].replacement_decision
+        == "replaceable_without_disruption"
+    )
+    assert (
+        entry_map["display_foundation_secondary"].replacement_class
+        == "foundation_secondary_replaceable_surface"
+    )
 
-    assert entry_map["display_tertiary_expansion"].replacement_decision == "replaceable_without_disruption"
-    assert entry_map["display_tertiary_expansion"].replacement_class == "replaceable_tertiary_surface"
+    assert (
+        entry_map["display_operator_interaction"].replacement_decision
+        == "replaceable_without_disruption"
+    )
+    assert (
+        entry_map["display_operator_interaction"].replacement_class
+        == "operator_interaction_replaceable_surface"
+    )
 
 
 def test_display_replacement_policy_entry_rejects_bad_totals() -> None:
     """Display replacement-policy entry should reject inconsistent totals."""
     with pytest.raises(ValueError, match="active_assignments must equal"):
         DisplayReplacementPolicyEntry(
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             replacement_decision="not_replaceable",
-            replacement_class="pinned_primary_surface",
+            replacement_class="foundation_primary_pinned_surface",
             active_assignments=2,
             replaceable_assignments=0,
             pinned_assignments=1,

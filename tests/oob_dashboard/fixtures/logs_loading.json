@@ -1,0 +1,18 @@
+{
+  "panel_id": "logs",
+  "panel_state": "loading",
+  "summary": {
+    "total_log_related_entries": 4,
+    "failure_visible_entries": 0,
+    "incident_visible_entries": 0,
+    "stalled_stage_visible_entries": 0
+  },
+  "severity": {
+    "critical_entries": 0,
+    "warning_entries": 0,
+    "info_entries": 4
+  },
+  "visibility": {
+    "source_file_visible_entries": 0
+  }
+}

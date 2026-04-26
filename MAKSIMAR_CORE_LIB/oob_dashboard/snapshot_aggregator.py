@@ -7,7 +7,7 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_unified_dashboard_view import (
     build_foundation_unified_dashboard_view,
 )
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_registry_contract import (
-    build_dashboard_panel_registry_contract,
+    build_panel_registry_contract,
 )
 from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_contract import (
     build_dashboard_workspace_contract,
@@ -69,7 +69,7 @@ def _resolve_foundation_status(foundation_view: object) -> str:
 def build_dashboard_state_snapshot() -> DashboardStateSnapshot:
     """Build canonical backward-compatible dashboard state snapshot."""
     foundation_view = build_foundation_unified_dashboard_view()
-    panel_registry = build_dashboard_panel_registry_contract()
+    panel_registry = build_panel_registry_contract()
     workspace_contract = build_dashboard_workspace_contract()
 
     foundation_id = _resolve_source_id(

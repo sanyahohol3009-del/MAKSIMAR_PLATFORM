@@ -10,36 +10,38 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_occupancy_contract import (
     build_display_occupancy_contract,
 )
 
+
 ReplacementDecision = Literal[
     "not_replaceable",
     "replaceable_without_disruption",
 ]
-
 ReplacementClass = Literal[
-    "pinned_primary_surface",
-    "replaceable_secondary_surface",
-    "replaceable_tertiary_surface",
+    "foundation_primary_pinned_surface",
+    "foundation_secondary_replaceable_surface",
+    "operator_interaction_replaceable_surface",
 ]
 
 ALL_REPLACEMENT_DECISIONS: tuple[ReplacementDecision, ...] = (
     "not_replaceable",
     "replaceable_without_disruption",
 )
-
 ALL_REPLACEMENT_CLASSES: tuple[ReplacementClass, ...] = (
-    "pinned_primary_surface",
-    "replaceable_secondary_surface",
-    "replaceable_tertiary_surface",
+    "foundation_primary_pinned_surface",
+    "foundation_secondary_replaceable_surface",
+    "operator_interaction_replaceable_surface",
 )
 
 
 def _require_non_empty(value: str, field_name: str) -> None:
+    """Validate that a string field is present and not blank."""
     if not value or not value.strip():
         raise ValueError(f"{field_name} must be a non-empty string.")
 
 
 @dataclass(frozen=True, slots=True)
 class DisplayReplacementPolicyEntry:
+    """Canonical display replacement policy entry."""
+
     display_target_id: str
     replacement_decision: ReplacementDecision
     replacement_class: ReplacementClass
@@ -50,6 +52,7 @@ class DisplayReplacementPolicyEntry:
     description: str
 
     def __post_init__(self) -> None:
+        """Validate canonical display replacement policy entry."""
         _require_non_empty(self.display_target_id, "display_target_id")
         _require_non_empty(self.description, "description")
 
@@ -84,6 +87,8 @@ class DisplayReplacementPolicyEntry:
 
 @dataclass(frozen=True, slots=True)
 class DisplayReplacementPolicyContract:
+    """Canonical display replacement policy contract."""
+
     contract_id: str
     total_entries: int
     not_replaceable_entries: int
@@ -92,6 +97,7 @@ class DisplayReplacementPolicyContract:
     entries: tuple[DisplayReplacementPolicyEntry, ...]
 
     def __post_init__(self) -> None:
+        """Validate canonical display replacement policy contract."""
         _require_non_empty(self.contract_id, "contract_id")
 
         if self.total_entries != len(self.entries):
@@ -116,32 +122,29 @@ class DisplayReplacementPolicyContract:
 
 
 def build_display_replacement_policy_contract() -> DisplayReplacementPolicyContract:
+    """Build canonical display replacement policy contract."""
     assignment_registry = build_display_assignment_registry_contract()
     occupancy_contract = build_display_occupancy_contract()
 
     counts: dict[str, dict[str, int]] = {}
-
     for entry in assignment_registry.entries:
         stats = counts.setdefault(
             entry.display_target_id,
             {"active": 0, "replaceable": 0, "pinned": 0},
         )
         stats["active"] += 1
-
         if entry.replaceable:
             stats["replaceable"] += 1
         else:
             stats["pinned"] += 1
 
-    replacement_class_map = {
-        "display_primary_operator": "pinned_primary_surface",
-        "display_secondary_diagnostics": "replaceable_secondary_surface",
-        "display_tertiary_expansion": "replaceable_tertiary_surface",
+    replacement_class_map: dict[str, ReplacementClass] = {
+        "display_foundation_primary": "foundation_primary_pinned_surface",
+        "display_foundation_secondary": "foundation_secondary_replaceable_surface",
+        "display_operator_interaction": "operator_interaction_replaceable_surface",
     }
 
-    occupancy_map = {
-        e.display_target_id: e for e in occupancy_contract.entries
-    }
+    occupancy_map = {e.display_target_id: e for e in occupancy_contract.entries}
 
     entries = tuple(
         DisplayReplacementPolicyEntry(

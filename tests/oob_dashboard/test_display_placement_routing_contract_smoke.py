@@ -27,21 +27,24 @@ def test_display_placement_routing_contract_contains_expected_entries() -> None:
     pinned_entry = entry_map["display_placement_route_001"]
     replaceable_entry = entry_map["display_placement_route_002"]
 
-    assert pinned_entry.display_target_id == "display_primary_operator"
+    assert pinned_entry.display_target_id == "display_foundation_primary"
     assert pinned_entry.routing_class == "pinned_route"
     assert pinned_entry.candidate_display_target_id is None
 
-    assert replaceable_entry.display_target_id == "display_secondary_diagnostics"
+    assert replaceable_entry.display_target_id == "display_foundation_secondary"
     assert replaceable_entry.routing_class == "replaceable_route"
-    assert replaceable_entry.candidate_display_target_id == "display_secondary_diagnostics"
+    assert replaceable_entry.candidate_display_target_id == "display_foundation_secondary"
 
 
 def test_display_placement_routing_entry_rejects_missing_candidate() -> None:
     """Replaceable routes must expose candidate display ids."""
-    with pytest.raises(ValueError, match="replaceable_route entries must expose candidate_display_target_id."):
+    with pytest.raises(
+        ValueError,
+        match="replaceable_route entries must expose candidate_display_target_id.",
+    ):
         DisplayPlacementRoutingEntry(
             routing_id="display_placement_route_invalid",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             routing_state="placement_route_resolved",
             routing_class="replaceable_route",
             incumbent_assignment_id="display_assignment_002",

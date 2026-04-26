@@ -4,105 +4,222 @@ set -euo pipefail
 ROOT="$HOME/MAKSIMAR_PLATFORM"
 TOOLS_DIR="$ROOT/tools"
 RUNTIME_STATE_DIR="$ROOT/RUNTIME/state"
+LOGS_DIR="$ROOT/logs"
 
 RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
 GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
 CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
 KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
+PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
+
+OPERATOR_SESSION="maksimar_operator"
+
+GUARD_LOG_FILE="$ROOT/logs/guard.log"
+CORE_GUARD_LOG_FILE="$ROOT/logs/core_guard.log"
+KERNEL_GUARD_LOG_FILE="$ROOT/logs/kernel_guard.log"
+
+CANONICAL_PYTHON=""
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/.venv/bin/python"
+elif [[ -x "$ROOT/venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/venv/bin/python"
+else
+  echo "[work] ERROR: canonical python not found in .venv/bin/python or venv/bin/python"
+  exit 1
+fi
 
 log() {
-    echo "[work] $1"
+  echo "[work] $1"
 }
 
 abort() {
-    local reason="$1"
-    log "ERROR: $reason"
-    "$TOOLS_DIR/rest" || true
-    exit 1
+  local reason="$1"
+  log "ERROR: $reason"
+  "$TOOLS_DIR/rest" || true
+  exit 1
 }
 
 wait_for_file() {
-    local file_path="$1"
-    local label="$2"
-    local timeout_sec="$3"
+  local file_path="$1"
+  local label="$2"
+  local timeout_sec="$3"
 
-    local started_at
-    started_at="$(date +%s)"
+  local started_at
+  started_at="$(date +%s)"
 
-    while true; do
-        if [[ -f "$file_path" ]]; then
-            log "$label heartbeat file detected: $file_path"
-            return 0
-        fi
+  while true; do
+    if [[ -f "$file_path" ]]; then
+      log "$label file detected: $file_path"
+      return 0
+    fi
 
-        local now
-        now="$(date +%s)"
-        if (( now - started_at >= timeout_sec )); then
-            log "timeout waiting for $label heartbeat: $file_path"
-            return 1
-        fi
+    local now
+    now="$(date +%s)"
+    if (( now - started_at >= timeout_sec )); then
+      log "timeout waiting for $label file: $file_path"
+      return 1
+    fi
 
-        sleep 1
-    done
+    sleep 1
+  done
 }
 
-remove_stale_state_files() {
-    log "removing stale state files"
-    mkdir -p "$RUNTIME_STATE_DIR"
-    rm -f \
-        "$RUNTIME_HEARTBEAT_FILE" \
-        "$GUARD_HEARTBEAT_FILE" \
-        "$CORE_GUARD_HEARTBEAT_FILE" \
-        "$KERNEL_HEARTBEAT_FILE"
+session_exists() {
+  local session_name="$1"
+  tmux has-session -t "$session_name" 2>/dev/null
+}
+
+remove_disposable_runtime_artifacts() {
+  log "removing disposable runtime artifacts"
+  mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
+
+  rm -f \
+    "$RUNTIME_HEARTBEAT_FILE" \
+    "$GUARD_HEARTBEAT_FILE" \
+    "$CORE_GUARD_HEARTBEAT_FILE" \
+    "$KERNEL_HEARTBEAT_FILE"
+}
+
+run_preflight() {
+  log "running runtime preflight"
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+    "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" || return 1
+
+  if [[ ! -f "$PREFLIGHT_RESULT_FILE" ]]; then
+    log "preflight result file not found: $PREFLIGHT_RESULT_FILE"
+    return 1
+  fi
+
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+    "$CANONICAL_PYTHON" - <<'PY'
+import json
+from pathlib import Path
+
+path = Path.home() / "MAKSIMAR_PLATFORM" / "RUNTIME" / "state" / "preflight_result.json"
+data = json.loads(path.read_text(encoding="utf-8"))
+if not data.get("ok", False):
+    raise SystemExit(1)
+print("[work] preflight result ok=true")
+PY
+}
+
+start_oob_dashboard() {
+  log "starting independent OOB dashboard first..."
+  "$TOOLS_DIR/oob_dashboard_ctl" start || true
+  "$TOOLS_DIR/oob_dashboard_ctl" status || true
 }
 
 start_runtime() {
-    log "starting runtime..."
-    "$TOOLS_DIR/ctl" start
-    "$TOOLS_DIR/ctl" status
+  log "starting runtime..."
+  "$TOOLS_DIR/ctl" start
+  "$TOOLS_DIR/ctl" status
+}
+
+wait_for_runtime_readiness() {
+  log "waiting for runtime readiness..."
+  wait_for_file "$RUNTIME_HEARTBEAT_FILE" "runtime heartbeat" 20 || return 1
 }
 
 start_guard() {
-    log "starting supervisor guard..."
-    "$TOOLS_DIR/guard_ctl" start
-    "$TOOLS_DIR/guard_ctl" status
+  log "starting supervisor guard..."
+  "$TOOLS_DIR/guard_ctl" start
+  "$TOOLS_DIR/guard_ctl" status
 }
 
 start_core_guard() {
-    log "starting core guard..."
-    "$TOOLS_DIR/core_guard_ctl" start
-    "$TOOLS_DIR/core_guard_ctl" status
+  log "starting core guard..."
+  "$TOOLS_DIR/core_guard_ctl" start
+  "$TOOLS_DIR/core_guard_ctl" status
 }
 
 start_kernel_watchdog() {
-    log "starting kernel watchdog..."
-    "$TOOLS_DIR/kernel_guard_ctl" start
-    "$TOOLS_DIR/kernel_guard_ctl" status
+  log "starting kernel watchdog..."
+  "$TOOLS_DIR/kernel_guard_ctl" start
+  "$TOOLS_DIR/kernel_guard_ctl" status
 }
 
-open_dashboards_best_effort() {
-    log "opening dashboards (best effort, non-critical)"
-    "$TOOLS_DIR/dashboards_open" 2>/dev/null || true
+wait_for_guard_chain() {
+  wait_for_file "$GUARD_HEARTBEAT_FILE" "guard heartbeat" 15 || return 1
+  wait_for_file "$CORE_GUARD_HEARTBEAT_FILE" "core guard heartbeat" 15 || return 1
+  wait_for_file "$KERNEL_HEARTBEAT_FILE" "kernel heartbeat" 15 || return 1
+}
+
+open_dashboard_windows() {
+  log "opening session-bound dashboard windows after sessions exist..."
+  "$TOOLS_DIR/dashboards_open" || return 1
+  "$TOOLS_DIR/dashboard" status || true
+}
+
+create_operator_dashboard_session() {
+  log "creating operator dashboard session..."
+
+  if session_exists "$OPERATOR_SESSION"; then
+    tmux kill-session -t "$OPERATOR_SESSION" 2>/dev/null || true
+  fi
+
+  tmux new-session -d -s "$OPERATOR_SESSION" -n dashboard -c "$ROOT"
+
+  local p_runtime p_cpu p_guard p_tree
+  p_runtime="$(tmux display-message -p -t "$OPERATOR_SESSION:dashboard.0" '#{pane_id}')"
+
+  p_cpu="$(tmux split-window -h -t "$p_runtime" -l 50% -c "$ROOT" -P -F '#{pane_id}')"
+  p_guard="$(tmux split-window -v -t "$p_runtime" -l 50% -c "$ROOT" -P -F '#{pane_id}')"
+  p_tree="$(tmux split-window -v -t "$p_cpu" -l 50% -c "$ROOT" -P -F '#{pane_id}')"
+
+  tmux send-keys -t "$p_runtime" \
+    "cd '$ROOT' && watch -n1 './tools/ctl status'" C-m
+
+  tmux send-keys -t "$p_cpu" \
+    "cd '$ROOT' && exec btop" C-m
+
+  tmux send-keys -t "$p_guard" \
+    "cd '$ROOT' && touch '$GUARD_LOG_FILE' '$CORE_GUARD_LOG_FILE' '$KERNEL_GUARD_LOG_FILE' && bash -lc '(stdbuf -oL tail -n 0 -F \"$GUARD_LOG_FILE\" | sed -u \"s/^/[STOP-GATE] /\") & (stdbuf -oL tail -n 0 -F \"$CORE_GUARD_LOG_FILE\" | sed -u \"s/^/[CORE-GUARD] /\") & (stdbuf -oL tail -n 0 -F \"$KERNEL_GUARD_LOG_FILE\" | sed -u \"s/^/[KERNEL-WATCHDOG] /\") & wait'" C-m
+
+  tmux send-keys -t "$p_tree" \
+    "cd '$ROOT' && watch -n2 'tree -L 2 \"$ROOT\" | sed -n \"1,80p\"'" C-m
+
+  tmux select-window -t "$OPERATOR_SESSION:dashboard"
+  tmux select-pane -t "$p_runtime"
+
+  log "operator dashboard session ready"
+}
+
+print_truth_summary() {
+  log "truth summary:"
+  [[ -f "$PREFLIGHT_RESULT_FILE" ]] && log "  preflight_result.json present"
+  [[ -f "$RUNTIME_HEARTBEAT_FILE" ]] && log "  runtime heartbeat present"
+  [[ -f "$GUARD_HEARTBEAT_FILE" ]] && log "  guard heartbeat present"
+  [[ -f "$CORE_GUARD_HEARTBEAT_FILE" ]] && log "  core guard heartbeat present"
+  [[ -f "$KERNEL_HEARTBEAT_FILE" ]] && log "  kernel heartbeat present"
 }
 
 main() {
-    mkdir -p "$RUNTIME_STATE_DIR"
-    remove_stale_state_files
+  mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
 
-    start_runtime || abort "runtime start failed"
-    wait_for_file "$RUNTIME_HEARTBEAT_FILE" "runtime" 15 || abort "runtime heartbeat timeout"
+  remove_disposable_runtime_artifacts
 
-    start_guard || abort "guard start failed"
-    wait_for_file "$GUARD_HEARTBEAT_FILE" "guard" 15 || abort "guard heartbeat timeout"
+  # observer layers must start before any preflight/runtime decision
+  start_oob_dashboard
+  create_operator_dashboard_session || abort "operator dashboard session failed"
 
-    start_core_guard || abort "core guard start failed"
-    wait_for_file "$CORE_GUARD_HEARTBEAT_FILE" "core guard" 15 || abort "core guard heartbeat timeout"
+  # open visibility immediately
+  "$TOOLS_DIR/ui_open" || true
 
-    start_kernel_watchdog || abort "kernel watchdog start failed"
-    wait_for_file "$KERNEL_HEARTBEAT_FILE" "kernel" 15 || abort "kernel heartbeat timeout"
+  run_preflight || abort "preflight failed"
 
-    open_dashboards_best_effort
-    log "done"
+  start_runtime || abort "runtime start failed"
+  wait_for_runtime_readiness || abort "runtime readiness timeout"
+
+  start_guard || abort "guard start failed"
+  start_core_guard || abort "core guard start failed"
+  start_kernel_watchdog || abort "kernel watchdog start failed"
+
+  wait_for_guard_chain || abort "guard chain heartbeat timeout"
+
+  open_dashboard_windows || abort "dashboard windows open failed"
+
+  print_truth_summary
+  log "done"
 }
 
 main "$@"

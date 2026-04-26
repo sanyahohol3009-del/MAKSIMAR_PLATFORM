@@ -2,149 +2,66 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.operator_intent_models import (
-    build_operator_intent_model,
-)
-
-ALL_HANDOFF_STATES: tuple[str, ...] = (
-    "handoff_not_ready",
-    "handoff_ready",
-    "handoff_blocked",
-    "handoff_emitted",
-    "handoff_acknowledged",
-    "handoff_failed",
-)
-
-CONTROL_PLANE_TARGETS: tuple[str, ...] = (
-    "control_plane_operator_router",
-    "control_plane_policy_gate",
-    "control_plane_execution_intake",
-)
-
-
-def _require_non_empty(value: str, field_name: str) -> None:
-    if not value or not value.strip():
-        raise ValueError(f"{field_name} must be a non-empty string.")
-
 
 @dataclass(frozen=True, slots=True)
 class OperatorControlPlaneHandoffEntry:
-    handoff_id: str
-    operator_intent_id: str
-    control_plane_target: str
-    handoff_state: str
-    handoff_created_at: str
-    handoff_completed_at: str | None
-    handoff_denied_reason: str | None
-    trace_id: str
+    """Canonical operator-to-control-plane handoff entry."""
+
+    dashboard_id: str
+    interaction_surface_id: str
+    handoff_target: str
+    handoff_mode: str
+    action_submission_allowed: bool
+    direct_execution_allowed: bool
+    approval_required: bool
+    policy_gate_required: bool
     description: str
 
     def __post_init__(self) -> None:
-        _require_non_empty(self.handoff_id, "handoff_id")
-        _require_non_empty(self.operator_intent_id, "operator_intent_id")
-        _require_non_empty(self.control_plane_target, "control_plane_target")
-        _require_non_empty(self.handoff_state, "handoff_state")
-        _require_non_empty(self.handoff_created_at, "handoff_created_at")
-        _require_non_empty(self.trace_id, "trace_id")
-        _require_non_empty(self.description, "description")
+        """Validate handoff entry invariants."""
+        if not self.dashboard_id.strip():
+            raise ValueError("dashboard_id must not be empty")
 
-        if self.handoff_state not in ALL_HANDOFF_STATES:
-            raise ValueError(
-                f"handoff_state must be one of {ALL_HANDOFF_STATES}, got {self.handoff_state!r}."
-            )
+        if not self.interaction_surface_id.strip():
+            raise ValueError("interaction_surface_id must not be empty")
 
-        if self.control_plane_target not in CONTROL_PLANE_TARGETS:
-            raise ValueError(
-                f"control_plane_target must be one of {CONTROL_PLANE_TARGETS}, got {self.control_plane_target!r}."
-            )
+        if not self.handoff_target.strip():
+            raise ValueError("handoff_target must not be empty")
 
-        if self.handoff_state == "handoff_acknowledged" and self.handoff_completed_at is None:
-            raise ValueError(
-                "handoff_acknowledged entries must include handoff_completed_at."
-            )
+        if not self.handoff_mode.strip():
+            raise ValueError("handoff_mode must not be empty")
 
-        if self.handoff_state == "handoff_failed":
-            if self.handoff_denied_reason is None or not self.handoff_denied_reason.strip():
-                raise ValueError(
-                    "handoff_failed entries must include a non-empty handoff_denied_reason."
-                )
-        elif self.handoff_denied_reason is not None:
-            raise ValueError(
-                "Non-failed handoff states must not include handoff_denied_reason."
-            )
+        if self.action_submission_allowed is not True:
+            raise ValueError("action_submission_allowed must be True")
+
+        if self.direct_execution_allowed is not False:
+            raise ValueError("direct_execution_allowed must be False")
+
+        if self.approval_required is not True:
+            raise ValueError("approval_required must be True")
+
+        if self.policy_gate_required is not True:
+            raise ValueError("policy_gate_required must be True")
+
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
-class OperatorControlPlaneHandoffModel:
-    model_id: str
-    total_entries: int
-    handoff_not_ready_entries: int
-    handoff_ready_entries: int
-    handoff_blocked_entries: int
-    handoff_emitted_entries: int
-    handoff_acknowledged_entries: int
-    handoff_failed_entries: int
+class OperatorControlPlaneHandoffContract:
+    """Canonical operator-control-plane handoff contract."""
+
     entries: tuple[OperatorControlPlaneHandoffEntry, ...]
 
     def __post_init__(self) -> None:
-        _require_non_empty(self.model_id, "model_id")
-        if self.total_entries != len(self.entries):
-            raise ValueError("total_entries must match len(entries).")
+        """Validate handoff contract invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
 
-
-def build_operator_control_plane_handoff_model() -> OperatorControlPlaneHandoffModel:
-    """Build canonical handoff model expected by smoke tests."""
-    intent_model = build_operator_intent_model()
-    intent_by_id = {entry.operator_intent_id: entry for entry in intent_model.entries}
-
-    entries = (
-        OperatorControlPlaneHandoffEntry(
-            handoff_id="operator_handoff_001",
-            operator_intent_id="operator_intent_001",
-            control_plane_target="control_plane_operator_router",
-            handoff_state="handoff_not_ready",
-            handoff_created_at="runtime_unbound",
-            handoff_completed_at=None,
-            handoff_denied_reason=None,
-            trace_id=intent_by_id["operator_intent_001"].trace_id,
-            description="Canonical view-only handoff entry.",
-        ),
-        OperatorControlPlaneHandoffEntry(
-            handoff_id="operator_handoff_002",
-            operator_intent_id="operator_intent_002",
-            control_plane_target="control_plane_operator_router",
-            handoff_state="handoff_not_ready",
-            handoff_created_at="runtime_unbound",
-            handoff_completed_at=None,
-            handoff_denied_reason=None,
-            trace_id=intent_by_id["operator_intent_002"].trace_id,
-            description="Canonical navigation handoff entry kept non-executing.",
-        ),
-        OperatorControlPlaneHandoffEntry(
-            handoff_id="operator_handoff_003",
-            operator_intent_id="operator_intent_003",
-            control_plane_target="control_plane_policy_gate",
-            handoff_state="handoff_ready",
-            handoff_created_at="runtime_unbound",
-            handoff_completed_at=None,
-            handoff_denied_reason=None,
-            trace_id=intent_by_id["operator_intent_003"].trace_id,
-            description="Canonical approval-bound control handoff entry.",
-        ),
-    )
-
-    return OperatorControlPlaneHandoffModel(
-        model_id="operator_control_plane_handoff_model_001",
-        total_entries=len(entries),
-        handoff_not_ready_entries=sum(
-            1 for entry in entries if entry.handoff_state == "handoff_not_ready"
-        ),
-        handoff_ready_entries=sum(
-            1 for entry in entries if entry.handoff_state == "handoff_ready"
-        ),
-        handoff_blocked_entries=0,
-        handoff_emitted_entries=0,
-        handoff_acknowledged_entries=0,
-        handoff_failed_entries=0,
-        entries=entries,
-    )
+        seen_dashboard_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.dashboard_id in seen_dashboard_ids:
+                raise ValueError(
+                    f"duplicate dashboard_id detected: {entry.dashboard_id}"
+                )
+            seen_dashboard_ids.add(entry.dashboard_id)

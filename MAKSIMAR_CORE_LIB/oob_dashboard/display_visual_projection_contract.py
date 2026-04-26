@@ -14,21 +14,19 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_resolver_decision_contract import (
 ProjectionState = Literal[
     "projection_ready",
 ]
-
 ProjectionClass = Literal[
-    "primary_projection",
-    "secondary_projection",
-    "tertiary_projection",
+    "foundation_primary_projection",
+    "foundation_secondary_projection",
+    "operator_interaction_projection",
 ]
 
 ALL_PROJECTION_STATES: tuple[ProjectionState, ...] = (
     "projection_ready",
 )
-
 ALL_PROJECTION_CLASSES: tuple[ProjectionClass, ...] = (
-    "primary_projection",
-    "secondary_projection",
-    "tertiary_projection",
+    "foundation_primary_projection",
+    "foundation_secondary_projection",
+    "operator_interaction_projection",
 )
 
 
@@ -135,10 +133,10 @@ def build_display_visual_projection_contract() -> DisplayVisualProjectionContrac
         entry.display_target_id for entry in resolver_decision_contract.entries
     }
 
-    projection_class_map = {
-        "display_primary_operator": "primary_projection",
-        "display_secondary_diagnostics": "secondary_projection",
-        "display_tertiary_expansion": "tertiary_projection",
+    projection_class_map: dict[str, ProjectionClass] = {
+        "display_foundation_primary": "foundation_primary_projection",
+        "display_foundation_secondary": "foundation_secondary_projection",
+        "display_operator_interaction": "operator_interaction_projection",
     }
 
     entries = tuple(
@@ -147,10 +145,8 @@ def build_display_visual_projection_contract() -> DisplayVisualProjectionContrac
             display_target_id=entry.display_target_id,
             projection_state="projection_ready",
             projection_class=projection_class_map[entry.display_target_id],
-            selected_assignment_present=(
-                entry.display_target_id in resolved_display_ids
-                or entry.display_target_id == "display_tertiary_expansion"
-            ),
+            selected_assignment_present=entry.display_target_id in resolved_display_ids
+            or entry.display_target_id == "display_operator_interaction",
             shared_surface=entry.shared_surface,
             projection_ready=True,
             operator_visible=True,

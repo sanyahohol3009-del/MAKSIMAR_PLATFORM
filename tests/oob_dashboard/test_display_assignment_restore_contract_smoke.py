@@ -25,7 +25,7 @@ def test_display_assignment_restore_contract_contains_expected_entries() -> None
     entry_map = {entry.assignment_id: entry for entry in contract.entries}
 
     assert entry_map["display_assignment_001"].restore_decision == "restore_direct"
-    assert entry_map["display_assignment_001"].display_target_id == "display_primary_operator"
+    assert entry_map["display_assignment_001"].display_target_id == "display_foundation_primary"
 
     assert entry_map["display_assignment_002"].restore_decision == "restore_shared_surface"
     assert entry_map["display_assignment_003"].restore_decision == "restore_shared_surface"
@@ -37,7 +37,7 @@ def test_display_assignment_restore_entry_rejects_blank_assignment_id() -> None:
     with pytest.raises(ValueError, match="assignment_id must be a non-empty string."):
         DisplayAssignmentRestoreEntry(
             assignment_id="",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             panel_or_surface_id="main_operator_interaction_surface_001",
             restore_decision="restore_direct",
             restore_state="restore_ready",

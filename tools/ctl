@@ -8,7 +8,6 @@ RUNTIME_STATE_DIR="$RUNTIME_DIR/state"
 HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
 LOG_FILE="$ROOT/logs/runtime.log"
 PID_FILE="$RUNTIME_DIR/runtime.pid"
-
 HEARTBEAT_TIMEOUT_SEC=10
 RUNTIME_PORT=8000
 HEALTH_URL="http://127.0.0.1:${RUNTIME_PORT}/health"
@@ -20,43 +19,52 @@ STATE_DEGRADED="DEGRADED"
 STATE_DEAD="DEAD"
 STATE_BROKEN="BROKEN"
 
+CANONICAL_PYTHON=""
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/.venv/bin/python"
+elif [[ -x "$ROOT/venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/venv/bin/python"
+else
+  echo "[ctl] ERROR: canonical python not found in .venv/bin/python or venv/bin/python"
+  exit 1
+fi
+
 log() {
-    echo "[ctl] $1"
+  echo "[ctl] $1"
 }
 
 session_exists() {
-    tmux has-session -t "$SESSION_NAME" 2>/dev/null
+  tmux has-session -t "$SESSION_NAME" 2>/dev/null
 }
 
 find_runtime_pid() {
-    local pid=""
-    local patterns=(
-        "SUPERVISOR.process_supervisor"
-        "python3 -m SUPERVISOR.process_supervisor"
-        "python -m SUPERVISOR.process_supervisor"
-        "process_supervisor.py"
-        "$ROOT/SUPERVISOR/process_supervisor.py"
-    )
+  local pid=""
+  local patterns=(
+    "SUPERVISOR.process_supervisor"
+    "$CANONICAL_PYTHON -m SUPERVISOR.process_supervisor"
+    "process_supervisor.py"
+    "$ROOT/SUPERVISOR/process_supervisor.py"
+  )
 
-    for pattern in "${patterns[@]}"; do
-        pid="$(pgrep -af "$pattern" | awk '$0 !~ /grep/ {print $1}' | head -n 1 || true)"
-        if [[ -n "${pid:-}" ]]; then
-            printf '%s\n' "$pid"
-            return 0
-        fi
-    done
+  for pattern in "${patterns[@]}"; do
+    pid="$(pgrep -af "$pattern" | awk '$0 !~ /grep/ {print $1}' | head -n 1 || true)"
+    if [[ -n "${pid:-}" ]]; then
+      printf '%s\n' "$pid"
+      return 0
+    fi
+  done
 
-    return 1
+  return 1
 }
 
 process_exists() {
-    local pid=""
-    pid="$(find_runtime_pid || true)"
-    [[ -n "${pid:-}" ]]
+  local pid=""
+  pid="$(find_runtime_pid || true)"
+  [[ -n "${pid:-}" ]]
 }
 
 heartbeat_age() {
-    python3 - "$HEARTBEAT_FILE" <<'PY'
+  "$CANONICAL_PYTHON" - "$HEARTBEAT_FILE" <<'PY'
 import json
 import sys
 import time
@@ -83,13 +91,13 @@ PY
 }
 
 heartbeat_is_fresh() {
-    local age=""
-    age="$(heartbeat_age)"
-    if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
-        return 1
-    fi
+  local age=""
+  age="$(heartbeat_age)"
+  if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
+    return 1
+  fi
 
-    python3 - "$age" "$HEARTBEAT_TIMEOUT_SEC" <<'PY'
+  "$CANONICAL_PYTHON" - "$age" "$HEARTBEAT_TIMEOUT_SEC" <<'PY'
 import sys
 
 age = float(sys.argv[1])
@@ -99,247 +107,230 @@ PY
 }
 
 http_health() {
-    curl -fsS --max-time 2 "$HEALTH_URL" >/dev/null 2>&1
+  curl -fsS --max-time 2 "$HEALTH_URL" >/dev/null 2>&1
 }
 
 port_listening() {
-    ss -ltn "( sport = :$RUNTIME_PORT )" 2>/dev/null | grep -q ":$RUNTIME_PORT"
+  ss -ltn "( sport = :$RUNTIME_PORT )" 2>/dev/null | grep -q ":$RUNTIME_PORT"
 }
 
 degraded_active() {
-    [[ -f "$DEGRADED_FILE" ]]
+  [[ -f "$DEGRADED_FILE" ]]
 }
 
 runtime_truth() {
-    session_exists && process_exists && heartbeat_is_fresh && http_health
+  session_exists && process_exists && heartbeat_is_fresh && http_health
 }
 
 normalized_state() {
-    local has_session="0"
-    local has_process="0"
-    local hb_age=""
-    local has_port="0"
-    local has_http="0"
+  local has_session="0"
+  local has_process="0"
+  local hb_age=""
+  local has_port="0"
+  local has_http="0"
 
-    if session_exists; then
-        has_session="1"
+  if session_exists; then
+    has_session="1"
+  fi
+  if process_exists; then
+    has_process="1"
+  fi
+  if port_listening; then
+    has_port="1"
+  fi
+  if http_health; then
+    has_http="1"
+  fi
+
+  hb_age="$(heartbeat_age)"
+
+  if runtime_truth; then
+    if degraded_active; then
+      printf '%s\n' "$STATE_DEGRADED"
+    else
+      printf '%s\n' "$STATE_ALIVE"
     fi
+    return 0
+  fi
 
-    if process_exists; then
-        has_process="1"
+  if [[ "$hb_age" == "invalid" ]]; then
+    printf '%s\n' "$STATE_BROKEN"
+    return 0
+  fi
+
+  if [[ "$hb_age" == "missing" ]]; then
+    if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" ]]; then
+      printf '%s\n' "$STATE_WARMING_UP"
+      return 0
     fi
-
-    if port_listening; then
-        has_port="1"
-    fi
-
-    if http_health; then
-        has_http="1"
-    fi
-
-    hb_age="$(heartbeat_age)"
-
-    if runtime_truth; then
-        if degraded_active; then
-            printf '%s\n' "$STATE_DEGRADED"
-        else
-            printf '%s\n' "$STATE_ALIVE"
-        fi
-        return 0
-    fi
-
-    if [[ "$hb_age" == "invalid" ]]; then
-        printf '%s\n' "$STATE_BROKEN"
-        return 0
-    fi
-
-    if [[ "$hb_age" == "missing" ]]; then
-        if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" ]]; then
-            printf '%s\n' "$STATE_WARMING_UP"
-            return 0
-        fi
-        printf '%s\n' "$STATE_DEAD"
-        return 0
-    fi
-
-    if [[ "$has_http" == "1" && "$has_port" == "1" && "$has_process" == "1" && "$has_session" == "1" ]]; then
-        if degraded_active; then
-            printf '%s\n' "$STATE_DEGRADED"
-        else
-            printf '%s\n' "$STATE_ALIVE"
-        fi
-        return 0
-    fi
-
-    if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" || "$has_http" == "1" ]]; then
-        printf '%s\n' "$STATE_BROKEN"
-        return 0
-    fi
-
     printf '%s\n' "$STATE_DEAD"
+    return 0
+  fi
+
+  if [[ "$has_http" == "1" && "$has_port" == "1" && "$has_process" == "1" && "$has_session" == "1" ]]; then
+    if degraded_active; then
+      printf '%s\n' "$STATE_DEGRADED"
+    else
+      printf '%s\n' "$STATE_ALIVE"
+    fi
+    return 0
+  fi
+
+  if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" || "$has_http" == "1" ]]; then
+    printf '%s\n' "$STATE_BROKEN"
+    return 0
+  fi
+
+  printf '%s\n' "$STATE_DEAD"
 }
 
 write_pid_file() {
-    local pid=""
-    pid="$(find_runtime_pid || true)"
-    mkdir -p "$RUNTIME_DIR"
-    if [[ -n "${pid:-}" ]]; then
-        printf '%s\n' "$pid" > "$PID_FILE"
-    fi
+  local pid=""
+  pid="$(find_runtime_pid || true)"
+  mkdir -p "$RUNTIME_DIR"
+  if [[ -n "${pid:-}" ]]; then
+    printf '%s\n' "$pid" > "$PID_FILE"
+  fi
 }
 
 remove_pid_file() {
-    rm -f "$PID_FILE"
+  rm -f "$PID_FILE"
 }
 
 start() {
-    if runtime_truth; then
-        log "already running (truthful)"
-        status
-        return 0
-    fi
-
-    if session_exists; then
-        log "removing stale tmux session: $SESSION_NAME"
-        tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
-    fi
-
-    remove_pid_file
-    mkdir -p "$RUNTIME_DIR" "$RUNTIME_STATE_DIR" "$(dirname "$LOG_FILE")"
-
-    log "starting runtime tmux session: $SESSION_NAME"
-    tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
-    tmux send-keys -t "$SESSION_NAME" \
-        "cd '$ROOT' && python3 -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" C-m
-
-    sleep 2
-    write_pid_file
-
-    if runtime_truth; then
-        log "started ($SESSION_NAME)"
-        return 0
-    fi
-
-    log "started tmux session, but runtime is not yet truthful"
+  if runtime_truth; then
+    log "already running (truthful)"
     status
-    return 1
+    return 0
+  fi
+
+  if session_exists; then
+    log "removing stale tmux session: $SESSION_NAME"
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+
+  remove_pid_file
+  mkdir -p "$RUNTIME_DIR" "$RUNTIME_STATE_DIR" "$(dirname "$LOG_FILE")"
+
+  log "starting runtime tmux session: $SESSION_NAME"
+  tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
+  tmux send-keys -t "$SESSION_NAME" \
+    "cd '$ROOT' && '$CANONICAL_PYTHON' -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" C-m
+
+  sleep 2
+  write_pid_file
+
+  if runtime_truth; then
+    log "started ($SESSION_NAME)"
+    return 0
+  fi
+
+  log "started tmux session, but runtime is not yet truthful"
+  status
+  return 1
 }
 
 stop() {
-    log "stopping runtime..."
+  log "stopping runtime..."
+  if session_exists; then
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
 
-    if session_exists; then
-        tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
-    fi
+  local pid=""
+  pid="$(find_runtime_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    kill "$pid" 2>/dev/null || true
+    sleep 1
+  fi
 
-    local pid=""
-    pid="$(find_runtime_pid || true)"
-    if [[ -n "${pid:-}" ]]; then
-        kill "$pid" 2>/dev/null || true
-        sleep 1
-    fi
+  pid="$(find_runtime_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    kill -9 "$pid" 2>/dev/null || true
+  fi
 
-    pid="$(find_runtime_pid || true)"
-    if [[ -n "${pid:-}" ]]; then
-        kill -9 "$pid" 2>/dev/null || true
-    fi
-
-    remove_pid_file
-    log "done"
+  remove_pid_file
+  log "done"
 }
 
 status() {
-    if session_exists; then
-        log "tmux:"
-        echo "  RUNNING (session: $SESSION_NAME)"
-    else
-        log "tmux:"
-        echo "  STOPPED"
-    fi
+  if session_exists; then
+    log "tmux:"
+    echo "  RUNNING (session: $SESSION_NAME)"
+  else
+    log "tmux:"
+    echo "  STOPPED"
+  fi
 
-    local pid=""
-    pid="$(find_runtime_pid || true)"
-    if [[ -n "${pid:-}" ]]; then
-        log "process:"
-        echo "  RUNNING (pid=$pid, script=process_supervisor)"
-    else
-        log "process:"
-        echo "  STOPPED"
-    fi
+  local pid=""
+  pid="$(find_runtime_pid || true)"
+  if [[ -n "${pid:-}" ]]; then
+    log "process:"
+    echo "  RUNNING (pid: $pid)"
+  else
+    log "process:"
+    echo "  STOPPED"
+  fi
 
-    log "heartbeat:"
-    if [[ ! -f "$HEARTBEAT_FILE" ]]; then
-        echo "  missing"
-    else
-        local age=""
-        age="$(heartbeat_age)"
-        if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
-            echo "  $age"
-        else
-            if heartbeat_is_fresh; then
-                echo "  FRESH (age=${age}s, file=$HEARTBEAT_FILE)"
-            else
-                echo "  STALE (age=${age}s, file=$HEARTBEAT_FILE)"
-            fi
-        fi
-    fi
+  local hb_age=""
+  hb_age="$(heartbeat_age)"
+  log "heartbeat:"
+  if [[ "$hb_age" == "missing" ]]; then
+    echo "  missing"
+  elif [[ "$hb_age" == "invalid" ]]; then
+    echo "  invalid"
+  else
+    echo "  age=${hb_age}s"
+  fi
 
-    log "port:"
-    if port_listening; then
-        echo "  LISTENING ($RUNTIME_PORT)"
-    else
-        echo "  CLOSED"
-    fi
+  log "port:"
+  if port_listening; then
+    echo "  LISTENING ($RUNTIME_PORT)"
+  else
+    echo "  CLOSED"
+  fi
 
-    log "http:"
-    if http_health; then
-        echo "  OK ($HEALTH_URL)"
-    else
-        echo "  UNAVAILABLE ($HEALTH_URL)"
-    fi
+  log "http:"
+  if http_health; then
+    echo "  ALIVE ($HEALTH_URL)"
+  else
+    echo "  UNAVAILABLE ($HEALTH_URL)"
+  fi
 
-    log "degraded:"
-    if degraded_active; then
-        echo "  ACTIVE ($DEGRADED_FILE)"
-    else
-        echo "  INACTIVE"
-    fi
+  log "degraded:"
+  if degraded_active; then
+    echo "  ACTIVE"
+  else
+    echo "  INACTIVE"
+  fi
 
-    log "state:"
-    echo "  $(normalized_state)"
+  log "state:"
+  echo "  $(normalized_state)"
 
-    log "truth:"
-    if runtime_truth; then
-        echo "  ALIVE"
-    else
-        echo "  NOT_ALIVE"
-    fi
+  log "truth:"
+  if runtime_truth; then
+    echo "  ALIVE"
+  else
+    echo "  NOT_ALIVE"
+  fi
 }
 
-attach() {
-    if ! session_exists; then
-        log "no session: $SESSION_NAME"
-        return 1
-    fi
-    tmux attach -t "$SESSION_NAME"
-}
-
-usage() {
-    echo "Usage: ./tools/ctl {start|stop|status|attach}"
-}
-
-main() {
-    local cmd="${1:-}"
-    case "$cmd" in
-        start) start ;;
-        stop) stop ;;
-        status) status ;;
-        attach) attach ;;
-        *)
-            usage
-            exit 1
-            ;;
-    esac
-}
-
-main "$@"
+case "${1:-}" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    status
+    ;;
+  restart)
+    stop || true
+    sleep 1
+    start
+    ;;
+  *)
+    echo "usage: $0 {start|stop|status|restart}"
+    exit 1
+    ;;
+esac

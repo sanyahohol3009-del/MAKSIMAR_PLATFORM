@@ -9,21 +9,19 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.layout_composition_contract import (
 
 
 PanelZone = Literal[
-    "left_sidebar",
-    "main_focus",
-    "diagnostics_strip",
-    "secondary_zone",
+    "foundation_layout_zone",
+    "operator_layout_zone",
 ]
 
 PanelSlot = Literal[
-    "slot_left_1",
-    "slot_left_2",
-    "slot_main_1",
-    "slot_main_2",
-    "slot_diag_1",
-    "slot_diag_2",
-    "slot_secondary_1",
-    "slot_secondary_2",
+    "slot_foundation_main_0",
+    "slot_foundation_main_1",
+    "slot_foundation_main_2",
+    "slot_foundation_secondary_0",
+    "slot_foundation_secondary_1",
+    "slot_operator_main_0",
+    "slot_operator_main_1",
+    "slot_operator_main_2",
 ]
 
 
@@ -62,68 +60,60 @@ def build_panel_zone_slot_vocabulary_contract() -> PanelZoneSlotVocabularyContra
 
     zone_entries = (
         PanelZoneVocabularyEntry(
-            panel_zone="left_sidebar",
-            description="Canonical sidebar zone for navigation/monitoring surfaces.",
+            panel_zone="foundation_layout_zone",
+            description="Canonical layout zone for foundation monitoring workspace panels.",
         ),
         PanelZoneVocabularyEntry(
-            panel_zone="main_focus",
-            description="Canonical main-focus zone for primary workspace surfaces.",
-        ),
-        PanelZoneVocabularyEntry(
-            panel_zone="diagnostics_strip",
-            description="Canonical diagnostics strip zone for incident/diagnostic surfaces.",
-        ),
-        PanelZoneVocabularyEntry(
-            panel_zone="secondary_zone",
-            description="Canonical secondary zone for expansion/supporting surfaces.",
+            panel_zone="operator_layout_zone",
+            description="Canonical layout zone for operator interaction workspace panels.",
         ),
     )
 
     slot_entries = (
         PanelSlotVocabularyEntry(
-            panel_slot="slot_left_1",
-            parent_zone="left_sidebar",
-            description="Canonical first sidebar slot.",
+            panel_slot="slot_foundation_main_0",
+            parent_zone="foundation_layout_zone",
+            description="Canonical first foundation main slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_left_2",
-            parent_zone="left_sidebar",
-            description="Canonical second sidebar slot.",
+            panel_slot="slot_foundation_main_1",
+            parent_zone="foundation_layout_zone",
+            description="Canonical second foundation main slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_main_1",
-            parent_zone="main_focus",
-            description="Canonical first main-focus slot.",
+            panel_slot="slot_foundation_main_2",
+            parent_zone="foundation_layout_zone",
+            description="Canonical third foundation main slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_main_2",
-            parent_zone="main_focus",
-            description="Canonical second main-focus slot.",
+            panel_slot="slot_foundation_secondary_0",
+            parent_zone="foundation_layout_zone",
+            description="Canonical first foundation secondary slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_diag_1",
-            parent_zone="diagnostics_strip",
-            description="Canonical first diagnostics-strip slot.",
+            panel_slot="slot_foundation_secondary_1",
+            parent_zone="foundation_layout_zone",
+            description="Canonical second foundation secondary slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_diag_2",
-            parent_zone="diagnostics_strip",
-            description="Canonical second diagnostics-strip slot.",
+            panel_slot="slot_operator_main_0",
+            parent_zone="operator_layout_zone",
+            description="Canonical first operator main slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_secondary_1",
-            parent_zone="secondary_zone",
-            description="Canonical first secondary-zone slot.",
+            panel_slot="slot_operator_main_1",
+            parent_zone="operator_layout_zone",
+            description="Canonical second operator main slot.",
         ),
         PanelSlotVocabularyEntry(
-            panel_slot="slot_secondary_2",
-            parent_zone="secondary_zone",
-            description="Canonical second secondary-zone slot.",
+            panel_slot="slot_operator_main_2",
+            parent_zone="operator_layout_zone",
+            description="Canonical third operator main slot.",
         ),
     )
 
     used_zones = {entry.layout_zone for entry in layout_contract.entries}
-    used_slots = {entry.layout_slot for entry in layout_contract.entries}
+    used_slots = {entry.layout_slot_id for entry in layout_contract.entries}
 
     return PanelZoneSlotVocabularyContract(
         total_zones=len(zone_entries),

@@ -1,53 +1,42 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard import (
+from MAKSIMAR_CORE_LIB.oob_dashboard.view_targeting_contract import (
     build_view_targeting_contract,
+    resolve_view_scope,
+    resolve_view_target_kind,
 )
 
 
 def test_view_targeting_contract_builds() -> None:
-    """View targeting contract should build successfully."""
     contract = build_view_targeting_contract()
 
-    assert contract.total_entries == 19
-    assert contract.foundation_views == 4
-    assert contract.diagnostics_views == 4
-    assert contract.interaction_views == 3
-    assert contract.execution_views == 7
-    assert contract.navigation_views == 1
+    assert len(contract.entries) == 8
+    assert contract.entries[0].panel_id == "system_status"
+    assert contract.entries[-1].panel_id == "audit_timeline"
 
 
-def test_view_targeting_chat_entry() -> None:
-    """Chat panel should map to canonical interaction view."""
+def test_view_targeting_contract_assigns_foundation_views() -> None:
     contract = build_view_targeting_contract()
-    entry = next(entry for entry in contract.entries if entry.panel_id == "panel_chat")
+    targeting_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.view_id == "view_chat"
-    assert entry.view_target_kind == "interaction_view"
-    assert entry.view_scope == "interaction"
+    assert targeting_map["system_status"].view_id == "view_foundation_status"
+    assert targeting_map["logs"].view_id == "view_foundation_observability"
 
 
-def test_view_targeting_foundation_runtime_entry() -> None:
-    """Foundation runtime panel should map to canonical foundation view."""
+def test_view_targeting_contract_assigns_interaction_views() -> None:
     contract = build_view_targeting_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.panel_id == "panel_foundation_runtime_status_001"
-    )
+    targeting_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.view_id == "view_foundation_runtime"
-    assert entry.view_target_kind == "foundation_view"
-    assert entry.view_scope == "foundation"
+    assert targeting_map["action_queue"].view_id == "view_operator_interaction"
+    assert targeting_map["approval_queue"].view_id == "view_operator_interaction"
+    assert targeting_map["audit_timeline"].view_id == "view_operator_interaction"
 
 
-def test_view_targeting_navigation_entry() -> None:
-    """Navigation panel should map to canonical navigation view."""
-    contract = build_view_targeting_contract()
-    entry = next(
-        entry for entry in contract.entries if entry.panel_id == "panel_navigation"
-    )
+def test_resolve_view_target_kind_smoke() -> None:
+    assert resolve_view_target_kind("system_status") == "foundation_view"
+    assert resolve_view_target_kind("audit_timeline") == "interaction_view"
 
-    assert entry.view_id == "view_navigation"
-    assert entry.view_target_kind == "navigation_view"
-    assert entry.view_scope == "navigation"
+
+def test_resolve_view_scope_smoke() -> None:
+    assert resolve_view_scope("system_status") == "foundation"
+    assert resolve_view_scope("audit_timeline") == "interaction"

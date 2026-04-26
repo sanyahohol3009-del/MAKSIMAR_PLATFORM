@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+SESSION_NAME="maksimar_oob"
+SCRIPT_PATH="$ROOT/tools/monitor/oob_foundation_monitor.py"
+# canonical candidates: ".venv/bin/python" and "/venv/bin/python"
+# this OOB layer must stay independent from runtime truthfulness
+
+CANONICAL_PYTHON=""
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/.venv/bin/python"
+elif [[ -x "$ROOT/venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/venv/bin/python"
+else
+  echo "[oob_dashboard_ctl] ERROR: canonical python not found in .venv/bin/python or venv/bin/python"
+  exit 1
+fi
+
+log() {
+  echo "[oob_dashboard_ctl] $1"
+}
+
+session_exists() {
+  tmux has-session -t "$SESSION_NAME" 2>/dev/null
+}
+
+start() {
+  if session_exists; then
+    log "already running ($SESSION_NAME)"
+    status
+    return 0
+  fi
+
+  if [[ ! -f "$SCRIPT_PATH" ]]; then
+    log "monitor script not found: $SCRIPT_PATH"
+    exit 1
+  fi
+
+  log "starting OOB dashboard session: $SESSION_NAME"
+  tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
+  tmux send-keys -t "$SESSION_NAME" \
+    "cd '$ROOT' && '$CANONICAL_PYTHON' '$SCRIPT_PATH'" C-m
+
+  sleep 1
+  status
+}
+
+stop() {
+  log "stopping OOB dashboard..."
+  if session_exists; then
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+  log "done"
+}
+
+status() {
+  if session_exists; then
+    log "tmux:"
+    echo "  RUNNING (session: $SESSION_NAME)"
+  else
+    log "tmux:"
+    echo "  STOPPED"
+  fi
+}
+
+case "${1:-}" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    status
+    ;;
+  restart)
+    stop || true
+    sleep 1
+    start
+    ;;
+  *)
+    echo "usage: $0 {start|stop|status|restart}"
+    exit 1
+    ;;
+esac

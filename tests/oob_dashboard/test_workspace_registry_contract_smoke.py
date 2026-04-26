@@ -1,57 +1,43 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard import (
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
     build_workspace_registry_contract,
 )
 
 
 def test_workspace_registry_contract_builds() -> None:
-    """Workspace registry contract should build successfully."""
     contract = build_workspace_registry_contract()
 
-    assert contract.total_entries == 3
-    assert contract.read_only_entries == 2
-    assert contract.operator_surface_entries == 1
+    assert len(contract.entries) == 2
+    assert contract.entries[0].workspace_id == "workspace_foundation_monitoring"
+    assert contract.entries[1].workspace_id == "workspace_operator_interaction"
 
 
-def test_workspace_registry_foundation_monitoring_entry() -> None:
-    """Foundation monitoring workspace should be canonical and read-only."""
+def test_workspace_registry_foundation_entry() -> None:
     contract = build_workspace_registry_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.workspace_id == "workspace_foundation_monitoring"
+    workspace_map = {entry.workspace_id: entry for entry in contract.entries}
+
+    foundation_entry = workspace_map["workspace_foundation_monitoring"]
+    assert foundation_entry.workspace_role == "foundation_monitoring"
+    assert foundation_entry.primary_display_target_id == "display_foundation_primary"
+    assert foundation_entry.included_panel_ids == (
+        "system_status",
+        "guard_chain",
+        "incidents",
+        "logs",
+        "topology",
     )
 
-    assert entry.workspace_role == "foundation_monitoring"
-    assert entry.display_target_id == "display_secondary_diagnostics"
-    assert entry.default_panel_count == 8
-    assert entry.read_only is True
 
-
-def test_workspace_registry_operator_main_entry() -> None:
-    """Operator main workspace should be canonical operator surface."""
+def test_workspace_registry_operator_entry() -> None:
     contract = build_workspace_registry_contract()
-    entry = next(
-        entry for entry in contract.entries if entry.workspace_id == "workspace_operator_main"
+    workspace_map = {entry.workspace_id: entry for entry in contract.entries}
+
+    operator_entry = workspace_map["workspace_operator_interaction"]
+    assert operator_entry.workspace_role == "operator_interaction"
+    assert operator_entry.primary_display_target_id == "display_operator_interaction"
+    assert operator_entry.included_panel_ids == (
+        "action_queue",
+        "approval_queue",
+        "audit_timeline",
     )
-
-    assert entry.workspace_role == "operator_surface"
-    assert entry.display_target_id == "display_primary_operator"
-    assert entry.default_panel_count == 3
-    assert entry.read_only is False
-
-
-def test_workspace_registry_expansion_entry() -> None:
-    """Expansion workspace should be canonical observability surface."""
-    contract = build_workspace_registry_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.workspace_id == "workspace_expansion_observability"
-    )
-
-    assert entry.workspace_role == "expansion_surface"
-    assert entry.display_target_id == "display_tertiary_expansion"
-    assert entry.default_panel_count == 8
-    assert entry.read_only is True

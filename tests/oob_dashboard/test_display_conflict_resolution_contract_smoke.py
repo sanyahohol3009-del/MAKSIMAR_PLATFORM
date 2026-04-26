@@ -27,25 +27,28 @@ def test_display_conflict_resolution_contract_contains_expected_entries() -> Non
     primary_entry = entry_map["display_conflict_001"]
     secondary_entry = entry_map["display_conflict_002"]
 
-    assert primary_entry.display_target_id == "display_primary_operator"
+    assert primary_entry.display_target_id == "display_foundation_primary"
     assert primary_entry.conflict_decision == "retain_pinned_surface"
-    assert primary_entry.conflict_class == "pinned_primary_conflict"
+    assert primary_entry.conflict_class == "foundation_primary_conflict"
     assert primary_entry.candidate_display_target_id is None
 
-    assert secondary_entry.display_target_id == "display_secondary_diagnostics"
+    assert secondary_entry.display_target_id == "display_foundation_secondary"
     assert secondary_entry.conflict_decision == "replace_replaceable_surface"
-    assert secondary_entry.conflict_class == "replaceable_secondary_conflict"
-    assert secondary_entry.candidate_display_target_id == "display_secondary_diagnostics"
+    assert secondary_entry.conflict_class == "foundation_secondary_conflict"
+    assert secondary_entry.candidate_display_target_id == "display_foundation_secondary"
 
 
 def test_display_conflict_resolution_entry_rejects_missing_candidate_for_replaceable_conflict() -> None:
     """Replaceable conflict entries must expose candidate display ids."""
-    with pytest.raises(ValueError, match="replace_replaceable_surface entries must expose candidate_display_target_id."):
+    with pytest.raises(
+        ValueError,
+        match="replace_replaceable_surface entries must expose candidate_display_target_id.",
+    ):
         DisplayConflictResolutionEntry(
             conflict_id="display_conflict_invalid",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             conflict_decision="replace_replaceable_surface",
-            conflict_class="replaceable_secondary_conflict",
+            conflict_class="foundation_secondary_conflict",
             incumbent_assignment_id="display_assignment_002",
             candidate_display_target_id=None,
             operator_visible=True,

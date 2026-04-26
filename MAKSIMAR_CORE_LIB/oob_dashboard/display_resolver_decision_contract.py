@@ -17,7 +17,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.display_restore_continuity_contract import 
 ResolverDecisionState = Literal[
     "resolver_decision_ready",
 ]
-
 ResolverDecisionClass = Literal[
     "pinned_display_resolution",
     "replaceable_display_resolution",
@@ -26,7 +25,6 @@ ResolverDecisionClass = Literal[
 ALL_RESOLVER_DECISION_STATES: tuple[ResolverDecisionState, ...] = (
     "resolver_decision_ready",
 )
-
 ALL_RESOLVER_DECISION_CLASSES: tuple[ResolverDecisionClass, ...] = (
     "pinned_display_resolution",
     "replaceable_display_resolution",
@@ -151,8 +149,8 @@ def build_display_resolver_decision_contract() -> DisplayResolverDecisionContrac
         entry.display_target_id: entry.assignment_id
         for entry in assignment_contract.entries
         if entry.display_target_id in {
-            "display_primary_operator",
-            "display_secondary_diagnostics",
+            "display_foundation_primary",
+            "display_foundation_secondary",
         }
     }
 
@@ -160,8 +158,8 @@ def build_display_resolver_decision_contract() -> DisplayResolverDecisionContrac
         entry.display_target_id: entry.continuity_id
         for entry in continuity_contract.entries
         if entry.display_target_id in {
-            "display_primary_operator",
-            "display_secondary_diagnostics",
+            "display_foundation_primary",
+            "display_foundation_secondary",
         }
     }
 
@@ -173,32 +171,32 @@ def build_display_resolver_decision_contract() -> DisplayResolverDecisionContrac
     entries = (
         DisplayResolverDecisionEntry(
             resolver_decision_id="display_resolver_decision_001",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             resolver_decision_state="resolver_decision_ready",
             resolver_decision_class="pinned_display_resolution",
-            selected_assignment_id=assignments_by_display["display_primary_operator"],
-            continuity_id=continuity_by_display["display_primary_operator"],
+            selected_assignment_id=assignments_by_display["display_foundation_primary"],
+            continuity_id=continuity_by_display["display_foundation_primary"],
             routed_candidate_display_target_id=None,
             operator_visible=True,
             description=(
-                "Canonical resolver decision for pinned primary operator display."
+                "Canonical resolver decision for pinned foundation primary display."
             ),
         ),
         DisplayResolverDecisionEntry(
             resolver_decision_id="display_resolver_decision_002",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             resolver_decision_state="resolver_decision_ready",
             resolver_decision_class="replaceable_display_resolution",
             selected_assignment_id=routing_by_display[
-                "display_secondary_diagnostics"
+                "display_foundation_secondary"
             ].incumbent_assignment_id,
-            continuity_id=continuity_by_display["display_secondary_diagnostics"],
+            continuity_id=continuity_by_display["display_foundation_secondary"],
             routed_candidate_display_target_id=routing_by_display[
-                "display_secondary_diagnostics"
+                "display_foundation_secondary"
             ].candidate_display_target_id,
             operator_visible=True,
             description=(
-                "Canonical resolver decision for replaceable secondary diagnostics display."
+                "Canonical resolver decision for replaceable foundation secondary display."
             ),
         ),
     )

@@ -24,18 +24,36 @@ def test_display_assignment_registry_contract_contains_expected_entries() -> Non
     contract = build_display_assignment_registry_contract()
     entry_map = {entry.assignment_id: entry for entry in contract.entries}
 
-    assert entry_map["display_assignment_001"].display_target_id == "display_primary_operator"
+    assert (
+        entry_map["display_assignment_001"].display_target_id
+        == "display_foundation_primary"
+    )
     assert entry_map["display_assignment_001"].replaceable is False
-    assert entry_map["display_assignment_001"].assignment_role == "primary_operator_surface"
+    assert (
+        entry_map["display_assignment_001"].assignment_role
+        == "foundation_primary_surface"
+    )
 
-    assert entry_map["display_assignment_002"].display_target_id == "display_secondary_diagnostics"
+    assert (
+        entry_map["display_assignment_002"].display_target_id
+        == "display_foundation_secondary"
+    )
     assert entry_map["display_assignment_002"].replaceable is True
 
-    assert entry_map["display_assignment_003"].display_target_id == "display_secondary_diagnostics"
+    assert (
+        entry_map["display_assignment_003"].display_target_id
+        == "display_foundation_secondary"
+    )
     assert entry_map["display_assignment_003"].replaceable is True
 
-    assert entry_map["display_assignment_004"].display_target_id == "display_tertiary_expansion"
-    assert entry_map["display_assignment_004"].assignment_role == "diagnostics_timeline_panel"
+    assert (
+        entry_map["display_assignment_004"].display_target_id
+        == "display_operator_interaction"
+    )
+    assert (
+        entry_map["display_assignment_004"].assignment_role
+        == "operator_interaction_surface"
+    )
 
 
 def test_display_assignment_registry_entry_rejects_blank_id() -> None:
@@ -43,11 +61,11 @@ def test_display_assignment_registry_entry_rejects_blank_id() -> None:
     with pytest.raises(ValueError, match="assignment_id must be a non-empty string."):
         DisplayAssignmentRegistryEntry(
             assignment_id="",
-            display_target_id="display_primary_operator",
-            panel_or_surface_id="main_operator_interaction_surface_001",
-            assignment_role="primary_operator_surface",
+            display_target_id="display_foundation_primary",
+            panel_or_surface_id="workspace_foundation_monitoring_surface",
+            assignment_role="foundation_primary_surface",
             assignment_state="display_assignment_active",
-            workspace_id="workspace_operator_main",
+            workspace_id="workspace_foundation_monitoring",
             replaceable=False,
             operator_visible=True,
             description="Invalid display assignment entry.",

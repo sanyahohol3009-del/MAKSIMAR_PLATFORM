@@ -5,130 +5,87 @@ from dataclasses import dataclass
 from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_contract import (
     build_panel_metadata_contract,
 )
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_metadata_models import (
-    PanelMetadataEntry,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.panel_id_vocabulary_normalization import (
-    PanelFamily,
-    PanelKind,
-    PanelRole,
-)
 
 
 @dataclass(frozen=True, slots=True)
-class PanelFamilySummary:
-    """Normalized summary for one canonical panel family."""
+class PanelTaxonomyEntry:
+    """Canonical taxonomy entry for a panel."""
 
-    panel_family: PanelFamily
-    total_entries: int
+    panel_id: str
+    panel_family: str
+    panel_kind: str
+    panel_role: str
+    description: str
 
-
-@dataclass(frozen=True, slots=True)
-class PanelKindSummary:
-    """Normalized summary for one canonical panel kind."""
-
-    panel_kind: PanelKind
-    total_entries: int
-
-
-@dataclass(frozen=True, slots=True)
-class PanelRoleSummary:
-    """Normalized summary for one canonical panel role."""
-
-    panel_role: PanelRole
-    total_entries: int
+    def __post_init__(self) -> None:
+        """Validate taxonomy entry invariants."""
+        if not self.panel_id.strip():
+            raise ValueError("panel_id must not be empty")
+        if not self.panel_family.strip():
+            raise ValueError("panel_family must not be empty")
+        if not self.panel_kind.strip():
+            raise ValueError("panel_kind must not be empty")
+        if not self.panel_role.strip():
+            raise ValueError("panel_role must not be empty")
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
 class PanelTaxonomyContract:
-    """Canonical taxonomy contract for panel family/kind/role."""
+    """Canonical ordered taxonomy contract."""
 
-    total_entries: int
-    unique_families: int
-    unique_kinds: int
-    unique_roles: int
-    family_summaries: tuple[PanelFamilySummary, ...]
-    kind_summaries: tuple[PanelKindSummary, ...]
-    role_summaries: tuple[PanelRoleSummary, ...]
-    entries: tuple[PanelMetadataEntry, ...]
+    entries: tuple[PanelTaxonomyEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate contract invariants."""
+        if not self.entries:
+            raise ValueError("entries must not be empty")
+
+        seen_ids: set[str] = set()
+        for entry in self.entries:
+            if entry.panel_id in seen_ids:
+                raise ValueError(f"duplicate panel_id detected: {entry.panel_id}")
+            seen_ids.add(entry.panel_id)
+
+
+def resolve_panel_role(panel_id: str) -> str:
+    """Resolve canonical panel role."""
+    if panel_id in {
+        "system_status",
+        "guard_chain",
+        "incidents",
+        "logs",
+        "topology",
+    }:
+        return "read_only_monitoring"
+
+    if panel_id in {
+        "action_queue",
+        "approval_queue",
+        "audit_timeline",
+    }:
+        return "operator_interaction"
+
+    raise ValueError(f"unsupported panel_id for panel_role: {panel_id}")
 
 
 def build_panel_taxonomy_contract() -> PanelTaxonomyContract:
-    """Build canonical taxonomy contract for normalized panels."""
+    """Build the canonical panel taxonomy contract."""
     metadata_contract = build_panel_metadata_contract()
-    entries = metadata_contract.entries
 
-    family_order: tuple[PanelFamily, ...] = (
-        "foundation_status",
-        "read_only_monitoring",
-        "diagnostics",
-        "interaction",
-        "control",
-        "execution_observability",
-        "navigation",
-    )
-    kind_order: tuple[PanelKind, ...] = (
-        "status",
-        "summary",
-        "incident",
-        "diagnostics",
-        "chat",
-        "settings",
-        "gesture",
-        "queue",
-        "topology",
-        "mode",
-        "map",
-        "flow",
-        "version_control",
-        "navigation",
-    )
-    role_order: tuple[PanelRole, ...] = (
-        "foundation_read_only",
-        "read_only_monitoring",
-        "diagnostics_surface",
-        "interaction_surface",
-        "control_surface",
-        "execution_surface",
-        "navigation_surface",
-    )
-
-    family_summaries = tuple(
-        PanelFamilySummary(
-            panel_family=panel_family,
-            total_entries=sum(
-                1 for entry in entries if entry.panel_family == panel_family
+    entries = tuple(
+        PanelTaxonomyEntry(
+            panel_id=entry.panel_id,
+            panel_family=entry.panel_family,
+            panel_kind=entry.panel_kind,
+            panel_role=resolve_panel_role(entry.panel_id),
+            description=(
+                f"Canonical taxonomy entry for {entry.title} "
+                f"({entry.panel_family}/{entry.panel_kind})."
             ),
         )
-        for panel_family in family_order
-        if any(entry.panel_family == panel_family for entry in entries)
+        for entry in metadata_contract.entries
     )
 
-    kind_summaries = tuple(
-        PanelKindSummary(
-            panel_kind=panel_kind,
-            total_entries=sum(1 for entry in entries if entry.panel_kind == panel_kind),
-        )
-        for panel_kind in kind_order
-        if any(entry.panel_kind == panel_kind for entry in entries)
-    )
-
-    role_summaries = tuple(
-        PanelRoleSummary(
-            panel_role=panel_role,
-            total_entries=sum(1 for entry in entries if entry.panel_role == panel_role),
-        )
-        for panel_role in role_order
-        if any(entry.panel_role == panel_role for entry in entries)
-    )
-
-    return PanelTaxonomyContract(
-        total_entries=len(entries),
-        unique_families=len(family_summaries),
-        unique_kinds=len(kind_summaries),
-        unique_roles=len(role_summaries),
-        family_summaries=family_summaries,
-        kind_summaries=kind_summaries,
-        role_summaries=role_summaries,
-        entries=entries,
-    )
+    return PanelTaxonomyContract(entries=entries)

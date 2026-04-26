@@ -17,7 +17,6 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.free_display_selection_contract import (
 PlacementRoutingState = Literal[
     "placement_route_resolved",
 ]
-
 PlacementRoutingClass = Literal[
     "pinned_route",
     "replaceable_route",
@@ -26,7 +25,6 @@ PlacementRoutingClass = Literal[
 ALL_PLACEMENT_ROUTING_STATES: tuple[PlacementRoutingState, ...] = (
     "placement_route_resolved",
 )
-
 ALL_PLACEMENT_ROUTING_CLASSES: tuple[PlacementRoutingClass, ...] = (
     "pinned_route",
     "replaceable_route",
@@ -76,12 +74,18 @@ class DisplayPlacementRoutingEntry:
                 "operator_visible must remain true for canonical placement routing entries."
             )
 
-        if self.routing_class == "pinned_route" and self.candidate_display_target_id is not None:
+        if (
+            self.routing_class == "pinned_route"
+            and self.candidate_display_target_id is not None
+        ):
             raise ValueError(
                 "pinned_route entries must not expose candidate_display_target_id."
             )
 
-        if self.routing_class == "replaceable_route" and self.candidate_display_target_id is None:
+        if (
+            self.routing_class == "replaceable_route"
+            and self.candidate_display_target_id is None
+        ):
             raise ValueError(
                 "replaceable_route entries must expose candidate_display_target_id."
             )
@@ -146,23 +150,23 @@ def build_display_placement_routing_contract() -> DisplayPlacementRoutingContrac
     entries = (
         DisplayPlacementRoutingEntry(
             routing_id="display_placement_route_001",
-            display_target_id="display_primary_operator",
+            display_target_id="display_foundation_primary",
             routing_state="placement_route_resolved",
             routing_class="pinned_route",
-            incumbent_assignment_id=assignments_by_display["display_primary_operator"],
+            incumbent_assignment_id=assignments_by_display["display_foundation_primary"],
             candidate_display_target_id=None,
             operator_visible=True,
-            description="Canonical placement route retaining pinned primary operator display.",
+            description="Canonical placement route retaining pinned foundation primary display.",
         ),
         DisplayPlacementRoutingEntry(
             routing_id="display_placement_route_002",
-            display_target_id="display_secondary_diagnostics",
+            display_target_id="display_foundation_secondary",
             routing_state="placement_route_resolved",
             routing_class="replaceable_route",
-            incumbent_assignment_id=conflict_map["display_secondary_diagnostics"].incumbent_assignment_id,
+            incumbent_assignment_id=conflict_map["display_foundation_secondary"].incumbent_assignment_id,
             candidate_display_target_id=selection_entry.candidate_display_target_id,
             operator_visible=True,
-            description="Canonical placement route using replaceable diagnostics display candidate.",
+            description="Canonical placement route using replaceable foundation secondary display candidate.",
         ),
     )
 

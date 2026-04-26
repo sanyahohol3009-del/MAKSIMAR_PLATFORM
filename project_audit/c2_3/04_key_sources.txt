@@ -1,0 +1,1728 @@
+
+--- MAKSIMAR_CORE_LIB/memory_engine/memory_accessor.py ---
+from __future__ import annotations
+
+from functools import lru_cache
+
+from MAKSIMAR_CORE_LIB.memory_engine.memory_models import MemoryEntityDefinition
+from MAKSIMAR_CORE_LIB.memory_engine.memory_registry import MemoryRegistry
+
+
+@lru_cache(maxsize=1)
+def _get_registry() -> MemoryRegistry:
+    """Build cached memory registry."""
+    registry = MemoryRegistry()
+    registry.load_all()
+    return registry
+
+
+def get_memory_definition(entity_id: str) -> MemoryEntityDefinition:
+    """Get memory definition by id."""
+    definition = _get_registry().get(entity_id)
+    if definition is None:
+        raise KeyError(f"Memory definition not found: {entity_id}")
+    return definition
+
+
+def list_memory_definitions() -> list[MemoryEntityDefinition]:
+    """List all loaded memory definitions."""
+    return _get_registry().list_all()
+
+
+--- MAKSIMAR_CORE_LIB/memory_engine/memory_loader.py ---
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from MAKSIMAR_CORE_LIB.memory_engine.memory_models import (
+    MemoryEntityDefinition,
+    MemoryLoadResult,
+)
+from MAKSIMAR_CORE_LIB.shared_services.atomic_io import AtomicIOError, safe_read_yaml
+from MAKSIMAR_CORE_LIB.shared_services.path_resolver import PATHS
+
+
+def collect_memory_files() -> list[Path]:
+    """Collect memory contract files."""
+    root = PATHS.memory_contracts
+    if not root.exists() or not root.is_dir():
+        return []
+
+    return sorted(
+        [
+            path
+            for path in root.glob("*.yaml")
+            if path.is_file()
+        ]
+    )
+
+
+def _extract_entity_id(payload: dict[str, Any], file_path: Path) -> str | None:
+    """Extract canonical memory entity id from payload or filename."""
+    entity_id = payload.get("entity_id")
+    if isinstance(entity_id, str) and entity_id.strip():
+        return entity_id.strip()
+
+    contract_name = payload.get("contract_name")
+    if isinstance(contract_name, str) and contract_name.strip():
+        return contract_name.strip()
+
+    return file_path.name.removesuffix(".yaml")
+
+
+def load_memory_definition(file_path: Path) -> MemoryLoadResult:
+    """Load one memory definition from memory contract YAML."""
+    try:
+        payload = safe_read_yaml(file_path)
+    except AtomicIOError as exc:
+        return MemoryLoadResult(
+            definition=None,
+            is_valid=False,
+            error=f"Failed to read memory file: {exc}",
+        )
+
+    schema_version = payload.get("schema_version")
+    if not isinstance(schema_version, str) or not schema_version.strip():
+        return MemoryLoadResult(
+            definition=None,
+            is_valid=False,
+            error="Memory definition must contain non-empty 'schema_version'.",
+        )
+
+    entity_id = _extract_entity_id(payload, file_path)
+    if entity_id is None:
+        return MemoryLoadResult(
+            definition=None,
+            is_valid=False,
+            error="Unable to derive entity_id.",
+        )
+
+    definition = MemoryEntityDefinition(
+        entity_id=entity_id,
+        version=schema_version.strip(),
+        file_path=file_path,
+        payload=payload,
+    )
+
+    return MemoryLoadResult(
+        definition=definition,
+        is_valid=True,
+    )
+
+
+def load_all_memory_definitions() -> list[MemoryLoadResult]:
+    """Load all memory definitions."""
+    return [load_memory_definition(file_path) for file_path in collect_memory_files()]
+
+
+--- MAKSIMAR_CORE_LIB/memory_engine/memory_registry.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.memory_engine.memory_loader import load_all_memory_definitions
+from MAKSIMAR_CORE_LIB.memory_engine.memory_models import MemoryEntityDefinition
+
+
+class MemoryRegistry:
+    """In-memory registry of memory definitions."""
+
+    def __init__(self) -> None:
+        self._definitions: dict[str, MemoryEntityDefinition] = {}
+
+    def load_all(self) -> None:
+        """Load all memory definitions."""
+        for result in load_all_memory_definitions():
+            if not result.is_valid or result.definition is None:
+                continue
+
+            definition = result.definition
+            self._definitions[definition.entity_id] = definition
+
+    def get(self, entity_id: str) -> MemoryEntityDefinition | None:
+        """Get memory definition by id."""
+        return self._definitions.get(entity_id)
+
+    def list_all(self) -> list[MemoryEntityDefinition]:
+        """List all loaded memory definitions."""
+        return list(self._definitions.values())
+
+
+--- MAKSIMAR_CORE_LIB/memory_engine/query_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+
+MemoryLevel = Literal[
+    "L0_ephemeral",
+    "L1_operational",
+    "L2_project",
+    "L3_stable_personal",
+    "L4_restricted",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryQuery:
+    """Canonical memory query model."""
+
+    query_text: str
+    level: MemoryLevel | None = None
+    limit: int = 10
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryRetrievalItem:
+    """Canonical memory retrieval item."""
+
+    entity_id: str
+    version: str
+
+
+--- MAKSIMAR_CORE_LIB/memory_engine/retrieval_summary.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.memory_engine.memory_models import MemoryEntityDefinition
+from MAKSIMAR_CORE_LIB.memory_engine.query_models import (
+    MemoryQuery,
+    MemoryRetrievalItem,
+)
+
+
+@dataclass(slots=True)
+class MemoryRetrievalSummary:
+    """Aggregated summary for one memory retrieval request."""
+
+    query_text: str
+    total_matches: int
+    returned_items: list[MemoryRetrievalItem]
+
+
+def build_retrieval_summary(
+    query: MemoryQuery,
+    definitions: list[MemoryEntityDefinition],
+) -> MemoryRetrievalSummary:
+    """Build retrieval summary from loaded memory definitions.
+
+    Current matching model:
+    - match if query text is contained in entity_id
+    - limit output by query.limit
+
+    Args:
+        query: Canonical memory query.
+        definitions: Loaded memory definitions.
+
+    Returns:
+        Retrieval summary.
+    """
+    normalized_query = query.query_text.strip().lower()
+
+    matches = [
+        definition
+        for definition in definitions
+        if normalized_query in definition.entity_id.lower()
+    ]
+
+    limited_matches = matches[: query.limit]
+
+    returned_items = [
+        MemoryRetrievalItem(
+            entity_id=definition.entity_id,
+            version=definition.version,
+        )
+        for definition in limited_matches
+    ]
+
+    return MemoryRetrievalSummary(
+        query_text=query.query_text,
+        total_matches=len(matches),
+        returned_items=returned_items,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/memory_policy/memory_classification_policy.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_SERVER.MEMORY_REGISTRY import (
+    build_memory_registry_contract,
+)
+
+
+MemoryFactClass = Literal[
+    "architecture_decision",
+    "platform_invariant",
+    "roadmap_checkpoint",
+]
+
+MemoryApprovalMode = Literal[
+    "mandatory_human_approval",
+]
+
+MemorySummarizationMode = Literal[
+    "summary_required",
+]
+
+MemoryDeduplicationMode = Literal[
+    "deduplicate_before_write",
+]
+
+MemoryConflictMode = Literal[
+    "conflict_check_required",
+]
+
+MemoryLanguagePolicy = Literal[
+    "language_metadata_required",
+]
+
+MemoryScriptPolicy = Literal[
+    "script_metadata_required",
+]
+
+MemoryProvenancePolicy = Literal[
+    "provenance_required",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryClassificationPolicyEntry:
+    """Canonical memory classification policy entry."""
+
+    module_slug: str
+    memory_tier_id: str
+    retention_class: str
+    accepted_fact_classes: tuple[MemoryFactClass, ...]
+    approval_mode: MemoryApprovalMode
+    summarization_mode: MemorySummarizationMode
+    deduplication_mode: MemoryDeduplicationMode
+    conflict_mode: MemoryConflictMode
+    language_policy: MemoryLanguagePolicy
+    script_policy: MemoryScriptPolicy
+    provenance_policy: MemoryProvenancePolicy
+    evidence_required: bool
+    active: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate memory classification policy invariants."""
+        if not self.module_slug.strip():
+            raise ValueError("module_slug must not be empty")
+
+        if not self.memory_tier_id.strip():
+            raise ValueError(
+                f"memory_tier_id must not be empty for {self.module_slug}"
+            )
+
+        if not self.description.strip():
+            raise ValueError(f"description must not be empty for {self.module_slug}")
+
+        if not self.accepted_fact_classes:
+            raise ValueError(
+                f"accepted_fact_classes must not be empty for {self.module_slug}"
+            )
+
+        if len(set(self.accepted_fact_classes)) != len(self.accepted_fact_classes):
+            raise ValueError(
+                f"Duplicate accepted_fact_classes detected for {self.module_slug}"
+            )
+
+        if not self.active:
+            raise ValueError(
+                f"inactive memory tier must not appear in classification policy: {self.module_slug}"
+            )
+
+        if not self.evidence_required:
+            raise ValueError(
+                f"memory classification policy must require evidence: {self.module_slug}"
+            )
+
+        if self.retention_class == "foundational":
+            expected_fact_classes = (
+                "architecture_decision",
+                "platform_invariant",
+                "roadmap_checkpoint",
+            )
+            if self.accepted_fact_classes != expected_fact_classes:
+                raise ValueError(
+                    f"foundational memory tier must use canonical fact classes: {self.module_slug}"
+                )
+
+            if self.approval_mode != "mandatory_human_approval":
+                raise ValueError(
+                    f"foundational memory tier must require mandatory_human_approval: {self.module_slug}"
+                )
+
+            if self.summarization_mode != "summary_required":
+                raise ValueError(
+                    f"foundational memory tier must require summary_required: {self.module_slug}"
+                )
+
+            if self.deduplication_mode != "deduplicate_before_write":
+                raise ValueError(
+                    f"foundational memory tier must require deduplicate_before_write: {self.module_slug}"
+                )
+
+            if self.conflict_mode != "conflict_check_required":
+                raise ValueError(
+                    f"foundational memory tier must require conflict_check_required: {self.module_slug}"
+                )
+
+            if self.language_policy != "language_metadata_required":
+                raise ValueError(
+                    f"foundational memory tier must require language metadata: {self.module_slug}"
+                )
+
+            if self.script_policy != "script_metadata_required":
+                raise ValueError(
+                    f"foundational memory tier must require script metadata: {self.module_slug}"
+                )
+
+            if self.provenance_policy != "provenance_required":
+                raise ValueError(
+                    f"foundational memory tier must require provenance: {self.module_slug}"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryClassificationPolicyContract:
+    """Unified memory classification policy contract."""
+
+    total_entries: int
+    active_entries: int
+    foundational_entries: int
+    approval_required_entries: int
+    entries: tuple[MemoryClassificationPolicyEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate memory classification policy contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        active_entries = sum(1 for entry in self.entries if entry.active)
+        foundational_entries = sum(
+            1 for entry in self.entries if entry.retention_class == "foundational"
+        )
+        approval_required_entries = sum(
+            1
+            for entry in self.entries
+            if entry.approval_mode == "mandatory_human_approval"
+        )
+
+        if self.active_entries != active_entries:
+            raise ValueError("active_entries must match computed count")
+
+        if self.foundational_entries != foundational_entries:
+            raise ValueError("foundational_entries must match computed count")
+
+        if self.approval_required_entries != approval_required_entries:
+            raise ValueError("approval_required_entries must match computed count")
+
+        memory_tier_ids = tuple(entry.memory_tier_id for entry in self.entries)
+        if len(set(memory_tier_ids)) != len(memory_tier_ids):
+            raise ValueError(
+                "Duplicate memory_tier_id values detected in classification policy"
+            )
+
+
+def build_memory_classification_policy_contract() -> MemoryClassificationPolicyContract:
+    """Build canonical memory classification policy contract."""
+    memory_registry = build_memory_registry_contract()
+
+    entries = []
+    for registry_entry in memory_registry.entries:
+        entries.append(
+            MemoryClassificationPolicyEntry(
+                module_slug=registry_entry.module_slug,
+                memory_tier_id=registry_entry.memory_tier_id,
+                retention_class=registry_entry.retention_class,
+                accepted_fact_classes=(
+                    "architecture_decision",
+                    "platform_invariant",
+                    "roadmap_checkpoint",
+                ),
+                approval_mode="mandatory_human_approval",
+                summarization_mode="summary_required",
+                deduplication_mode="deduplicate_before_write",
+                conflict_mode="conflict_check_required",
+                language_policy="language_metadata_required",
+                script_policy="script_metadata_required",
+                provenance_policy="provenance_required",
+                evidence_required=registry_entry.evidence_required,
+                active=registry_entry.active,
+                description=(
+                    f"Memory classification policy for memory_tier={registry_entry.memory_tier_id} "
+                    f"with retention_class={registry_entry.retention_class}."
+                ),
+            )
+        )
+
+    active_entries = sum(1 for entry in entries if entry.active)
+    foundational_entries = sum(
+        1 for entry in entries if entry.retention_class == "foundational"
+    )
+    approval_required_entries = sum(
+        1
+        for entry in entries
+        if entry.approval_mode == "mandatory_human_approval"
+    )
+
+    return MemoryClassificationPolicyContract(
+        total_entries=len(entries),
+        active_entries=active_entries,
+        foundational_entries=foundational_entries,
+        approval_required_entries=approval_required_entries,
+        entries=tuple(entries),
+    )
+
+
+--- MAKSIMAR_CORE_LIB/knowledge_engine/knowledge_accessor.py ---
+from __future__ import annotations
+
+from functools import lru_cache
+
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_models import (
+    KnowledgeObjectDefinition,
+)
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_registry import KnowledgeRegistry
+
+
+@lru_cache(maxsize=1)
+def _get_registry() -> KnowledgeRegistry:
+    """Build cached knowledge registry."""
+    registry = KnowledgeRegistry()
+    registry.load_all()
+    return registry
+
+
+def get_knowledge_definition(object_id: str) -> KnowledgeObjectDefinition:
+    """Get knowledge definition by id."""
+    definition = _get_registry().get(object_id)
+    if definition is None:
+        raise KeyError(f"Knowledge definition not found: {object_id}")
+    return definition
+
+
+def list_knowledge_definitions() -> list[KnowledgeObjectDefinition]:
+    """List all loaded knowledge definitions."""
+    return _get_registry().list_all()
+
+
+--- MAKSIMAR_CORE_LIB/knowledge_engine/knowledge_loader.py ---
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_models import (
+    KnowledgeLoadResult,
+    KnowledgeObjectDefinition,
+)
+from MAKSIMAR_CORE_LIB.shared_services.atomic_io import AtomicIOError, safe_read_yaml
+from MAKSIMAR_CORE_LIB.shared_services.path_resolver import PATHS
+
+
+def collect_knowledge_files() -> list[Path]:
+    """Collect knowledge contract files."""
+    root = PATHS.knowledge_contracts
+    if not root.exists() or not root.is_dir():
+        return []
+
+    return sorted(
+        [
+            path
+            for path in root.glob("*.yaml")
+            if path.is_file()
+        ]
+    )
+
+
+def _extract_object_id(payload: dict[str, Any], file_path: Path) -> str | None:
+    """Extract canonical knowledge object id from payload or filename."""
+    object_id = payload.get("object_id")
+    if isinstance(object_id, str) and object_id.strip():
+        return object_id.strip()
+
+    contract_name = payload.get("contract_name")
+    if isinstance(contract_name, str) and contract_name.strip():
+        return contract_name.strip()
+
+    return file_path.name.removesuffix(".yaml")
+
+
+def load_knowledge_definition(file_path: Path) -> KnowledgeLoadResult:
+    """Load one knowledge definition from contract YAML."""
+    try:
+        payload = safe_read_yaml(file_path)
+    except AtomicIOError as exc:
+        return KnowledgeLoadResult(
+            definition=None,
+            is_valid=False,
+            error=f"Failed to read knowledge file: {exc}",
+        )
+
+    schema_version = payload.get("schema_version")
+    if not isinstance(schema_version, str) or not schema_version.strip():
+        return KnowledgeLoadResult(
+            definition=None,
+            is_valid=False,
+            error="Knowledge definition must contain non-empty 'schema_version'.",
+        )
+
+    object_id = _extract_object_id(payload, file_path)
+    if object_id is None:
+        return KnowledgeLoadResult(
+            definition=None,
+            is_valid=False,
+            error="Unable to derive object_id.",
+        )
+
+    definition = KnowledgeObjectDefinition(
+        object_id=object_id,
+        version=schema_version.strip(),
+        file_path=file_path,
+        payload=payload,
+    )
+
+    return KnowledgeLoadResult(
+        definition=definition,
+        is_valid=True,
+    )
+
+
+def load_all_knowledge_definitions() -> list[KnowledgeLoadResult]:
+    """Load all knowledge definitions."""
+    return [load_knowledge_definition(file_path) for file_path in collect_knowledge_files()]
+
+
+--- MAKSIMAR_CORE_LIB/knowledge_engine/knowledge_registry.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_loader import (
+    load_all_knowledge_definitions,
+)
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_models import (
+    KnowledgeObjectDefinition,
+)
+
+
+class KnowledgeRegistry:
+    """In-memory registry of knowledge definitions."""
+
+    def __init__(self) -> None:
+        self._definitions: dict[str, KnowledgeObjectDefinition] = {}
+
+    def load_all(self) -> None:
+        """Load all knowledge definitions."""
+        for result in load_all_knowledge_definitions():
+            if not result.is_valid or result.definition is None:
+                continue
+
+            definition = result.definition
+            self._definitions[definition.object_id] = definition
+
+    def get(self, object_id: str) -> KnowledgeObjectDefinition | None:
+        """Get knowledge definition by id."""
+        return self._definitions.get(object_id)
+
+    def list_all(self) -> list[KnowledgeObjectDefinition]:
+        """List all loaded knowledge definitions."""
+        return list(self._definitions.values())
+
+
+--- MAKSIMAR_CORE_LIB/knowledge_engine/query_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+
+KnowledgeTrustLevel = Literal[
+    "unverified",
+    "reviewed",
+    "trusted",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeQuery:
+    """Canonical knowledge query model."""
+
+    query_text: str
+    trust_level: KnowledgeTrustLevel | None = None
+    limit: int = 10
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeRetrievalItem:
+    """Canonical knowledge retrieval item."""
+
+    object_id: str
+    version: str
+
+
+--- MAKSIMAR_CORE_LIB/knowledge_engine/retrieval_summary.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.knowledge_engine.knowledge_models import (
+    KnowledgeObjectDefinition,
+)
+from MAKSIMAR_CORE_LIB.knowledge_engine.query_models import (
+    KnowledgeQuery,
+    KnowledgeRetrievalItem,
+)
+
+
+@dataclass(slots=True)
+class KnowledgeRetrievalSummary:
+    """Aggregated summary for one knowledge retrieval request."""
+
+    query_text: str
+    total_matches: int
+    returned_items: list[KnowledgeRetrievalItem]
+
+
+def build_retrieval_summary(
+    query: KnowledgeQuery,
+    definitions: list[KnowledgeObjectDefinition],
+) -> KnowledgeRetrievalSummary:
+    """Build retrieval summary from loaded knowledge definitions.
+
+    Current matching model:
+    - match if query text is contained in object_id
+    - limit output by query.limit
+
+    Args:
+        query: Canonical knowledge query.
+        definitions: Loaded knowledge definitions.
+
+    Returns:
+        Retrieval summary.
+    """
+    normalized_query = query.query_text.strip().lower()
+
+    matches = [
+        definition
+        for definition in definitions
+        if normalized_query in definition.object_id.lower()
+    ]
+
+    limited_matches = matches[: query.limit]
+
+    returned_items = [
+        KnowledgeRetrievalItem(
+            object_id=definition.object_id,
+            version=definition.version,
+        )
+        for definition in limited_matches
+    ]
+
+    return KnowledgeRetrievalSummary(
+        query_text=query.query_text,
+        total_matches=len(matches),
+        returned_items=returned_items,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/surface_intelligence/surface_intelligence_contract.py ---
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.constraint_profile_registry import (
+    build_constraint_profile_registry_contract,
+)
+from MAKSIMAR_CORE_LIB.material_registry import (
+    build_material_registry_contract,
+)
+
+
+SurfaceScanMode = Literal[
+    "full_surface_scan",
+]
+
+HeightMapResolutionClass = Literal[
+    "fine",
+    "medium",
+]
+
+SurfaceModelClass = Literal[
+    "surface_height_model",
+]
+
+ToolProfileClass = Literal[
+    "engraving_tip",
+    "cutting_head",
+]
+
+CorrectionStrategy = Literal[
+    "heightmap_based_compensation",
+]
+
+SurfaceContractStatus = Literal[
+    "defined",
+]
+
+
+_SURFACE_ENTRY_ID_PATTERN = re.compile(r"^surfaceintel_[a-z][a-z0-9_]*$")
+_MATERIAL_ID_PATTERN = re.compile(r"^material_[a-z][a-z0-9_]*$")
+_CONSTRAINT_PROFILE_ID_PATTERN = re.compile(r"^constraint_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class SurfaceIntelligenceEntry:
+    """Canonical surface intelligence entry."""
+
+    surface_entry_id: str
+    scan_mode: SurfaceScanMode
+    height_map_resolution_class: HeightMapResolutionClass
+    surface_model_class: SurfaceModelClass
+    tool_profile_class: ToolProfileClass
+    correction_strategy: CorrectionStrategy
+    material_id: str
+    constraint_profile_id: str
+    full_scan_required: bool
+    partial_probe_allowed: bool
+    production_usable: bool
+    explainable_required: bool
+    contract_status: SurfaceContractStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate surface intelligence invariants."""
+        if not _SURFACE_ENTRY_ID_PATTERN.fullmatch(self.surface_entry_id):
+            raise ValueError(f"Invalid surface_entry_id: {self.surface_entry_id}")
+
+        if not _MATERIAL_ID_PATTERN.fullmatch(self.material_id):
+            raise ValueError(f"Invalid material_id: {self.material_id}")
+
+        if not _CONSTRAINT_PROFILE_ID_PATTERN.fullmatch(self.constraint_profile_id):
+            raise ValueError(
+                f"Invalid constraint_profile_id: {self.constraint_profile_id}"
+            )
+
+        if not self.description.strip():
+            raise ValueError(
+                f"description must not be empty for {self.surface_entry_id}"
+            )
+
+        if self.scan_mode != "full_surface_scan":
+            raise ValueError(
+                f"surface intelligence must use full_surface_scan: {self.surface_entry_id}"
+            )
+
+        if self.surface_model_class != "surface_height_model":
+            raise ValueError(
+                f"surface intelligence must use surface_height_model: {self.surface_entry_id}"
+            )
+
+        if self.correction_strategy != "heightmap_based_compensation":
+            raise ValueError(
+                f"surface intelligence must use heightmap_based_compensation: {self.surface_entry_id}"
+            )
+
+        if not self.full_scan_required:
+            raise ValueError(
+                f"full_scan_required must be True: {self.surface_entry_id}"
+            )
+
+        if self.partial_probe_allowed:
+            raise ValueError(
+                f"partial_probe_allowed must be False at this step: {self.surface_entry_id}"
+            )
+
+        if not self.production_usable:
+            raise ValueError(
+                f"production_usable must be True: {self.surface_entry_id}"
+            )
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True: {self.surface_entry_id}"
+            )
+
+        if self.contract_status != "defined":
+            raise ValueError(
+                f"surface intelligence contract must be defined: {self.surface_entry_id}"
+            )
+
+        if self.surface_entry_id == "surfaceintel_aluminum_engraving_001":
+            if self.height_map_resolution_class != "fine":
+                raise ValueError(
+                    f"Aluminum engraving must use fine resolution: {self.surface_entry_id}"
+                )
+            if self.tool_profile_class != "engraving_tip":
+                raise ValueError(
+                    f"Aluminum engraving must use engraving_tip: {self.surface_entry_id}"
+                )
+            if self.material_id != "material_aluminum_001":
+                raise ValueError(
+                    f"Aluminum engraving must use material_aluminum_001: {self.surface_entry_id}"
+                )
+            if self.constraint_profile_id != "constraint_strict_execution_001":
+                raise ValueError(
+                    f"Aluminum engraving must use strict execution profile: {self.surface_entry_id}"
+                )
+
+        if self.surface_entry_id == "surfaceintel_steel_cutting_001":
+            if self.height_map_resolution_class != "fine":
+                raise ValueError(
+                    f"Steel cutting must use fine resolution: {self.surface_entry_id}"
+                )
+            if self.tool_profile_class != "cutting_head":
+                raise ValueError(
+                    f"Steel cutting must use cutting_head: {self.surface_entry_id}"
+                )
+            if self.material_id != "material_steel_001":
+                raise ValueError(
+                    f"Steel cutting must use material_steel_001: {self.surface_entry_id}"
+                )
+            if self.constraint_profile_id != "constraint_engineering_candidate_001":
+                raise ValueError(
+                    f"Steel cutting must use engineering candidate profile: {self.surface_entry_id}"
+                )
+
+        if self.surface_entry_id == "surfaceintel_acrylic_engraving_001":
+            if self.height_map_resolution_class != "medium":
+                raise ValueError(
+                    f"Acrylic engraving must use medium resolution: {self.surface_entry_id}"
+                )
+            if self.tool_profile_class != "engraving_tip":
+                raise ValueError(
+                    f"Acrylic engraving must use engraving_tip: {self.surface_entry_id}"
+                )
+            if self.material_id != "material_acrylic_001":
+                raise ValueError(
+                    f"Acrylic engraving must use material_acrylic_001: {self.surface_entry_id}"
+                )
+            if self.constraint_profile_id != "constraint_engineering_candidate_001":
+                raise ValueError(
+                    f"Acrylic engraving must use engineering candidate profile: {self.surface_entry_id}"
+                )
+
+        if self.surface_entry_id == "surfaceintel_wood_engraving_001":
+            if self.height_map_resolution_class != "medium":
+                raise ValueError(
+                    f"Wood engraving must use medium resolution: {self.surface_entry_id}"
+                )
+            if self.tool_profile_class != "engraving_tip":
+                raise ValueError(
+                    f"Wood engraving must use engraving_tip: {self.surface_entry_id}"
+                )
+            if self.material_id != "material_wood_001":
+                raise ValueError(
+                    f"Wood engraving must use material_wood_001: {self.surface_entry_id}"
+                )
+            if self.constraint_profile_id != "constraint_strict_execution_001":
+                raise ValueError(
+                    f"Wood engraving must use strict execution profile: {self.surface_entry_id}"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class SurfaceIntelligenceContract:
+    """Unified surface intelligence contract."""
+
+    total_entries: int
+    fine_resolution_entries: int
+    production_usable_entries: int
+    explainable_entries: int
+    defined_entries: int
+    entries: tuple[SurfaceIntelligenceEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate surface intelligence contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        fine_resolution_entries = sum(
+            1 for entry in self.entries if entry.height_map_resolution_class == "fine"
+        )
+        production_usable_entries = sum(
+            1 for entry in self.entries if entry.production_usable
+        )
+        explainable_entries = sum(
+            1 for entry in self.entries if entry.explainable_required
+        )
+        defined_entries = sum(
+            1 for entry in self.entries if entry.contract_status == "defined"
+        )
+
+        if self.fine_resolution_entries != fine_resolution_entries:
+            raise ValueError("fine_resolution_entries must match computed count")
+
+        if self.production_usable_entries != production_usable_entries:
+            raise ValueError("production_usable_entries must match computed count")
+
+        if self.explainable_entries != explainable_entries:
+            raise ValueError("explainable_entries must match computed count")
+
+        if self.defined_entries != defined_entries:
+            raise ValueError("defined_entries must match computed count")
+
+        entry_ids = tuple(entry.surface_entry_id for entry in self.entries)
+        if len(set(entry_ids)) != len(entry_ids):
+            raise ValueError("Duplicate surface_entry_id values detected")
+
+
+def build_surface_intelligence_contract() -> SurfaceIntelligenceContract:
+    """Build canonical surface intelligence contract."""
+    material_registry = build_material_registry_contract()
+    constraint_registry = build_constraint_profile_registry_contract()
+
+    material_ids = {entry.material_id for entry in material_registry.entries}
+    constraint_ids = {
+        entry.constraint_profile_id for entry in constraint_registry.entries
+    }
+
+    required_materials = {
+        "material_aluminum_001",
+        "material_steel_001",
+        "material_acrylic_001",
+        "material_wood_001",
+    }
+    required_constraints = {
+        "constraint_strict_execution_001",
+        "constraint_engineering_candidate_001",
+    }
+
+    missing_materials = required_materials - material_ids
+    if missing_materials:
+        raise ValueError(
+            f"Missing required materials: {sorted(missing_materials)}"
+        )
+
+    missing_constraints = required_constraints - constraint_ids
+    if missing_constraints:
+        raise ValueError(
+            f"Missing required constraint profiles: {sorted(missing_constraints)}"
+        )
+
+    entries = (
+        SurfaceIntelligenceEntry(
+            surface_entry_id="surfaceintel_aluminum_engraving_001",
+            scan_mode="full_surface_scan",
+            height_map_resolution_class="fine",
+            surface_model_class="surface_height_model",
+            tool_profile_class="engraving_tip",
+            correction_strategy="heightmap_based_compensation",
+            material_id="material_aluminum_001",
+            constraint_profile_id="constraint_strict_execution_001",
+            full_scan_required=True,
+            partial_probe_allowed=False,
+            production_usable=True,
+            explainable_required=True,
+            contract_status="defined",
+            description="Surface intelligence profile for aluminum engraving workflow.",
+        ),
+        SurfaceIntelligenceEntry(
+            surface_entry_id="surfaceintel_steel_cutting_001",
+            scan_mode="full_surface_scan",
+            height_map_resolution_class="fine",
+            surface_model_class="surface_height_model",
+            tool_profile_class="cutting_head",
+            correction_strategy="heightmap_based_compensation",
+            material_id="material_steel_001",
+            constraint_profile_id="constraint_engineering_candidate_001",
+            full_scan_required=True,
+            partial_probe_allowed=False,
+            production_usable=True,
+            explainable_required=True,
+            contract_status="defined",
+            description="Surface intelligence profile for steel cutting workflow.",
+        ),
+        SurfaceIntelligenceEntry(
+            surface_entry_id="surfaceintel_acrylic_engraving_001",
+            scan_mode="full_surface_scan",
+            height_map_resolution_class="medium",
+            surface_model_class="surface_height_model",
+            tool_profile_class="engraving_tip",
+            correction_strategy="heightmap_based_compensation",
+            material_id="material_acrylic_001",
+            constraint_profile_id="constraint_engineering_candidate_001",
+            full_scan_required=True,
+            partial_probe_allowed=False,
+            production_usable=True,
+            explainable_required=True,
+            contract_status="defined",
+            description="Surface intelligence profile for acrylic engraving workflow.",
+        ),
+        SurfaceIntelligenceEntry(
+            surface_entry_id="surfaceintel_wood_engraving_001",
+            scan_mode="full_surface_scan",
+            height_map_resolution_class="medium",
+            surface_model_class="surface_height_model",
+            tool_profile_class="engraving_tip",
+            correction_strategy="heightmap_based_compensation",
+            material_id="material_wood_001",
+            constraint_profile_id="constraint_strict_execution_001",
+            full_scan_required=True,
+            partial_probe_allowed=False,
+            production_usable=True,
+            explainable_required=True,
+            contract_status="defined",
+            description="Surface intelligence profile for wood engraving workflow.",
+        ),
+    )
+
+    fine_resolution_entries = sum(
+        1 for entry in entries if entry.height_map_resolution_class == "fine"
+    )
+    production_usable_entries = sum(
+        1 for entry in entries if entry.production_usable
+    )
+    explainable_entries = sum(
+        1 for entry in entries if entry.explainable_required
+    )
+    defined_entries = sum(
+        1 for entry in entries if entry.contract_status == "defined"
+    )
+
+    return SurfaceIntelligenceContract(
+        total_entries=len(entries),
+        fine_resolution_entries=fine_resolution_entries,
+        production_usable_entries=production_usable_entries,
+        explainable_entries=explainable_entries,
+        defined_entries=defined_entries,
+        entries=entries,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_contract.py ---
+from __future__ import annotations
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_contract import (
+    build_main_operator_dashboard_contract,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.main_operator_dashboard_read_model_models import (
+    MainOperatorDashboardReadModelContract,
+    MainOperatorDashboardReadRow,
+)
+from MAKSIMAR_CORE_LIB.oob_dashboard.workspace_registry_contract import (
+    build_workspace_registry_contract,
+)
+
+
+def build_main_operator_dashboard_read_model_contract() -> (
+    MainOperatorDashboardReadModelContract
+):
+    """Build the canonical read-model contract for the main operator dashboard."""
+    dashboard_contract = build_main_operator_dashboard_contract()
+    workspace_contract = build_workspace_registry_contract()
+
+    workspace_map = {entry.workspace_id: entry for entry in workspace_contract.entries}
+
+    rows: list[MainOperatorDashboardReadRow] = []
+
+    for entry in dashboard_contract.entries:
+        workspace_ids = (entry.primary_workspace_id,) + entry.secondary_workspace_ids
+        total_panel_count = 0
+
+        for workspace_id in workspace_ids:
+            if workspace_id not in workspace_map:
+                raise ValueError(f"workspace missing from registry: {workspace_id}")
+            total_panel_count += len(workspace_map[workspace_id].included_panel_ids)
+
+        rows.append(
+            MainOperatorDashboardReadRow(
+                dashboard_id=entry.dashboard_id,
+                dashboard_role=entry.dashboard_role,
+                primary_workspace_id=entry.primary_workspace_id,
+                secondary_workspace_ids=entry.secondary_workspace_ids,
+                total_workspace_count=len(workspace_ids),
+                total_panel_count=total_panel_count,
+                read_only_foundation_reuse=entry.read_only_foundation_reuse,
+                supports_multimonitor_layout=True,
+                supports_voice_gesture_addressing=True,
+                description=(
+                    "Canonical read-model row for the main operator dashboard with "
+                    "workspace reuse, multimonitor awareness, and future voice/gesture "
+                    "addressability."
+                ),
+            )
+        )
+
+    return MainOperatorDashboardReadModelContract(rows=tuple(rows))
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/main_operator_dashboard_read_model_models.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadRow:
+    """Read-only row describing the assembled main operator dashboard."""
+
+    dashboard_id: str
+    dashboard_role: str
+    primary_workspace_id: str
+    secondary_workspace_ids: tuple[str, ...]
+    total_workspace_count: int
+    total_panel_count: int
+    read_only_foundation_reuse: bool
+    supports_multimonitor_layout: bool
+    supports_voice_gesture_addressing: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate read-row invariants."""
+        if not self.dashboard_id.strip():
+            raise ValueError("dashboard_id must not be empty")
+
+        if not self.dashboard_role.strip():
+            raise ValueError("dashboard_role must not be empty")
+
+        if not self.primary_workspace_id.strip():
+            raise ValueError("primary_workspace_id must not be empty")
+
+        if self.total_workspace_count < 1:
+            raise ValueError("total_workspace_count must be >= 1")
+
+        if self.total_panel_count < 1:
+            raise ValueError("total_panel_count must be >= 1")
+
+        if self.read_only_foundation_reuse is not True:
+            raise ValueError("read_only_foundation_reuse must be True")
+
+        if self.supports_multimonitor_layout is not True:
+            raise ValueError("supports_multimonitor_layout must be True")
+
+        if self.supports_voice_gesture_addressing is not True:
+            raise ValueError("supports_voice_gesture_addressing must be True")
+
+        if not self.description.strip():
+            raise ValueError("description must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class MainOperatorDashboardReadModelContract:
+    """Canonical read-model contract for the main operator dashboard."""
+
+    rows: tuple[MainOperatorDashboardReadRow, ...]
+
+    def __post_init__(self) -> None:
+        """Validate read-model contract invariants."""
+        if not self.rows:
+            raise ValueError("rows must not be empty")
+
+        seen_dashboard_ids: set[str] = set()
+        for row in self.rows:
+            if row.dashboard_id in seen_dashboard_ids:
+                raise ValueError(f"duplicate dashboard_id detected: {row.dashboard_id}")
+            seen_dashboard_ids.add(row.dashboard_id)
+
+
+--- MAKSIMAR_CORE_LIB/oob_dashboard/visual_explainability_sidebar_contract.py ---
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_to_visual_mapping_contract import (
+    build_panel_to_visual_mapping_contract,
+)
+
+
+def _require_non_empty(value: str, field_name: str) -> None:
+    if not value or not value.strip():
+        raise ValueError(f"{field_name} must be a non-empty string.")
+
+
+@dataclass(frozen=True, slots=True)
+class VisualExplainabilitySidebarEntry:
+    explainability_sidebar_entry_id: str
+    panel_id: str
+    explainability_enabled: bool
+    sidebar_ready: bool
+    operator_visible: bool
+    truth_bound: bool
+    description: str
+
+    def __post_init__(self) -> None:
+        _require_non_empty(
+            self.explainability_sidebar_entry_id,
+            "explainability_sidebar_entry_id",
+        )
+        _require_non_empty(self.panel_id, "panel_id")
+        _require_non_empty(self.description, "description")
+
+        if not self.explainability_enabled:
+            raise ValueError(
+                "explainability_enabled must remain true for canonical visual explainability sidebar entries."
+            )
+        if not self.sidebar_ready:
+            raise ValueError(
+                "sidebar_ready must remain true for canonical visual explainability sidebar entries."
+            )
+        if not self.operator_visible:
+            raise ValueError(
+                "operator_visible must remain true for canonical visual explainability sidebar entries."
+            )
+        if not self.truth_bound:
+            raise ValueError(
+                "truth_bound must remain true for canonical visual explainability sidebar entries."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class VisualExplainabilitySidebarContract:
+    contract_id: str
+    total_entries: int
+    sidebar_ready_entries: int
+    operator_visible_entries: int
+    truth_bound_entries: int
+    entries: tuple[VisualExplainabilitySidebarEntry, ...]
+
+    def __post_init__(self) -> None:
+        _require_non_empty(self.contract_id, "contract_id")
+
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match len(entries).")
+        if self.sidebar_ready_entries != sum(
+            1 for entry in self.entries if entry.sidebar_ready
+        ):
+            raise ValueError("sidebar_ready_entries must match sidebar_ready count.")
+        if self.operator_visible_entries != sum(
+            1 for entry in self.entries if entry.operator_visible
+        ):
+            raise ValueError("operator_visible_entries must match operator_visible count.")
+        if self.truth_bound_entries != sum(
+            1 for entry in self.entries if entry.truth_bound
+        ):
+            raise ValueError("truth_bound_entries must match truth_bound count.")
+
+
+def build_visual_explainability_sidebar_contract() -> VisualExplainabilitySidebarContract:
+    mapping_contract = build_panel_to_visual_mapping_contract()
+
+    entries = tuple(
+        VisualExplainabilitySidebarEntry(
+            explainability_sidebar_entry_id=(
+                f"visual_explainability_sidebar_{index:03d}"
+            ),
+            panel_id=entry.panel_id,
+            explainability_enabled=True,
+            sidebar_ready=True,
+            operator_visible=True,
+            truth_bound=True,
+            description=f"Canonical visual explainability sidebar entry for {entry.panel_id}.",
+        )
+        for index, entry in enumerate(mapping_contract.entries, start=1)
+        if entry.explainability_enabled
+    )
+
+    return VisualExplainabilitySidebarContract(
+        contract_id="visual_explainability_sidebar_contract_001",
+        total_entries=len(entries),
+        sidebar_ready_entries=sum(1 for entry in entries if entry.sidebar_ready),
+        operator_visible_entries=sum(1 for entry in entries if entry.operator_visible),
+        truth_bound_entries=sum(1 for entry in entries if entry.truth_bound),
+        entries=entries,
+    )
+
+
+--- MAKSIMAR_CORE_LIB/real_dashboard_clients_mobile/real_dashboard_clients_mobile_contract.py ---
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from MAKSIMAR_CORE_LIB.ar_glasses_display_contract import (
+    build_ar_glasses_display_contract,
+)
+from MAKSIMAR_CORE_LIB.end_to_end_orchestration_runtime import (
+    build_end_to_end_orchestration_runtime_contract,
+)
+from MAKSIMAR_CORE_LIB.physics_dashboard_views import (
+    build_physics_dashboard_views_contract,
+)
+from MAKSIMAR_CORE_LIB.real_node_agents import (
+    build_real_node_agents_contract,
+)
+from MAKSIMAR_CORE_LIB.wrist_terminal_contract import (
+    build_wrist_terminal_contract,
+)
+
+
+RealClientEntryId = Literal[
+    "realclient_dashboard_001",
+    "realclient_mobile_001",
+    "realclient_ar_glasses_001",
+]
+
+ClientKind = Literal[
+    "dashboard_client",
+    "mobile_client",
+    "ar_glasses_client",
+]
+
+PresentationMode = Literal[
+    "read_only_dashboard",
+    "mobile_proxy_view",
+    "private_spatial_view",
+]
+
+ClientRuntimeStatus = Literal[
+    "active",
+]
+
+
+_ENTRY_ID_PATTERN = re.compile(r"^realclient_[a-z][a-z0-9_]*$")
+_ORCH_ID_PATTERN = re.compile(r"^orchestration_[a-z][a-z0-9_]*$")
+_AGENT_ID_PATTERN = re.compile(r"^nodeagent_[a-z][a-z0-9_]*$")
+_PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
+_WRIST_ID_PATTERN = re.compile(r"^wrist_[a-z][a-z0-9_]*$")
+_AR_ID_PATTERN = re.compile(r"^ar_[a-z][a-z0-9_]*$")
+
+
+@dataclass(frozen=True, slots=True)
+class RealDashboardClientMobileEntry:
+    """Canonical real dashboard / clients / mobile entry."""
+
+    real_client_entry_id: RealClientEntryId
+    client_kind: ClientKind
+    linked_orchestration_entry_id: str
+    linked_node_agent_id: str
+    linked_panel_id: str | None
+    linked_wrist_terminal_id: str | None
+    linked_ar_display_id: str | None
+    presentation_mode: PresentationMode
+    read_only_required: bool
+    transport_path_required: bool
+    explainable_required: bool
+    production_path_allowed: bool
+    client_runtime_status: ClientRuntimeStatus
+    description: str
+
+    def __post_init__(self) -> None:
+        """Validate real dashboard / clients / mobile invariants."""
+        if not _ENTRY_ID_PATTERN.fullmatch(self.real_client_entry_id):
+            raise ValueError(
+                f"Invalid real_client_entry_id: {self.real_client_entry_id}"
+            )
+
+        if not _ORCH_ID_PATTERN.fullmatch(self.linked_orchestration_entry_id):
+            raise ValueError(
+                f"Invalid linked_orchestration_entry_id: {self.linked_orchestration_entry_id}"
+            )
+
+        if not _AGENT_ID_PATTERN.fullmatch(self.linked_node_agent_id):
+            raise ValueError(
+                f"Invalid linked_node_agent_id: {self.linked_node_agent_id}"
+            )
+
+        if self.linked_panel_id is not None:
+            if not _PANEL_ID_PATTERN.fullmatch(self.linked_panel_id):
+                raise ValueError(f"Invalid linked_panel_id: {self.linked_panel_id}")
+
+        if self.linked_wrist_terminal_id is not None:
+            if not _WRIST_ID_PATTERN.fullmatch(self.linked_wrist_terminal_id):
+                raise ValueError(
+                    f"Invalid linked_wrist_terminal_id: {self.linked_wrist_terminal_id}"
+                )
+
+        if self.linked_ar_display_id is not None:
+            if not _AR_ID_PATTERN.fullmatch(self.linked_ar_display_id):
+                raise ValueError(
+                    f"Invalid linked_ar_display_id: {self.linked_ar_display_id}"
+                )
+
+        if not self.description.strip():
+            raise ValueError(
+                f"description must not be empty for {self.real_client_entry_id}"
+            )
+
+        if not self.read_only_required:
+            raise ValueError(
+                f"read_only_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.transport_path_required:
+            raise ValueError(
+                f"transport_path_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.explainable_required:
+            raise ValueError(
+                f"explainable_required must be True: {self.real_client_entry_id}"
+            )
+
+        if not self.production_path_allowed:
+            raise ValueError(
+                f"production_path_allowed must be True: {self.real_client_entry_id}"
+            )
+
+        if self.client_runtime_status != "active":
+            raise ValueError(
+                f"client_runtime_status must be active: {self.real_client_entry_id}"
+            )
+
+        if self.real_client_entry_id == "realclient_dashboard_001":
+            if self.client_kind != "dashboard_client":
+                raise ValueError("realclient_dashboard_001 must use dashboard_client")
+            if self.linked_orchestration_entry_id != "orchestration_control_plane_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link orchestration_control_plane_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_dev_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link nodeagent_dev_001"
+                )
+            if self.linked_panel_id != "panel_validation_report_001":
+                raise ValueError(
+                    "realclient_dashboard_001 must link panel_validation_report_001"
+                )
+            if self.linked_wrist_terminal_id is not None:
+                raise ValueError(
+                    "realclient_dashboard_001 must not link wrist terminal"
+                )
+            if self.linked_ar_display_id is not None:
+                raise ValueError(
+                    "realclient_dashboard_001 must not link ar display"
+                )
+            if self.presentation_mode != "read_only_dashboard":
+                raise ValueError(
+                    "realclient_dashboard_001 must use read_only_dashboard"
+                )
+
+        if self.real_client_entry_id == "realclient_mobile_001":
+            if self.client_kind != "mobile_client":
+                raise ValueError("realclient_mobile_001 must use mobile_client")
+            if self.linked_orchestration_entry_id != "orchestration_mobile_entry_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link orchestration_mobile_entry_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_mobile_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link nodeagent_mobile_001"
+                )
+            if self.linked_panel_id != "panel_project_export_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link panel_project_export_001"
+                )
+            if self.linked_wrist_terminal_id != "wrist_terminal_core_001":
+                raise ValueError(
+                    "realclient_mobile_001 must link wrist_terminal_core_001"
+                )
+            if self.linked_ar_display_id is not None:
+                raise ValueError(
+                    "realclient_mobile_001 must not link ar display"
+                )
+            if self.presentation_mode != "mobile_proxy_view":
+                raise ValueError(
+                    "realclient_mobile_001 must use mobile_proxy_view"
+                )
+
+        if self.real_client_entry_id == "realclient_ar_glasses_001":
+            if self.client_kind != "ar_glasses_client":
+                raise ValueError("realclient_ar_glasses_001 must use ar_glasses_client")
+            if self.linked_orchestration_entry_id != "orchestration_mobile_entry_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link orchestration_mobile_entry_001"
+                )
+            if self.linked_node_agent_id != "nodeagent_mobile_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link nodeagent_mobile_001"
+                )
+            if self.linked_panel_id != "panel_optics_mode_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link panel_optics_mode_001"
+                )
+            if self.linked_wrist_terminal_id != "wrist_terminal_core_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link wrist_terminal_core_001"
+                )
+            if self.linked_ar_display_id != "ar_glasses_display_core_001":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must link ar_glasses_display_core_001"
+                )
+            if self.presentation_mode != "private_spatial_view":
+                raise ValueError(
+                    "realclient_ar_glasses_001 must use private_spatial_view"
+                )
+
+
+@dataclass(frozen=True, slots=True)
+class RealDashboardClientsMobileContract:
+    """Unified real dashboard / clients / mobile contract."""
+
+    total_entries: int
+    dashboard_entries: int
+    mobile_entries: int
+    spatial_entries: int
+    active_entries: int
+    entries: tuple[RealDashboardClientMobileEntry, ...]
+
+    def __post_init__(self) -> None:
+        """Validate real dashboard / clients / mobile contract invariants."""
+        if self.total_entries != len(self.entries):
+            raise ValueError("total_entries must match entries length")
+
+        dashboard_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "dashboard_client"
+        )
+        mobile_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "mobile_client"
+        )
+        spatial_entries = sum(
+            1 for entry in self.entries if entry.client_kind == "ar_glasses_client"
+        )
+        active_entries = sum(
+            1 for entry in self.entries if entry.client_runtime_status == "active"
+        )
+
+        if self.dashboard_entries != dashboard_entries:
+            raise ValueError("dashboard_entries must match computed count")
+
+        if self.mobile_entries != mobile_entries:
+            raise ValueError("mobile_entries must match computed count")
+
+        if self.spatial_entries != spatial_entries:
+            raise ValueError("spatial_entries must match computed count")
+
+        if self.active_entries != active_entries:
+            raise ValueError("active_entries must match computed count")
+
+        entry_ids = tuple(entry.real_client_entry_id for entry in self.entries)
+        client_kinds = tuple(entry.client_kind for entry in self.entries)
+
+        if len(set(entry_ids)) != len(entry_ids):
+            raise ValueError("Duplicate real_client_entry_id values detected")
+
+        if len(set(client_kinds)) != len(client_kinds):
+            raise ValueError("Duplicate client_kind values detected")
+
+
+def build_real_dashboard_clients_mobile_contract() -> RealDashboardClientsMobileContract:
+    """Build canonical real dashboard / clients / mobile contract."""
+    orchestration_contract = build_end_to_end_orchestration_runtime_contract()
+    node_agent_contract = build_real_node_agents_contract()
+    physics_dashboard_contract = build_physics_dashboard_views_contract()
+    wrist_contract = build_wrist_terminal_contract()
+    ar_contract = build_ar_glasses_display_contract()
+
+    orchestration_ids = {entry.orchestration_entry_id for entry in orchestration_contract.entries}
+    node_agent_ids = {entry.real_node_agent_entry_id for entry in node_agent_contract.entries}
+    panel_ids = {entry.panel_id for entry in physics_dashboard_contract.entries}
+    wrist_ids = {entry.wrist_terminal_id for entry in wrist_contract.entries}
+    ar_ids = {entry.ar_display_id for entry in ar_contract.entries}
+
+    required_orchestration_ids = {
+        "orchestration_control_plane_001",
+        "orchestration_mobile_entry_001",
+    }
+    required_node_agent_ids = {
+        "nodeagent_dev_001",
+        "nodeagent_mobile_001",
+    }
+    required_panel_ids = {
+        "panel_validation_report_001",
+        "panel_project_export_001",
+        "panel_optics_mode_001",
+    }
+
+    missing_orchestration_ids = required_orchestration_ids - orchestration_ids
+    if missing_orchestration_ids:
+        raise ValueError(
+            f"Missing orchestration ids: {sorted(missing_orchestration_ids)}"
+        )
+
+    missing_node_agent_ids = required_node_agent_ids - node_agent_ids
+    if missing_node_agent_ids:
+        raise ValueError(
+            f"Missing node agent ids: {sorted(missing_node_agent_ids)}"
+        )
+
+    missing_panel_ids = required_panel_ids - panel_ids
+    if missing_panel_ids:
+        raise ValueError(f"Missing panel ids: {sorted(missing_panel_ids)}")
+
+    if "wrist_terminal_core_001" not in wrist_ids:
+        raise ValueError("Expected wrist_terminal_core_001 in wrist contract")
+
+    if "ar_glasses_display_core_001" not in ar_ids:
+        raise ValueError("Expected ar_glasses_display_core_001 in AR contract")
+
+    entries = (
+        RealDashboardClientMobileEntry(
+            real_client_entry_id="realclient_dashboard_001",
+            client_kind="dashboard_client",
+            linked_orchestration_entry_id="orchestration_control_plane_001",
+            linked_node_agent_id="nodeagent_dev_001",
+            linked_panel_id="panel_validation_report_001",
+            linked_wrist_terminal_id=None,
+            linked_ar_display_id=None,
+            presentation_mode="read_only_dashboard",
+            read_only_required=True,
+            transport_path_required=True,
+            explainable_required=True,
+            production_path_allowed=True,
+            client_runtime_status="active",
+            description="Canonical real dashboard client entry.",
+        ),
+        RealDashboardClientMobileEntry(
+            real_client_entry_id="realclient_mobile_001",
+            client_kind="mobile_client",
+            linked_orchestration_entry_id="orchestration_mobile_entry_001",
+            linked_node_agent_id="nodeagent_mobile_001",
+            linked_panel_id="panel_project_export_001",
+            linked_wrist_terminal_id="wrist_terminal_core_001",
+            linked_ar_display_id=None,
+            presentation_mode="mobile_proxy_view",
+            read_only_required=True,
+            transport_path_required=True,
+            explainable_required=True,
+            production_path_allowed=True,
+            client_runtime_status="active",
+            description="Canonical real mobile client entry.",
+        ),
+        RealDashboardClientMobileEntry(
+            real_client_entry_id="realclient_ar_glasses_001",
+            client_kind="ar_glasses_client",
+            linked_orchestration_entry_id="orchestration_mobile_entry_001",
+            linked_node_agent_id="nodeagent_mobile_001",
+            linked_panel_id="panel_optics_mode_001",
+            linked_wrist_terminal_id="wrist_terminal_core_001",
+            linked_ar_display_id="ar_glasses_display_core_001",
+            presentation_mode="private_spatial_view",
+            read_only_required=True,
+            transport_path_required=True,
+            explainable_required=True,
+            production_path_allowed=True,
+            client_runtime_status="active",
+            description="Canonical real AR glasses client entry.",
+        ),
+    )
+
+    dashboard_entries = sum(
+        1 for entry in entries if entry.client_kind == "dashboard_client"
+    )
+    mobile_entries = sum(
+        1 for entry in entries if entry.client_kind == "mobile_client"
+    )
+    spatial_entries = sum(
+        1 for entry in entries if entry.client_kind == "ar_glasses_client"
+    )
+    active_entries = sum(
+        1 for entry in entries if entry.client_runtime_status == "active"
+    )
+
+    return RealDashboardClientsMobileContract(
+        total_entries=len(entries),
+        dashboard_entries=dashboard_entries,
+        mobile_entries=mobile_entries,
+        spatial_entries=spatial_entries,
+        active_entries=active_entries,
+        entries=entries,
+    )
+

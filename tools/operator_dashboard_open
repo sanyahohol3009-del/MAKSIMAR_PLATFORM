@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$HOME/MAKSIMAR_PLATFORM"
+TOOLS_DIR="$ROOT/tools"
+
+SESSION_NAME="maksimar_operator"
+WORK_SESSION="maksimar"
+GUARD_SESSION="maksimar_guard"
+CORE_SESSION="maksimar_core_guard"
+KERNEL_SESSION="maksimar_kernel_guard"
+OOB_SESSION="maksimar_oob"
+
+log() {
+  echo "[operator_dashboard_open] $1"
+}
+
+session_exists() {
+  local session_name="$1"
+  tmux has-session -t "$session_name" 2>/dev/null
+}
+
+ensure_foundation_sessions() {
+  local missing=0
+
+  for session_name in \
+    "$WORK_SESSION" \
+    "$GUARD_SESSION" \
+    "$CORE_SESSION" \
+    "$KERNEL_SESSION" \
+    "$OOB_SESSION"; do
+    if ! session_exists "$session_name"; then
+      log "required session missing: $session_name"
+      missing=1
+    fi
+  done
+
+  if (( missing != 0 )); then
+    log "foundation sessions missing, starting ./tools/work"
+    "$TOOLS_DIR/work"
+  fi
+
+  if ! session_exists "$OOB_SESSION"; then
+    log "OOB session still missing, forcing OOB start"
+    "$TOOLS_DIR/oob_dashboard_ctl" start || true
+  fi
+
+  local unresolved=0
+  for session_name in \
+    "$WORK_SESSION" \
+    "$GUARD_SESSION" \
+    "$CORE_SESSION" \
+    "$KERNEL_SESSION" \
+    "$OOB_SESSION"; do
+    if ! session_exists "$session_name"; then
+      log "session still missing after recovery: $session_name"
+      unresolved=1
+    fi
+  done
+
+  if (( unresolved != 0 )); then
+    log "foundation recovery failed"
+    exit 1
+  fi
+}
+
+destroy_existing_operator_session() {
+  if session_exists "$SESSION_NAME"; then
+    log "removing stale operator dashboard session: $SESSION_NAME"
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+}
+
+create_dashboard_window() {
+  log "creating dashboard window"
+
+  tmux new-session -d -s "$SESSION_NAME" -n dashboard -c "$ROOT"
+
+  tmux send-keys -t "$SESSION_NAME:dashboard.0" \
+    "cd '$ROOT' && watch -n1 './tools/ctl status'" C-m
+
+  tmux split-window -h -t "$SESSION_NAME:dashboard" -c "$ROOT" \
+    "btop"
+
+  tmux split-window -v -t "$SESSION_NAME:dashboard.0" -c "$ROOT" \
+    "tail -F '$ROOT/logs/system.log'"
+
+  tmux split-window -v -t "$SESSION_NAME:dashboard.1" -c "$ROOT" \
+    "watch -n2 'tree -L 2 \"$ROOT\" | sed -n \"1,80p\"'"
+
+  tmux select-layout -t "$SESSION_NAME:dashboard" tiled
+}
+
+create_oob_window() {
+  log "creating oob window"
+  tmux new-window -t "$SESSION_NAME" -n oob -c "$ROOT" \
+    "cd '$ROOT' && ./.venv/bin/python tools/monitor/oob_foundation_monitor.py"
+}
+
+create_console_window() {
+  log "creating console window"
+  tmux new-window -t "$SESSION_NAME" -n console -c "$ROOT"
+}
+
+select_dashboard_window() {
+  tmux select-window -t "$SESSION_NAME:dashboard"
+}
+
+attach_operator_session() {
+  log "attaching operator dashboard session to dashboard window"
+  tmux attach -t "$SESSION_NAME:dashboard"
+}
+
+status() {
+  if session_exists "$SESSION_NAME"; then
+    log "session: PRESENT ($SESSION_NAME)"
+    tmux list-windows -t "$SESSION_NAME" -F '#I #W'
+  else
+    log "session: MISSING ($SESSION_NAME)"
+  fi
+}
+
+close() {
+  if session_exists "$SESSION_NAME"; then
+    log "closing operator dashboard session: $SESSION_NAME"
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  fi
+  log "done"
+}
+
+open() {
+  ensure_foundation_sessions
+  destroy_existing_operator_session
+  create_dashboard_window
+  create_oob_window
+  create_console_window
+  select_dashboard_window
+  status
+  attach_operator_session
+}
+
+usage() {
+  cat <<'EOF'
+Usage: ./tools/operator_dashboard_open {open|status|close}
+EOF
+}
+
+main() {
+  local cmd="${1:-open}"
+
+  case "$cmd" in
+    open)
+      open
+      ;;
+    status)
+      status
+      ;;
+    close)
+      close
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

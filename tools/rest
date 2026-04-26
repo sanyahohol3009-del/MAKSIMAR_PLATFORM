@@ -9,35 +9,66 @@ RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
 GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
 CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
 KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
+PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
+
+OPERATOR_SESSION="maksimar_operator"
 
 log() {
-    echo "[rest] $1"
+  echo "[rest] $1"
+}
+
+session_exists() {
+  local session_name="$1"
+  tmux has-session -t "$session_name" 2>/dev/null
 }
 
 remove_stale_state_files() {
-    log "removing stale state files"
-    rm -f \
-        "$RUNTIME_HEARTBEAT_FILE" \
-        "$GUARD_HEARTBEAT_FILE" \
-        "$CORE_GUARD_HEARTBEAT_FILE" \
-        "$KERNEL_HEARTBEAT_FILE"
+  log "removing stale state files"
+  rm -f \
+    "$RUNTIME_HEARTBEAT_FILE" \
+    "$GUARD_HEARTBEAT_FILE" \
+    "$CORE_GUARD_HEARTBEAT_FILE" \
+    "$KERNEL_HEARTBEAT_FILE" \
+    "$PREFLIGHT_RESULT_FILE"
+
+  rm -f "$RUNTIME_STATE_DIR"/.tmp_*.json 2>/dev/null || true
+}
+
+close_dashboard_windows() {
+  log "closing dashboard windows..."
+  "$TOOLS_DIR/dashboard" close || true
+}
+
+stop_operator_session() {
+  log "stopping operator dashboard session..."
+  if session_exists "$OPERATOR_SESSION"; then
+    tmux kill-session -t "$OPERATOR_SESSION" 2>/dev/null || true
+  fi
+  log "operator dashboard session stopped"
 }
 
 main() {
-    log "stopping kernel watchdog..."
-    "$TOOLS_DIR/kernel_guard_ctl" stop || true
+  log "stopping kernel watchdog..."
+  "$TOOLS_DIR/kernel_guard_ctl" stop || true
 
-    log "stopping core guard..."
-    "$TOOLS_DIR/core_guard_ctl" stop || true
+  log "stopping core guard..."
+  "$TOOLS_DIR/core_guard_ctl" stop || true
 
-    log "stopping supervisor guard..."
-    "$TOOLS_DIR/guard_ctl" stop || true
+  log "stopping supervisor guard..."
+  "$TOOLS_DIR/guard_ctl" stop || true
 
-    log "stopping runtime..."
-    "$TOOLS_DIR/ctl" stop || true
+  log "stopping runtime..."
+  "$TOOLS_DIR/ctl" stop || true
 
-    remove_stale_state_files
-    log "done"
+  remove_stale_state_files
+
+  log "stopping OOB dashboard last..."
+  "$TOOLS_DIR/oob_dashboard_ctl" stop || true
+
+  close_dashboard_windows
+  stop_operator_session
+
+  log "done"
 }
 
 main "$@"

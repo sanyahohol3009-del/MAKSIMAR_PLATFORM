@@ -1,0 +1,15 @@
+{
+  "panel_id": "incidents",
+  "panel_state": "empty",
+  "summary": {
+    "total_incident_entries": 0,
+    "active_incident_entries": 0,
+    "history_visible_entries": 0,
+    "kill_chain_triggered_entries": 0
+  },
+  "severity": {
+    "critical_entries": 0,
+    "warning_entries": 0,
+    "info_entries": 0
+  }
+}

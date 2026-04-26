@@ -1,0 +1,15 @@
+{
+  "panel_id": "logs",
+  "panel_state": "incident",
+  "summary": {
+    "total_log_related_entries": 4,
+    "failure_visible_entries": 2,
+    "incident_visible_entries": 2,
+    "stalled_stage_visible_entries": 2
+  },
+  "severity": {
+    "critical_entries": 1,
+    "warning_entries": 2,
+    "info_entries": 1
+  }
+}

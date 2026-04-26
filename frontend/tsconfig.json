@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "dist",
+    "declaration": false,
+    "lib": ["ES2022", "DOM"],
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "contracts/**/*.ts",
+    "tests/**/*.ts",
+    "previews/**/*.ts",
+    "types/**/*.d.ts",
+    "react_flow_preview/src/**/*.ts",
+    "react_flow_preview/src/**/*.tsx"
+  ]
+}

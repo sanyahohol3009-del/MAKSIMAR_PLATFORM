@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.oob_dashboard import (
+from MAKSIMAR_CORE_LIB.oob_dashboard.panel_exposure_policy_contract import (
     build_panel_exposure_policy_contract,
 )
 
@@ -9,50 +9,39 @@ def test_panel_exposure_policy_contract_builds() -> None:
     """Panel exposure policy contract should build successfully."""
     contract = build_panel_exposure_policy_contract()
 
-    assert contract.total_entries == 19
-    assert contract.oob_only_entries == 0
-    assert contract.main_dashboard_visible_entries == 9
-    assert contract.shared_visible_entries == 9
-    assert contract.hidden_internal_entries == 1
+    assert len(contract.entries) == 8
 
 
-def test_panel_exposure_policy_chat_entry() -> None:
-    """Chat panel should be main-dashboard-only and restricted."""
+def test_panel_exposure_policy_foundation_entries() -> None:
+    """Foundation panels should remain visible in both dashboards."""
     contract = build_panel_exposure_policy_contract()
-    entry = next(entry for entry in contract.entries if entry.panel_id == "panel_chat")
+    exposure_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.exposure_level == "main_dashboard_visible"
-    assert entry.visibility_policy == "restricted_operator"
-    assert entry.visible_in_oob_dashboard is False
-    assert entry.visible_in_main_dashboard is True
-    assert entry.visible_in_navigation is True
+    assert exposure_map["system_status"].visible_in_oob_dashboard is True
+    assert exposure_map["system_status"].visible_in_main_dashboard is True
+
+    assert exposure_map["guard_chain"].visible_in_oob_dashboard is True
+    assert exposure_map["guard_chain"].visible_in_main_dashboard is True
+
+    assert exposure_map["incidents"].visible_in_oob_dashboard is True
+    assert exposure_map["incidents"].visible_in_main_dashboard is True
 
 
-def test_panel_exposure_policy_foundation_runtime_entry() -> None:
-    """Foundation runtime panel should remain shared visible."""
+def test_panel_exposure_policy_interaction_entries() -> None:
+    """Interaction panels should remain visible through operator policy path."""
     contract = build_panel_exposure_policy_contract()
-    entry = next(
-        entry
-        for entry in contract.entries
-        if entry.panel_id == "panel_foundation_runtime_status_001"
-    )
+    exposure_map = {entry.panel_id: entry for entry in contract.entries}
 
-    assert entry.exposure_level == "shared_visible"
-    assert entry.visibility_policy == "read_only_public"
-    assert entry.visible_in_oob_dashboard is True
-    assert entry.visible_in_main_dashboard is True
-    assert entry.visible_in_navigation is True
+    assert exposure_map["action_queue"].visibility_policy == "policy_visible"
+    assert exposure_map["approval_queue"].visibility_policy == "policy_visible"
+    assert exposure_map["audit_timeline"].visibility_policy == "policy_visible"
 
 
-def test_panel_exposure_policy_navigation_entry() -> None:
-    """Navigation panel should stay hidden internal."""
+def test_panel_exposure_policy_descriptions_are_present() -> None:
+    """Exposure policy entries should expose readable descriptions."""
     contract = build_panel_exposure_policy_contract()
-    entry = next(
-        entry for entry in contract.entries if entry.panel_id == "panel_navigation"
-    )
 
-    assert entry.exposure_level == "hidden_internal"
-    assert entry.visibility_policy == "hidden_internal"
-    assert entry.visible_in_oob_dashboard is False
-    assert entry.visible_in_main_dashboard is False
-    assert entry.visible_in_navigation is False
+    for entry in contract.entries:
+        assert entry.description
+        assert entry.exposure_level
+        assert entry.visibility_policy
