@@ -1866,3 +1866,59 @@ Future buttons and surfaces must bind through taxonomy / registry / manifest / r
 ### NEXT STEP
 C2.12c — dashboard renderer adapter boundary
 
+
+---
+
+## 36. VERIFIED PATCH V22 — C2.12c DASHBOARD RENDERER ADAPTER BOUNDARY
+
+### STATUS
+C2.12c dashboard renderer adapter boundary completed.
+
+### PURPOSE
+Create a renderer adapter boundary between dashboard skeleton surfaces and concrete visual/rendering engines.
+
+### ADDED RENDERER BOUNDARY FILES
+- frontend/react_flow_preview/src/dashboard_renderer/types.ts
+- frontend/react_flow_preview/src/dashboard_renderer/adapterRegistry.ts
+- frontend/react_flow_preview/src/dashboard_renderer/resolution.ts
+- frontend/react_flow_preview/src/dashboard_renderer/index.ts
+- frontend/react_flow_preview/src/dashboardRendererAdapterBoundary.ts
+
+### ADDED TEST
+- frontend/tests/dashboardRendererAdapterBoundary.test.ts
+
+### RENDERER ADAPTER RULE
+Dashboard surfaces resolve to renderer adapters through:
+- render mode
+- target zone
+- adapter registry
+- adapter boundary contract
+
+### 3D ENGINE RULE
+The future 3D engine is not directly connected to App.tsx.
+
+It must connect through:
+- dashboard surface taxonomy
+- renderer adapter boundary
+- center viewport input contract
+- guarded adapter implementation
+
+### CONFIRMED ADAPTERS
+- React Flow Graph Renderer
+- ECharts Chart Renderer
+- Panel Renderer
+- Chat Surface Renderer
+- Memory Map Renderer
+- 3D Scene Renderer Adapter
+- Simulation Scene Renderer Adapter
+- External Placeholder Renderer
+
+### MEMORY DASHBOARD RULE
+Memory dashboards will use Memory Map Renderer before concrete memory visualization is implemented.
+
+### APP.TSX RULE
+App.tsx must not import or instantiate concrete rendering engines directly for dashboard modules.
+
+### NEXT STEP
+C2.12d — dashboard skeleton navigation binding
+
