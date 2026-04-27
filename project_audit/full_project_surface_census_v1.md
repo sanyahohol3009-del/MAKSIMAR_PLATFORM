@@ -2078,17 +2078,17 @@ Dashboard buttons must not be hardcoded manually in App.tsx.
 
 ### NEXT STEP
 C2.12g — left drawer skeleton navigation visual wiring
-
-
 ---
 
 ## 39A. DESIGN CORRECTION — C2.12f-REV1 PERMANENT DASHBOARD NAVIGATION RAIL
 
 ### STATUS
-C2.12f is corrected before implementation.
+C2.12f is corrected after review before further visual wiring.
 
 ### REASON
 The dashboard skeleton must not treat the main dashboard list as a temporary left drawer.
+
+The main dashboard list must be a persistent navigation rail, while drawer panels must be reserved for active-dashboard-specific functions and state.
 
 ### CANONICAL LAYOUT MODEL
 The dashboard shell must use:
@@ -2147,9 +2147,9 @@ The top communication drawer must open as a fullscreen ChatGPT-like communicatio
 
 It must contain:
 - central conversation stream
-- right chat/service column
+- right chat / service column
 - bottom input bar
-- file/photo attach button
+- file / photo attach button
 - voice input button
 - send button
 
@@ -2159,12 +2159,12 @@ It must not mix dashboard navigation into the conversation center.
 The visual direction follows the provided dashboard mockups:
 - dark HUD interface
 - cyan primary accents
-- amber warning/attention accents
+- amber warning / attention accents
 - glass panels
 - clear permanent left navigation
 - center visual gravity
 - right context panels
-- top/bottom status lanes
+- top / bottom status lanes
 
 ### RENAMING DECISION
 The earlier “left drawer skeleton navigation exposure” concept must be corrected.
