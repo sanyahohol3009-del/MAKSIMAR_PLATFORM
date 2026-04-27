@@ -2224,3 +2224,53 @@ They must not be hardcoded manually in App.tsx.
 ### NEXT STEP
 C2.12g — permanent dashboard navigation rail visual wiring
 
+
+---
+
+## 41. VERIFIED PATCH V27 — C2.12g PERMANENT DASHBOARD NAVIGATION RAIL VISUAL WIRING
+
+### STATUS
+C2.12g permanent dashboard navigation rail visual wiring completed.
+
+### PURPOSE
+Create a visual wiring read-model for the persistent left dashboard navigation rail before connecting it to the visible shell.
+
+### ADDED VISUAL WIRING
+- frontend/react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts
+
+### ADDED TEST
+- frontend/tests/permanentDashboardNavigationRailVisualWiring.test.ts
+
+### CONFIRMED VISUAL MODEL
+The permanent dashboard navigation rail visual wiring exposes:
+- persistent left rail target
+- non-overlay behavior
+- no center viewport overlap
+- 19 dashboard sections
+- 34 dashboard items
+- exactly one selected surface
+- default active surface = Operator Home
+- compact / expanded density support
+- memory visual kind
+- mobile visual kind
+- 3D visual kind
+- simulation visual kind
+
+### IMPORTANT SHELL RULE
+The permanent dashboard navigation rail is not a drawer.
+
+It is the stable left-side dashboard selector.
+
+### ACTIVE DASHBOARD DRAWER RULE
+Future drawer panels must be active-dashboard-specific:
+- left contextual drawer = functions / settings / tools
+- right contextual drawer = state / diagnostics / context
+
+### APP.TSX RULE
+The visible shell must consume this visual wiring read-model.
+
+Dashboard buttons must not be hardcoded manually in App.tsx.
+
+### NEXT STEP
+C2.12h — permanent dashboard navigation rail shell component
+
