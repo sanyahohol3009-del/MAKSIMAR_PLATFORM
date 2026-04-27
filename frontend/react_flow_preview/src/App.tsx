@@ -63,6 +63,8 @@ import type { EmbeddedChatSurfaceId } from "./jarvis_chat/embeddedChatSurfaceReg
 import { buildOperatorZoneAppBinding } from "./operator_shell/operatorZoneAppBinding.js";
 import { buildTopCommunicationDensityAppBinding } from "./operator_shell/topCommunicationDensityAppBinding.js";
 
+import { TopChatDrawer } from "./shell/TopChatDrawer.js";
+
 type ChartInstanceLike = {
   dispose: () => void;
   resize: () => void;
@@ -999,163 +1001,33 @@ export default function App() {
           </button>
         ) : null}
 
-        {operatorZoneAppBinding.showTopCommunicationOverlay ? (
-          <section
-            style={{
-              ...glassPanelBase,
-              top: topStripHeight,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              opacity: jarvisChatDrawerContract.overlayOpacity,
-              backdropFilter: `blur(${jarvisChatDrawerContract.backdropBlurPx}px)`,
-              padding: "18px 20px 22px 20px",
-              zIndex: 45,
-            }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateRows: "auto auto auto 1fr",
-                gap: topCommunicationDensityAppBinding.compactHeaderSpacing
-                  ? 10
-                  : 14,
-                height: "100%",
-              }}
-            >
-              {topCommunicationDensityAppBinding.showSectionTabs ? (
-                <section className="view-switcher-group">
-                  <div className="view-switcher-group-title">
-                    JARVIS Communication Surface
-                  </div>
-                  <div
-                    className="view-switcher"
-                    style={{
-                      display: "flex",
-                      flexWrap: "nowrap",
-                      overflowX: "auto",
-                      gap: 8,
-                    }}
-                  >
-                    {jarvisChatDrawerContract.sections.map((section) => (
-                      <button
-                        key={section}
-                        type="button"
-                        className={
-                          activeJarvisChatSection === section
-                            ? "view-switch-button active"
-                            : "view-switch-button"
-                        }
-                        onClick={() => setActiveJarvisChatSection(section)}
-                      >
-                        {getJarvisChatSectionTitle(section)}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {topCommunicationDensityAppBinding.showSurfaceSelector ? (
-                <section
-                  className="view-switcher-group"
-                  style={{
-                    opacity: topCommunicationDensityAppBinding.collapseSurfaceSelector
-                      ? 0.72
-                      : 1,
-                  }}
-                >
-                  <div className="view-switcher-group-title">
-                    Primary Surface Exposure
-                  </div>
-                  <div
-                    className="view-switcher"
-                    style={{
-                      display: "flex",
-                      flexWrap: "nowrap",
-                      overflowX: "auto",
-                      gap: 8,
-                    }}
-                  >
-                    {topDrawerExposureGroup?.rows.map((row) => (
-                      <button
-                        key={row.surfaceId}
-                        type="button"
-                        className={
-                          row.surfaceId === activeEmbeddedChatSurface
-                            ? "view-switch-button active"
-                            : "view-switch-button"
-                        }
-                        onClick={() => activateEmbeddedChatSurface(row.surfaceId)}
-                      >
-                        {row.title}
-                      </button>
-                    )) ?? null}
-                  </div>
-                </section>
-              ) : null}
-
-              {topCommunicationDensityAppBinding.showSummaryChipLane ? (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    flexWrap: "nowrap",
-                    overflowX: "auto",
-                    paddingBottom: 2,
-                    opacity: topCommunicationDensityAppBinding.collapseSummaryChipLane
-                      ? 0.72
-                      : 1,
-                  }}
-                >
-                  {topDrawerExposureGroup?.rows.map((row) => (
-                    <span
-                      key={row.surfaceId}
-                      className="inspect-chip"
-                      style={{ whiteSpace: "nowrap" }}
-                    >
-                      {row.title}: {row.countLabel} {row.countValue}
-                    </span>
-                  )) ?? null}
-                </div>
-              ) : null}
-
-              {topCommunicationDensityAppBinding.showSupportMeta ? (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                  }}
-                >
-                  <span className="inspect-chip">
-                    Density Mode: {topCommunicationDensityAppBinding.mode}
-                  </span>
-                  <span className="inspect-chip">
-                    Content Dominant:{" "}
-                    {String(topCommunicationDensityAppBinding.contentDominant)}
-                  </span>
-                </div>
-              ) : null}
-
-              <div
-                style={{
-                  minHeight: 0,
-                  overflow: "auto",
-                  paddingRight: 4,
-                  borderTop: topCommunicationDensityAppBinding.contentDominant
-                    ? "1px solid rgba(255,255,255,0.08)"
-                    : "none",
-                  paddingTop: topCommunicationDensityAppBinding.contentDominant
-                    ? 10
-                    : 0,
-                }}
-              >
-                {renderTopDrawerBody()}
-              </div>
-            </div>
-          </section>
-        ) : null}
+<TopChatDrawer
+  isOpen={operatorZoneAppBinding.showTopCommunicationOverlay}
+  topStripHeight={topStripHeight}
+  overlayOpacity={jarvisChatDrawerContract.overlayOpacity}
+  backdropBlurPx={jarvisChatDrawerContract.backdropBlurPx}
+  compactHeaderSpacing={topCommunicationDensityAppBinding.compactHeaderSpacing}
+  showSectionTabs={topCommunicationDensityAppBinding.showSectionTabs}
+  showSurfaceSelector={topCommunicationDensityAppBinding.showSurfaceSelector}
+  collapseSurfaceSelector={
+    topCommunicationDensityAppBinding.collapseSurfaceSelector
+  }
+  showSummaryChipLane={topCommunicationDensityAppBinding.showSummaryChipLane}
+  collapseSummaryChipLane={
+    topCommunicationDensityAppBinding.collapseSummaryChipLane
+  }
+  showSupportMeta={topCommunicationDensityAppBinding.showSupportMeta}
+  contentDominant={topCommunicationDensityAppBinding.contentDominant}
+  topCommunicationDensityMode={topCommunicationDensityAppBinding.mode}
+  activeJarvisChatSection={activeJarvisChatSection}
+  activeEmbeddedChatSurface={activeEmbeddedChatSurface}
+  jarvisChatSections={jarvisChatDrawerContract.sections}
+  topDrawerExposureGroup={topDrawerExposureGroup}
+  onJarvisChatSectionChange={setActiveJarvisChatSection}
+  onEmbeddedChatSurfaceChange={activateEmbeddedChatSurface}
+  getJarvisChatSectionTitle={getJarvisChatSectionTitle}
+  renderTopDrawerBody={renderTopDrawerBody}
+/>
 
         {operatorZoneAppBinding.showSummaryCards ? (
           <>

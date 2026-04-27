@@ -911,3 +911,230 @@ The next step is application binding so the top communication UI stops carrying 
 ### IMMEDIATE NEXT ACTION
 STEP C2.6e — APP BINDING TO TOP COMMUNICATION DENSITY POLICY
 
+
+---
+
+## 21. CANONICAL CONTINUITY PATCH — DASHBOARD / SHELL RECOVERY + REFACTOR DECISION PACK
+
+### STATUS
+This patch records the canonical recovery decision after shell integration pain caused by oversized App.tsx integration.
+
+### CORE FINDING
+The main dashboard/shell problem is not lack of architecture and not lack of policy/read-model work.
+The main problem is giant-file integration drift inside App.tsx.
+
+Confirmed issue:
+- App.tsx became too large and too mixed in responsibility
+- layout, drawers, chat, context, canvas hosting, bindings, and density logic accumulated in one file
+- corrective passes became risky and expensive
+- JSX-level edits became hard to reason about safely
+
+### CANONICAL SHELL MODEL
+The shell layout is fixed as:
+
+- top = status strip
+- left = dashboard navigation
+- center = immutable active dashboard / visual scene
+- right = related dashboard state / inspect / context
+- bottom = status/footer lane
+- top fullscreen drawer = communication layer
+
+### IMMUTABLE CENTER RULE
+Center must remain immutable.
+It must not:
+- shrink
+- shift
+- lose primary scene role
+
+All shell chrome must behave as overlay logic around center.
+
+### COMMUNICATION DRAWER CANONICAL MODEL
+When the top communication drawer is opened fullscreen:
+
+Center area must contain only:
+- JARVIS conversation
+- user messages
+- assistant messages
+- code blocks only when they are part of real message output
+
+Bottom area must contain:
+- attach / file input
+- text input
+- voice-to-text
+- send
+
+Right communication sidebar must contain service/context lanes such as:
+- chats
+- commands
+- code
+- memory
+- settings
+- related communication-side context
+
+Forbidden inside main conversation stream:
+- duplicated service panels
+- duplicated summary cards
+- local mini-dashboard controls
+- mixed navigation controls above message stream
+- secondary service UI inside message stream
+
+### SUMMARY CARDS POLICY
+Summary cards are not core interface.
+They are helper overlays.
+
+Rules:
+- allowed in baseline shell
+- must remain lightweight / glass
+- must disappear when side overlay panels are open
+- must return when overlays are closed
+- must never compete with center scene or fullscreen communication layer
+
+### LEFT / RIGHT DRAWER POLICY
+Left drawer:
+- dashboard selection
+- grouped navigation
+- overlay-only
+- no heavy dashboard content logic inside it
+
+Right drawer:
+- related state
+- inspect
+- explain / context
+- active dashboard related system state
+- overlay-only
+
+Neither drawer may break the center scene.
+
+### VISUAL REFERENCE DECISION
+Reference mockups are not copied directly into App.tsx.
+Only the following are accepted from reference:
+- compositional cleanliness
+- clear zoning
+- calm spacing rhythm
+- clean service-column approach
+- clean input row separation
+- less opaque heavy cards
+- less visual clutter
+
+Rejected from reference:
+- layout assumptions that conflict with overlay shell architecture
+- demo hardcoding
+- service logic embedded into conversation center
+
+### ROOT TECHNICAL DECISION
+Further shell development must not continue inside one giant App.tsx.
+
+App.tsx must be reduced to orchestration role.
+
+### REQUIRED FILE SPLIT DIRECTION
+Canonical target split:
+
+react_flow_preview/src/shell/
+- AppShell.tsx
+- TopStatusStrip.tsx
+- LeftDashboardDrawer.tsx
+- RightSystemContextDrawer.tsx
+- TopChatDrawer.tsx
+- CenterDashboardViewport.tsx
+- SummaryCardsOverlay.tsx
+
+react_flow_preview/src/features/chat/
+- ChatConversationPane.tsx
+- ChatInputBar.tsx
+- ChatSidebar.tsx
+
+react_flow_preview/src/features/dashboard/
+- DashboardRegistryView.tsx
+- DashboardContentRouter.tsx
+- DashboardSystemStatePanel.tsx
+
+### RESPONSIBILITY MODEL
+App.tsx:
+- orchestration only
+- top-level shell state only
+- props wiring only
+- no giant inline UI trees
+
+TopChatDrawer.tsx:
+- fullscreen communication overlay shell only
+
+ChatConversationPane.tsx:
+- message stream only
+- no service panels
+- no duplicated controls
+
+ChatInputBar.tsx:
+- attach
+- input
+- voice-to-text
+- send
+
+ChatSidebar.tsx:
+- communication-side service/context column only
+
+LeftDashboardDrawer.tsx:
+- dashboard navigation only
+
+RightSystemContextDrawer.tsx:
+- related state / inspect / explain / context only
+
+CenterDashboardViewport.tsx:
+- immutable active scene only
+
+SummaryCardsOverlay.tsx:
+- baseline-only helper overlay cards
+
+DashboardRegistryView.tsx:
+- dashboard selection surface
+
+DashboardContentRouter.tsx:
+- active dashboard id -> active content surface routing
+
+DashboardSystemStatePanel.tsx:
+- active dashboard related state panel
+
+### NON-DRIFT RULE
+Do not continue with more giant-file corrective passes inside App.tsx.
+Do not add new major UI features before shell split.
+Do not mix top chat content and service panels inside one scroll area.
+Do not duplicate the same controls in center and sidebar.
+Do not expand dashboard feature scope before shell skeleton is stabilized.
+
+### RECOVERY / GIT DISCIPLINE
+Continue from:
+- document
+- current Git checkpoint
+- confirmed working branch state
+
+Cleanup is deferred deliberately.
+
+### CLEANUP POLICY
+Repository cleanup is NOT part of the current stabilization step.
+Cleanup is scheduled only after shell stabilization.
+
+Deferred cleanup examples:
+- build artifacts
+- node_modules tracking issues
+- coverage/runtime leftovers
+- repository hygiene normalization
+
+### IMMEDIATE NEXT STEP
+The next correct step is:
+
+STEP C2.7 — SHELL REFACTOR / FILE SPLIT
+
+### C2.7 FIRST EXECUTION ORDER
+1. freeze unstable giant-file mutation pattern
+2. extract TopChatDrawer.tsx
+3. extract ChatConversationPane.tsx
+4. extract ChatInputBar.tsx
+5. extract ChatSidebar.tsx
+6. extract SummaryCardsOverlay.tsx
+7. simplify App.tsx to orchestration layer
+8. only then continue UI polish and further dashboard ergonomics
+
+### FINAL ENGINEERING SUMMARY
+The shell architecture is already defined.
+The current pain is giant-file integration ergonomics.
+The correct recovery path is structured component split, not more monolithic patching.
+
