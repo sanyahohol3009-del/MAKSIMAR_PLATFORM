@@ -2029,3 +2029,53 @@ No direct engine binding is allowed from App.tsx.
 ### NEXT STEP
 C2.12f — left drawer skeleton navigation exposure
 
+
+---
+
+## 39. VERIFIED PATCH V25 — C2.12f LEFT DRAWER SKELETON NAVIGATION EXPOSURE
+
+### STATUS
+C2.12f left drawer skeleton navigation exposure completed.
+
+### PURPOSE
+Expose dashboard skeleton navigation and renderer route data as a read-model for the future left dashboard drawer.
+
+### ADDED EXPOSURE
+- frontend/react_flow_preview/src/leftDrawerSkeletonNavigationExposure.ts
+
+### ADDED TEST
+- frontend/tests/leftDrawerSkeletonNavigationExposure.test.ts
+
+### CONFIRMED EXPOSURE MODEL
+The left drawer exposure read-model contains:
+- 19 dashboard sections
+- 34 dashboard items
+- renderer adapter identifiers
+- status badges
+- approval badges
+- adapter-boundary badges
+- memory badges
+- mobile badges
+- 3D / simulation badges
+
+### MEMORY EXPOSURE NOTE
+Memory Control surfaces are now visible to the future left drawer exposure model.
+
+They remain reserved until memory implementation chats provide real memory layer/folder contracts.
+
+### MOBILE EXPOSURE NOTE
+Android and iOS companion surfaces are visible under Mobile Companion, not Family.
+
+### 3D / SIMULATION EXPOSURE NOTE
+3D, simulation and robotics surfaces are visible as adapter-boundary entries.
+
+They do not bind directly to concrete engines.
+
+### APP.TSX RULE
+The left drawer must consume this exposure read-model in a future wiring step.
+
+Dashboard buttons must not be hardcoded manually in App.tsx.
+
+### NEXT STEP
+C2.12g — left drawer skeleton navigation visual wiring
+
