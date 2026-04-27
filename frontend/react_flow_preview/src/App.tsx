@@ -59,6 +59,10 @@ import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
+import {
+  SHELL_OVERLAY_STYLE,
+  SHELL_TOP_STRIP_HEIGHT_PX,
+} from "./shell/shellLayoutConstants.js";
 import { ShellFooter } from "./shell/ShellFooter.js";
 import { DrawerHandles } from "./shell/DrawerHandles.js";
 import { InspectPresentationView } from "./shell/InspectPresentationView.js";
@@ -295,8 +299,7 @@ export default function App() {
     (message) => message.sourceScope === "diagnostics",
   );
 
-  const topStripHeight = 42;
-  const mainVisualHeight = "78vh";
+  const topStripHeight = SHELL_TOP_STRIP_HEIGHT_PX;
 
   const presenceItems = ["home_001", "dev_001", "mobile_001"];
 
@@ -642,15 +645,7 @@ export default function App() {
     />
   );
 
-  const overlayShellStyle: React.CSSProperties = {
-    position: "relative",
-    height: mainVisualHeight,
-    borderRadius: 24,
-    overflow: "hidden",
-    border: "1px solid rgba(255,255,255,0.08)",
-    background:
-      "radial-gradient(circle at center, rgba(22,36,72,0.32), rgba(6,10,24,0.96))",
-  };
+  const overlayShellStyle = SHELL_OVERLAY_STYLE;
 
   const glassPanelBase: React.CSSProperties = {
     position: "absolute",
