@@ -1981,3 +1981,51 @@ can bind to real memory data without redesigning the dashboard shell.
 ### NEXT STEP
 C2.12e — dashboard skeleton navigation-to-renderer route binding
 
+
+---
+
+## 38. VERIFIED PATCH V24 — C2.12e DASHBOARD SKELETON NAVIGATION-TO-RENDERER ROUTE BINDING
+
+### STATUS
+C2.12e dashboard skeleton navigation-to-renderer route binding completed.
+
+### PURPOSE
+Bind dashboard skeleton navigation items to renderer adapter routes before wiring them into the visible left drawer.
+
+### ADDED ROUTE BINDING
+- frontend/react_flow_preview/src/dashboardSkeletonNavigationRendererRouteBinding.ts
+
+### ADDED TEST
+- frontend/tests/dashboardSkeletonNavigationRendererRouteBinding.test.ts
+
+### CONFIRMED ROUTE MODEL
+The binding resolves:
+
+dashboard navigation item
+→ dashboard skeleton surface
+→ renderer adapter
+
+### CONFIRMED COUNTS
+- 19 navigation sections
+- 34 navigation items
+- 34 renderer routes
+- 5 adapter-boundary routes
+- 1 3D renderer route
+- 4 simulation renderer routes
+
+### MEMORY ROUTE NOTE
+Memory Control Dashboard and Memory Layers Map now resolve to Memory Map Renderer.
+
+Memory implementation chats must keep future memory data compatible with this route.
+
+### MOBILE ROUTE NOTE
+Android and iOS companion surfaces now resolve as Mobile Companion routes, not Family routes.
+
+### 3D / SIMULATION ROUTE NOTE
+3D and simulation routes remain adapter-boundary only.
+
+No direct engine binding is allowed from App.tsx.
+
+### NEXT STEP
+C2.12f — left drawer skeleton navigation exposure
+
