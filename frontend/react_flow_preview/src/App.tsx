@@ -65,6 +65,7 @@ import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
 import { ShellFooter } from "./shell/ShellFooter.js";
+import { DrawerHandles } from "./shell/DrawerHandles.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -760,56 +761,32 @@ export default function App() {
         />
       }
       leftHandle={
-        operatorZoneAppBinding.showLeftHandle ? (
-          <button
-            type="button"
-            onClick={toggleLeftDrawer}
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: 10,
-              transform: "translateY(-50%)",
-              zIndex: 40,
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-              padding: "12px 8px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(10,16,34,0.32)",
-              backdropFilter: `blur(${overlayLayoutContract.drawers.left.backdropBlurPx}px)`,
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            {overlayLayoutContract.drawers.left.handleLabel}
-          </button>
-        ) : null
+        <DrawerHandles
+          showLeftHandle={operatorZoneAppBinding.showLeftHandle}
+          showRightHandle={false}
+          leftLabel={overlayLayoutContract.drawers.left.handleLabel}
+          rightLabel=""
+          leftBackdropBlurPx={
+            overlayLayoutContract.drawers.left.backdropBlurPx
+          }
+          rightBackdropBlurPx={0}
+          onToggleLeft={toggleLeftDrawer}
+          onToggleRight={() => {}}
+        />
       }
       rightHandle={
-        operatorZoneAppBinding.showRightHandle ? (
-          <button
-            type="button"
-            onClick={toggleRightDrawer}
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: 10,
-              transform: "translateY(-50%)",
-              zIndex: 40,
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-              padding: "12px 8px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(10,16,34,0.32)",
-              backdropFilter: `blur(${overlayLayoutContract.drawers.right.backdropBlurPx}px)`,
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            {overlayLayoutContract.drawers.right.handleLabel}
-          </button>
-        ) : null
+        <DrawerHandles
+          showLeftHandle={false}
+          showRightHandle={operatorZoneAppBinding.showRightHandle}
+          leftLabel=""
+          rightLabel={overlayLayoutContract.drawers.right.handleLabel}
+          leftBackdropBlurPx={0}
+          rightBackdropBlurPx={
+            overlayLayoutContract.drawers.right.backdropBlurPx
+          }
+          onToggleLeft={() => {}}
+          onToggleRight={toggleRightDrawer}
+        />
       }
       topChatDrawer={
         <TopChatDrawer
