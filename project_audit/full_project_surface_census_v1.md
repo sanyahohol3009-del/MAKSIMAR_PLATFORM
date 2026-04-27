@@ -1742,3 +1742,53 @@ Required commands remain green:
 ### NEXT STEP
 C2.12b — dashboard skeleton surface taxonomy
 
+
+---
+
+## 34. VERIFIED PATCH V20 — C2.12b DASHBOARD SKELETON SURFACE TAXONOMY
+
+### STATUS
+C2.12b dashboard skeleton surface taxonomy completed.
+
+### PURPOSE
+Define the planned dashboard surfaces and future button groups before wiring them into navigation.
+
+### ADDED TAXONOMY
+- frontend/react_flow_preview/src/dashboardSkeletonSurfaceTaxonomy.ts
+
+### ADDED TEST
+- frontend/tests/dashboardSkeletonSurfaceTaxonomy.test.ts
+
+### CONFIRMED DASHBOARD BUTTON GROUPS
+- Home
+- Server
+- Security
+- Memory
+- Commands
+- Family
+- Smart Home
+- Simulation
+- Robotics
+- 3D / Engineering
+- Media
+- Business
+- Settings
+
+### 3D RENDERER CLARIFICATION
+The future 3D engine is not only for physics simulation.
+
+It is reserved as a renderer / viewport adapter for dashboard information visualization where needed.
+
+Reserved adapter surfaces:
+- Physics / Simulation
+- Robotics
+- 3D / CAD / CAM
+
+### APP.TSX RULE
+Dashboard surfaces must not be hardcoded directly into App.tsx.
+
+The skeleton taxonomy prepares future button binding and renderer routing.
+
+### NEXT STEP
+C2.12c — dashboard renderer adapter boundary
+
