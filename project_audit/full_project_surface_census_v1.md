@@ -1252,3 +1252,77 @@ No node_modules / dist / coverage cleanup is performed in this step.
 ### NEXT STEP
 C2.9i — post-split shell cleanup checkpoint and next-track decision.
 
+
+---
+
+## 24. VERIFIED COMPLETION PATCH V10 — C2.9 POST-SPLIT SHELL CLEANUP CHECKPOINT
+
+### STATUS
+C2.9 post-split shell cleanup continuation is complete.
+
+### CONFIRMED RESULT
+The shell refactor and post-split cleanup are now stabilized.
+
+Confirmed completed blocks:
+- C2.7 — shell refactor / file split
+- C2.8 — document patch + post-split stabilization
+- C2.9 — post-split shell cleanup continuation
+
+### CURRENT APP.TSX ROLE
+App.tsx is accepted as orchestration entry.
+
+It still owns:
+- top-level React state
+- read-model and binding assembly
+- active view selection
+- chart runtime lifecycle
+- prop wiring into extracted components
+
+It no longer owns the major shell rendering surfaces.
+
+### CONFIRMED EXTRACTED SURFACES
+- AppShell
+- TopStatusStrip
+- TopChatDrawer
+- ChatDrawerBody
+- ChatConversationPane
+- ChatInputBar
+- ChatSidebar
+- SummaryCardsOverlay
+- LeftDashboardDrawer
+- RightSystemContextDrawer
+- CenterDashboardViewport
+- ShellFooter
+- DrawerHandles
+- InspectPresentationView
+
+### CONFIRMED EXTRACTED HELPERS / CONFIG
+- drawer shell interactions
+- active visual view helpers
+- shell layout constants
+- embedded chat surface helpers
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### REPOSITORY CLEANUP STATUS
+Repository hygiene cleanup remains deferred.
+Do not clean node_modules / dist / coverage artifacts yet.
+
+### NEXT TRACK DECISION
+The next correct track should be selected from the document and current shell state.
+
+Recommended next track:
+C2.10 — VISUAL / SHELL POLISH STABILIZATION PASS
+
+Purpose:
+- check the UI visually after split
+- verify drawer behavior
+- verify fullscreen top communication layer
+- verify center scene remains immutable
+- fix only post-split visual regressions
+- no new dashboard features yet
+
