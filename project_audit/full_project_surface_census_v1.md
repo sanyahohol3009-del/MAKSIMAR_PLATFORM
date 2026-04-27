@@ -2274,3 +2274,59 @@ Dashboard buttons must not be hardcoded manually in App.tsx.
 ### NEXT STEP
 C2.12h — permanent dashboard navigation rail shell component
 
+
+---
+
+## 42. VERIFIED PATCH V28 — C2.12h PERMANENT DASHBOARD NAVIGATION RAIL SHELL COMPONENT
+
+### STATUS
+C2.12h permanent dashboard navigation rail shell component completed.
+
+### PURPOSE
+Create the permanent dashboard navigation rail shell component as a split component package, not as a monolithic App.tsx block.
+
+### ADDED COMPONENT PACKAGE
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx
+- frontend/react_flow_preview/src/permanent_dashboard_navigation_rail/index.ts
+- frontend/react_flow_preview/src/permanentDashboardNavigationRailShellComponent.ts
+
+### ADDED TEST
+- frontend/tests/permanentDashboardNavigationRailShellComponent.test.ts
+
+### COMPONENT SPLIT RULE
+The navigation rail shell component is intentionally split to avoid a large UI file.
+
+Responsibilities:
+- types.ts = shell contracts
+- railReadModelAdapter.ts = visual wiring to shell model
+- railItemPresenter.ts = item labels / classes / badges
+- railSectionPresenter.ts = section labels / classes
+- PermanentDashboardNavigationRail.tsx = visual component only
+
+### CONFIRMED SHELL MODEL
+The shell component is:
+- persistent
+- left permanent rail
+- non-overlay
+- no center viewport overlap
+- not a drawer
+- dashboard navigation role
+- read-model driven
+- App.tsx hardcoding forbidden
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+Current frontend test count:
+- 187 pass / 0 fail
+
+### NEXT STEP
+C2.12i — permanent dashboard navigation rail shell integration boundary
+
