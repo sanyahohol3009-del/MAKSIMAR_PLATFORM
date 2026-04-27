@@ -66,6 +66,7 @@ import { buildTopCommunicationDensityAppBinding } from "./operator_shell/topComm
 import { TopChatDrawer } from "./shell/TopChatDrawer.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
+import { ChatInputBar } from "./features/chat/ChatInputBar.js";
 
 type ChartInstanceLike = {
   dispose: () => void;
@@ -705,7 +706,10 @@ export default function App() {
     switch (activeJarvisChatSection) {
       case "conversation":
       return (
-        <ChatConversationPane messages={jarvisChatDrawerFixture.messages} />
+        <div>
+          <ChatConversationPane messages={jarvisChatDrawerFixture.messages} />
+          <ChatInputBar />
+        </div>
       );
 
     case "project_context":
