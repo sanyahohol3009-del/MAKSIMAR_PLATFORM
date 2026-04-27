@@ -1326,3 +1326,49 @@ Purpose:
 - fix only post-split visual regressions
 - no new dashboard features yet
 
+
+---
+
+## 25. VERIFIED COMPLETION PATCH V11 — C2.10 VISUAL / SHELL POLISH STABILIZATION PASS
+
+### STATUS
+C2.10 visual / shell polish stabilization pass is complete.
+
+### SCOPE
+This was not a feature expansion step.
+
+The goal was to visually verify the shell after:
+- C2.7 shell refactor / file split
+- C2.8 document patch + post-split stabilization
+- C2.9 post-split shell cleanup continuation
+
+### MANUAL VISUAL RESULT
+No critical post-split visual regression was found.
+
+### CONFIRMED SHELL BEHAVIOR
+- top status strip remains narrow and usable
+- top communication drawer opens/closes correctly
+- left drawer opens/closes correctly
+- right drawer opens/closes correctly
+- center viewport remains the immutable main scene
+- drawers overlay the scene instead of moving/resizing it
+- footer remains separated from the center viewport
+- summary cards remain helper overlays, not primary layout
+- shell remains usable after component extraction
+
+### DECISION
+No immediate visual polish fix is required in C2.10.
+
+### CLEANUP POLICY
+Repository hygiene cleanup remains deferred.
+No node_modules / dist / coverage cleanup is performed in this step.
+
+### NEXT STEP
+C2.11 — DASHBOARD ROUTING / ACTIVE SURFACE STABILIZATION
+
+Purpose:
+- keep following the document
+- do not add new dashboard features yet
+- stabilize active dashboard/surface routing after the shell split
+- verify that left navigation, center viewport, and right context remain aligned
+

@@ -80,3 +80,24 @@ CONFIRMED:
 - footer remains separated
 - no critical post-split visual regression observed
 
+
+C2.10b — NO-FIX VISUAL POLISH CHECKPOINT
+
+RESULT:
+No critical visual/shell regression found during manual verification.
+
+DECISION:
+No visual polish fix is required at this checkpoint.
+
+CONFIRMED:
+- top status strip remains usable
+- top communication drawer opens and closes correctly
+- left drawer opens and closes correctly
+- right drawer opens and closes correctly
+- center viewport remains the main immutable scene
+- footer remains separated from center viewport
+- overlay behavior is acceptable after file split
+- shell is stable enough to proceed to next document-controlled step
+
+NEXT:
+C2.10 closeout patch in full project surface census.
