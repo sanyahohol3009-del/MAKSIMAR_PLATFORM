@@ -38,10 +38,7 @@ import {
   type LeftDrawerSection,
   type RightDrawerSection,
 } from "./overlayDrawerLayoutContract.js";
-import {
-  buildInitialOverlayDrawerShellState,
-  toggleOverlayDrawerMode,
-} from "./overlayDrawerShellState.js";
+import { buildInitialOverlayDrawerShellState } from "./overlayDrawerShellState.js";
 
 import {
   buildJarvisChatDrawerContract,
@@ -67,6 +64,7 @@ import { AppShell } from "./shell/AppShell.js";
 import { ShellFooter } from "./shell/ShellFooter.js";
 import { DrawerHandles } from "./shell/DrawerHandles.js";
 import { InspectPresentationView } from "./shell/InspectPresentationView.js";
+import { useDrawerShellInteractions } from "./shell/useDrawerShellInteractions.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -198,6 +196,14 @@ export default function App() {
   const [drawerShellState, setDrawerShellState] = useState(
     buildInitialOverlayDrawerShellState(),
   );
+
+  const {
+    toggleLeftDrawer,
+    toggleRightDrawer,
+    toggleTopDrawer,
+    setActiveLeftDrawerSection,
+    setActiveRightDrawerSection,
+  } = useDrawerShellInteractions(setDrawerShellState);
 
   const [activeView, setActiveView] =
     useState<UnifiedVisualViewId>("graph:topology");
@@ -400,37 +406,6 @@ export default function App() {
   const goToView = (viewId: UnifiedVisualViewId) => {
     setActiveView(viewId);
     setSelectedItem(null);
-  };
-
-  const toggleLeftDrawer = () => {
-    setDrawerShellState((current) => {
-      const nextLeftMode = toggleOverlayDrawerMode(current.leftMode);
-
-      return {
-        ...current,
-        leftMode: nextLeftMode,
-        rightMode: nextLeftMode === "expanded" ? "hidden" : current.rightMode,
-      };
-    });
-  };
-
-  const toggleRightDrawer = () => {
-    setDrawerShellState((current) => {
-      const nextRightMode = toggleOverlayDrawerMode(current.rightMode);
-
-      return {
-        ...current,
-        rightMode: nextRightMode,
-        leftMode: nextRightMode === "expanded" ? "hidden" : current.leftMode,
-      };
-    });
-  };
-
-  const toggleTopDrawer = () => {
-    setDrawerShellState((current) => ({
-      ...current,
-      topMode: toggleOverlayDrawerMode(current.topMode),
-    }));
   };
 
   const activateEmbeddedChatSurface = (surfaceId: EmbeddedChatSurfaceId) => {
@@ -850,12 +825,7 @@ export default function App() {
           }
           activeLeftSection={drawerShellState.activeLeftSection}
           leftDrawerSections={leftDrawerSections}
-          onLeftSectionChange={(section) =>
-            setDrawerShellState((current) => ({
-              ...current,
-              activeLeftSection: section,
-            }))
-          }
+          onLeftSectionChange={setActiveLeftDrawerSection}
           getLeftSectionTitle={getLeftSectionTitle}
           renderBody={renderLeftDrawerBody}
         />
@@ -871,12 +841,7 @@ export default function App() {
           }
           activeRightSection={drawerShellState.activeRightSection}
           rightDrawerSections={rightDrawerSections}
-          onRightSectionChange={(section) =>
-            setDrawerShellState((current) => ({
-              ...current,
-              activeRightSection: section,
-            }))
-          }
+          onRightSectionChange={setActiveRightDrawerSection}
           getRightSectionTitle={getRightSectionTitle}
           renderBody={renderRightDrawerBody}
         />
