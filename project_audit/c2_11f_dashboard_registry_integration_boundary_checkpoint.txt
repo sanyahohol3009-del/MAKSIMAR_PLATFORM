@@ -1,0 +1,86 @@
+C2.11f — DASHBOARD REGISTRY INTEGRATION BOUNDARY CHECKPOINT
+
+PURPOSE:
+Verify that dashboard/cube integration is now registry-driven and ready for future modular dashboard surfaces.
+
+SCOPE:
+No new dashboard features.
+No 3D engine integration yet.
+No visual redesign.
+No App.tsx feature hardcoding.
+
+BOUNDARY TO VERIFY:
+dashboard module registration contract
+→ client capability / feature gate
+→ allowed surfaces
+→ active dashboard route read-model
+→ center viewport input contract
+→ center viewport renderer
+
+EXPECTED:
+- future dashboards register through module registration contract
+- client-specific delivery is controlled by capability gate
+- center viewport receives only stabilized input contract
+- App.tsx remains orchestration layer
+- cube dashboards are not hardcoded into App.tsx
+- 3D/simulation future surface will attach through the same route
+
+===== DASHBOARD REGISTRATION CONTRACT =====
+26:export type DashboardModuleRegistrationContract = {
+37:  DashboardModuleRegistrationContract,
+106:export function buildDashboardModuleRegistrationContract(
+108:    DashboardModuleRegistrationContract,
+111:): DashboardModuleRegistrationContract {
+33:  appTsxHardcodingAllowed: false;
+38:  "registryDriven" | "appTsxHardcodingAllowed"
+41:  appTsxHardcodingAllowed: boolean;
+70:  if (registration.appTsxHardcodingAllowed) {
+109:    "registryDriven" | "appTsxHardcodingAllowed"
+115:    appTsxHardcodingAllowed: false,
+49:export function validateDashboardModuleRegistration(
+
+===== CLIENT CAPABILITY GATE =====
+20:export type DashboardClientCapabilityProfile = {
+62:  profile: DashboardClientCapabilityProfile,
+81:  profile: DashboardClientCapabilityProfile,
+107:  profile: DashboardClientCapabilityProfile,
+105:export function evaluateDashboardModuleForClient(
+42:  allowedSurfaces: readonly DashboardModuleSurfaceRegistration[];
+117:      allowedSurfaces: [],
+126:  const allowedSurfaces: DashboardModuleSurfaceRegistration[] = [];
+141:    allowedSurfaces.push(surface);
+147:    moduleAllowed: allowedSurfaces.length > 0,
+149:    allowedSurfaces,
+43:  rejectedSurfaces: readonly DashboardFeatureGateSurfaceDecision[];
+118:      rejectedSurfaces: registration.providedSurfaces.map((surface) => ({
+127:  const rejectedSurfaces: DashboardFeatureGateSurfaceDecision[] = [];
+133:      rejectedSurfaces.push({
+150:    rejectedSurfaces,
+
+===== ACTIVE ROUTE READ MODEL =====
+19:export type ActiveDashboardRouteReadModel = {
+28:export function buildActiveDashboardRouteReadModel(
+30:): ActiveDashboardRouteReadModel {
+28:export function buildActiveDashboardRouteReadModel(
+
+===== CENTER VIEWPORT INPUT CONTRACT =====
+12:export type CenterViewportInputContract = {
+23:export function buildCenterViewportInputContract(
+25:): CenterViewportInputContract {
+23:export function buildCenterViewportInputContract(
+17:  centerImmutable: true;
+31:    centerImmutable: true,
+18:  drawerPolicy: CenterViewportDrawerPolicy;
+32:    drawerPolicy: "overlay_only",
+
+===== APP.TSX ORCHESTRATION CHECK =====
+5:import { buildActiveDashboardRouteReadModel } from "./activeDashboardRouteReadModel.js";
+202:    buildActiveDashboardRouteReadModel(activeView);
+6:import { buildCenterViewportInputContract } from "./centerViewportInputContract.js";
+204:    buildCenterViewportInputContract(activeDashboardRoute);
+
+===== TEST COVERAGE CHECK =====
+activeDashboardRouteReadModel.test.ts
+centerViewportInputContract.test.ts
+dashboardClientCapabilityContract.test.ts
+dashboardModuleRegistrationContract.test.ts

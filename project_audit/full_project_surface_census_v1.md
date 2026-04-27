@@ -1565,3 +1565,68 @@ Required commands remain green:
 ### NEXT STEP
 C2.11f — dashboard registry integration boundary checkpoint
 
+
+---
+
+## 31. VERIFIED PATCH V17 — C2.11f DASHBOARD REGISTRY INTEGRATION BOUNDARY CHECKPOINT
+
+### STATUS
+C2.11f dashboard registry integration boundary checkpoint completed.
+
+### PURPOSE
+Verify that dashboard and cube integration is now registry-driven and ready for future modular dashboard surfaces.
+
+### CONFIRMED INTEGRATION BOUNDARY
+The accepted integration path is:
+
+dashboard module registration contract
+→ client capability / feature gate
+→ allowed surfaces
+→ active dashboard route read-model
+→ center viewport input contract
+→ center viewport renderer
+
+### CONFIRMED FILES
+- frontend/react_flow_preview/src/dashboardModuleRegistrationContract.ts
+- frontend/react_flow_preview/src/dashboardClientCapabilityContract.ts
+- frontend/react_flow_preview/src/activeDashboardRouteReadModel.ts
+- frontend/react_flow_preview/src/centerViewportInputContract.ts
+
+### CONFIRMED TESTS
+- frontend/tests/dashboardModuleRegistrationContract.test.ts
+- frontend/tests/dashboardClientCapabilityContract.test.ts
+- frontend/tests/activeDashboardRouteReadModel.test.ts
+- frontend/tests/centerViewportInputContract.test.ts
+
+### APP.TSX RULE
+App.tsx remains orchestration-only.
+
+It must not directly hardcode:
+- client dashboard modules
+- cube dashboard modules
+- 3D/simulation dashboard surfaces
+- client package decisions
+- feature gate decisions
+
+### MODULAR DASHBOARD RULE
+Future dashboard surfaces must enter through:
+- module registration
+- client capability gating
+- registry / manifest binding
+- active route read-model
+- center viewport input contract
+
+### 3D / SIMULATION NOTE
+The future 3D / simulation viewport must attach through the same boundary.
+
+It must not be wired directly into App.tsx.
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.11g — dashboard routing stabilization closeout and 3D adapter preparation decision
+
