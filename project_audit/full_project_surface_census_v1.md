@@ -2427,3 +2427,44 @@ It must not manually recreate:
 ### NEXT STEP
 C2.12k — AppShell permanent rail slot contract
 
+
+---
+
+## 45. VERIFIED PATCH V31 — C2.12k APPSHELL PERMANENT RAIL SLOT CONTRACT
+
+### STATUS
+C2.12k AppShell permanent rail slot contract completed.
+
+### PURPOSE
+Create the AppShell slot contract for the permanent dashboard navigation rail before visible shell wiring.
+
+### ADDED CONTRACT
+- frontend/react_flow_preview/src/appShellPermanentRailSlotContract.ts
+
+### ADDED TEST
+- frontend/tests/appShellPermanentRailSlotContract.test.ts
+
+### CONFIRMED SLOT MODEL
+The AppShell permanent rail slot contract defines:
+- AppShell host
+- left permanent navigation rail slot
+- placement before center viewport
+- reserved rail width before center viewport
+- non-overlay behavior
+- non-drawer behavior
+- active-dashboard-only contextual drawer policy
+- fullscreen chat remains separate
+- PermanentDashboardNavigationRail component handoff
+
+### APP.TSX RULE
+App.tsx must not manually recreate:
+- dashboard button taxonomy
+- renderer route logic
+- client gating logic
+- rail item presentation logic
+
+The future wiring must consume the AppShell slot contract.
+
+### NEXT STEP
+C2.12l — AppShell permanent rail slot wiring preview
+
