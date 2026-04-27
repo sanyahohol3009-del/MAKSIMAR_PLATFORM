@@ -1519,3 +1519,49 @@ Required commands remain green:
 ### NEXT STEP
 C2.11e — dashboard client capability / feature gating contract
 
+
+---
+
+## 30. VERIFIED PATCH V16 — C2.11e DASHBOARD CLIENT CAPABILITY / FEATURE GATING CONTRACT
+
+### STATUS
+C2.11e dashboard client capability / feature gating contract completed.
+
+### PURPOSE
+Stabilize the rule that dashboards and cube surfaces are exposed to a client only through capability-based gating.
+
+### ADDED CONTRACT
+- frontend/react_flow_preview/src/dashboardClientCapabilityContract.ts
+
+### ADDED TEST
+- frontend/tests/dashboardClientCapabilityContract.test.ts
+
+### MODULAR DELIVERY RULE
+Client dashboards must be delivered through:
+- module registration contract
+- client capability profile
+- feature gating result
+- active dashboard route read-model
+- center viewport input contract
+
+### CLIENT-SPECIFIC CONTROL
+The feature gate can allow or reject surfaces by:
+- module kind
+- disabled module id
+- approved module id
+- target zone
+- view id
+- protected surface approval
+
+### IMPORTANT BUSINESS RULE
+Future customers must receive only the dashboard modules/cubes enabled for their contract, permissions, hardware, and product package.
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.11f — dashboard registry integration boundary checkpoint
+
