@@ -2384,3 +2384,46 @@ Current frontend test count:
 ### NEXT STEP
 C2.12j — AppShell permanent rail slot wiring audit
 
+
+---
+
+## 44. VERIFIED PATCH V30 — C2.12j APPSHELL PERMANENT RAIL SLOT WIRING AUDIT
+
+### STATUS
+C2.12j AppShell permanent rail slot wiring audit completed.
+
+### PURPOSE
+Audit the current shell structure before wiring the permanent dashboard navigation rail into the visible AppShell.
+
+### AUDIT FILE
+- project_audit/c2_12j_appshell_permanent_rail_slot_wiring_audit.txt
+
+### CONFIRMED INTENT
+The permanent dashboard navigation rail must be wired as a persistent shell slot.
+
+It must not be implemented as:
+- overlay drawer
+- temporary drawer
+- manually hardcoded App.tsx button list
+
+### ACCEPTED SLOT MODEL
+The future visible shell must reserve:
+
+- left permanent rail slot = dashboard selection
+- center viewport slot = active dashboard visualization
+- active dashboard left contextual drawer = functions / settings / tools
+- active dashboard right contextual drawer = state / diagnostics / context
+- top communication drawer = fullscreen JARVIS chat
+
+### APP.TSX RULE
+App.tsx may only wire a dedicated shell slot or wrapper.
+
+It must not manually recreate:
+- dashboard button taxonomy
+- renderer route logic
+- client gating logic
+- rail item presentation logic
+
+### NEXT STEP
+C2.12k — AppShell permanent rail slot contract
+

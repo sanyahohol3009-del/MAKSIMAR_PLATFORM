@@ -1,0 +1,358 @@
+C2.12j — AppShell permanent rail slot wiring audit
+
+PURPOSE:
+Audit the current AppShell/App.tsx structure before wiring the permanent dashboard navigation rail into the visible shell.
+
+SCOPE:
+No App.tsx modification yet.
+No visual wiring yet.
+No dashboard button hardcoding.
+No drawer semantic regression.
+
+CURRENT ACCEPTED MODEL:
+- permanent left navigation rail = all dashboard groups / buttons
+- center viewport = active dashboard visualization
+- active dashboard left contextual drawer = functions / settings / tools for selected dashboard
+- active dashboard right contextual drawer = state / diagnostics / context for selected dashboard
+- top strip = network / weather / activity / notifications
+- bottom strip = connected devices / users / robotic devices / environment
+- top communication drawer = fullscreen ChatGPT-like JARVIS chat
+
+AUDIT QUESTIONS:
+1. Where is the current shell root?
+2. Is App.tsx still too large?
+3. Where is the current center viewport rendered?
+4. Where are overlay drawers mounted?
+5. Where is top communication drawer mounted?
+6. Where should the permanent rail slot be inserted?
+7. What must not be changed during first wiring?
+8. Which existing files already expose permanent rail contracts?
+
+EXPECTED DECISION:
+The rail should be wired into a dedicated shell slot before the center viewport.
+It must not be implemented as an overlay drawer.
+It must not hardcode dashboard buttons.
+It must consume the permanent rail integration boundary.
+
+===== SHELL FILES =====
+react_flow_preview/src/App.tsx
+react_flow_preview/src/App.tsx.bak_c2_6g
+react_flow_preview/src/App.tsx.bak_clean_chat_layout
+react_flow_preview/src/App.tsx.bak_clean_fix
+react_flow_preview/src/App.tsx.bak_fix_2
+react_flow_preview/src/App.tsx.bak_fix_3
+react_flow_preview/src/App.tsx.bak_fix_sidebar
+react_flow_preview/src/ChartPreviewApp.tsx
+react_flow_preview/src/centerViewportInputContract.ts
+react_flow_preview/src/jarvis_chat/embeddedChatShellExposureInspect.ts
+react_flow_preview/src/jarvis_chat/embeddedChatShellExposureReadModel.ts
+react_flow_preview/src/jarvis_chat/jarvisChatDrawerContract.ts
+react_flow_preview/src/jarvis_chat/jarvisChatDrawerFixture.ts
+react_flow_preview/src/jarvis_chat/jarvisChatDrawerReadModel.ts
+react_flow_preview/src/leftDrawerSkeletonNavigationExposure.ts
+react_flow_preview/src/memoryKnowledgeShellReadModel.ts
+react_flow_preview/src/operator_shell/operatorZoneAppBinding.ts
+react_flow_preview/src/operator_shell/operatorZoneVisibilityInspect.ts
+react_flow_preview/src/operator_shell/operatorZoneVisibilityPolicy.ts
+react_flow_preview/src/operator_shell/operatorZoneVisibilityReadModel.ts
+react_flow_preview/src/operator_shell/topCommunicationDensityAppBinding.ts
+react_flow_preview/src/operator_shell/topCommunicationDensityInspect.ts
+react_flow_preview/src/operator_shell/topCommunicationDensityPolicy.ts
+react_flow_preview/src/operator_shell/topCommunicationDensityReadModel.ts
+react_flow_preview/src/operator_shell/topCommunicationReferenceV2.tsx
+react_flow_preview/src/overlayDrawerLayoutContract.ts
+react_flow_preview/src/overlayDrawerLayoutReadModel.ts
+react_flow_preview/src/overlayDrawerShellState.ts
+react_flow_preview/src/panelNavigationShellInspect.ts
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts
+react_flow_preview/src/permanentDashboardNavigationRailShellComponent.ts
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx
+react_flow_preview/src/permanent_dashboard_navigation_rail/index.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts
+react_flow_preview/src/shell/AppShell.tsx
+react_flow_preview/src/shell/CenterDashboardViewport.tsx
+react_flow_preview/src/shell/DrawerHandles.tsx
+react_flow_preview/src/shell/InspectPresentationView.tsx
+react_flow_preview/src/shell/LeftDashboardDrawer.tsx
+react_flow_preview/src/shell/RightSystemContextDrawer.tsx
+react_flow_preview/src/shell/ShellFooter.tsx
+react_flow_preview/src/shell/SummaryCardsOverlay.tsx
+react_flow_preview/src/shell/TopChatDrawer.tsx
+react_flow_preview/src/shell/TopStatusStrip.tsx
+react_flow_preview/src/shell/activeVisualViewHelpers.ts
+react_flow_preview/src/shell/shellLayoutConstants.ts
+react_flow_preview/src/shell/useDrawerShellInteractions.ts
+
+
+===== APP.TSX SIZE =====
+827 react_flow_preview/src/App.tsx
+
+
+===== APP.TSX RAIL / DRAWER / VIEWPORT REFERENCES =====
+633:  const overlayShellStyle = SHELL_OVERLAY_STYLE;
+654:      overlayShellStyle={overlayShellStyle}
+169:  const [drawerShellState, setDrawerShellState] = useState(
+297:    topMode: normalizeOperatorZoneDrawerMode(drawerShellState.topMode),
+298:    leftMode: normalizeOperatorZoneDrawerMode(drawerShellState.leftMode),
+299:    rightMode: normalizeOperatorZoneDrawerMode(drawerShellState.rightMode),
+391:    switch (drawerShellState.activeLeftSection) {
+497:    switch (drawerShellState.activeRightSection) {
+658:          isExpanded={drawerShellState.topMode !== "hidden"}
+791:          activeLeftSection={drawerShellState.activeLeftSection}
+807:          activeRightSection={drawerShellState.activeRightSection}
+623:  const renderTopDrawerBody = () => (
+718:          renderTopDrawerBody={renderTopDrawerBody}
+52:import { buildOperatorZoneAppBinding } from "./operator_shell/operatorZoneAppBinding.js";
+296:  const operatorZoneAppBinding = buildOperatorZoneAppBinding({
+305:        operatorZoneAppBinding.shellMode === "communication_focus",
+666:          showLeftHandle={operatorZoneAppBinding.showLeftHandle}
+681:          showRightHandle={operatorZoneAppBinding.showRightHandle}
+694:          isOpen={operatorZoneAppBinding.showTopCommunicationOverlay}
+736:          isVisible={operatorZoneAppBinding.showSummaryCards}
+784:          isVisible={operatorZoneAppBinding.showLeftDrawer}
+800:          isVisible={operatorZoneAppBinding.showRightDrawer}
+816:          isVisible={operatorZoneAppBinding.showFooter}
+818:          shellMode={operatorZoneAppBinding.shellMode}
+820:            operatorZoneAppBinding.centerImmutableConfirmed
+60:import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
+749:        <CenterDashboardViewport
+
+
+===== PERMANENT RAIL CONTRACTS =====
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts
+react_flow_preview/src/permanentDashboardNavigationRailShellComponent.ts
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx
+react_flow_preview/src/permanent_dashboard_navigation_rail/index.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts
+
+
+===== PERMANENT RAIL EXPORTS =====
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:19:export type PermanentDashboardNavigationRailTarget =
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:22:export type PermanentDashboardNavigationRailSource =
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:25:export type PermanentDashboardNavigationRailDisplayMode =
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:28:export type PermanentDashboardNavigationRailItem = {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:42:  displayMode: PermanentDashboardNavigationRailDisplayMode;
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:43:  source: PermanentDashboardNavigationRailSource;
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:46:export type PermanentDashboardNavigationRailSection = {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:49:  items: readonly PermanentDashboardNavigationRailItem[];
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:52:export type PermanentDashboardNavigationRailReadModel = {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:53:  target: PermanentDashboardNavigationRailTarget;
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:54:  source: PermanentDashboardNavigationRailSource;
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:55:  displayMode: PermanentDashboardNavigationRailDisplayMode;
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:56:  sections: readonly PermanentDashboardNavigationRailSection[];
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:69:export type PermanentDashboardNavigationRailValidation = {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:76:): PermanentDashboardNavigationRailItem {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:96:export function buildPermanentDashboardNavigationRailReadModel(): PermanentDashboardNavigationRailReadModel {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:99:  const sections: PermanentDashboardNavigationRailSection[] =
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:133:export function getPermanentDashboardNavigationRailItemBySurfaceId(
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:135:): PermanentDashboardNavigationRailItem | null {
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:146:export function validatePermanentDashboardNavigationRailReadModel(
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:147:  readModel: PermanentDashboardNavigationRailReadModel =
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:148:    buildPermanentDashboardNavigationRailReadModel(),
+react_flow_preview/src/permanentDashboardNavigationRailReadModel.ts:149:): PermanentDashboardNavigationRailValidation {
+react_flow_preview/src/permanent_dashboard_navigation_rail/index.ts:5:export * from "./PermanentDashboardNavigationRail.js";
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:14:  PermanentDashboardNavigationRailVisualDensity,
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:15:  PermanentDashboardNavigationRailVisualItemKind,
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:16:} from "../permanentDashboardNavigationRailVisualWiring.js";
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:18:export type PermanentDashboardNavigationRailShellTarget =
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:21:export type PermanentDashboardNavigationRailShellSource =
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:24:export type PermanentDashboardNavigationRailShellPlacement =
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:27:export type PermanentDashboardNavigationRailShellRole =
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:30:export type PermanentDashboardNavigationRailShellItem = {
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:41:  visualKind: PermanentDashboardNavigationRailVisualItemKind;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:49:export type PermanentDashboardNavigationRailShellSection = {
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:52:  items: readonly PermanentDashboardNavigationRailShellItem[];
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:55:export type PermanentDashboardNavigationRailShellReadModel = {
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:56:  target: PermanentDashboardNavigationRailShellTarget;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:57:  source: PermanentDashboardNavigationRailShellSource;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:58:  placement: PermanentDashboardNavigationRailShellPlacement;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:59:  role: PermanentDashboardNavigationRailShellRole;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:60:  density: PermanentDashboardNavigationRailVisualDensity;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:62:  sections: readonly PermanentDashboardNavigationRailShellSection[];
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:78:export type PermanentDashboardNavigationRailShellValidation = {
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:83:export type PermanentDashboardNavigationRailShellProps = {
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:84:  readModel?: PermanentDashboardNavigationRailShellReadModel;
+react_flow_preview/src/permanent_dashboard_navigation_rail/types.ts:86:  density?: PermanentDashboardNavigationRailVisualDensity;
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:2:  PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:5:export function getPermanentDashboardNavigationRailSectionHeadingId(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:6:  section: PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:11:export function getPermanentDashboardNavigationRailSectionClassName(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:12:  section: PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:20:export function getPermanentDashboardNavigationRailSectionCountLabel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railSectionPresenter.ts:21:  section: PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:2:  PermanentDashboardNavigationRailVisualItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:3:  PermanentDashboardNavigationRailVisualWiringInput,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:4:} from "../permanentDashboardNavigationRailVisualWiring.js";
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:6:  buildPermanentDashboardNavigationRailVisualWiringReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:7:} from "../permanentDashboardNavigationRailVisualWiring.js";
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:9:  PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:10:  PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:11:  PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:12:  PermanentDashboardNavigationRailShellValidation,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:16:  item: PermanentDashboardNavigationRailVisualItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:17:): PermanentDashboardNavigationRailShellItem {
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:38:export function buildPermanentDashboardNavigationRailShellReadModel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:39:  input?: PermanentDashboardNavigationRailVisualWiringInput,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:40:): PermanentDashboardNavigationRailShellReadModel {
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:42:    buildPermanentDashboardNavigationRailVisualWiringReadModel(input);
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:44:  const sections: PermanentDashboardNavigationRailShellSection[] =
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:75:export function validatePermanentDashboardNavigationRailShellReadModel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:76:  readModel: PermanentDashboardNavigationRailShellReadModel =
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:77:    buildPermanentDashboardNavigationRailShellReadModel(),
+react_flow_preview/src/permanent_dashboard_navigation_rail/railReadModelAdapter.ts:78:): PermanentDashboardNavigationRailShellValidation {
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:5:  PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:8:export function getPermanentDashboardNavigationRailBadgeLabel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:31:export function getPermanentDashboardNavigationRailItemAriaLabel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:32:  item: PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:43:export function getPermanentDashboardNavigationRailItemClassName(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:44:  item: PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:61:export function getPermanentDashboardNavigationRailItemShortLabel(
+react_flow_preview/src/permanent_dashboard_navigation_rail/railItemPresenter.ts:62:  item: PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:4:  getPermanentDashboardNavigationRailBadgeLabel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:5:  getPermanentDashboardNavigationRailItemAriaLabel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:6:  getPermanentDashboardNavigationRailItemClassName,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:7:  getPermanentDashboardNavigationRailItemShortLabel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:10:  getPermanentDashboardNavigationRailSectionClassName,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:11:  getPermanentDashboardNavigationRailSectionCountLabel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:12:  getPermanentDashboardNavigationRailSectionHeadingId,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:15:  buildPermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:18:  PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:19:  PermanentDashboardNavigationRailShellProps,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:20:  PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:21:  PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:25:  readModel: PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:168:function renderBadges(item: PermanentDashboardNavigationRailShellItem): React.ReactNode {
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:173:          {getPermanentDashboardNavigationRailBadgeLabel(badge)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:181:  item: PermanentDashboardNavigationRailShellItem,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:182:  readModel: PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:195:      className={getPermanentDashboardNavigationRailItemClassName(item)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:202:      aria-label={getPermanentDashboardNavigationRailItemAriaLabel(item)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:209:        {getPermanentDashboardNavigationRailItemShortLabel(item)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:227:  section: PermanentDashboardNavigationRailShellSection,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:228:  readModel: PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:231:  const headingId = getPermanentDashboardNavigationRailSectionHeadingId(section);
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:236:      className={getPermanentDashboardNavigationRailSectionClassName(section)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:245:          {getPermanentDashboardNavigationRailSectionCountLabel(section)}
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:254:export function PermanentDashboardNavigationRail(
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:255:  props: PermanentDashboardNavigationRailShellProps,
+react_flow_preview/src/permanent_dashboard_navigation_rail/PermanentDashboardNavigationRail.tsx:259:    buildPermanentDashboardNavigationRailShellReadModel({
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:14:  PermanentDashboardNavigationRailItem,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:15:  PermanentDashboardNavigationRailReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:16:} from "./permanentDashboardNavigationRailReadModel.js";
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:18:  buildPermanentDashboardNavigationRailReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:19:  getPermanentDashboardNavigationRailItemBySurfaceId,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:20:} from "./permanentDashboardNavigationRailReadModel.js";
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:22:export type PermanentDashboardNavigationRailVisualTarget =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:25:export type PermanentDashboardNavigationRailVisualSource =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:28:export type PermanentDashboardNavigationRailVisualPlacement =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:31:export type PermanentDashboardNavigationRailVisualDensity =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:35:export type PermanentDashboardNavigationRailVisualItemKind =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:43:export type PermanentDashboardNavigationRailVisualItem = {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:55:  visualKind: PermanentDashboardNavigationRailVisualItemKind;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:62:export type PermanentDashboardNavigationRailVisualSection = {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:65:  items: readonly PermanentDashboardNavigationRailVisualItem[];
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:68:export type PermanentDashboardNavigationRailVisualWiringInput = {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:70:  density?: PermanentDashboardNavigationRailVisualDensity;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:73:export type PermanentDashboardNavigationRailVisualWiringReadModel = {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:74:  target: PermanentDashboardNavigationRailVisualTarget;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:75:  source: PermanentDashboardNavigationRailVisualSource;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:76:  placement: PermanentDashboardNavigationRailVisualPlacement;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:77:  density: PermanentDashboardNavigationRailVisualDensity;
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:79:  sections: readonly PermanentDashboardNavigationRailVisualSection[];
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:95:export type PermanentDashboardNavigationRailVisualWiringValidation = {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:103:  item: PermanentDashboardNavigationRailItem,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:104:): PermanentDashboardNavigationRailVisualItemKind {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:129:  item: PermanentDashboardNavigationRailItem,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:131:): PermanentDashboardNavigationRailVisualItem {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:153:  readModel: PermanentDashboardNavigationRailReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:154:  input?: PermanentDashboardNavigationRailVisualWiringInput,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:158:    getPermanentDashboardNavigationRailItemBySurfaceId(requestedSurfaceId);
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:175:export function buildPermanentDashboardNavigationRailVisualWiringReadModel(
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:176:  input?: PermanentDashboardNavigationRailVisualWiringInput,
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:177:): PermanentDashboardNavigationRailVisualWiringReadModel {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:178:  const railReadModel = buildPermanentDashboardNavigationRailReadModel();
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:181:  const sections: PermanentDashboardNavigationRailVisualSection[] =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:218:export function getPermanentDashboardNavigationRailVisualItemBySurfaceId(
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:220:): PermanentDashboardNavigationRailVisualItem | null {
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:221:  const readModel = buildPermanentDashboardNavigationRailVisualWiringReadModel({
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:232:export function validatePermanentDashboardNavigationRailVisualWiringReadModel(
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:233:  readModel: PermanentDashboardNavigationRailVisualWiringReadModel =
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:234:    buildPermanentDashboardNavigationRailVisualWiringReadModel(),
+react_flow_preview/src/permanentDashboardNavigationRailVisualWiring.ts:235:): PermanentDashboardNavigationRailVisualWiringValidation {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:2:  PermanentDashboardNavigationRailVisualDensity,
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:3:} from "./permanentDashboardNavigationRailVisualWiring.js";
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:5:  PermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:6:} from "./permanentDashboardNavigationRailShellComponent.js";
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:8:  buildPermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:9:  validatePermanentDashboardNavigationRailShellReadModel,
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:10:} from "./permanentDashboardNavigationRailShellComponent.js";
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:12:export type PermanentDashboardNavigationRailShellIntegrationTarget =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:15:export type PermanentDashboardNavigationRailShellIntegrationSource =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:18:export type PermanentDashboardNavigationRailShellIntegrationHost =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:21:export type PermanentDashboardNavigationRailShellIntegrationSlot =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:24:export type PermanentDashboardNavigationRailShellIntegrationPlacement =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:27:export type PermanentDashboardNavigationRailShellIntegrationContextualDrawerPolicy =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:30:export type PermanentDashboardNavigationRailShellIntegrationTopCommunicationPolicy =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:33:export type PermanentDashboardNavigationRailShellIntegrationInput = {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:35:  density?: PermanentDashboardNavigationRailVisualDensity;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:38:export type PermanentDashboardNavigationRailShellIntegrationLayoutContract = {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:43:  contextualDrawerPolicy: PermanentDashboardNavigationRailShellIntegrationContextualDrawerPolicy;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:44:  topCommunicationPolicy: PermanentDashboardNavigationRailShellIntegrationTopCommunicationPolicy;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:49:export type PermanentDashboardNavigationRailShellIntegrationBoundary = {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:50:  target: PermanentDashboardNavigationRailShellIntegrationTarget;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:51:  source: PermanentDashboardNavigationRailShellIntegrationSource;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:52:  host: PermanentDashboardNavigationRailShellIntegrationHost;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:53:  slot: PermanentDashboardNavigationRailShellIntegrationSlot;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:54:  placement: PermanentDashboardNavigationRailShellIntegrationPlacement;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:55:  componentExportName: "PermanentDashboardNavigationRail";
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:56:  shellReadModel: PermanentDashboardNavigationRailShellReadModel;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:57:  layoutContract: PermanentDashboardNavigationRailShellIntegrationLayoutContract;
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:63:export type PermanentDashboardNavigationRailShellIntegrationValidation = {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:68:export function buildPermanentDashboardNavigationRailShellIntegrationBoundary(
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:69:  input?: PermanentDashboardNavigationRailShellIntegrationInput,
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:70:): PermanentDashboardNavigationRailShellIntegrationBoundary {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:71:  const shellReadModel = buildPermanentDashboardNavigationRailShellReadModel(input);
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:79:    componentExportName: "PermanentDashboardNavigationRail",
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:97:export function validatePermanentDashboardNavigationRailShellIntegrationBoundary(
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:98:  boundary: PermanentDashboardNavigationRailShellIntegrationBoundary =
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:99:    buildPermanentDashboardNavigationRailShellIntegrationBoundary(),
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:100:): PermanentDashboardNavigationRailShellIntegrationValidation {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:123:  if (boundary.componentExportName !== "PermanentDashboardNavigationRail") {
+react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts:172:    validatePermanentDashboardNavigationRailShellReadModel(
+
+
+===== ACTIVE DASHBOARD / CENTER VIEWPORT CONTRACTS =====
+react_flow_preview/src/activeDashboardRouteReadModel.ts
+react_flow_preview/src/centerViewportInputContract.ts
+react_flow_preview/src/dashboardSkeletonNavigationRendererRouteBinding.ts
+react_flow_preview/src/shell/CenterDashboardViewport.tsx
+
+
+===== TEST COVERAGE =====
+activeDashboardRouteReadModel.test.ts
+centerViewportInputContract.test.ts
+dashboard_shell_contract.test.ts
+permanentDashboardNavigationRailReadModel.test.ts
+permanentDashboardNavigationRailShellComponent.test.ts
+permanentDashboardNavigationRailShellIntegrationBoundary.test.ts
+permanentDashboardNavigationRailVisualWiring.test.ts
+react_flow_embedded_chat_shell_exposure_inspect.test.ts
+react_flow_embedded_chat_shell_exposure_read_model.test.ts
+react_flow_jarvis_chat_drawer_contract.test.ts
+react_flow_jarvis_chat_drawer_read_model.test.ts
+react_flow_memory_knowledge_shell_read_model.test.ts
+react_flow_overlay_drawer_layout_contract.test.ts
+react_flow_overlay_drawer_layout_read_model.test.ts
+react_flow_overlay_drawer_shell_state.test.ts
+react_flow_panel_navigation_shell_inspect.test.ts
+shell_state_contract.test.ts
