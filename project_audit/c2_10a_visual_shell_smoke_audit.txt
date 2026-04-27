@@ -1,0 +1,82 @@
+C2.10a — VISUAL / SHELL POLISH SMOKE AUDIT
+
+PURPOSE:
+Verify the visual shell after C2.7/C2.8/C2.9 split and cleanup.
+
+SCOPE:
+No new dashboard features.
+No new architecture.
+No large refactor.
+Only visual/shell behavior verification after split.
+
+CHECKLIST:
+
+1. TOP STATUS STRIP
+- Project title visible.
+- Strip remains narrow.
+- Click opens top communication drawer.
+- Click closes top communication drawer.
+- It does not duplicate left/right drawer content.
+
+2. TOP COMMUNICATION DRAWER
+- Opens fullscreen / near-fullscreen.
+- Center area is communication-focused.
+- Conversation is readable.
+- Input bar is visible and separated.
+- Chat sidebar is separate from message stream.
+- Side drawers and summary cards do not pollute chat focus.
+
+3. LEFT DRAWER
+- Opens by left handle.
+- Closes by left handle.
+- Contains navigation only.
+- Does not resize or move center viewport.
+- Does not duplicate top communication content.
+
+4. RIGHT DRAWER
+- Opens by right handle.
+- Closes by right handle.
+- Contains inspect/context/system state.
+- Does not resize or move center viewport.
+- Does not duplicate left navigation.
+
+5. CENTER VIEWPORT
+- Remains immutable visual scene.
+- Graph/visualization stays full center.
+- Drawers overlay instead of shifting layout.
+- React Flow pan/zoom still works.
+- Node/edge inspect still opens right context.
+
+6. SUMMARY CARDS
+- Visible only in baseline mode.
+- Hidden when communication focus requires it.
+- Do not block main scene excessively.
+
+7. FOOTER
+- Shows system/environment/status information.
+- Does not duplicate drawer navigation.
+- Does not consume center viewport.
+
+8. RESPONSIVENESS
+- Layout still usable on current monitor.
+- Handles remain reachable.
+- No major overlap that blocks operation.
+
+EXPECTED RESULT:
+Shell remains usable, clean, and stable after file split.
+
+RESULT:
+Pending manual visual verification.
+
+MANUAL RESULT:
+Visual shell smoke audit passed.
+
+CONFIRMED:
+- top strip works
+- top communication drawer works
+- left drawer works
+- right drawer works
+- center viewport remains immutable
+- footer remains separated
+- no critical post-split visual regression observed
+
