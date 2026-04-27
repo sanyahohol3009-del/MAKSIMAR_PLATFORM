@@ -1,10 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Background,
-  Controls,
-  MiniMap,
-  ReactFlow,
-} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import { graphProjectionRegistry } from "./graphProjectionData.js";
@@ -68,6 +62,7 @@ import { SummaryCardsOverlay } from "./shell/SummaryCardsOverlay.js";
 import { TopStatusStrip } from "./shell/TopStatusStrip.js";
 import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
+import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -872,100 +867,37 @@ export default function App() {
           codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
         />
 
-        <section
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 1,
-          }}
-        >
-          {activeGraphViewKey ? (
-            <div style={{ position: "absolute", inset: 0 }}>
-              <ReactFlow
-                key={`graph-flow:${activeGraphViewKey}`}
-                nodes={nodes}
-                edges={edges}
-                fitView
-                attributionPosition="bottom-left"
-                proOptions={{ hideAttribution: true }}
-                nodesDraggable={false}
-                nodesConnectable={false}
-                elementsSelectable={true}
-                panOnDrag={true}
-                zoomOnScroll={true}
-                zoomOnPinch={true}
-                onInit={(instance) => {
-                  window.requestAnimationFrame(() => {
-                    instance.fitView({ padding: 0.16 });
-                  });
-                }}
-                onNodeClick={(_, node) => {
-                  const payload = selectedNodeMap.get(node.id);
-                  if (payload) {
-                    setSelectedItem({
-                      kind: "node",
-                      viewKey: activeGraphViewKey,
-                      payload,
-                    });
-                    setDrawerShellState((current) => ({
-                      ...current,
-                      rightMode: "expanded",
-                      activeRightSection: "inspect",
-                    }));
-                  }
-                }}
-                onEdgeClick={(_, edge) => {
-                  const payload = selectedEdgeMap.get(edge.id);
-                  if (payload) {
-                    setSelectedItem({
-                      kind: "edge",
-                      viewKey: activeGraphViewKey,
-                      payload,
-                    });
-                    setDrawerShellState((current) => ({
-                      ...current,
-                      rightMode: "expanded",
-                      activeRightSection: "inspect",
-                    }));
-                  }
-                }}
-              >
-                <MiniMap />
-                <Controls />
-                <Background />
-              </ReactFlow>
-            </div>
-          ) : (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                paddingTop: topStripHeight + 16,
-              }}
-            >
-              <div ref={chartHostRef} className="chart-host" />
-            </div>
-          )}
-        </section>
-
-        <LeftDashboardDrawer
-          isVisible={operatorZoneAppBinding.showLeftDrawer}
-          topStripHeight={topStripHeight}
-          drawerWidth={overlayLayoutContract.drawers.left.expandedSizePx}
-          drawerOpacity={overlayLayoutContract.drawers.left.opacity}
-          drawerBackdropBlurPx={
-            overlayLayoutContract.drawers.left.backdropBlurPx
-          }
-          activeLeftSection={drawerShellState.activeLeftSection}
-          leftDrawerSections={leftDrawerSections}
-          onLeftSectionChange={(section) =>
+        <CenterDashboardViewport
+          activeGraphViewKey={activeGraphViewKey}
+          nodes={nodes}
+          edges={edges}
+          chartHostRef={chartHostRef}
+          selectedNodeMap={selectedNodeMap}
+          selectedEdgeMap={selectedEdgeMap}
+          onNodeInspect={({ viewKey, payload }) => {
+            setSelectedItem({
+              kind: "node",
+              viewKey,
+              payload,
+            });
             setDrawerShellState((current) => ({
               ...current,
-              activeLeftSection: section,
-            }))
-          }
-          getLeftSectionTitle={getLeftSectionTitle}
-          renderBody={renderLeftDrawerBody}
+              rightMode: "expanded",
+              activeRightSection: "inspect",
+            }));
+          }}
+          onEdgeInspect={({ viewKey, payload }) => {
+            setSelectedItem({
+              kind: "edge",
+              viewKey,
+              payload,
+            });
+            setDrawerShellState((current) => ({
+              ...current,
+              rightMode: "expanded",
+              activeRightSection: "inspect",
+            }));
+          }}
         />
 
         <RightSystemContextDrawer
