@@ -1922,3 +1922,62 @@ App.tsx must not import or instantiate concrete rendering engines directly for d
 ### NEXT STEP
 C2.12d — dashboard skeleton navigation binding
 
+
+### PATCH V22 DOCUMENT CORRECTION
+The C2.12c renderer adapter boundary remains valid.
+
+### APP.TSX RULE
+App.tsx must not import or instantiate concrete rendering engines directly for dashboard modules.
+
+### NEXT STEP
+C2.12d — dashboard skeleton navigation binding
+
+---
+
+## 37. VERIFIED PATCH V23 — C2.12d DASHBOARD SKELETON NAVIGATION BINDING
+
+### STATUS
+C2.12d dashboard skeleton navigation binding completed.
+
+### PURPOSE
+Bind the expanded dashboard skeleton taxonomy to a navigation read-model for the future left dashboard drawer.
+
+### ADDED BINDING
+- frontend/react_flow_preview/src/dashboardSkeletonNavigationBinding.ts
+
+### ADDED TEST
+- frontend/tests/dashboardSkeletonNavigationBinding.test.ts
+
+### NAVIGATION RULE
+Dashboard buttons must be generated from:
+- dashboard skeleton taxonomy
+- navigation binding read-model
+- future shell/drawer binding
+
+They must not be hardcoded directly into App.tsx.
+
+### CONFIRMED NAVIGATION MODEL
+The navigation binding exposes:
+- 19 dashboard button groups
+- 34 dashboard surface items
+- memory surfaces under Memory Control
+- Android/iOS under Mobile Companion
+- 3D/simulation/robotics surfaces as adapter-boundary navigation items
+
+### MEMORY DASHBOARD NOTE
+The Memory Control Dashboard is now reserved in navigation.
+
+Future memory implementation chats must build memory layer/folder contracts so that:
+- Memory Control Dashboard
+- Memory Layers Map
+- Memory Folder Sequence
+- Memory Governance Policy
+
+can bind to real memory data without redesigning the dashboard shell.
+
+### 3D / RENDERER NOTE
+3D and simulation surfaces are now visible to the skeleton navigation model but still connect only through renderer adapter boundaries.
+
+### NEXT STEP
+C2.12e — dashboard skeleton navigation-to-renderer route binding
+
