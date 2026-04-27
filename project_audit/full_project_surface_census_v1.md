@@ -1792,3 +1792,77 @@ The skeleton taxonomy prepares future button binding and renderer routing.
 ### NEXT STEP
 C2.12c — dashboard renderer adapter boundary
 
+
+---
+
+## 35. VERIFIED PATCH V21 — C2.12b-REV1 EXPANDED DASHBOARD SKELETON TAXONOMY
+
+### STATUS
+C2.12b-REV1 expanded dashboard skeleton taxonomy completed.
+
+### PURPOSE
+Expand the first dashboard skeleton taxonomy using audit 122 and split the taxonomy to avoid a large monolithic file.
+
+### REASON FOR REVISION
+The first taxonomy had correct direction but was too coarse.
+
+Audit 122 required explicit representation of:
+- foundation dashboards
+- incident dashboard
+- diagnostics correlation dashboard
+- topology / dependency / dataflow / displays graphs
+- telemetry/chart workspaces
+- action queue / approval queue / audit timeline panels
+- simulation / digital twin / industrial robotics dashboards
+- embedded JARVIS chat
+- project context surface
+- base family dashboard
+- Android and iOS companion surfaces
+
+### SPLIT TAXONOMY FILES
+- frontend/react_flow_preview/src/dashboard_skeleton/types.ts
+- frontend/react_flow_preview/src/dashboard_skeleton/surfaces.ts
+- frontend/react_flow_preview/src/dashboard_skeleton/queries.ts
+- frontend/react_flow_preview/src/dashboard_skeleton/validation.ts
+- frontend/react_flow_preview/src/dashboard_skeleton/index.ts
+- frontend/react_flow_preview/src/dashboardSkeletonSurfaceTaxonomy.ts
+
+### MEMORY DASHBOARD DECISION
+Memory is now represented as a stronger dashboard group.
+
+Reserved memory surfaces:
+- Memory Control Dashboard
+- Memory Layers Map
+- Memory Folder Sequence
+- Memory Governance Policy
+
+Future memory implementation chats must build memory contracts and folders so they can plug into these dashboard surfaces directly.
+
+### MOBILE DECISION
+Android and iOS are not part of Family.
+
+Family remains a product/domain dashboard.
+
+Android and iOS live under:
+- Mobile Companion
+
+### 3D / RENDERER DECISION
+The 3D engine is reserved not only for physics simulation.
+
+It is a center viewport renderer / adapter for dashboard information visualization where needed.
+
+Reserved adapter surfaces:
+- Simulation Dashboards Pack
+- Physics / Digital Twin
+- Industrial Robotics
+- Robotics Control
+- 3D / CAD / CAM
+
+### APP.TSX RULE
+No dashboard surface from this taxonomy may be hardcoded directly into App.tsx.
+
+Future buttons and surfaces must bind through taxonomy / registry / manifest / route contracts.
+
+### NEXT STEP
+C2.12c — dashboard renderer adapter boundary
+
