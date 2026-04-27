@@ -78,6 +78,10 @@ import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
 import { ChatSidebar } from "./features/chat/ChatSidebar.js";
 import { ChatDrawerBody } from "./features/chat/ChatDrawerBody.js";
+import {
+  getEmbeddedChatSurfaceLabel,
+  getPreferredJarvisSection,
+} from "./features/chat/embeddedChatSurfaceHelpers.js";
 
 type ChartInstanceLike = {
   dispose: () => void;
@@ -141,20 +145,6 @@ function getJarvisChatSectionTitle(
   }
 }
 
-function getPreferredJarvisSection(
-  surfaceId: EmbeddedChatSurfaceId,
-): JarvisChatDrawerSectionId {
-  switch (surfaceId) {
-    case "project_context_host":
-      return "project_context";
-    case "conversation_history_lane":
-      return "conversation";
-    case "code_output_lane":
-      return "conversation";
-    case "command_support_lane":
-      return "command_handoff";
-  }
-}
 
 function normalizeOperatorZoneDrawerMode(
   mode: "hidden" | "peek" | "expanded",
@@ -303,10 +293,10 @@ export default function App() {
 
   const presenceItems = ["home_001", "dev_001", "mobile_001"];
 
-  const activeEmbeddedChatSurfaceLabel =
-    topDrawerExposureGroup?.rows.find(
-      (row) => row.surfaceId === activeEmbeddedChatSurface,
-    )?.title ?? activeEmbeddedChatSurface;
+  const activeEmbeddedChatSurfaceLabel = getEmbeddedChatSurfaceLabel(
+    topDrawerExposureGroup,
+    activeEmbeddedChatSurface,
+  );
 
   const operatorZoneAppBinding = buildOperatorZoneAppBinding({
     topMode: normalizeOperatorZoneDrawerMode(drawerShellState.topMode),
