@@ -1,0 +1,74 @@
+C2.9h — POST-SPLIT App.tsx SIZE + RESPONSIBILITY AUDIT
+
+PURPOSE:
+Verify that App.tsx no longer acts as giant mixed shell renderer after C2.7/C2.9 cleanup.
+
+CHECKS:
+- App.tsx line count
+- AppShell usage
+- extracted shell components imports
+- direct ReactFlow removal from App.tsx
+- shell layout constants usage
+- extracted helper usage
+- remaining local render helpers visibility
+
+EXPECTED:
+- App.tsx remains orchestration layer
+- shell components are extracted
+- center viewport is extracted
+- top drawer is extracted
+- left/right drawers are extracted
+- footer is extracted
+- drawer handles are extracted
+- inspect presentation renderer is extracted
+- active visual view helpers are extracted
+- shell layout constants are extracted
+- embedded chat surface helpers are extracted
+===== APP.TSX LINE COUNT =====
+832 react_flow_preview/src/App.tsx
+
+===== REQUIRED EXTRACTED IMPORTS =====
+61:import { AppShell } from "./shell/AppShell.js";
+658:    <AppShell
+55:import { TopChatDrawer } from "./shell/TopChatDrawer.js";
+698:        <TopChatDrawer
+80:import { ChatDrawerBody } from "./features/chat/ChatDrawerBody.js";
+629:    <ChatDrawerBody
+77:import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
+78:import { ChatInputBar } from "./features/chat/ChatInputBar.js";
+79:import { ChatSidebar } from "./features/chat/ChatSidebar.js";
+725:            <ChatSidebar
+56:import { SummaryCardsOverlay } from "./shell/SummaryCardsOverlay.js";
+740:        <SummaryCardsOverlay
+57:import { TopStatusStrip } from "./shell/TopStatusStrip.js";
+661:        <TopStatusStrip
+58:import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
+788:        <LeftDashboardDrawer
+59:import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
+804:        <RightSystemContextDrawer
+60:import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
+754:        <CenterDashboardViewport
+66:import { ShellFooter } from "./shell/ShellFooter.js";
+820:        <ShellFooter
+67:import { DrawerHandles } from "./shell/DrawerHandles.js";
+670:        <DrawerHandles
+684:        <DrawerHandles
+68:import { InspectPresentationView } from "./shell/InspectPresentationView.js";
+494:              <InspectPresentationView presentation={embeddedChatShellExposureInspect} />
+540:            <InspectPresentationView presentation={memoryKnowledgeShell.activeInspect} />
+581:            <InspectPresentationView presentation={panelFamilyTaxonomyExposureInspect} />
+589:            <InspectPresentationView presentation={inspectPresentation} />
+620:                <InspectPresentationView presentation={embeddedChatShellExposureInspect} />
+75:} from "./shell/activeVisualViewHelpers.js";
+65:} from "./shell/shellLayoutConstants.js";
+84:} from "./features/chat/embeddedChatSurfaceHelpers.js";
+
+===== SHOULD NOT BE IN APP.TSX =====
+
+===== RETURN / APPSHELL CHECK =====
+465:        return (
+504:        return (
+545:        return (
+587:        return (
+657:  return (
+658:    <AppShell

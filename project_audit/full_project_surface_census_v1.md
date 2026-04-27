@@ -1192,3 +1192,63 @@ It is not part of this stabilization checkpoint.
 ### IMMEDIATE NEXT ACTION
 C2.8 — DOCUMENT PATCH + POST-SPLIT STABILIZATION PASS
 
+
+---
+
+## 23. VERIFIED COMPLETION PATCH V9 — C2.9 POST-SPLIT SHELL CLEANUP AUDIT
+
+### STATUS
+C2.9 post-split shell cleanup audit completed.
+
+### CONFIRMED CLEANUP STEPS
+- ShellFooter extracted
+- DrawerHandles extracted
+- InspectPresentationView extracted
+- drawer shell interactions extracted
+- active visual view helpers extracted
+- shell layout constants extracted
+- embedded chat surface helpers extracted
+
+### APP.TSX RESPONSIBILITY RESULT
+App.tsx remains the orchestration entry.
+
+It is responsible for:
+- top-level state
+- read-model / binding assembly
+- selected active view state
+- chart runtime lifecycle
+- prop wiring into shell components
+
+It no longer owns:
+- top chat drawer rendering
+- conversation message stream rendering
+- chat input bar rendering
+- chat sidebar rendering
+- summary cards rendering
+- top status strip rendering
+- left drawer shell rendering
+- right drawer shell rendering
+- center dashboard viewport rendering
+- footer rendering
+- drawer handle rendering
+- inspect presentation rendering
+- active visual view helper definitions
+- shell layout constants
+- embedded chat surface helper logic
+
+### VERIFICATION
+Audit file:
+- project_audit/c2_9h_post_split_app_shell_audit.txt
+
+Required commands:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### CLEANUP POLICY
+Repository hygiene cleanup remains deferred.
+No node_modules / dist / coverage cleanup is performed in this step.
+
+### NEXT STEP
+C2.9i — post-split shell cleanup checkpoint and next-track decision.
+
