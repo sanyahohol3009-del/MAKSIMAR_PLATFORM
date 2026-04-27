@@ -1630,3 +1630,71 @@ Required commands remain green:
 ### NEXT STEP
 C2.11g — dashboard routing stabilization closeout and 3D adapter preparation decision
 
+
+---
+
+## 32. VERIFIED PATCH V18 — C2.11g DASHBOARD ROUTING STABILIZATION CLOSEOUT
+
+### STATUS
+C2.11 dashboard routing / active surface stabilization is complete.
+
+### CONFIRMED COMPLETED BLOCKS
+- C2.11a — dashboard routing / active surface audit snapshot
+- C2.11b — active dashboard route read-model stabilization
+- C2.11c — center viewport input contract stabilization
+- C2.11d — dashboard module registration boundary stabilization
+- C2.11e — dashboard client capability / feature gating contract
+- C2.11f — dashboard registry integration boundary checkpoint
+- C2.11g — routing stabilization closeout
+
+### RESULT
+The dashboard routing foundation is now stabilized.
+
+The accepted modular route is:
+
+dashboard module registration
+→ client capability / feature gate
+→ allowed surfaces
+→ active dashboard route read-model
+→ center viewport input contract
+→ center viewport renderer
+
+### APP.TSX RULE CONFIRMED
+App.tsx remains orchestration-only.
+
+It must not directly hardcode:
+- client dashboard modules
+- cube dashboard modules
+- 3D/simulation dashboard surfaces
+- feature gating decisions
+- client package decisions
+
+### DASHBOARD MODULARITY CONFIRMED
+Dashboards remain modular.
+
+Future dashboards and cubes must connect through:
+- registry / manifest binding
+- dashboard module registration contract
+- client capability gate
+- active route read-model
+- center viewport input contract
+- right context / system state contracts
+
+### 3D / SIMULATION DECISION
+3D / simulation must not be wired directly into App.tsx.
+
+The next correct approach is:
+- first reserve the dashboard skeleton surface for 3D / simulation
+- then create a 3D / simulation viewport adapter boundary
+- then connect actual 3D engine through that adapter later
+
+### NEXT TRACK
+C2.12 — DASHBOARD SKELETON COMPLETION TRACK
+
+Purpose:
+- return to the dashboard roadmap
+- complete the dashboard skeleton
+- keep left / center / right / top / bottom roles clean
+- prepare dashboard surfaces for future 3D / simulation integration
+- no direct App.tsx hardcoding
+
