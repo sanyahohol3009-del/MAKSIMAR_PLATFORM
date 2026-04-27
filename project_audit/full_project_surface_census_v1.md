@@ -2329,4 +2329,58 @@ Current frontend test count:
 
 ### NEXT STEP
 C2.12i — permanent dashboard navigation rail shell integration boundary
+---
+
+## 43. VERIFIED PATCH V29 — C2.12i PERMANENT DASHBOARD NAVIGATION RAIL SHELL INTEGRATION BOUNDARY
+
+### STATUS
+C2.12i permanent dashboard navigation rail shell integration boundary completed.
+
+### PURPOSE
+Create the shell integration boundary for the permanent dashboard navigation rail before wiring it into the visible AppShell.
+
+### ADDED INTEGRATION BOUNDARY
+- frontend/react_flow_preview/src/permanentDashboardNavigationRailShellIntegrationBoundary.ts
+
+### ADDED TEST
+- frontend/tests/permanentDashboardNavigationRailShellIntegrationBoundary.test.ts
+
+### CONFIRMED INTEGRATION MODEL
+The integration boundary defines:
+- operator dashboard shell host
+- left permanent navigation rail slot
+- PermanentDashboardNavigationRail component export
+- shell read-model handoff
+- persistent layout semantics
+- non-overlay behavior
+- no center viewport overlap
+- active-dashboard-only contextual drawer policy
+- fullscreen chat communication policy
+
+### APP.TSX RULE
+App.tsx must not hardcode dashboard buttons.
+
+The future visible AppShell wiring must consume:
+- PermanentDashboardNavigationRail shell component
+- shell integration boundary
+- permanent rail read-model
+
+### CONTEXTUAL DRAWER RULE
+The permanent rail selects dashboards.
+
+Contextual drawers must remain separate:
+- active dashboard left drawer = functions / settings / tools
+- active dashboard right drawer = state / diagnostics / context
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+Current frontend test count:
+- 192 pass / 0 fail
+
+### NEXT STEP
+C2.12j — AppShell permanent rail slot wiring audit
 
