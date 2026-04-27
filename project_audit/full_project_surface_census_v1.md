@@ -1469,3 +1469,53 @@ Required commands remain green:
 ### NEXT STEP
 C2.11d — dashboard module registration boundary stabilization
 
+
+---
+
+## 29. VERIFIED PATCH V15 — C2.11d DASHBOARD MODULE REGISTRATION BOUNDARY STABILIZATION
+
+### STATUS
+C2.11d dashboard module registration boundary stabilization completed.
+
+### PURPOSE
+Stabilize the boundary that future dashboards and cubes must use to register into the shell.
+
+### ADDED CONTRACT
+- frontend/react_flow_preview/src/dashboardModuleRegistrationContract.ts
+
+### ADDED TEST
+- frontend/tests/dashboardModuleRegistrationContract.test.ts
+
+### MODULAR DASHBOARD RULE CONFIRMED
+Dashboards and cubes must remain modular.
+
+Future client-specific dashboards and cube-provided dashboards must connect through:
+- dashboard module registration contract
+- registry / manifest binding
+- active dashboard route read-model
+- center viewport input contract
+- right context / system state contracts
+
+They must not be hardcoded directly into App.tsx.
+
+### REGISTRATION BOUNDARY RULES
+The registration contract enforces:
+- module id
+- display name
+- module kind
+- version
+- provided surfaces
+- target zone
+- client-selectable center surfaces
+- registry-driven connection
+- App.tsx hardcoding forbidden
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.11e — dashboard client capability / feature gating contract
+
