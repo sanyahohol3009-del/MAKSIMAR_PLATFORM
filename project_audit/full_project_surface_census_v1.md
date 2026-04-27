@@ -2079,3 +2079,102 @@ Dashboard buttons must not be hardcoded manually in App.tsx.
 ### NEXT STEP
 C2.12g — left drawer skeleton navigation visual wiring
 
+
+---
+
+## 39A. DESIGN CORRECTION — C2.12f-REV1 PERMANENT DASHBOARD NAVIGATION RAIL
+
+### STATUS
+C2.12f is corrected before implementation.
+
+### REASON
+The dashboard skeleton must not treat the main dashboard list as a temporary left drawer.
+
+### CANONICAL LAYOUT MODEL
+The dashboard shell must use:
+
+- permanent left navigation rail = all dashboard buttons / dashboard groups
+- center viewport = active dashboard visualization
+- active dashboard left drawer = functions / settings of the selected dashboard
+- active dashboard right drawer = state / context / diagnostics of the selected dashboard
+- top status strip = network / weather / activity / notifications
+- bottom status strip = connected devices / active users / robotic devices / environment
+- fullscreen top communication drawer = JARVIS chat surface
+
+### LEFT NAVIGATION RAIL RULE
+The left dashboard list is persistent.
+
+It must show the full dashboard taxonomy:
+- Home
+- Foundation
+- Incidents / Diagnostics
+- Graphs
+- Telemetry
+- Interaction
+- Memory Control
+- Project Context
+- Server
+- Security
+- Family
+- Mobile Companion
+- Smart Home
+- Simulation
+- Robotics
+- 3D / Engineering
+- Media
+- Business
+- Settings
+
+### ACTIVE DASHBOARD DRAWER RULE
+The active dashboard may expose contextual drawer content.
+
+Left contextual drawer:
+- functions
+- settings
+- tools
+- dashboard-specific controls
+
+Right contextual drawer:
+- state
+- diagnostics
+- active surface details
+- dashboard-specific system context
+
+These drawers must contain only data related to the currently selected dashboard.
+
+### CHAT DRAWER RULE
+The top communication drawer must open as a fullscreen ChatGPT-like communication surface.
+
+It must contain:
+- central conversation stream
+- right chat/service column
+- bottom input bar
+- file/photo attach button
+- voice input button
+- send button
+
+It must not mix dashboard navigation into the conversation center.
+
+### DESIGN DIRECTION
+The visual direction follows the provided dashboard mockups:
+- dark HUD interface
+- cyan primary accents
+- amber warning/attention accents
+- glass panels
+- clear permanent left navigation
+- center visual gravity
+- right context panels
+- top/bottom status lanes
+
+### RENAMING DECISION
+The earlier “left drawer skeleton navigation exposure” concept must be corrected.
+
+New semantic target:
+- permanent_dashboard_navigation_rail
+
+Not:
+- left_dashboard_drawer as the main dashboard list
+
+### NEXT STEP
+C2.12f-REV1 — permanent dashboard navigation rail read-model
+
