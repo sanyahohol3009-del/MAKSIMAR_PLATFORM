@@ -38,6 +38,7 @@ type TopChatDrawerProps = {
     section: JarvisChatDrawerSectionId,
   ) => string;
   renderTopDrawerBody: () => React.ReactNode;
+  renderSidebar: () => React.ReactNode;
 };
 
 export function TopChatDrawer({
@@ -62,6 +63,7 @@ export function TopChatDrawer({
   onEmbeddedChatSurfaceChange,
   getJarvisChatSectionTitle,
   renderTopDrawerBody,
+  renderSidebar,
 }: TopChatDrawerProps) {
   if (!isOpen) {
     return null;
@@ -206,15 +208,38 @@ export function TopChatDrawer({
         <div
           style={{
             minHeight: 0,
-            overflow: "auto",
-            paddingRight: 4,
-            borderTop: contentDominant
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "none",
-            paddingTop: contentDominant ? 10 : 0,
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) 300px",
+            gap: 14,
+            alignItems: "stretch",
           }}
         >
-          {renderTopDrawerBody()}
+          <div
+            style={{
+              minHeight: 0,
+              overflow: "auto",
+              paddingRight: 4,
+              borderTop: contentDominant
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "none",
+              paddingTop: contentDominant ? 10 : 0,
+            }}
+          >
+            {renderTopDrawerBody()}
+          </div>
+
+          <aside
+            style={{
+              minHeight: 0,
+              overflow: "auto",
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.04)",
+              borderRadius: 16,
+              padding: 12,
+            }}
+          >
+            {renderSidebar()}
+          </aside>
         </div>
       </div>
     </section>

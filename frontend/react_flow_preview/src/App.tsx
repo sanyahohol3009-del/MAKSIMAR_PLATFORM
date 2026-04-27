@@ -67,6 +67,7 @@ import { TopChatDrawer } from "./shell/TopChatDrawer.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
+import { ChatSidebar } from "./features/chat/ChatSidebar.js";
 
 type ChartInstanceLike = {
   dispose: () => void;
@@ -303,6 +304,11 @@ export default function App() {
   const mainVisualHeight = "78vh";
 
   const presenceItems = ["home_001", "dev_001", "mobile_001"];
+
+  const activeEmbeddedChatSurfaceLabel =
+    topDrawerExposureGroup?.rows.find(
+      (row) => row.surfaceId === activeEmbeddedChatSurface,
+    )?.title ?? activeEmbeddedChatSurface;
 
   const operatorZoneAppBinding = buildOperatorZoneAppBinding({
     topMode: normalizeOperatorZoneDrawerMode(drawerShellState.topMode),
@@ -984,6 +990,19 @@ export default function App() {
   onEmbeddedChatSurfaceChange={activateEmbeddedChatSurface}
   getJarvisChatSectionTitle={getJarvisChatSectionTitle}
   renderTopDrawerBody={renderTopDrawerBody}
+  renderSidebar={() => (
+    <ChatSidebar
+      activeJarvisChatSection={activeJarvisChatSection}
+      activeEmbeddedChatSurfaceLabel={activeEmbeddedChatSurfaceLabel}
+      jarvisChatSections={jarvisChatDrawerContract.sections}
+      onJarvisChatSectionChange={setActiveJarvisChatSection}
+      getJarvisChatSectionTitle={getJarvisChatSectionTitle}
+      unreadCount={jarvisChatDrawerReadModel.unreadCount}
+      codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
+      handoffCount={jarvisChatDrawerFixture.handoffs.length}
+      diagnosticCount={diagnosticsMessages.length}
+    />
+  )}
 />
 
         {operatorZoneAppBinding.showSummaryCards ? (
