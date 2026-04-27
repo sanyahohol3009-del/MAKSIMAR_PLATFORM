@@ -66,6 +66,7 @@ import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
 import { ShellFooter } from "./shell/ShellFooter.js";
 import { DrawerHandles } from "./shell/DrawerHandles.js";
+import { InspectPresentationView } from "./shell/InspectPresentationView.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -437,46 +438,6 @@ export default function App() {
     setActiveJarvisChatSection(getPreferredJarvisSection(surfaceId));
   };
 
-  const renderPresentation = (
-    presentation: InspectPresentationLike,
-  ) => (
-    <>
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          flexWrap: "wrap",
-          marginBottom: 12,
-        }}
-      >
-        <span className="inspect-chip">{presentation.semanticKind}</span>
-      </div>
-
-      <div className="inspect-explanation">
-        <h3>{presentation.title}</h3>
-        <p>{presentation.explanation}</p>
-      </div>
-
-      <div className="inspect-sections">
-        {presentation.sections.map((section) => (
-          <section key={section.title} className="inspect-section">
-            <h3>{section.title}</h3>
-            <div className="inspect-fields">
-              {section.items.map((item) => (
-                <div
-                  key={`${section.title}:${item.key}`}
-                  className="inspect-field"
-                >
-                  <span className="inspect-field-key">{item.key}</span>
-                  <span className="inspect-field-value">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </>
-  );
 
   const renderLeftDrawerBody = () => {
     switch (drawerShellState.activeLeftSection) {
@@ -577,7 +538,7 @@ export default function App() {
 
             <section className="workspace-sidebar-group">
               <h3>Exposure Inspect</h3>
-              {renderPresentation(embeddedChatShellExposureInspect)}
+              <InspectPresentationView presentation={embeddedChatShellExposureInspect} />
             </section>
           </div>
         );
@@ -623,7 +584,7 @@ export default function App() {
                 </section>
               ))}
             </div>
-            {renderPresentation(memoryKnowledgeShell.activeInspect)}
+            <InspectPresentationView presentation={memoryKnowledgeShell.activeInspect} />
           </>
         );
 
@@ -664,7 +625,7 @@ export default function App() {
                 </section>
               ))}
             </div>
-            {renderPresentation(panelFamilyTaxonomyExposureInspect)}
+            <InspectPresentationView presentation={panelFamilyTaxonomyExposureInspect} />
           </>
         );
 
@@ -672,7 +633,7 @@ export default function App() {
       default:
         return (
           <>
-            {renderPresentation(inspectPresentation)}
+            <InspectPresentationView presentation={inspectPresentation} />
 
             {rightReferenceExposureGroup?.rows.length ? (
               <section className="inspect-section" style={{ marginTop: 16 }}>
@@ -703,7 +664,7 @@ export default function App() {
                   ))}
                 </div>
 
-                {renderPresentation(embeddedChatShellExposureInspect)}
+                <InspectPresentationView presentation={embeddedChatShellExposureInspect} />
               </section>
             ) : null}
           </>
