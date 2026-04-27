@@ -16,9 +16,7 @@ import {
   type UnifiedVisualViewId,
 } from "./unifiedVisualWorkspaceRegistry.js";
 import { buildChartOption } from "./chartTelemetrySemantics.js";
-import type { ChartViewKey } from "./chartTelemetryRegistry.js";
 import type {
-  GraphViewKey,
   ProjectionEdgeRecord,
   ProjectionNodeRecord,
 } from "./graphProjectionTypes.js";
@@ -65,6 +63,12 @@ import { ShellFooter } from "./shell/ShellFooter.js";
 import { DrawerHandles } from "./shell/DrawerHandles.js";
 import { InspectPresentationView } from "./shell/InspectPresentationView.js";
 import { useDrawerShellInteractions } from "./shell/useDrawerShellInteractions.js";
+import {
+  extractChartViewKey,
+  extractGraphViewKey,
+  isChartViewId,
+  isGraphViewId,
+} from "./shell/activeVisualViewHelpers.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -91,25 +95,6 @@ type InspectPresentationLike = {
   }[];
 };
 
-function isGraphViewId(
-  viewId: UnifiedVisualViewId,
-): viewId is `graph:${GraphViewKey}` {
-  return viewId.startsWith("graph:");
-}
-
-function isChartViewId(
-  viewId: UnifiedVisualViewId,
-): viewId is `chart:${ChartViewKey}` {
-  return viewId.startsWith("chart:");
-}
-
-function extractGraphViewKey(viewId: `graph:${GraphViewKey}`): GraphViewKey {
-  return viewId.slice("graph:".length) as GraphViewKey;
-}
-
-function extractChartViewKey(viewId: `chart:${ChartViewKey}`): ChartViewKey {
-  return viewId.slice("chart:".length) as ChartViewKey;
-}
 
 function getLeftSectionTitle(section: LeftDrawerSection): string {
   switch (section) {
