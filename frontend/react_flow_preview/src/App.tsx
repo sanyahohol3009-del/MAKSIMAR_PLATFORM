@@ -64,6 +64,7 @@ import { buildOperatorZoneAppBinding } from "./operator_shell/operatorZoneAppBin
 import { buildTopCommunicationDensityAppBinding } from "./operator_shell/topCommunicationDensityAppBinding.js";
 
 import { TopChatDrawer } from "./shell/TopChatDrawer.js";
+import { SummaryCardsOverlay } from "./shell/SummaryCardsOverlay.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -1005,64 +1006,18 @@ export default function App() {
   )}
 />
 
-        {operatorZoneAppBinding.showSummaryCards ? (
-          <>
-            <div
-              style={{
-                position: "absolute",
-                top: topStripHeight + 12,
-                left: 18,
-                zIndex: 6,
-                display: "grid",
-                gap: 10,
-                gridTemplateColumns: "repeat(2, minmax(130px, 1fr))",
-                maxWidth: 340,
-              }}
-            >
-              <div className="summary-card" style={lightweightCardStyle}>
-                <span className="summary-label">Active View</span>
-                <span className="summary-value">{activeEntry.title}</span>
-              </div>
-
-              <div className="summary-card" style={lightweightCardStyle}>
-                <span className="summary-label">Nodes</span>
-                <span className="summary-value">
-                  {activeGraphViewKey
-                    ? graphProjectionRegistry[activeGraphViewKey].nodes.length
-                    : "—"}
-                </span>
-              </div>
-            </div>
-
-            <div
-              style={{
-                position: "absolute",
-                top: topStripHeight + 12,
-                right: 18,
-                zIndex: 6,
-                display: "grid",
-                gap: 10,
-                gridTemplateColumns: "repeat(2, minmax(120px, 1fr))",
-                width: 280,
-                maxWidth: "calc(100% - 40px)",
-              }}
-            >
-              <div className="summary-card" style={lightweightCardStyle}>
-                <span className="summary-label">Unread</span>
-                <span className="summary-value">
-                  {jarvisChatDrawerReadModel.unreadCount}
-                </span>
-              </div>
-
-              <div className="summary-card" style={lightweightCardStyle}>
-                <span className="summary-label">Code Blocks</span>
-                <span className="summary-value">
-                  {jarvisChatDrawerReadModel.codeBlockCount}
-                </span>
-              </div>
-            </div>
-          </>
-        ) : null}
+        <SummaryCardsOverlay
+          isVisible={operatorZoneAppBinding.showSummaryCards}
+          topStripHeight={topStripHeight}
+          activeViewTitle={activeEntry.title}
+          nodeCountLabel={
+            activeGraphViewKey
+              ? String(graphProjectionRegistry[activeGraphViewKey].nodes.length)
+              : "—"
+          }
+          unreadCount={jarvisChatDrawerReadModel.unreadCount}
+          codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
+        />
 
         <section
           style={{
