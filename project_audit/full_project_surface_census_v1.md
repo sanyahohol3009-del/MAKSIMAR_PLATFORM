@@ -1138,3 +1138,57 @@ The shell architecture is already defined.
 The current pain is giant-file integration ergonomics.
 The correct recovery path is structured component split, not more monolithic patching.
 
+
+---
+
+## 22. VERIFIED COMPLETION PATCH V8 — C2.7 SHELL REFACTOR / FILE SPLIT CLOSED
+
+### VERIFICATION SNAPSHOT
+- npm run build = pass
+- npm run test = pass
+- npm run graph:build = pass
+
+### C2.7 CONFIRMED STATE
+The shell refactor / file split pass is complete.
+
+### COMPLETED EXTRACTIONS
+Shell layer:
+- TopChatDrawer.tsx
+- SummaryCardsOverlay.tsx
+- TopStatusStrip.tsx
+- LeftDashboardDrawer.tsx
+- RightSystemContextDrawer.tsx
+- CenterDashboardViewport.tsx
+- AppShell.tsx
+
+Chat feature layer:
+- ChatConversationPane.tsx
+- ChatInputBar.tsx
+- ChatSidebar.tsx
+- ChatDrawerBody.tsx
+
+### ACCEPTED RESULT
+App.tsx is no longer the giant mixed shell renderer.
+It now acts as orchestration layer:
+- top-level state
+- bindings/read-model assembly
+- prop wiring
+- shell composition entry
+
+### ARCHITECTURAL IMPACT
+This closes the giant-file integration pain point that previously caused shell drift risk.
+The accepted direction remains:
+- left = navigation
+- center = immutable main scene
+- right = inspect/context
+- top = status strip
+- top fullscreen drawer = communication layer
+- bottom = footer/status lane
+
+### CLEANUP STATUS
+Repository cleanup is still deferred.
+It is not part of this stabilization checkpoint.
+
+### IMMEDIATE NEXT ACTION
+C2.8 — DOCUMENT PATCH + POST-SPLIT STABILIZATION PASS
+
