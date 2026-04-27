@@ -63,6 +63,7 @@ import { TopStatusStrip } from "./shell/TopStatusStrip.js";
 import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
+import { AppShell } from "./shell/AppShell.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -746,15 +747,9 @@ export default function App() {
   };
 
   return (
-    <div
-      className="page-shell"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      <main style={overlayShellStyle}>
+    <AppShell
+      overlayShellStyle={overlayShellStyle}
+      topStatusStrip={
         <TopStatusStrip
           title={jarvisChatDrawerContract.collapsedStripLabel}
           isExpanded={drawerShellState.topMode !== "hidden"}
@@ -762,8 +757,9 @@ export default function App() {
           backdropBlurPx={jarvisChatDrawerContract.backdropBlurPx}
           onToggle={toggleTopDrawer}
         />
-
-        {operatorZoneAppBinding.showLeftHandle ? (
+      }
+      leftHandle={
+        operatorZoneAppBinding.showLeftHandle ? (
           <button
             type="button"
             onClick={toggleLeftDrawer}
@@ -786,9 +782,10 @@ export default function App() {
           >
             {overlayLayoutContract.drawers.left.handleLabel}
           </button>
-        ) : null}
-
-        {operatorZoneAppBinding.showRightHandle ? (
+        ) : null
+      }
+      rightHandle={
+        operatorZoneAppBinding.showRightHandle ? (
           <button
             type="button"
             onClick={toggleRightDrawer}
@@ -811,49 +808,51 @@ export default function App() {
           >
             {overlayLayoutContract.drawers.right.handleLabel}
           </button>
-        ) : null}
-
-<TopChatDrawer
-  isOpen={operatorZoneAppBinding.showTopCommunicationOverlay}
-  topStripHeight={topStripHeight}
-  overlayOpacity={jarvisChatDrawerContract.overlayOpacity}
-  backdropBlurPx={jarvisChatDrawerContract.backdropBlurPx}
-  compactHeaderSpacing={topCommunicationDensityAppBinding.compactHeaderSpacing}
-  showSectionTabs={topCommunicationDensityAppBinding.showSectionTabs}
-  showSurfaceSelector={topCommunicationDensityAppBinding.showSurfaceSelector}
-  collapseSurfaceSelector={
-    topCommunicationDensityAppBinding.collapseSurfaceSelector
-  }
-  showSummaryChipLane={topCommunicationDensityAppBinding.showSummaryChipLane}
-  collapseSummaryChipLane={
-    topCommunicationDensityAppBinding.collapseSummaryChipLane
-  }
-  showSupportMeta={topCommunicationDensityAppBinding.showSupportMeta}
-  contentDominant={topCommunicationDensityAppBinding.contentDominant}
-  topCommunicationDensityMode={topCommunicationDensityAppBinding.mode}
-  activeJarvisChatSection={activeJarvisChatSection}
-  activeEmbeddedChatSurface={activeEmbeddedChatSurface}
-  jarvisChatSections={jarvisChatDrawerContract.sections}
-  topDrawerExposureGroup={topDrawerExposureGroup}
-  onJarvisChatSectionChange={setActiveJarvisChatSection}
-  onEmbeddedChatSurfaceChange={activateEmbeddedChatSurface}
-  getJarvisChatSectionTitle={getJarvisChatSectionTitle}
-  renderTopDrawerBody={renderTopDrawerBody}
-  renderSidebar={() => (
-    <ChatSidebar
-      activeJarvisChatSection={activeJarvisChatSection}
-      activeEmbeddedChatSurfaceLabel={activeEmbeddedChatSurfaceLabel}
-      jarvisChatSections={jarvisChatDrawerContract.sections}
-      onJarvisChatSectionChange={setActiveJarvisChatSection}
-      getJarvisChatSectionTitle={getJarvisChatSectionTitle}
-      unreadCount={jarvisChatDrawerReadModel.unreadCount}
-      codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
-      handoffCount={jarvisChatDrawerFixture.handoffs.length}
-      diagnosticCount={diagnosticsMessages.length}
-    />
-  )}
-/>
-
+        ) : null
+      }
+      topChatDrawer={
+        <TopChatDrawer
+          isOpen={operatorZoneAppBinding.showTopCommunicationOverlay}
+          topStripHeight={topStripHeight}
+          overlayOpacity={jarvisChatDrawerContract.overlayOpacity}
+          backdropBlurPx={jarvisChatDrawerContract.backdropBlurPx}
+          compactHeaderSpacing={topCommunicationDensityAppBinding.compactHeaderSpacing}
+          showSectionTabs={topCommunicationDensityAppBinding.showSectionTabs}
+          showSurfaceSelector={topCommunicationDensityAppBinding.showSurfaceSelector}
+          collapseSurfaceSelector={
+            topCommunicationDensityAppBinding.collapseSurfaceSelector
+          }
+          showSummaryChipLane={topCommunicationDensityAppBinding.showSummaryChipLane}
+          collapseSummaryChipLane={
+            topCommunicationDensityAppBinding.collapseSummaryChipLane
+          }
+          showSupportMeta={topCommunicationDensityAppBinding.showSupportMeta}
+          contentDominant={topCommunicationDensityAppBinding.contentDominant}
+          topCommunicationDensityMode={topCommunicationDensityAppBinding.mode}
+          activeJarvisChatSection={activeJarvisChatSection}
+          activeEmbeddedChatSurface={activeEmbeddedChatSurface}
+          jarvisChatSections={jarvisChatDrawerContract.sections}
+          topDrawerExposureGroup={topDrawerExposureGroup}
+          onJarvisChatSectionChange={setActiveJarvisChatSection}
+          onEmbeddedChatSurfaceChange={activateEmbeddedChatSurface}
+          getJarvisChatSectionTitle={getJarvisChatSectionTitle}
+          renderTopDrawerBody={renderTopDrawerBody}
+          renderSidebar={() => (
+            <ChatSidebar
+              activeJarvisChatSection={activeJarvisChatSection}
+              activeEmbeddedChatSurfaceLabel={activeEmbeddedChatSurfaceLabel}
+              jarvisChatSections={jarvisChatDrawerContract.sections}
+              onJarvisChatSectionChange={setActiveJarvisChatSection}
+              getJarvisChatSectionTitle={getJarvisChatSectionTitle}
+              unreadCount={jarvisChatDrawerReadModel.unreadCount}
+              codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
+              handoffCount={jarvisChatDrawerFixture.handoffs.length}
+              diagnosticCount={diagnosticsMessages.length}
+            />
+          )}
+        />
+      }
+      summaryCardsOverlay={
         <SummaryCardsOverlay
           isVisible={operatorZoneAppBinding.showSummaryCards}
           topStripHeight={topStripHeight}
@@ -866,7 +865,8 @@ export default function App() {
           unreadCount={jarvisChatDrawerReadModel.unreadCount}
           codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
         />
-
+      }
+      centerViewport={
         <CenterDashboardViewport
           activeGraphViewKey={activeGraphViewKey}
           nodes={nodes}
@@ -899,7 +899,29 @@ export default function App() {
             }));
           }}
         />
-
+      }
+      leftDrawer={
+        <LeftDashboardDrawer
+          isVisible={operatorZoneAppBinding.showLeftDrawer}
+          topStripHeight={topStripHeight}
+          drawerWidth={overlayLayoutContract.drawers.left.expandedSizePx}
+          drawerOpacity={overlayLayoutContract.drawers.left.opacity}
+          drawerBackdropBlurPx={
+            overlayLayoutContract.drawers.left.backdropBlurPx
+          }
+          activeLeftSection={drawerShellState.activeLeftSection}
+          leftDrawerSections={leftDrawerSections}
+          onLeftSectionChange={(section) =>
+            setDrawerShellState((current) => ({
+              ...current,
+              activeLeftSection: section,
+            }))
+          }
+          getLeftSectionTitle={getLeftSectionTitle}
+          renderBody={renderLeftDrawerBody}
+        />
+      }
+      rightDrawer={
         <RightSystemContextDrawer
           isVisible={operatorZoneAppBinding.showRightDrawer}
           topStripHeight={topStripHeight}
@@ -919,84 +941,84 @@ export default function App() {
           getRightSectionTitle={getRightSectionTitle}
           renderBody={renderRightDrawerBody}
         />
-
-      </main>
-
-      {operatorZoneAppBinding.showFooter ? (
-        <footer
-          style={{
-            borderRadius: 20,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(10,16,34,0.34)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
-            padding: "12px 16px",
-            display: "grid",
-            gap: 10,
-          }}
-        >
-          <div
+      }
+      footer={
+        operatorZoneAppBinding.showFooter ? (
+          <footer
             style={{
-              display: "flex",
+              borderRadius: 20,
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(10,16,34,0.34)",
+              backdropFilter: "blur(14px)",
+              boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
+              padding: "12px 16px",
+              display: "grid",
               gap: 10,
-              flexWrap: "wrap",
-              alignItems: "center",
             }}
           >
-            <span
+            <div
               style={{
-                fontSize: 12,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                opacity: 0.72,
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                alignItems: "center",
               }}
             >
-              System Footer
-            </span>
-
-            <span className="inspect-chip">Environment: DEV</span>
-            <span className="inspect-chip">Network: Stable</span>
-            <span className="inspect-chip">View: {activeEntry.title}</span>
-            <span className="inspect-chip">
-              Shell Mode: {operatorZoneAppBinding.shellMode}
-            </span>
-            <span className="inspect-chip">
-              Center Immutable:{" "}
-              {String(operatorZoneAppBinding.centerImmutableConfirmed)}
-            </span>
-            <span className="inspect-chip">
-              Family Presence: {presenceItems.length} online
-            </span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <button type="button" className="view-switch-button active">
-              Family Surface
-            </button>
-
-            <button type="button" className="view-switch-button">
-              Presence Board
-            </button>
-
-            {presenceItems.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className="view-switch-button"
+              <span
+                style={{
+                  fontSize: 12,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  opacity: 0.72,
+                }}
               >
-                {item}
+                System Footer
+              </span>
+
+              <span className="inspect-chip">Environment: DEV</span>
+              <span className="inspect-chip">Network: Stable</span>
+              <span className="inspect-chip">View: {activeEntry.title}</span>
+              <span className="inspect-chip">
+                Shell Mode: {operatorZoneAppBinding.shellMode}
+              </span>
+              <span className="inspect-chip">
+                Center Immutable:{" "}
+                {String(operatorZoneAppBinding.centerImmutableConfirmed)}
+              </span>
+              <span className="inspect-chip">
+                Family Presence: {presenceItems.length} online
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <button type="button" className="view-switch-button active">
+                Family Surface
               </button>
-            ))}
-          </div>
-        </footer>
-      ) : null}
-    </div>
+
+              <button type="button" className="view-switch-button">
+                Presence Board
+              </button>
+
+              {presenceItems.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className="view-switch-button"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </footer>
+        ) : null
+      }
+    />
   );
 }
