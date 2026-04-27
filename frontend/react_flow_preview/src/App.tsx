@@ -65,6 +65,7 @@ import { buildTopCommunicationDensityAppBinding } from "./operator_shell/topComm
 
 import { TopChatDrawer } from "./shell/TopChatDrawer.js";
 import { SummaryCardsOverlay } from "./shell/SummaryCardsOverlay.js";
+import { TopStatusStrip } from "./shell/TopStatusStrip.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -757,35 +758,13 @@ export default function App() {
       }}
     >
       <main style={overlayShellStyle}>
-        <button
-          type="button"
-          onClick={toggleTopDrawer}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: topStripHeight,
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 16px",
-            border: "none",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(10,16,34,0.22)",
-            backdropFilter: `blur(${jarvisChatDrawerContract.backdropBlurPx}px)`,
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          <span style={{ fontWeight: 700 }}>
-            {jarvisChatDrawerContract.collapsedStripLabel}
-          </span>
-          <span style={{ opacity: 0.72 }}>
-            {drawerShellState.topMode === "hidden" ? "▾" : "▴"}
-          </span>
-        </button>
+        <TopStatusStrip
+          title={jarvisChatDrawerContract.collapsedStripLabel}
+          isExpanded={drawerShellState.topMode !== "hidden"}
+          topStripHeight={topStripHeight}
+          backdropBlurPx={jarvisChatDrawerContract.backdropBlurPx}
+          onToggle={toggleTopDrawer}
+        />
 
         {operatorZoneAppBinding.showLeftHandle ? (
           <button
