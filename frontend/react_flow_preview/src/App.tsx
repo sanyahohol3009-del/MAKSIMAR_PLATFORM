@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 
 import { graphProjectionRegistry } from "./graphProjectionData.js";
+import { buildActiveDashboardRouteReadModel } from "./activeDashboardRouteReadModel.js";
+import { buildCenterViewportInputContract } from "./centerViewportInputContract.js";
 import {
   buildStyledEdges,
   buildStyledNodes,
@@ -10,9 +12,7 @@ import {
   buildUnifiedVisualInspectPresentation,
   type SelectedGraphInspectItem,
 } from "./unifiedVisualInspectSemantics.js";
-import { buildUnifiedVisualWorkspaceSnapshot } from "./unifiedVisualWorkspace.js";
 import {
-  getUnifiedVisualWorkspaceRegistryEntry,
   type UnifiedVisualViewId,
 } from "./unifiedVisualWorkspaceRegistry.js";
 import { buildChartOption } from "./chartTelemetrySemantics.js";
@@ -67,12 +67,6 @@ import { ShellFooter } from "./shell/ShellFooter.js";
 import { DrawerHandles } from "./shell/DrawerHandles.js";
 import { InspectPresentationView } from "./shell/InspectPresentationView.js";
 import { useDrawerShellInteractions } from "./shell/useDrawerShellInteractions.js";
-import {
-  extractChartViewKey,
-  extractGraphViewKey,
-  isChartViewId,
-  isGraphViewId,
-} from "./shell/activeVisualViewHelpers.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -204,8 +198,13 @@ export default function App() {
   const chartInstanceRef = useRef<ChartInstanceLike | null>(null);
   const chartResizeHandlerRef = useRef<(() => void) | null>(null);
 
-  const activeEntry = getUnifiedVisualWorkspaceRegistryEntry(activeView);
-  const workspaceSnapshot = buildUnifiedVisualWorkspaceSnapshot(activeView);
+  const activeDashboardRoute =
+    buildActiveDashboardRouteReadModel(activeView);
+  const centerViewportInput =
+    buildCenterViewportInputContract(activeDashboardRoute);
+
+  const activeEntry = activeDashboardRoute.activeEntry;
+  const workspaceSnapshot = activeDashboardRoute.workspaceSnapshot;
 
   const memoryKnowledgeShell =
     buildMemoryKnowledgeShellReadModel(activeMemoryExposure);
@@ -239,13 +238,9 @@ export default function App() {
       (group) => group.target === "right_drawer_inspect_reference",
     ) ?? null;
 
-  const activeGraphViewKey = isGraphViewId(activeView)
-    ? extractGraphViewKey(activeView)
-    : null;
+  const activeGraphViewKey = centerViewportInput.activeGraphViewKey;
 
-  const activeChartViewKey = isChartViewId(activeView)
-    ? extractChartViewKey(activeView)
-    : null;
+  const activeChartViewKey = centerViewportInput.activeChartViewKey;
 
   const currentGraphView = activeGraphViewKey
     ? graphProjectionRegistry[activeGraphViewKey]

@@ -1419,3 +1419,53 @@ Required commands remain green:
 ### NEXT STEP
 C2.11b — active dashboard route read-model stabilization
 
+
+---
+
+## 28. VERIFIED PATCH V14 — C2.11c CENTER VIEWPORT INPUT CONTRACT STABILIZATION
+
+### STATUS
+C2.11c center viewport input contract stabilization completed.
+
+### PURPOSE
+Stabilize the input contract between active dashboard routing and the immutable center viewport.
+
+### ADDED CONTRACT
+- frontend/react_flow_preview/src/centerViewportInputContract.ts
+
+### ADDED TEST
+- frontend/react_flow_preview/src/tests/centerViewportInputContract.test.ts
+
+### RESPONSIBILITY RESULT
+App.tsx now consumes a dedicated center viewport input contract.
+
+The contract confirms:
+- active view id
+- surface kind
+- graph view key when graph route is active
+- chart view key when chart route is active
+- center viewport immutability
+- overlay-only drawer policy
+- render-only viewport responsibility
+- route read-model as source
+
+### MODULAR DASHBOARD RULE
+Dashboards must remain modular and registry-driven.
+
+Future client-specific dashboards and cubes must connect through:
+- registry / manifest binding
+- active route read-model
+- center viewport input contract
+- dashboard/system context contracts
+
+They must not be hardcoded directly into App.tsx.
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.11d — dashboard module registration boundary stabilization
+
