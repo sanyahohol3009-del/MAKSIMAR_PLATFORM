@@ -1,0 +1,108 @@
+C2.11a — DASHBOARD ROUTING / ACTIVE SURFACE AUDIT SNAPSHOT
+
+PURPOSE:
+Verify current active dashboard / visual surface routing after shell split.
+
+SCOPE:
+No new dashboard features.
+No visual redesign.
+No new architecture.
+Only routing/responsibility verification.
+
+ROUTING MODEL TO VERIFY:
+- left navigation selects visual/dashboard surface
+- active surface resolves to graph/chart view
+- center viewport renders active graph/chart surface
+- right drawer exposes inspect/context for active surface
+- top communication layer remains separate
+- footer remains status/environment/family lane
+
+EXPECTED:
+- App.tsx remains orchestration entry
+- active view state remains centralized
+- CenterDashboardViewport owns rendering only
+- LeftDashboardDrawer owns navigation shell only
+- RightSystemContextDrawer owns context shell only
+- no duplicate active-surface routing logic in extracted UI components
+
+===== APP ACTIVE VIEW STATE =====
+187:  const [activeView, setActiveView] =
+207:  const activeEntry = getUnifiedVisualWorkspaceRegistryEntry(activeView);
+208:  const workspaceSnapshot = buildUnifiedVisualWorkspaceSnapshot(activeView);
+242:  const activeGraphViewKey = isGraphViewId(activeView)
+243:    ? extractGraphViewKey(activeView)
+246:  const activeChartViewKey = isChartViewId(activeView)
+247:    ? extractChartViewKey(activeView)
+279:    activeView,
+409:                        view.viewId === activeView
+743:          activeViewTitle={activeEntry.title}
+822:          activeViewTitle={activeEntry.title}
+207:  const activeEntry = getUnifiedVisualWorkspaceRegistryEntry(activeView);
+743:          activeViewTitle={activeEntry.title}
+822:          activeViewTitle={activeEntry.title}
+242:  const activeGraphViewKey = isGraphViewId(activeView)
+250:  const currentGraphView = activeGraphViewKey
+251:    ? graphProjectionRegistry[activeGraphViewKey]
+255:    () => (activeGraphViewKey ? buildStyledNodes(activeGraphViewKey) : []),
+256:    [activeGraphViewKey],
+260:    () => (activeGraphViewKey ? buildStyledEdges(activeGraphViewKey) : []),
+261:    [activeGraphViewKey],
+745:            activeGraphViewKey
+746:              ? String(graphProjectionRegistry[activeGraphViewKey].nodes.length)
+755:          activeGraphViewKey={activeGraphViewKey}
+246:  const activeChartViewKey = isChartViewId(activeView)
+284:    () => (activeChartViewKey ? buildChartOption(activeChartViewKey) : null),
+285:    [activeChartViewKey],
+330:    if (!activeChartViewKey || !chartOption) {
+382:  }, [activeChartViewKey, chartOption]);
+
+===== ROUTING / REGISTRY USAGE =====
+12:} from "./unifiedVisualInspectSemantics.js";
+13:import { buildUnifiedVisualWorkspaceSnapshot } from "./unifiedVisualWorkspace.js";
+17:} from "./unifiedVisualWorkspaceRegistry.js";
+4:import { graphProjectionRegistry } from "./graphProjectionData.js";
+251:    ? graphProjectionRegistry[activeGraphViewKey]
+746:              ? String(graphProjectionRegistry[activeGraphViewKey].nodes.length)
+
+===== LEFT DRAWER ROUTING =====
+58:import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
+788:        <LeftDashboardDrawer
+396:    switch (drawerShellState.activeLeftSection) {
+796:          activeLeftSection={drawerShellState.activeLeftSection}
+395:  const renderLeftDrawerBody = () => {
+800:          renderBody={renderLeftDrawerBody}
+
+===== CENTER VIEWPORT ROUTING =====
+60:import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
+754:        <CenterDashboardViewport
+264:  const selectedNodeMap = useMemo(() => {
+759:          selectedNodeMap={selectedNodeMap}
+271:  const selectedEdgeMap = useMemo(() => {
+760:          selectedEdgeMap={selectedEdgeMap}
+
+===== RIGHT CONTEXT ROUTING =====
+59:import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
+804:        <RightSystemContextDrawer
+502:    switch (drawerShellState.activeRightSection) {
+770:              activeRightSection: "inspect",
+782:              activeRightSection: "inspect",
+812:          activeRightSection={drawerShellState.activeRightSection}
+501:  const renderRightDrawerBody = () => {
+816:          renderBody={renderRightDrawerBody}
+189:  const [selectedItem, setSelectedItem] =
+386:    setSelectedItem(null);
+762:            setSelectedItem({
+774:            setSelectedItem({
+
+===== EXTRACTED ROUTING-RELATED FILES =====
+react_flow_preview/src/chartTelemetryRegistry.ts
+react_flow_preview/src/chartTelemetrySemantics.ts
+react_flow_preview/src/graphProjectionData.ts
+react_flow_preview/src/graphProjectionTypes.ts
+react_flow_preview/src/shell/CenterDashboardViewport.tsx
+react_flow_preview/src/shell/LeftDashboardDrawer.tsx
+react_flow_preview/src/shell/RightSystemContextDrawer.tsx
+react_flow_preview/src/shell/activeVisualViewHelpers.ts
+react_flow_preview/src/unifiedVisualInspectSemantics.ts
+react_flow_preview/src/unifiedVisualWorkspace.ts
+react_flow_preview/src/unifiedVisualWorkspaceRegistry.ts

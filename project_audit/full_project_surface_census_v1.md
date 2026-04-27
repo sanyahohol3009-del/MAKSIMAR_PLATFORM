@@ -1372,3 +1372,50 @@ Purpose:
 - stabilize active dashboard/surface routing after the shell split
 - verify that left navigation, center viewport, and right context remain aligned
 
+
+---
+
+## 26. VERIFIED PATCH V12 — C2.11a DASHBOARD ROUTING / ACTIVE SURFACE AUDIT SNAPSHOT
+
+### STATUS
+C2.11a dashboard routing / active surface audit snapshot completed.
+
+### PURPOSE
+Verify current active dashboard / visual surface routing after shell split.
+
+### CONFIRMED ROUTING MODEL
+The accepted routing model remains:
+
+- left navigation selects visual/dashboard surface
+- active surface resolves to graph/chart view
+- center viewport renders active graph/chart surface
+- right drawer exposes inspect/context for active surface
+- top communication layer remains separate
+- footer remains status/environment/family lane
+
+### RESPONSIBILITY MODEL
+App.tsx remains orchestration entry for:
+- active view state
+- active graph/chart key resolution
+- registry binding
+- selected node/edge state
+- prop wiring into shell components
+
+Extracted components remain rendering surfaces:
+- LeftDashboardDrawer = navigation shell
+- CenterDashboardViewport = immutable visual scene renderer
+- RightSystemContextDrawer = inspect/context shell
+- TopChatDrawer = communication overlay
+
+### AUDIT FILE
+- project_audit/c2_11a_dashboard_routing_audit.txt
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.11b — active dashboard route read-model stabilization
+
