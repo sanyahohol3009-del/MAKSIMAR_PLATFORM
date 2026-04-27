@@ -64,6 +64,7 @@ import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
+import { ShellFooter } from "./shell/ShellFooter.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -943,81 +944,15 @@ export default function App() {
         />
       }
       footer={
-        operatorZoneAppBinding.showFooter ? (
-          <footer
-            style={{
-              borderRadius: 20,
-              border: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(10,16,34,0.34)",
-              backdropFilter: "blur(14px)",
-              boxShadow: "0 14px 36px rgba(0,0,0,0.16)",
-              padding: "12px 16px",
-              display: "grid",
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  opacity: 0.72,
-                }}
-              >
-                System Footer
-              </span>
-
-              <span className="inspect-chip">Environment: DEV</span>
-              <span className="inspect-chip">Network: Stable</span>
-              <span className="inspect-chip">View: {activeEntry.title}</span>
-              <span className="inspect-chip">
-                Shell Mode: {operatorZoneAppBinding.shellMode}
-              </span>
-              <span className="inspect-chip">
-                Center Immutable:{" "}
-                {String(operatorZoneAppBinding.centerImmutableConfirmed)}
-              </span>
-              <span className="inspect-chip">
-                Family Presence: {presenceItems.length} online
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
-            >
-              <button type="button" className="view-switch-button active">
-                Family Surface
-              </button>
-
-              <button type="button" className="view-switch-button">
-                Presence Board
-              </button>
-
-              {presenceItems.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className="view-switch-button"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </footer>
-        ) : null
+        <ShellFooter
+          isVisible={operatorZoneAppBinding.showFooter}
+          activeViewTitle={activeEntry.title}
+          shellMode={operatorZoneAppBinding.shellMode}
+          centerImmutableConfirmed={
+            operatorZoneAppBinding.centerImmutableConfirmed
+          }
+          presenceItems={presenceItems}
+        />
       }
     />
   );
