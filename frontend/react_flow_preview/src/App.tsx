@@ -66,6 +66,7 @@ import { buildTopCommunicationDensityAppBinding } from "./operator_shell/topComm
 import { TopChatDrawer } from "./shell/TopChatDrawer.js";
 import { SummaryCardsOverlay } from "./shell/SummaryCardsOverlay.js";
 import { TopStatusStrip } from "./shell/TopStatusStrip.js";
+import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 
 import { ChatConversationPane } from "./features/chat/ChatConversationPane.js";
 import { ChatInputBar } from "./features/chat/ChatInputBar.js";
@@ -946,57 +947,25 @@ export default function App() {
           )}
         </section>
 
-        {operatorZoneAppBinding.showLeftDrawer ? (
-          <aside
-            style={{
-              ...glassPanelBase,
-              top: topStripHeight,
-              bottom: 16,
-              left: 0,
-              width: overlayLayoutContract.drawers.left.expandedSizePx,
-              opacity: overlayLayoutContract.drawers.left.opacity,
-              backdropFilter: `blur(${overlayLayoutContract.drawers.left.backdropBlurPx}px)`,
-              padding: "16px 14px 18px 14px",
-            }}
-          >
-            <div className="view-switcher-group-shell">
-              <section className="view-switcher-group">
-                <div className="view-switcher-group-title">Left Drawer</div>
-                <div
-                  className="view-switcher"
-                  style={{
-                    display: "flex",
-                    flexWrap: "nowrap",
-                    overflowX: "auto",
-                    gap: 8,
-                  }}
-                >
-                  {leftDrawerSections.map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={
-                        drawerShellState.activeLeftSection === section
-                          ? "view-switch-button active"
-                          : "view-switch-button"
-                      }
-                      onClick={() =>
-                        setDrawerShellState((current) => ({
-                          ...current,
-                          activeLeftSection: section,
-                        }))
-                      }
-                    >
-                      {getLeftSectionTitle(section)}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            {renderLeftDrawerBody()}
-          </aside>
-        ) : null}
+        <LeftDashboardDrawer
+          isVisible={operatorZoneAppBinding.showLeftDrawer}
+          topStripHeight={topStripHeight}
+          drawerWidth={overlayLayoutContract.drawers.left.expandedSizePx}
+          drawerOpacity={overlayLayoutContract.drawers.left.opacity}
+          drawerBackdropBlurPx={
+            overlayLayoutContract.drawers.left.backdropBlurPx
+          }
+          activeLeftSection={drawerShellState.activeLeftSection}
+          leftDrawerSections={leftDrawerSections}
+          onLeftSectionChange={(section) =>
+            setDrawerShellState((current) => ({
+              ...current,
+              activeLeftSection: section,
+            }))
+          }
+          getLeftSectionTitle={getLeftSectionTitle}
+          renderBody={renderLeftDrawerBody}
+        />
 
         {operatorZoneAppBinding.showRightDrawer ? (
           <aside
