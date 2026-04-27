@@ -1,0 +1,107 @@
+C2.12a — DASHBOARD SKELETON MAP / ROLES AUDIT
+
+PURPOSE:
+Return to the dashboard roadmap after C2.11 routing stabilization.
+
+SCOPE:
+No new dashboard feature implementation yet.
+No 3D engine integration yet.
+No direct App.tsx hardcoding.
+
+SKELETON ROLES:
+- top = status strip + communication drawer
+- left = dashboard navigation / module selection
+- center = active dashboard surface / future 3D or simulation viewport
+- right = selected dashboard context / inspect / state
+- bottom = environment / network / family / status footer
+
+MODULARITY RULE:
+Dashboards and cubes must enter through:
+- dashboard module registration contract
+- client capability gate
+- registry / manifest binding
+- active dashboard route read-model
+- center viewport input contract
+- right context / system state contract
+
+3D / SIMULATION RULE:
+3D/simulation must be prepared as a viewport adapter boundary.
+It must not be wired directly into App.tsx.
+
+AUDIT QUESTIONS:
+1. Which shell components already exist?
+2. Which dashboard registry/read-model files already exist?
+3. Which left/center/right bindings already exist?
+4. Which files define active visual views?
+5. Where should the future 3D/simulation adapter attach?
+
+===== SHELL COMPONENTS =====
+react_flow_preview/src/shell/AppShell.tsx
+react_flow_preview/src/shell/CenterDashboardViewport.tsx
+react_flow_preview/src/shell/DrawerHandles.tsx
+react_flow_preview/src/shell/InspectPresentationView.tsx
+react_flow_preview/src/shell/LeftDashboardDrawer.tsx
+react_flow_preview/src/shell/RightSystemContextDrawer.tsx
+react_flow_preview/src/shell/ShellFooter.tsx
+react_flow_preview/src/shell/SummaryCardsOverlay.tsx
+react_flow_preview/src/shell/TopChatDrawer.tsx
+react_flow_preview/src/shell/TopStatusStrip.tsx
+react_flow_preview/src/shell/activeVisualViewHelpers.ts
+react_flow_preview/src/shell/shellLayoutConstants.ts
+react_flow_preview/src/shell/useDrawerShellInteractions.ts
+
+===== DASHBOARD / ROUTING CONTRACTS =====
+react_flow_preview/src/activeDashboardRouteReadModel.ts
+react_flow_preview/src/canonicalGraphRegistry.ts
+react_flow_preview/src/centerViewportInputContract.ts
+react_flow_preview/src/chartTelemetryRegistry.ts
+react_flow_preview/src/chatContextBindingRegistry.ts
+react_flow_preview/src/dashboardClientCapabilityContract.ts
+react_flow_preview/src/dashboardModuleRegistrationContract.ts
+react_flow_preview/src/graphVisualSemantics.ts
+react_flow_preview/src/memoryKnowledgeExposureRegistry.ts
+react_flow_preview/src/overlayDrawerLayoutContract.ts
+react_flow_preview/src/panelFamilyTaxonomyExposureRegistry.ts
+react_flow_preview/src/panelNavigationRegistry.ts
+react_flow_preview/src/unifiedVisualInspectSemantics.ts
+react_flow_preview/src/unifiedVisualWorkspace.ts
+react_flow_preview/src/unifiedVisualWorkspaceRegistry.ts
+
+===== TEST COVERAGE =====
+activeDashboardRouteReadModel.test.ts
+centerViewportInputContract.test.ts
+dashboardClientCapabilityContract.test.ts
+dashboardModuleRegistrationContract.test.ts
+dashboard_shell_contract.test.ts
+panel_registry_contract.test.ts
+react_flow_canonical_registry.test.ts
+react_flow_chart_registry.test.ts
+react_flow_chat_context_binding_registry.test.ts
+react_flow_embedded_chat_surface_registry.test.ts
+react_flow_memory_knowledge_exposure_registry.test.ts
+react_flow_panel_family_taxonomy_exposure_registry.test.ts
+react_flow_panel_navigation_registry.test.ts
+react_flow_registry_alignment.test.ts
+react_flow_unified_visual_inspect.test.ts
+react_flow_unified_visual_registry.test.ts
+react_flow_unified_visual_workspace.test.ts
+react_flow_visual_semantics.test.ts
+
+===== APP.TSX ROLE CHECK =====
+61:import { AppShell } from "./shell/AppShell.js";
+653:    <AppShell
+58:import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
+783:        <LeftDashboardDrawer
+60:import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
+749:        <CenterDashboardViewport
+59:import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
+799:        <RightSystemContextDrawer
+5:import { buildActiveDashboardRouteReadModel } from "./activeDashboardRouteReadModel.js";
+202:    buildActiveDashboardRouteReadModel(activeView);
+6:import { buildCenterViewportInputContract } from "./centerViewportInputContract.js";
+204:    buildCenterViewportInputContract(activeDashboardRoute);
+
+===== FUTURE 3D / SIMULATION ATTACHMENT SEARCH =====
+tests/dashboardClientCapabilityContract.test.ts:92:        surfaceId: "robotics_simulation_surface",
+tests/dashboardClientCapabilityContract.test.ts:93:        title: "Robotics Simulation Surface",
+tests/dashboardClientCapabilityContract.test.ts:121:    approvedSurfaceIds: ["robotics_simulation_surface"],

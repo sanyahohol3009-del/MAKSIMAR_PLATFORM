@@ -1698,3 +1698,47 @@ Purpose:
 - prepare dashboard surfaces for future 3D / simulation integration
 - no direct App.tsx hardcoding
 
+
+---
+
+## 33. VERIFIED PATCH V19 — C2.12a DASHBOARD SKELETON MAP / ROLES AUDIT
+
+### STATUS
+C2.12a dashboard skeleton map / roles audit completed.
+
+### PURPOSE
+Return to the dashboard roadmap after C2.11 routing stabilization.
+
+### CONFIRMED SHELL ROLE MODEL
+- top = status strip + communication drawer
+- left = dashboard navigation / module selection
+- center = active dashboard surface / future 3D or simulation viewport
+- right = selected dashboard context / inspect / state
+- bottom = environment / network / family / status footer
+
+### MODULARITY RULE
+Dashboards and cubes must enter through:
+- dashboard module registration contract
+- client capability gate
+- registry / manifest binding
+- active dashboard route read-model
+- center viewport input contract
+- right context / system state contract
+
+### 3D / SIMULATION RULE
+3D/simulation will attach through a viewport adapter boundary.
+
+It must not be wired directly into App.tsx.
+
+### AUDIT FILE
+- project_audit/c2_12a_dashboard_skeleton_map_audit.txt
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+### NEXT STEP
+C2.12b — dashboard skeleton surface taxonomy
+
