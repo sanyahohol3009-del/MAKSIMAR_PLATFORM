@@ -2468,3 +2468,51 @@ The future wiring must consume the AppShell slot contract.
 ### NEXT STEP
 C2.12l — AppShell permanent rail slot wiring preview
 
+
+---
+
+## 46. VERIFIED PATCH V32 — C2.12l APPSHELL PERMANENT RAIL SLOT WIRING PREVIEW
+
+### STATUS
+C2.12l AppShell permanent rail slot wiring preview completed.
+
+### PURPOSE
+Create a safe preview model for wiring the permanent dashboard navigation rail into AppShell before modifying App.tsx or visible shell layout.
+
+### ADDED PREVIEW
+- frontend/react_flow_preview/src/appShellPermanentRailSlotWiringPreview.ts
+
+### ADDED TEST
+- frontend/tests/appShellPermanentRailSlotWiringPreview.test.ts
+
+### CONFIRMED PREVIEW MODEL
+The preview confirms:
+- permanent rail slot before center viewport
+- center viewport after permanent rail
+- rail is persistent
+- rail is not overlay
+- rail is not drawer
+- rail does not overlap center viewport
+- contextual drawers remain active-dashboard-only
+- top JARVIS chat remains fullscreen and separate
+- manual dashboard button wiring is forbidden
+- manual renderer route wiring is forbidden
+- manual taxonomy duplication is forbidden
+
+### TEST STATUS
+Required commands remain green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+Current frontend test count:
+- 204 pass / 0 fail
+
+### APP.TSX RULE
+This step does not modify App.tsx.
+
+Visible shell wiring must happen only after preview validation.
+
+### NEXT STEP
+C2.12m — AppShell permanent rail visible wiring contract
+
