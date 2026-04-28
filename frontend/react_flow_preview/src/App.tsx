@@ -61,6 +61,11 @@ import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
 import { PermanentDashboardNavigationRail } from "./permanentDashboardNavigationRailShellComponent.js";
 import {
+  ACTIVE_DASHBOARD_LEFT_DRAWER_LEFT_OFFSET_PX,
+  LEFT_DRAWER_HANDLE_LEFT_OFFSET_PX,
+  SUMMARY_CARDS_LEFT_OFFSET_PX,
+} from "./appShellPermanentRailLayoutOffsets.js";
+import {
   SHELL_OVERLAY_STYLE,
   SHELL_TOP_STRIP_HEIGHT_PX,
 } from "./shell/shellLayoutConstants.js";
@@ -653,6 +658,7 @@ export default function App() {
   return (
     <AppShell
       overlayShellStyle={overlayShellStyle}
+      topReservedHeight={topStripHeight}
       topStatusStrip={
         <TopStatusStrip
           title={jarvisChatDrawerContract.collapsedStripLabel}
@@ -672,6 +678,7 @@ export default function App() {
             overlayLayoutContract.drawers.left.backdropBlurPx
           }
           rightBackdropBlurPx={0}
+          leftOffsetPx={LEFT_DRAWER_HANDLE_LEFT_OFFSET_PX}
           onToggleLeft={toggleLeftDrawer}
           onToggleRight={() => {}}
         />
@@ -744,10 +751,11 @@ export default function App() {
           }
           unreadCount={jarvisChatDrawerReadModel.unreadCount}
           codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
+          leftOffsetPx={SUMMARY_CARDS_LEFT_OFFSET_PX}
         />
       }
       permanentRail={
-        <PermanentDashboardNavigationRail />
+        <PermanentDashboardNavigationRail density="expanded" />
       }
       centerViewport={
         <CenterDashboardViewport
@@ -788,6 +796,7 @@ export default function App() {
           isVisible={operatorZoneAppBinding.showLeftDrawer}
           topStripHeight={topStripHeight}
           drawerWidth={overlayLayoutContract.drawers.left.expandedSizePx}
+          leftOffsetPx={ACTIVE_DASHBOARD_LEFT_DRAWER_LEFT_OFFSET_PX}
           drawerOpacity={overlayLayoutContract.drawers.left.opacity}
           drawerBackdropBlurPx={
             overlayLayoutContract.drawers.left.backdropBlurPx

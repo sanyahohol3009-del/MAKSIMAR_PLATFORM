@@ -7,6 +7,7 @@ type SummaryCardsOverlayProps = {
   nodeCountLabel: string;
   unreadCount: number;
   codeBlockCount: number;
+  leftOffsetPx?: number;
 };
 
 export function SummaryCardsOverlay({
@@ -16,6 +17,7 @@ export function SummaryCardsOverlay({
   nodeCountLabel,
   unreadCount,
   codeBlockCount,
+  leftOffsetPx = 0,
 }: SummaryCardsOverlayProps) {
   if (!isVisible) {
     return null;
@@ -34,7 +36,7 @@ export function SummaryCardsOverlay({
         style={{
           position: "absolute",
           top: topStripHeight + 12,
-          left: 18,
+          left: leftOffsetPx + 18,
           zIndex: 6,
           display: "grid",
           gap: 10,

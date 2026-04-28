@@ -2715,3 +2715,42 @@ This is acceptable for the current step because compact mode is the default rail
 ### NEXT STEP
 C2.12r — permanent rail compact layout refinement
 
+
+---
+
+## 52. VERIFIED PATCH V38 — C2.12s TOP STRIP / SUMMARY / RAIL OFFSET COSMETIC FIX
+
+### STATUS
+C2.12s top strip / summary / rail offset cosmetic fix completed.
+
+### PURPOSE
+Refine visible layout after permanent rail activation.
+
+### CONFIRMED VISUAL MODEL
+The browser preview confirms:
+- permanent left rail is visible and expanded
+- center viewport starts after the permanent rail
+- summary cards no longer sit under the permanent rail
+- top reserved area no longer visually breaks the permanent rail
+- NAV handle is separated from permanent rail
+- active left drawer opens as a contextual panel beside the permanent rail
+- footer remains visible
+- no white screen observed
+
+### CANONICAL DASHBOARD RULE
+Permanent rail = dashboard selector.
+
+Active left drawer = functions / tools / settings of the currently selected dashboard.
+
+Right drawer = diagnostics / state / context of the currently selected dashboard.
+
+Center viewport = visualization of the currently selected dashboard.
+
+### IMPLEMENTATION RULE
+The rail must not become a hardcoded App.tsx button list.
+
+Dashboard switching must be registry/read-model driven.
+
+### NEXT STEP
+C2.12t — permanent rail active dashboard selection binding
+

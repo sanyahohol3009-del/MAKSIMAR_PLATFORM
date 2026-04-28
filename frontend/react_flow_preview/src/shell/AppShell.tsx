@@ -1,7 +1,10 @@
 import React from "react";
 
+import { VISIBLE_PERMANENT_RAIL_WIDTH_PX } from "../appShellPermanentRailLayoutOffsets.js";
+
 type AppShellProps = {
   overlayShellStyle: React.CSSProperties;
+  topReservedHeight: number;
   topStatusStrip: React.ReactNode;
   leftHandle: React.ReactNode;
   rightHandle: React.ReactNode;
@@ -14,28 +17,38 @@ type AppShellProps = {
   footer: React.ReactNode;
 };
 
-const permanentRailSlotStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  bottom: 0,
-  zIndex: 12,
-  pointerEvents: "auto",
-};
+function buildPermanentRailSlotStyle(
+  topReservedHeight: number,
+): React.CSSProperties {
+  return {
+    position: "absolute",
+    top: topReservedHeight,
+    left: 0,
+    bottom: 0,
+    width: VISIBLE_PERMANENT_RAIL_WIDTH_PX,
+    zIndex: 12,
+    pointerEvents: "auto",
+  };
+}
 
-const centerViewportSlotStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 104,
-  zIndex: 1,
-  minWidth: 0,
-  overflow: "hidden",
-};
+function buildCenterViewportSlotStyle(
+  topReservedHeight: number,
+): React.CSSProperties {
+  return {
+    position: "absolute",
+    top: topReservedHeight,
+    right: 0,
+    bottom: 0,
+    left: VISIBLE_PERMANENT_RAIL_WIDTH_PX,
+    zIndex: 1,
+    minWidth: 0,
+    overflow: "hidden",
+  };
+}
 
 export function AppShell({
   overlayShellStyle,
+  topReservedHeight,
   topStatusStrip,
   leftHandle,
   rightHandle,
@@ -63,9 +76,11 @@ export function AppShell({
           overflow: "hidden",
         }}
       >
+        {topStatusStrip}
+
         <div
           className="permanent-dashboard-navigation-rail-slot"
-          style={permanentRailSlotStyle}
+          style={buildPermanentRailSlotStyle(topReservedHeight)}
           data-slot="left_permanent_navigation_rail_slot"
         >
           {permanentRail}
@@ -73,13 +88,12 @@ export function AppShell({
 
         <div
           className="center-dashboard-viewport-slot"
-          style={centerViewportSlotStyle}
+          style={buildCenterViewportSlotStyle(topReservedHeight)}
           data-slot="center_dashboard_viewport_slot"
         >
           {centerViewport}
         </div>
 
-        {topStatusStrip}
         {leftHandle}
         {rightHandle}
         {topChatDrawer}

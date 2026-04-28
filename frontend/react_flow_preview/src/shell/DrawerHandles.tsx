@@ -5,6 +5,7 @@ type DrawerHandleProps = {
   side: "left" | "right";
   label: string;
   backdropBlurPx: number;
+  offsetPx?: number;
   onToggle: () => void;
 };
 
@@ -13,6 +14,7 @@ function SingleDrawerHandle({
   side,
   label,
   backdropBlurPx,
+  offsetPx = 0,
   onToggle,
 }: DrawerHandleProps) {
   if (!isVisible) {
@@ -26,7 +28,7 @@ function SingleDrawerHandle({
       style={{
         position: "absolute",
         top: "50%",
-        [side]: 10,
+        [side]: 10 + offsetPx,
         transform: "translateY(-50%)",
         zIndex: 40,
         writingMode: "vertical-rl",
@@ -52,6 +54,8 @@ type DrawerHandlesProps = {
   rightLabel: string;
   leftBackdropBlurPx: number;
   rightBackdropBlurPx: number;
+  leftOffsetPx?: number;
+  rightOffsetPx?: number;
   onToggleLeft: () => void;
   onToggleRight: () => void;
 };
@@ -63,6 +67,8 @@ export function DrawerHandles({
   rightLabel,
   leftBackdropBlurPx,
   rightBackdropBlurPx,
+  leftOffsetPx = 0,
+  rightOffsetPx = 0,
   onToggleLeft,
   onToggleRight,
 }: DrawerHandlesProps) {
@@ -73,6 +79,7 @@ export function DrawerHandles({
         side="left"
         label={leftLabel}
         backdropBlurPx={leftBackdropBlurPx}
+        offsetPx={leftOffsetPx}
         onToggle={onToggleLeft}
       />
       <SingleDrawerHandle
@@ -80,6 +87,7 @@ export function DrawerHandles({
         side="right"
         label={rightLabel}
         backdropBlurPx={rightBackdropBlurPx}
+        offsetPx={rightOffsetPx}
         onToggle={onToggleRight}
       />
     </>

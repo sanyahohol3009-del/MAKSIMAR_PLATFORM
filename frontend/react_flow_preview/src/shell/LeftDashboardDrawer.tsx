@@ -8,6 +8,7 @@ type LeftDashboardDrawerProps = {
   drawerWidth: number;
   drawerOpacity: number;
   drawerBackdropBlurPx: number;
+  leftOffsetPx?: number;
   activeLeftSection: LeftDrawerSection;
   leftDrawerSections: readonly LeftDrawerSection[];
   onLeftSectionChange: (section: LeftDrawerSection) => void;
@@ -21,6 +22,7 @@ export function LeftDashboardDrawer({
   drawerWidth,
   drawerOpacity,
   drawerBackdropBlurPx,
+  leftOffsetPx = 0,
   activeLeftSection,
   leftDrawerSections,
   onLeftSectionChange,
@@ -38,7 +40,7 @@ export function LeftDashboardDrawer({
         zIndex: 20,
         top: topStripHeight,
         bottom: 16,
-        left: 0,
+        left: leftOffsetPx,
         width: drawerWidth,
         opacity: drawerOpacity,
         border: "1px solid rgba(255,255,255,0.08)",
