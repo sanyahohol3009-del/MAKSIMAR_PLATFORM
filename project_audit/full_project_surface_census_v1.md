@@ -2754,3 +2754,51 @@ Dashboard switching must be registry/read-model driven.
 ### NEXT STEP
 C2.12t — permanent rail active dashboard selection binding
 
+
+---
+
+## 53. VERIFIED PATCH V39 — C2.12t PERMANENT RAIL ACTIVE DASHBOARD SELECTION BINDING
+
+### STATUS
+C2.12t permanent rail active dashboard selection binding completed.
+
+### PURPOSE
+Bind the permanent dashboard rail to the active dashboard route pipeline without hardcoding dashboard buttons or duplicating renderer logic in App.tsx.
+
+### ADDED BINDING
+- frontend/react_flow_preview/src/permanentRailActiveDashboardSelectionBinding.ts
+
+### ADDED TEST
+- frontend/tests/permanentRailActiveDashboardSelectionBinding.test.ts
+
+### MODIFIED FILE
+- frontend/react_flow_preview/src/App.tsx
+
+### CONFIRMED MODEL
+The permanent rail now follows:
+
+permanent rail surfaceId
+→ existing dashboard skeleton route binding
+→ existing UnifiedVisualViewId when available
+→ activeDashboardRoute
+→ center viewport input contract
+→ CenterDashboardViewport
+
+### IMPORTANT CORRECTION
+The displays_graph mapping was not guessed.
+
+It remains center_viewport_not_ready until a real registered UnifiedVisualViewId exists.
+
+### APP.TSX RULE
+App.tsx may hold active selection state and call the binding helper.
+
+App.tsx must not manually recreate:
+- dashboard taxonomy
+- dashboard button list
+- renderer adapter routing
+- fake display graph view ids
+- client capability gating
+
+### NEXT STEP
+C2.12u — active dashboard contextual left drawer binding
+

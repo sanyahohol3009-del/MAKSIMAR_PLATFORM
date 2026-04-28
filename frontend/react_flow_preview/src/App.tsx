@@ -60,6 +60,7 @@ import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
 import { PermanentDashboardNavigationRail } from "./permanentDashboardNavigationRailShellComponent.js";
+import { getActiveViewForPermanentRailSurfaceId } from "./permanentRailActiveDashboardSelectionBinding.js";
 import {
   ACTIVE_DASHBOARD_LEFT_DRAWER_LEFT_OFFSET_PX,
   LEFT_DRAWER_HANDLE_LEFT_OFFSET_PX,
@@ -186,6 +187,8 @@ export default function App() {
 
   const [activeView, setActiveView] =
     useState<UnifiedVisualViewId>("graph:topology");
+  const [activeRailSurfaceId, setActiveRailSurfaceId] =
+    useState("operator_home");
   const [selectedItem, setSelectedItem] =
     useState<SelectedGraphInspectItem | null>(null);
 
@@ -208,6 +211,16 @@ export default function App() {
     buildActiveDashboardRouteReadModel(activeView);
   const centerViewportInput =
     buildCenterViewportInputContract(activeDashboardRoute);
+
+  const handlePermanentRailSurfaceSelect = (surfaceId: string): void => {
+    setActiveRailSurfaceId(surfaceId);
+
+    const nextActiveView = getActiveViewForPermanentRailSurfaceId(surfaceId);
+
+    if (nextActiveView) {
+      setActiveView(nextActiveView);
+    }
+  };
 
   const activeEntry = activeDashboardRoute.activeEntry;
   const workspaceSnapshot = activeDashboardRoute.workspaceSnapshot;
@@ -755,7 +768,11 @@ export default function App() {
         />
       }
       permanentRail={
-        <PermanentDashboardNavigationRail density="expanded" />
+        <PermanentDashboardNavigationRail
+            activeSurfaceId={activeRailSurfaceId}
+            density="expanded"
+            onSelectSurface={handlePermanentRailSurfaceSelect}
+          />
       }
       centerViewport={
         <CenterDashboardViewport
