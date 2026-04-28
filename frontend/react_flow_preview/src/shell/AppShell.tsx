@@ -7,6 +7,7 @@ type AppShellProps = {
   rightHandle: React.ReactNode;
   topChatDrawer: React.ReactNode;
   summaryCardsOverlay: React.ReactNode;
+  permanentRail: React.ReactNode;
   centerViewport: React.ReactNode;
   leftDrawer: React.ReactNode;
   rightDrawer: React.ReactNode;
@@ -20,6 +21,7 @@ export function AppShell({
   rightHandle,
   topChatDrawer,
   summaryCardsOverlay,
+  permanentRail,
   centerViewport,
   leftDrawer,
   rightDrawer,

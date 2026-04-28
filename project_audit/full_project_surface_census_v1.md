@@ -2557,3 +2557,45 @@ App.tsx must not directly hardcode:
 ### NEXT STEP
 C2.12n — AppShell permanent rail visible wiring implementation
 
+
+---
+
+## 48. VERIFIED PATCH V34 — C2.12n APPSHELL PERMANENT RAIL VISIBLE WIRING IMPLEMENTATION
+
+### STATUS
+C2.12n AppShell permanent rail visible wiring implementation completed.
+
+### PURPOSE
+Wire the PermanentDashboardNavigationRail into the visible AppShell through a dedicated shell prop/slot without recreating dashboard taxonomy or renderer logic in App.tsx.
+
+### MODIFIED FILES
+- frontend/react_flow_preview/src/shell/AppShell.tsx
+- frontend/react_flow_preview/src/App.tsx
+
+### ADDED TEST
+- frontend/tests/appShellPermanentRailVisibleWiringImplementation.test.ts
+
+### CONFIRMED IMPLEMENTATION MODEL
+The visible wiring:
+- adds a permanentRail slot to AppShell
+- renders permanentRail before centerViewport
+- imports PermanentDashboardNavigationRail into App.tsx
+- passes PermanentDashboardNavigationRail through the AppShell prop
+- does not hardcode dashboard button taxonomy in App.tsx
+- does not hardcode renderer route logic in App.tsx
+- keeps contextual drawers separate from dashboard navigation
+- keeps top communication drawer separate from dashboard navigation
+
+### APP.TSX RULE
+App.tsx may wire the shell slot.
+
+App.tsx must not manually recreate:
+- dashboard button list
+- dashboard taxonomy
+- renderer adapter registry
+- navigation-to-renderer route binding
+- client gating logic
+
+### NEXT STEP
+C2.12o — permanent rail visible layout verification
+

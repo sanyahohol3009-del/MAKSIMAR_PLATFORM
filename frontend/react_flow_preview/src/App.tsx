@@ -59,6 +59,7 @@ import { LeftDashboardDrawer } from "./shell/LeftDashboardDrawer.js";
 import { RightSystemContextDrawer } from "./shell/RightSystemContextDrawer.js";
 import { CenterDashboardViewport } from "./shell/CenterDashboardViewport.js";
 import { AppShell } from "./shell/AppShell.js";
+import { PermanentDashboardNavigationRail } from "./permanentDashboardNavigationRailShellComponent.js";
 import {
   SHELL_OVERLAY_STYLE,
   SHELL_TOP_STRIP_HEIGHT_PX,
@@ -744,6 +745,9 @@ export default function App() {
           unreadCount={jarvisChatDrawerReadModel.unreadCount}
           codeBlockCount={jarvisChatDrawerReadModel.codeBlockCount}
         />
+      }
+      permanentRail={
+        <PermanentDashboardNavigationRail />
       }
       centerViewport={
         <CenterDashboardViewport
