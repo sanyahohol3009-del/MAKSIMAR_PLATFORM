@@ -2599,3 +2599,40 @@ App.tsx must not manually recreate:
 ### NEXT STEP
 C2.12o — permanent rail visible layout verification
 
+
+---
+
+## 49. VERIFIED PATCH V35 — C2.12o PERMANENT RAIL VISIBLE LAYOUT VERIFICATION
+
+### STATUS
+C2.12o permanent rail visible layout verification completed.
+
+### PURPOSE
+Verify the visible permanent rail layout after AppShell wiring.
+
+### ADDED VERIFICATION
+- frontend/react_flow_preview/src/permanentRailVisibleLayoutVerification.ts
+
+### ADDED TEST
+- frontend/tests/permanentRailVisibleLayoutVerification.test.ts
+
+### CONFIRMED LAYOUT MODEL
+The verification confirms:
+- permanent rail is before center viewport
+- permanent rail is persistent
+- permanent rail is not overlay
+- permanent rail is not drawer
+- permanent rail does not overlap center viewport
+- center viewport uses remaining shell width
+- contextual drawers remain active-dashboard-only
+- contextual drawers do not contain the main dashboard list
+- top JARVIS chat remains separate
+- top JARVIS chat does not contain dashboard navigation
+- App.tsx may only wire the shell slot
+- manual dashboard button list is forbidden
+- manual renderer route logic is forbidden
+- manual taxonomy duplication is forbidden
+
+### NEXT STEP
+C2.12p — permanent rail visual smoke preview
+
