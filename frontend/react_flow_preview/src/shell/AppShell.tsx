@@ -14,6 +14,26 @@ type AppShellProps = {
   footer: React.ReactNode;
 };
 
+const permanentRailSlotStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  bottom: 0,
+  zIndex: 12,
+  pointerEvents: "auto",
+};
+
+const centerViewportSlotStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 104,
+  zIndex: 1,
+  minWidth: 0,
+  overflow: "hidden",
+};
+
 export function AppShell({
   overlayShellStyle,
   topStatusStrip,
@@ -36,13 +56,34 @@ export function AppShell({
         gap: 12,
       }}
     >
-      <main style={overlayShellStyle}>
+      <main
+        style={{
+          ...overlayShellStyle,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="permanent-dashboard-navigation-rail-slot"
+          style={permanentRailSlotStyle}
+          data-slot="left_permanent_navigation_rail_slot"
+        >
+          {permanentRail}
+        </div>
+
+        <div
+          className="center-dashboard-viewport-slot"
+          style={centerViewportSlotStyle}
+          data-slot="center_dashboard_viewport_slot"
+        >
+          {centerViewport}
+        </div>
+
         {topStatusStrip}
         {leftHandle}
         {rightHandle}
         {topChatDrawer}
         {summaryCardsOverlay}
-        {centerViewport}
         {leftDrawer}
         {rightDrawer}
       </main>

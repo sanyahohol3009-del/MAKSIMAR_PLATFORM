@@ -2677,3 +2677,41 @@ The smoke preview confirms:
 ### NEXT STEP
 C2.12q — permanent rail visual/manual browser check
 
+
+---
+
+## 51. VERIFIED PATCH V37 — C2.12q PERMANENT RAIL VISUAL / MANUAL BROWSER CHECK
+
+### STATUS
+C2.12q permanent rail visual/manual browser check completed.
+
+### PURPOSE
+Verify the visible permanent dashboard navigation rail in the browser after AppShell wiring.
+
+### MANUAL CHECK RESULT
+PASS.
+
+The browser preview confirms:
+- permanent rail is visible on the left side
+- rail is persistent, not a drawer
+- center viewport is shifted to the right of the rail
+- graph viewport remains visible
+- top status strip remains visible
+- footer remains visible
+- existing NAV / CTX handles remain separate
+- no white screen observed
+
+### LAYOUT FIX APPLIED
+AppShell now reserves a real shell slot for the permanent rail.
+
+### MODIFIED FILE
+- frontend/react_flow_preview/src/shell/AppShell.tsx
+
+### ACCEPTED CURRENT VISUAL STATE
+The rail is currently compact and narrow.
+
+This is acceptable for the current step because compact mode is the default rail mode.
+
+### NEXT STEP
+C2.12r — permanent rail compact layout refinement
+
