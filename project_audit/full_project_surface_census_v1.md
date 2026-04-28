@@ -2636,3 +2636,44 @@ The verification confirms:
 ### NEXT STEP
 C2.12p — permanent rail visual smoke preview
 
+
+---
+
+## 50. VERIFIED PATCH V36 — C2.12p PERMANENT RAIL VISUAL SMOKE PREVIEW
+
+### STATUS
+C2.12p permanent rail visual smoke preview completed.
+
+### PURPOSE
+Create a smoke preview read-model for the visible permanent dashboard navigation rail after AppShell wiring and layout verification.
+
+### ADDED SMOKE PREVIEW
+- frontend/react_flow_preview/src/permanentRailVisualSmokePreview.ts
+
+### ADDED TEST
+- frontend/tests/permanentRailVisualSmokePreview.test.ts
+
+### CONFIRMED SMOKE MODEL
+The smoke preview confirms:
+- PermanentDashboardNavigationRail component export is available
+- permanent rail exposes 19 sections
+- permanent rail exposes 34 dashboard items
+- exactly one selected rail item
+- compact rail width = 104px
+- expanded rail width = 284px
+- operator_home is the default active surface
+- engineering_3d_cad_cam can be selected in expanded mode
+- rail remains before center viewport
+- rail remains persistent
+- rail is not overlay
+- rail is not drawer
+- center viewport uses remaining width
+- contextual drawers remain active-dashboard-only
+- top chat remains separate
+- manual dashboard button recreation is forbidden
+- manual renderer route recreation is forbidden
+- manual taxonomy duplication is forbidden
+
+### NEXT STEP
+C2.12q — permanent rail visual/manual browser check
+
