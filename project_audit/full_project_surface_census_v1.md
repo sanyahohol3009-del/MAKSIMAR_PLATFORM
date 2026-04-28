@@ -2516,3 +2516,44 @@ Visible shell wiring must happen only after preview validation.
 ### NEXT STEP
 C2.12m — AppShell permanent rail visible wiring contract
 
+
+---
+
+## 47. VERIFIED PATCH V33 — C2.12m APPSHELL PERMANENT RAIL VISIBLE WIRING CONTRACT
+
+### STATUS
+C2.12m AppShell permanent rail visible wiring contract completed.
+
+### PURPOSE
+Create the visible wiring contract for connecting the permanent dashboard navigation rail into AppShell without direct App.tsx hardcoding.
+
+### ADDED CONTRACT
+- frontend/react_flow_preview/src/appShellPermanentRailVisibleWiringContract.ts
+
+### ADDED TEST
+- frontend/tests/appShellPermanentRailVisibleWiringContract.test.ts
+
+### CONFIRMED CONTRACT MODEL
+The contract confirms:
+- visible wiring is allowed only through a dedicated shell slot
+- permanent rail is before center viewport
+- center viewport remains after the rail
+- rail is persistent
+- rail is not overlay
+- rail is not drawer
+- rail must not overlap center viewport
+- contextual drawers remain active-dashboard-only
+- top JARVIS chat remains fullscreen and separate
+- visible wiring must be read-model driven
+
+### APP.TSX RULE
+App.tsx must not directly hardcode:
+- dashboard button list
+- renderer route logic
+- dashboard taxonomy duplication
+- client gating logic
+- drawer semantic rewrite
+
+### NEXT STEP
+C2.12n — AppShell permanent rail visible wiring implementation
+
