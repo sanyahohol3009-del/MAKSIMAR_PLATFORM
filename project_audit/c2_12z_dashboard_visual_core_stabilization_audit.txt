@@ -1,0 +1,13 @@
+C2.12z — DASHBOARD SKELETON VISUAL CORE STABILIZATION AUDIT
+
+PURPOSE:
+Verify that dashboard visual skeleton is stable before real data / topology / metrics injection.
+
+CHECKS:
+- no duplicate dashboard route path
+- permanent rail remains selector
+- left drawer remains active-dashboard context
+- center viewport uses existing renderer
+- App.tsx does not recreate taxonomy
+- registry/read-model path is preserved
+- 3D renderer is not started before data routing checkpoint

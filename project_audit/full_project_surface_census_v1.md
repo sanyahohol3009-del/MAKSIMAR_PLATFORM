@@ -2850,3 +2850,51 @@ The implementation verifies and reuses existing:
 ### NEXT STEP
 C2.12z — dashboard skeleton visual core stabilization checkpoint
 
+
+---
+
+## 56. VERIFIED PATCH V42 — C2.12z DASHBOARD SKELETON VISUAL CORE STABILIZATION
+
+### STATUS
+C2.12z completed.
+
+### TEST STATUS
+Frontend checks are green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+Current frontend test count:
+- 254 pass / 0 fail
+
+### CONFIRMED ARCHITECTURE
+The dashboard visual skeleton is stable.
+
+Confirmed pipeline:
+permanent rail
+→ surfaceId
+→ active dashboard selection binding
+→ UnifiedVisualViewId
+→ active dashboard route
+→ center viewport input contract
+→ existing CenterDashboardViewport
+→ ReactFlow / ECharts renderer
+
+### CONFIRMED RULES
+- permanent rail remains the dashboard selector
+- left drawer remains active-dashboard context
+- center viewport uses existing renderer
+- App.tsx does not recreate dashboard taxonomy
+- registry/read-model path is preserved
+- no new renderer was created
+- 3D renderer is not started before data routing checkpoint
+
+### HARDENING RESULT
+Confirmed:
+- appTsxHardcodingAllowed: false
+- newRendererCreated: false
+- hardcodedRendererAllowed: false
+
+### NEXT PHASE
+C2.13 — REAL DATA / TOPOLOGY / METRICS INJECTION
+
