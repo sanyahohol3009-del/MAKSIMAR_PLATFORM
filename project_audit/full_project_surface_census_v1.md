@@ -2802,3 +2802,51 @@ App.tsx must not manually recreate:
 ### NEXT STEP
 C2.12u — active dashboard contextual left drawer binding
 
+
+---
+
+## 55. VERIFIED PATCH V41 — C2.12x/y CENTER VIEWPORT LIVE BINDING + EXISTING RENDERER VERIFICATION
+
+### STATUS
+C2.12x/y completed.
+
+### TEST STATUS
+Frontend checks are green:
+- npm run build
+- npm run test
+- npm run graph:build
+
+Current frontend test count:
+- 254 pass / 0 fail
+
+### CONFIRMED PIPELINE
+The dashboard center now follows:
+
+permanent rail
+→ surfaceId
+→ active dashboard selection binding
+→ UnifiedVisualViewId
+→ active dashboard route
+→ center viewport input contract
+→ existing CenterDashboardViewport
+→ ReactFlow graph renderer or ECharts chart renderer
+
+### IMPORTANT RULE
+No new renderer was created.
+
+The implementation verifies and reuses existing:
+- ReactFlow graph renderer
+- ECharts chart renderer
+- CenterDashboardViewport
+- graphProjectionRegistry
+- chartTelemetrySemantics
+
+### ADDED FILES
+- frontend/react_flow_preview/src/activeDashboardCenterViewportBinding.ts
+- frontend/react_flow_preview/src/activeDashboardCenterRendererBinding.ts
+- frontend/tests/activeDashboardCenterViewportBinding.test.ts
+- frontend/tests/activeDashboardCenterRendererBinding.test.ts
+
+### NEXT STEP
+C2.12z — dashboard skeleton visual core stabilization checkpoint
+

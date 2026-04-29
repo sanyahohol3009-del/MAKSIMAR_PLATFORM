@@ -61,7 +61,7 @@ test("permanent dashboard navigation rail shell integration boundary carries she
   assert.equal(boundary.shellReadModel.activeSurfaceId, "engineering_3d_cad_cam");
   assert.equal(boundary.shellReadModel.density, "expanded");
   assert.equal(boundary.shellReadModel.totalSections, 19);
-  assert.equal(boundary.shellReadModel.totalItems, 34);
+  assert.equal(boundary.shellReadModel.totalItems, 38);
   assert.equal(boundary.shellReadModel.selectedItems, 1);
   assert.equal(boundary.shellReadModel.threeDItems, 1);
   assert.equal(boundary.shellReadModel.simulationItems, 4);

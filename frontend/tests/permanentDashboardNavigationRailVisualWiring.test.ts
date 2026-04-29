@@ -20,7 +20,7 @@ test("permanent dashboard navigation rail visual wiring exposes persistent left 
   assert.equal(readModel.drawerSemanticsAllowedForMainDashboardList, false);
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
 });
 
 test("permanent dashboard navigation rail visual wiring validates canonical model", () => {

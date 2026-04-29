@@ -62,6 +62,10 @@ import { AppShell } from "./shell/AppShell.js";
 import { PermanentDashboardNavigationRail } from "./permanentDashboardNavigationRailShellComponent.js";
 import { getActiveViewForPermanentRailSurfaceId } from "./permanentRailActiveDashboardSelectionBinding.js";
 import {
+  buildActiveDashboardLeftDrawerReadModel,
+  getActiveDashboardLeftDrawerSectionByAlias,
+} from "./activeDashboardLeftDrawerBinding.js";
+import {
   ACTIVE_DASHBOARD_LEFT_DRAWER_LEFT_OFFSET_PX,
   LEFT_DRAWER_HANDLE_LEFT_OFFSET_PX,
   SUMMARY_CARDS_LEFT_OFFSET_PX,
@@ -222,7 +226,12 @@ export default function App() {
     }
   };
 
-  const activeEntry = activeDashboardRoute.activeEntry;
+  const activeDashboardLeftDrawer =
+ buildActiveDashboardLeftDrawerReadModel({
+ activeSurfaceId: activeRailSurfaceId,
+ activeView,
+ });
+ const activeEntry = activeDashboardRoute.activeEntry;
   const workspaceSnapshot = activeDashboardRoute.workspaceSnapshot;
 
   const memoryKnowledgeShell =
@@ -407,112 +416,44 @@ export default function App() {
 
 
   const renderLeftDrawerBody = () => {
-    switch (drawerShellState.activeLeftSection) {
-      case "visual_registry_navigation":
-        return (
-          <div className="workspace-sidebar-groups">
-            {workspaceSnapshot.groupedViews.map((group) => (
-              <section key={group.group} className="workspace-sidebar-group">
-                <h3>{group.title}</h3>
-                <div className="workspace-sidebar-items">
-                  {group.views.map((view) => (
-                    <button
-                      key={view.viewId}
-                      type="button"
-                      className={
-                        view.viewId === activeView
-                          ? "workspace-sidebar-item active"
-                          : "workspace-sidebar-item"
-                      }
-                      onClick={() => goToView(view.viewId)}
-                    >
-                      <span className="workspace-sidebar-item-title">
-                        {view.title}
-                      </span>
-                      <span className="workspace-sidebar-item-meta">
-                        {view.viewKind} · {view.summaryLabel}: {view.summaryValue}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        );
+ const activeContextSection = getActiveDashboardLeftDrawerSectionByAlias(
+ activeDashboardLeftDrawer,
+ drawerShellState.activeLeftSection,
+ );
 
-      case "panel_navigation":
-        return (
-          <div className="workspace-sidebar-groups">
-            {panelNavigationReadModel.groupedNavigation.map((group) => (
-              <section
-                key={group.navigationViewId}
-                className="workspace-sidebar-group"
-              >
-                <h3>{group.title}</h3>
-                <div className="workspace-sidebar-items">
-                  {group.rows.map((row) => (
-                    <button
-                      key={row.panelId}
-                      type="button"
-                      className={
-                        row.panelId === activePanelNavigation
-                          ? "workspace-sidebar-item active"
-                          : "workspace-sidebar-item"
-                      }
-                      onClick={() => setActivePanelNavigation(row.panelId)}
-                    >
-                      <span className="workspace-sidebar-item-title">
-                        {row.title}
-                      </span>
-                      <span className="workspace-sidebar-item-meta">
-                        {row.workspaceRole} · {row.workspaceId}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        );
-
-      case "embedded_chat_context":
-        return (
-          <div className="workspace-sidebar-groups">
-            <section className="workspace-sidebar-group">
-              <h3>Left Reference Exposure</h3>
-              <div className="workspace-sidebar-items">
-                {leftReferenceExposureGroup?.rows.map((row) => (
-                  <button
-                    key={row.surfaceId}
-                    type="button"
-                    className={
-                      row.surfaceId === activeEmbeddedChatSurface
-                        ? "workspace-sidebar-item active"
-                        : "workspace-sidebar-item"
-                    }
-                    onClick={() => activateEmbeddedChatSurface(row.surfaceId)}
-                  >
-                    <span className="workspace-sidebar-item-title">
-                      {row.title}
-                    </span>
-                    <span className="workspace-sidebar-item-meta">
-                      {row.targetSection} · {row.countLabel}: {row.countValue}
-                    </span>
-                  </button>
-                )) ?? null}
-              </div>
-            </section>
-
-            <section className="workspace-sidebar-group">
-              <h3>Exposure Inspect</h3>
-              <InspectPresentationView presentation={embeddedChatShellExposureInspect} />
-            </section>
-          </div>
-        );
-    }
-  };
-
-  const renderRightDrawerBody = () => {
+ return (
+ <div className="workspace-sidebar-groups">
+ <section className="workspace-sidebar-group">
+ <h3>{activeContextSection.title}</h3>
+ <p className="workspace-sidebar-item-meta">
+ {activeContextSection.description}
+ </p>
+ <div className="workspace-sidebar-items">
+ {activeContextSection.items.map((item) => (
+ <button
+ key={item.itemId}
+ type="button"
+ className={
+ item.enabled
+ ? "workspace-sidebar-item active"
+ : "workspace-sidebar-item"
+ }
+ disabled={!item.enabled}
+ >
+ <span className="workspace-sidebar-item-title">
+ {item.title}
+ </span>
+ <span className="workspace-sidebar-item-meta">
+ {item.description}: {item.value}
+ </span>
+ </button>
+ ))}
+ </div>
+ </section>
+ </div>
+ );
+ };
+ const renderRightDrawerBody = () => {
     switch (drawerShellState.activeRightSection) {
       case "memory_knowledge":
         return (

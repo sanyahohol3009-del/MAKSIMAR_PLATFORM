@@ -23,7 +23,7 @@ test("permanent dashboard navigation rail shell read model exposes stable compon
   assert.equal(readModel.drawerSemanticsAllowedForMainDashboardList, false);
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
   assert.equal(readModel.selectedItems, 1);
 });
 

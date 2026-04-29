@@ -13,8 +13,8 @@ test("dashboard skeleton navigation-to-renderer route binding exposes all naviga
 
   assert.equal(readModel.source, "dashboard_skeleton_navigation_binding");
   assert.equal(readModel.navigationReadModel.totalSections, 19);
-  assert.equal(readModel.navigationReadModel.totalItems, 34);
-  assert.equal(readModel.totalRoutes, 34);
+  assert.equal(readModel.navigationReadModel.totalItems, 38);
+  assert.equal(readModel.totalRoutes, 38);
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.directEngineBindingAllowed, false);
 });

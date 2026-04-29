@@ -52,16 +52,19 @@ export type PermanentRailActiveDashboardSelectionBindingValidation = {
 
 const SURFACE_TO_VIEW_ID: Readonly<Record<string, UnifiedVisualViewId>> = {
   operator_home: "graph:topology",
+
   topology_graph: "graph:topology",
   dependency_graph: "graph:dependency",
   dataflow_graph: "graph:dataflow",
-  module_graph: "graph:modules",
-  truth_consistency_graph: "graph:truth_consistency",
+  modules_graph: "graph:modules",
   guard_chain_graph: "graph:guard_chain",
+  truth_consistency_graph: "graph:truth_consistency",
   workspace_graph: "graph:workspace",
-  node_resources: "chart:node_resources",
-  security_telemetry: "chart:security_telemetry",
-  telemetry_summary: "chart:summary",
+  displays_graph: "graph:displays",
+
+  node_resources_chart: "chart:node_resources",
+  security_telemetry_chart: "chart:security_telemetry",
+  multi_series_summary_chart: "chart:summary",
 };
 
 function readOptionalString(
@@ -185,8 +188,8 @@ export function validatePermanentRailActiveDashboardSelectionBindingReadModel(
     errors.push("source_must_be_dashboard_skeleton_navigation_renderer_route_binding");
   }
 
-  if (readModel.totalRoutes !== 34) {
-    errors.push("total_routes_must_be_34");
+  if (readModel.totalRoutes !== 38) {
+    errors.push("total_routes_must_be_38");
   }
 
   if (readModel.centerViewportReadyRoutes < 1) {

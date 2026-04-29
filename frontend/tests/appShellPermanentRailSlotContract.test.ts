@@ -69,6 +69,6 @@ test("AppShell permanent rail slot contract carries integration boundary read mo
   );
   assert.equal(contract.integrationBoundary.shellReadModel.density, "expanded");
   assert.equal(contract.integrationBoundary.shellReadModel.totalSections, 19);
-  assert.equal(contract.integrationBoundary.shellReadModel.totalItems, 34);
+  assert.equal(contract.integrationBoundary.shellReadModel.totalItems, 38);
   assert.equal(contract.integrationBoundary.shellReadModel.selectedItems, 1);
 });

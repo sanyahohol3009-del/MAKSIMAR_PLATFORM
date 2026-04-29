@@ -56,7 +56,7 @@ test("AppShell permanent rail visible wiring implementation remains read-model d
   assert.equal(readModel.activeSurfaceId, "engineering_3d_cad_cam");
   assert.equal(readModel.density, "expanded");
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
   assert.equal(readModel.selectedItems, 1);
   assert.equal(readModel.threeDItems, 1);
 });

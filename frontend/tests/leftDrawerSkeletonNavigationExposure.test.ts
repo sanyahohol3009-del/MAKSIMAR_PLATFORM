@@ -16,7 +16,7 @@ test("left drawer skeleton navigation exposure exposes all sections and items", 
     "dashboard_skeleton_navigation_renderer_route_binding",
   );
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
   assert.equal(readModel.appTsxHardcodingAllowed, false);
 });
 

@@ -20,7 +20,7 @@ test("permanent rail active dashboard selection binding exposes all dashboard ro
 
   assert.equal(readModel.target, "permanent_rail_active_dashboard_selection_binding");
   assert.equal(readModel.source, "dashboard_skeleton_navigation_renderer_route_binding");
-  assert.equal(readModel.totalRoutes, 34);
+  assert.equal(readModel.totalRoutes, 38);
   assert.equal(readModel.defaultSurfaceId, "operator_home");
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.manualDashboardButtonListAllowed, false);

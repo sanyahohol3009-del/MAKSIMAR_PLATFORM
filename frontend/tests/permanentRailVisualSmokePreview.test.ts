@@ -19,7 +19,7 @@ test("permanent rail visual smoke preview exposes component and canonical counts
   assert.equal(preview.componentExportName, "PermanentDashboardNavigationRail");
   assert.equal(preview.componentAvailable, true);
   assert.equal(preview.totalSections, 19);
-  assert.equal(preview.totalItems, 34);
+  assert.equal(preview.totalItems, 38);
   assert.equal(preview.selectedItems, 1);
 });
 

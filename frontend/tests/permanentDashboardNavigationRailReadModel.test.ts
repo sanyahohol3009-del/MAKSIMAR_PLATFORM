@@ -15,7 +15,7 @@ test("permanent dashboard navigation rail exposes persistent dashboard list", ()
   assert.equal(readModel.source, "left_drawer_skeleton_navigation_exposure");
   assert.equal(readModel.persistent, true);
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.drawerSemanticsAllowedForMainDashboardList, false);
 });

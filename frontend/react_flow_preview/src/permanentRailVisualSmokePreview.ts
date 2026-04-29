@@ -154,8 +154,8 @@ export function validatePermanentRailVisualSmokePreview(
     errors.push("total_sections_must_be_19");
   }
 
-  if (preview.totalItems !== 34) {
-    errors.push("total_items_must_be_34");
+  if (preview.totalItems !== 38) {
+    errors.push("total_items_must_be_38");
   }
 
   if (preview.selectedItems !== 1) {

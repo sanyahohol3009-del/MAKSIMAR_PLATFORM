@@ -46,7 +46,7 @@ test("dashboard skeleton taxonomy keeps all surface ids stable and unique", () =
 
   assert.equal(validation.valid, true);
   assert.deepEqual(validation.errors, []);
-  assert.equal(getDashboardSkeletonSurfaces().length, 34);
+  assert.equal(getDashboardSkeletonSurfaces().length, 38);
 });
 
 test("dashboard skeleton taxonomy includes audit 122 dashboard surfaces", () => {

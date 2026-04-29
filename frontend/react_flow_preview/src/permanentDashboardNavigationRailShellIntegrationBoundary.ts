@@ -183,8 +183,8 @@ export function validatePermanentDashboardNavigationRailShellIntegrationBoundary
     errors.push("shell_read_model_total_sections_must_be_19");
   }
 
-  if (boundary.shellReadModel.totalItems !== 34) {
-    errors.push("shell_read_model_total_items_must_be_34");
+  if (boundary.shellReadModel.totalItems !== 38) {
+    errors.push("shell_read_model_total_items_must_be_38");
   }
 
   if (boundary.shellReadModel.selectedItems !== 1) {

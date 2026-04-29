@@ -14,7 +14,7 @@ test("dashboard skeleton navigation binding exposes all taxonomy groups", () => 
   assert.equal(readModel.bindingSource, "dashboard_skeleton_surface_taxonomy");
   assert.equal(readModel.appTsxHardcodingAllowed, false);
   assert.equal(readModel.totalSections, 19);
-  assert.equal(readModel.totalItems, 34);
+  assert.equal(readModel.totalItems, 38);
 });
 
 test("dashboard skeleton navigation binding validates stable navigation model", () => {
