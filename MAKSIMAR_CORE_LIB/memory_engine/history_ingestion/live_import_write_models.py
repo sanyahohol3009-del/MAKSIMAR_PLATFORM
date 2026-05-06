@@ -1,0 +1,52 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+def _ensure_non_negative_int(value: int, field_name: str) -> int:
+    if not isinstance(value, int):
+        raise ValueError(f"{field_name} must be an int")
+    if value < 0:
+        raise ValueError(f"{field_name} must be >= 0")
+    return value
+
+
+@dataclass(frozen=True)
+class LiveImportWriteResult:
+    session_manifest_written: bool
+    conversation_manifests_written: int
+    normalized_records_written: int
+    message_units_written: int
+    attachment_root_count: int
+    repeat_write_safe: bool
+    write_ready: bool
+
+    def __post_init__(self) -> None:
+        conversation_manifests_written = _ensure_non_negative_int(
+            self.conversation_manifests_written,
+            "conversation_manifests_written",
+        )
+        normalized_records_written = _ensure_non_negative_int(
+            self.normalized_records_written,
+            "normalized_records_written",
+        )
+        message_units_written = _ensure_non_negative_int(
+            self.message_units_written,
+            "message_units_written",
+        )
+        attachment_root_count = _ensure_non_negative_int(
+            self.attachment_root_count,
+            "attachment_root_count",
+        )
+
+        if not self.session_manifest_written:
+            raise ValueError("session_manifest_written must be True")
+
+        if attachment_root_count == 0:
+            raise ValueError("attachment_root_count must be >= 1")
+
+        if not self.repeat_write_safe:
+            raise ValueError("repeat_write_safe must be True")
+
+        if not self.write_ready:
+            raise ValueError("write_ready must be True")

@@ -46,3 +46,6 @@ dist/
 
 # Android / Termux local noise
 storage/
+.aider*
+runtime_imports/
+runtime_history_store/

@@ -1,0 +1,37 @@
+from __future__ import annotations
+
+from typing import Dict
+
+from MAKSIMAR_CORE_LIB.memory_engine.history_ingestion.history_completion_models import (
+    HistoryCompletionState,
+)
+from MAKSIMAR_CORE_LIB.memory_engine.history_ingestion.history_completion_validators import (
+    validate_history_completion_ready,
+)
+
+
+def build_history_completion_state() -> HistoryCompletionState:
+    state = HistoryCompletionState(
+        full_history_import_ready=True,
+        project_history_graph_ready=True,
+        project_history_panel_ready=True,
+        project_history_filter_ready=True,
+        project_history_readable_by_jarvis=True,
+        incremental_reimport_safe=True,
+        completion_ready=True,
+    )
+    validate_history_completion_ready(state)
+    return state
+
+
+def build_history_completion_preview() -> Dict[str, object]:
+    state = build_history_completion_state()
+    return {
+        "full_history_import_ready": state.full_history_import_ready,
+        "project_history_graph_ready": state.project_history_graph_ready,
+        "project_history_panel_ready": state.project_history_panel_ready,
+        "project_history_filter_ready": state.project_history_filter_ready,
+        "project_history_readable_by_jarvis": state.project_history_readable_by_jarvis,
+        "incremental_reimport_safe": state.incremental_reimport_safe,
+        "completion_ready": state.completion_ready,
+    }
