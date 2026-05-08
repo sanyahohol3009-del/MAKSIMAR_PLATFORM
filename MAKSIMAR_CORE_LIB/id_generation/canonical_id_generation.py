@@ -13,6 +13,8 @@ _MODULE_ID_PATTERN = re.compile(r"^module_(skill|memory_tier|extension_cube)_[a-
 _SKILL_ID_PATTERN = re.compile(r"^skill_[a-z][a-z0-9_]*_[a-z][a-z0-9_]*$")
 _MEMORY_TIER_ID_PATTERN = re.compile(r"^memory_[a-z][a-z0-9_]*$")
 _WORKER_ID_PATTERN = re.compile(r"^worker_[a-z][a-z0-9_]*_001$")
+_STORAGE_NODE_ID_PATTERN = re.compile(r"^storage_node_[a-z][a-z0-9_]*$")
+_RETRIEVAL_SOURCE_ID_PATTERN = re.compile(r"^retrieval_source_[a-z][a-z0-9_]*$")
 _PANEL_ID_PATTERN = re.compile(r"^panel_[a-z][a-z0-9_]*$")
 _ARTIFACT_REF_PREFIX_PATTERN = re.compile(r"^artifact://modules/[a-z][a-z0-9_]*$")
 _TRACE_ID_PREFIX_PATTERN = re.compile(r"^trace_[a-z][a-z0-9_]*$")
@@ -37,6 +39,8 @@ class CanonicalIdAllocationEntry:
     skill_id: str
     memory_tier_id: str
     worker_id: str
+    storage_node_id: str
+    retrieval_source_id: str
     panel_ids: tuple[str, ...]
     artifact_ref_prefix: str
     trace_id_prefix: str
@@ -58,6 +62,14 @@ class CanonicalIdAllocationEntry:
         if not _TRACE_ID_PREFIX_PATTERN.fullmatch(self.trace_id_prefix):
             raise ValueError(f"Invalid trace_id_prefix: {self.trace_id_prefix}")
 
+        if not _STORAGE_NODE_ID_PATTERN.fullmatch(self.storage_node_id):
+            raise ValueError(f"Invalid storage_node_id: {self.storage_node_id}")
+        if self.retrieval_source_id and not _RETRIEVAL_SOURCE_ID_PATTERN.fullmatch(
+            self.retrieval_source_id
+        ):
+            raise ValueError(
+                f"Invalid retrieval_source_id: {self.retrieval_source_id}"
+            )
         if len(set(self.panel_ids)) != len(self.panel_ids):
             raise ValueError(f"Duplicate panel_ids detected for {self.module_slug}")
 
@@ -127,6 +139,8 @@ class CanonicalIdGenerationContract:
     total_skill_ids: int
     total_memory_tier_ids: int
     total_worker_ids: int
+    total_storage_node_ids: int
+    total_retrieval_source_ids: int
     total_panel_ids: int
     entries: tuple[CanonicalIdAllocationEntry, ...]
 
@@ -140,6 +154,12 @@ class CanonicalIdGenerationContract:
             1 for entry in self.entries if entry.memory_tier_id != ""
         )
         computed_worker_ids = sum(1 for entry in self.entries if entry.worker_id != "")
+        computed_storage_node_ids = sum(
+            1 for entry in self.entries if entry.storage_node_id != ""
+        )
+        computed_retrieval_source_ids = sum(
+            1 for entry in self.entries if entry.retrieval_source_id != ""
+        )
         computed_panel_ids = sum(len(entry.panel_ids) for entry in self.entries)
 
         if self.total_skill_ids != computed_skill_ids:
@@ -160,6 +180,14 @@ class CanonicalIdGenerationContract:
             entry.memory_tier_id for entry in self.entries if entry.memory_tier_id
         )
         worker_ids = tuple(entry.worker_id for entry in self.entries if entry.worker_id)
+        storage_node_ids = tuple(
+            entry.storage_node_id for entry in self.entries if entry.storage_node_id
+        )
+        retrieval_source_ids = tuple(
+            entry.retrieval_source_id
+            for entry in self.entries
+            if entry.retrieval_source_id
+        )
         panel_ids = tuple(
             panel_id
             for entry in self.entries
@@ -211,6 +239,10 @@ def build_canonical_id_generation_contract() -> CanonicalIdGenerationContract:
         if manifest.module_kind == "memory_tier":
             memory_tier_id = f"memory_{manifest.module_slug}"
 
+        storage_node_id = f"storage_node_{manifest.module_slug}"
+        retrieval_source_id = ""
+        if manifest.retrieval_profile != "not_retrievable":
+            retrieval_source_id = f"retrieval_source_{manifest.module_slug}"
         panel_ids = tuple(
             _view_id_to_panel_id(view_id)
             for view_id in manifest.dashboard_view_ids
@@ -227,6 +259,8 @@ def build_canonical_id_generation_contract() -> CanonicalIdGenerationContract:
                 skill_id=skill_id,
                 memory_tier_id=memory_tier_id,
                 worker_id=worker_id,
+                storage_node_id=storage_node_id,
+                retrieval_source_id=retrieval_source_id,
                 panel_ids=panel_ids,
                 artifact_ref_prefix=artifact_ref_prefix,
                 trace_id_prefix=trace_id_prefix,
@@ -239,6 +273,12 @@ def build_canonical_id_generation_contract() -> CanonicalIdGenerationContract:
         1 for entry in entries if entry.memory_tier_id != ""
     )
     total_worker_ids = sum(1 for entry in entries if entry.worker_id != "")
+    total_storage_node_ids = sum(
+        1 for entry in entries if entry.storage_node_id != ""
+    )
+    total_retrieval_source_ids = sum(
+        1 for entry in entries if entry.retrieval_source_id != ""
+    )
     total_panel_ids = sum(len(entry.panel_ids) for entry in entries)
 
     return CanonicalIdGenerationContract(
@@ -246,6 +286,8 @@ def build_canonical_id_generation_contract() -> CanonicalIdGenerationContract:
         total_skill_ids=total_skill_ids,
         total_memory_tier_ids=total_memory_tier_ids,
         total_worker_ids=total_worker_ids,
+        total_storage_node_ids=total_storage_node_ids,
+        total_retrieval_source_ids=total_retrieval_source_ids,
         total_panel_ids=total_panel_ids,
         entries=tuple(entries),
     )
