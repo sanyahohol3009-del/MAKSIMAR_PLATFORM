@@ -37,3 +37,24 @@ __all__ = [
     "RegistryAutoEnrollmentEntry",
     "build_registry_auto_enrollment_contract",
 ]
+
+
+# PHASE 1.4 Batch 2 exports
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.auto_enroll_runner import (
+    AutoEnrollmentDryRunResult,
+    EnrollmentDryRunEntry,
+    build_auto_enrollment_dry_run_result,
+)
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.enrollment_candidate_builder import (
+    EnrollmentCandidate,
+    EnrollmentCandidateContract,
+    build_enrollment_candidate_contract,
+)
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.enrollment_summary_builder import (
+    build_auto_enrollment_summary,
+)
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.manifest_discovery import (
+    ManifestDiscoveryContract,
+    ManifestDiscoveryEntry,
+    build_manifest_discovery_contract,
+)
