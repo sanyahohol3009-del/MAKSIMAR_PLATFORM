@@ -24,6 +24,8 @@ from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.registry_auto_enrollment_models im
 )
 
 __all__ = [
+    "build_registry_auto_enrollment_phase_readiness",
+    "RegistryAutoEnrollmentPhaseReadiness",
     "build_registry_auto_enrollment_preview",
     "build_existing_domain_minimal_manifest_contract",
     "build_existing_domain_inventory",
@@ -57,4 +59,9 @@ from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.manifest_discovery import (
     ManifestDiscoveryContract,
     ManifestDiscoveryEntry,
     build_manifest_discovery_contract,
+)
+
+from MAKSIMAR_SERVER.REGISTRY_AUTO_ENROLLMENT.enrollment_phase_readiness_gate import (
+    RegistryAutoEnrollmentPhaseReadiness,
+    build_registry_auto_enrollment_phase_readiness,
 )
