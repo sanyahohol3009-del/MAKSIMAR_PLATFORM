@@ -1,3 +1,6 @@
+from MAKSIMAR_CORE_LIB.module_manifest.module_manifest_flow_preview import (
+    build_module_manifest_flow_preview,
+)
 from MAKSIMAR_CORE_LIB.module_manifest.module_manifest_schema import (
     DisplayRole,
     ModuleDomainClass,
@@ -6,6 +9,8 @@ from MAKSIMAR_CORE_LIB.module_manifest.module_manifest_schema import (
     ModuleManifestSchemaContract,
     ModuleObservabilityProfile,
     ModulePolicyProfile,
+    ModuleRetrievalProfile,
+    ModuleStorageProfile,
     build_module_manifest_schema_contract,
 )
 
@@ -17,5 +22,8 @@ __all__ = [
     "ModuleManifestSchemaContract",
     "ModuleObservabilityProfile",
     "ModulePolicyProfile",
+    "ModuleRetrievalProfile",
+    "ModuleStorageProfile",
     "build_module_manifest_schema_contract",
+    "build_module_manifest_flow_preview",
 ]

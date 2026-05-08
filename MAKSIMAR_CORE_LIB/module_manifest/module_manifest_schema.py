@@ -34,6 +34,20 @@ ModuleObservabilityProfile = Literal[
     "critical",
 ]
 
+ModuleStorageProfile = Literal[
+    "metadata_only",
+    "portable_storage",
+    "artifact_reference",
+    "model_weight_store",
+]
+
+ModuleRetrievalProfile = Literal[
+    "not_retrievable",
+    "metadata_retrieval",
+    "semantic_retrieval",
+    "hybrid_retrieval",
+]
+
 DisplayRole = Literal[
     "primary_dashboard_display",
     "monitoring_display",
@@ -84,6 +98,12 @@ class ModuleManifestEntry:
     supported_languages: tuple[str, ...]
     supported_scripts: tuple[str, ...]
     active: bool
+    storage_profile: ModuleStorageProfile = "metadata_only"
+    retrieval_profile: ModuleRetrievalProfile = "not_retrievable"
+    required_memory_tier_ids: tuple[str, ...] = ()
+    required_skill_ids: tuple[str, ...] = ()
+    enrollment_allowed: bool = True
+    dashboard_exposure_allowed: bool = True
 
     def __post_init__(self) -> None:
         """Validate module manifest entry invariants."""
@@ -120,6 +140,52 @@ class ModuleManifestEntry:
             field_name="supported_scripts",
             owner_id=self.module_slug,
         )
+
+        _validate_unique_non_empty_str_tuple(
+            values=self.required_memory_tier_ids,
+            field_name="required_memory_tier_ids",
+            owner_id=self.module_slug,
+        )
+        _validate_unique_non_empty_str_tuple(
+            values=self.required_skill_ids,
+            field_name="required_skill_ids",
+            owner_id=self.module_slug,
+        )
+
+        if self.storage_profile not in {
+            "metadata_only",
+            "portable_storage",
+            "artifact_reference",
+            "model_weight_store",
+        }:
+            raise ValueError(
+                f"storage_profile must be one of canonical values: {self.module_slug}"
+            )
+
+        if self.retrieval_profile not in {
+            "not_retrievable",
+            "metadata_retrieval",
+            "semantic_retrieval",
+            "hybrid_retrieval",
+        }:
+            raise ValueError(
+                f"retrieval_profile must be one of canonical values: {self.module_slug}"
+            )
+
+        if not isinstance(self.enrollment_allowed, bool):
+            raise ValueError(
+                f"enrollment_allowed must be bool for {self.module_slug}"
+            )
+
+        if not isinstance(self.dashboard_exposure_allowed, bool):
+            raise ValueError(
+                f"dashboard_exposure_allowed must be bool for {self.module_slug}"
+            )
+
+        if not self.dashboard_exposure_allowed and self.dashboard_view_ids:
+            raise ValueError(
+                f"dashboard_view_ids require dashboard_exposure_allowed: {self.module_slug}"
+            )
 
         if len(set(self.supported_display_roles)) != len(self.supported_display_roles):
             raise ValueError(
