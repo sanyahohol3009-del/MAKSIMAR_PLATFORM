@@ -29,70 +29,72 @@ def _is_multilingual_ready(
 
 
 def build_memory_skill_metrics_contract() -> MemorySkillMetricsContract:
-    """Build observability binding contract for memory and skills."""
+    """Build observability binding contract for memory and skills.
+
+    This builder supports an extensible number of memory tiers, skills and
+    router bindings. It must not assume a single canonical memory or skill entry.
+    """
     memory_registry = build_memory_registry_contract()
     skill_registry = build_skill_adapter_registry_contract()
     ai_router_binding = build_ai_router_memory_skill_binding_contract()
 
-    if len(memory_registry.entries) != 1:
-        raise ValueError("Expected exactly one canonical memory registry entry")
+    entries = []
 
-    if len(skill_registry.entries) != 1:
-        raise ValueError("Expected exactly one canonical skill registry entry")
+    for memory_entry in memory_registry.entries:
+        memory_multilingual_ready = _is_multilingual_ready(
+            supported_languages=memory_entry.supported_languages,
+            supported_scripts=memory_entry.supported_scripts,
+        )
+        entries.append(
+            MemorySkillMetricEntry(
+                metric_id=f"msmetric_memory_registry_{memory_entry.module_slug}",
+                source_component="memory_registry",
+                module_slug=memory_entry.module_slug,
+                linked_memory_tier_id=memory_entry.memory_tier_id,
+                linked_skill_id="",
+                linked_worker_id="",
+                linked_panel_id=memory_entry.panel_ids[0],
+                route_request_id="",
+                active=memory_entry.active,
+                explanation_available=memory_entry.explanation_available,
+                policy_compatible=True,
+                multilingual_ready=memory_multilingual_ready,
+                event_severity="info",
+                alert_emitted=False,
+                description=(
+                    f"Observability metric for memory registry entry "
+                    f"{memory_entry.module_slug}."
+                ),
+            )
+        )
 
-    memory_entry = memory_registry.entries[0]
-    skill_entry = skill_registry.entries[0]
-
-    memory_multilingual_ready = _is_multilingual_ready(
-        supported_languages=memory_entry.supported_languages,
-        supported_scripts=memory_entry.supported_scripts,
-    )
-    skill_multilingual_ready = _is_multilingual_ready(
-        supported_languages=skill_entry.supported_languages,
-        supported_scripts=skill_entry.supported_scripts,
-    )
-
-    entries = [
-        MemorySkillMetricEntry(
-            metric_id="msmetric_memory_registry_project_architecture",
-            source_component="memory_registry",
-            module_slug=memory_entry.module_slug,
-            linked_memory_tier_id=memory_entry.memory_tier_id,
-            linked_skill_id="",
-            linked_worker_id="",
-            linked_panel_id=memory_entry.panel_ids[0],
-            route_request_id="",
-            active=memory_entry.active,
-            explanation_available=memory_entry.explanation_available,
-            policy_compatible=True,
-            multilingual_ready=memory_multilingual_ready,
-            event_severity="info",
-            alert_emitted=False,
-            description=(
-                "Observability metric for foundational memory registry entry "
-                "project_architecture."
-            ),
-        ),
-        MemorySkillMetricEntry(
-            metric_id="msmetric_skill_registry_simulation_analysis",
-            source_component="skill_adapter_registry",
-            module_slug=skill_entry.module_slug,
-            linked_memory_tier_id="",
-            linked_skill_id=skill_entry.skill_id,
-            linked_worker_id=skill_entry.worker_id,
-            linked_panel_id=skill_entry.panel_ids[0],
-            route_request_id="",
-            active=skill_entry.active,
-            explanation_available=True,
-            policy_compatible=True,
-            multilingual_ready=skill_multilingual_ready,
-            event_severity="info",
-            alert_emitted=False,
-            description=(
-                "Observability metric for simulation analysis skill adapter registry."
-            ),
-        ),
-    ]
+    for skill_entry in skill_registry.entries:
+        skill_multilingual_ready = _is_multilingual_ready(
+            supported_languages=skill_entry.supported_languages,
+            supported_scripts=skill_entry.supported_scripts,
+        )
+        entries.append(
+            MemorySkillMetricEntry(
+                metric_id=f"msmetric_skill_registry_{skill_entry.module_slug}",
+                source_component="skill_adapter_registry",
+                module_slug=skill_entry.module_slug,
+                linked_memory_tier_id="",
+                linked_skill_id=skill_entry.skill_id,
+                linked_worker_id=skill_entry.worker_id,
+                linked_panel_id=skill_entry.panel_ids[0],
+                route_request_id="",
+                active=skill_entry.active,
+                explanation_available=True,
+                policy_compatible=True,
+                multilingual_ready=skill_multilingual_ready,
+                event_severity="info",
+                alert_emitted=False,
+                description=(
+                    f"Observability metric for skill adapter registry entry "
+                    f"{skill_entry.module_slug}."
+                ),
+            )
+        )
 
     for route_entry in ai_router_binding.entries:
         entries.append(
@@ -137,3 +139,4 @@ def build_memory_skill_metrics_contract() -> MemorySkillMetricsContract:
         router_binding_entries=router_binding_entries,
         entries=tuple(entries),
     )
+
