@@ -1,3 +1,9 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.evidence_memory_core_binding import (
+    EvidenceMemoryCoreBindingContract,
+    EvidenceMemoryCoreBindingEntry,
+    build_evidence_memory_core_binding_contract,
+    build_evidence_memory_core_binding_preview,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.evidence_bound_memory_readiness_gate import (
     EvidenceBoundMemoryPhaseReadiness,
     build_evidence_bound_memory_phase_preview,
@@ -78,6 +84,10 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_trace_builder import
 )
 
 __all__ = [
+    "build_evidence_memory_core_binding_preview",
+    "build_evidence_memory_core_binding_contract",
+    "EvidenceMemoryCoreBindingEntry",
+    "EvidenceMemoryCoreBindingContract",
     "build_evidence_bound_memory_phase_readiness",
     "build_evidence_bound_memory_phase_preview",
     "EvidenceBoundMemoryPhaseReadiness",
