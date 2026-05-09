@@ -1,3 +1,7 @@
+from MAKSIMAR_CORE_LIB.memory_engine.media_memory.media_memory_readiness_gate import (
+    MediaMemoryPhaseReadiness,
+    build_media_memory_phase_readiness,
+)
 from MAKSIMAR_CORE_LIB.memory_engine.media_memory.media_storage_binding_builder import (
     build_media_storage_binding_contract,
 )
@@ -46,6 +50,8 @@ from MAKSIMAR_CORE_LIB.memory_engine.media_memory.project_output_artifact_models
 )
 
 __all__ = [
+    "build_media_memory_phase_readiness",
+    "MediaMemoryPhaseReadiness",
     "build_media_storage_binding_preview",
     "build_media_storage_binding_contract",
     "MediaStorageBindingEntry",
