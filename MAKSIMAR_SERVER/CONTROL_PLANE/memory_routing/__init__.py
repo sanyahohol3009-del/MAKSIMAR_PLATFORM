@@ -1,3 +1,13 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_backend_policy_gate import (
+    RetrievalBackendCandidate,
+    RetrievalBackendPolicyEntry,
+    RetrievalBackendPolicyGate,
+    build_retrieval_backend_policy_gate,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_phase_readiness_gate import (
+    RetrievalPhaseReadiness,
+    build_retrieval_phase_readiness,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_batch2_preview_builder import (
     build_retrieval_batch2_preview,
 )
@@ -53,6 +63,12 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_trace_builder import
 )
 
 __all__ = [
+    "build_retrieval_phase_readiness",
+    "build_retrieval_backend_policy_gate",
+    "RetrievalPhaseReadiness",
+    "RetrievalBackendPolicyGate",
+    "RetrievalBackendPolicyEntry",
+    "RetrievalBackendCandidate",
     "build_retrieval_registry_binding_contract",
     "build_retrieval_observability_binding",
     "build_retrieval_batch2_preview",
