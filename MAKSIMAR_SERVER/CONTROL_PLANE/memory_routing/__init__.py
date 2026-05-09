@@ -1,3 +1,19 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_batch2_preview_builder import (
+    build_retrieval_batch2_preview,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_observability_binding_builder import (
+    build_retrieval_observability_binding,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_observability_binding_models import (
+    RetrievalObservabilityBinding,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_registry_binding_builder import (
+    build_retrieval_registry_binding_contract,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_registry_binding_models import (
+    RetrievalRegistryBindingContract,
+    RetrievalRegistryBindingEntry,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_evidence_pack_models import (
     RetrievalEvidenceItem,
     RetrievalEvidencePack,
@@ -37,6 +53,12 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_trace_builder import
 )
 
 __all__ = [
+    "build_retrieval_registry_binding_contract",
+    "build_retrieval_observability_binding",
+    "build_retrieval_batch2_preview",
+    "RetrievalRegistryBindingEntry",
+    "RetrievalRegistryBindingContract",
+    "RetrievalObservabilityBinding",
     "RetrievalEvidenceItem",
     "RetrievalEvidencePack",
     "RetrievalIntent",
