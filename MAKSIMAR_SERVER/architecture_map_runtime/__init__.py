@@ -1,3 +1,8 @@
+from MAKSIMAR_SERVER.architecture_map_runtime.architecture_control_readiness_gate import (
+    ArchitectureControlPhaseReadiness,
+    build_architecture_control_phase_preview,
+    build_architecture_control_phase_readiness,
+)
 from MAKSIMAR_SERVER.architecture_map_runtime.memory_layer_architecture_binding import (
     MemoryLayerArchitectureBindingContract,
     MemoryLayerArchitectureBindingEntry,
@@ -50,6 +55,9 @@ from MAKSIMAR_SERVER.architecture_map_runtime.server_architecture_shell_models i
 )
 
 __all__ = [
+    "build_architecture_control_phase_readiness",
+    "build_architecture_control_phase_preview",
+    "ArchitectureControlPhaseReadiness",
     "build_memory_dependency_summary",
     "build_domain_cube_memory_locator_contract",
     "DomainCubeMemoryLocatorEntry",
