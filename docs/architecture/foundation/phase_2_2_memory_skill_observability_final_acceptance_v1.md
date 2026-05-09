@@ -131,3 +131,25 @@ PHASE 2.2 считается принятой, если:
 - preview_ready=True;
 - final acceptance smoke test passes;
 - full auto parallel remains green.
+
+## Roadmap v5 / v5.1 reconciliation
+
+PHASE 2.2 was checked against both roadmap versions.
+
+Roadmap v5 old required:
+
+- MAKSIMAR_CORE_LIB/memory_engine/memory_skill_observability/
+
+Roadmap v5.1 corrected replaces this with the existing server observability surface:
+
+- MAKSIMAR_SERVER/OBSERVABILITY/memory_skill_metrics/
+
+Decision:
+
+- follow v5.1 corrected as primary roadmap;
+- do not create the legacy CORE memory_skill_observability root;
+- keep Memory / Skill Observability as an extension of existing SERVER observability;
+- preserve v5 requirements by implementing retrieval / promotion / conflict / adapter selection / summary / preview metrics in the corrected server location.
+
+This prevents duplicate observability roots and keeps the current architecture aligned with the corrected roadmap.
+
