@@ -3,20 +3,26 @@ from __future__ import annotations
 from MAKSIMAR_SERVER.DASHBOARD_READ_ONLY_VIEWS import (
     build_dashboard_read_only_views_contract,
 )
+from MAKSIMAR_SERVER.DASHBOARD_READ_ONLY_VIEWS.memory_registry_views import (
+    build_memory_registry_view_contract,
+)
 
 
 def test_dashboard_read_only_views_contract_builds() -> None:
     """Dashboard read-only views contract should build successfully."""
-    contract = build_dashboard_read_only_views_contract()
 
-    assert contract.total_entries == 2
-    assert contract.active_entries == 2
-    assert contract.multilingual_ready_entries == 2
-    assert contract.explanation_available_entries == 2
+    contract = build_dashboard_read_only_views_contract()
+    memory_registry_views = build_memory_registry_view_contract()
+
+    assert contract.total_entries == 2 + memory_registry_views.total_views
+    assert contract.active_entries == contract.total_entries
+    assert contract.multilingual_ready_entries == contract.total_entries
+    assert contract.explanation_available_entries == contract.total_entries
 
 
 def test_dashboard_read_only_views_contract_contains_expected_memory_view() -> None:
     """Dashboard read-only views contract should expose expected memory dashboard view."""
+
     contract = build_dashboard_read_only_views_contract()
     entry = contract.entries[0]
 
@@ -31,6 +37,7 @@ def test_dashboard_read_only_views_contract_contains_expected_memory_view() -> N
 
 def test_dashboard_read_only_views_contract_contains_expected_skill_view() -> None:
     """Dashboard read-only views contract should expose expected skill dashboard view."""
+
     contract = build_dashboard_read_only_views_contract()
     entry = contract.entries[1]
 
@@ -45,6 +52,7 @@ def test_dashboard_read_only_views_contract_contains_expected_skill_view() -> No
 
 def test_dashboard_read_only_views_contract_preserves_read_only_and_explanation_flags() -> None:
     """Dashboard read-only views should preserve read-only and explanation semantics."""
+
     contract = build_dashboard_read_only_views_contract()
 
     for entry in contract.entries:
