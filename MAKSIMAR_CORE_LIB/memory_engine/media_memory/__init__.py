@@ -1,3 +1,13 @@
+from MAKSIMAR_CORE_LIB.memory_engine.media_memory.media_storage_binding_builder import (
+    build_media_storage_binding_contract,
+)
+from MAKSIMAR_CORE_LIB.memory_engine.media_memory.media_storage_binding_models import (
+    MediaStorageBindingContract,
+    MediaStorageBindingEntry,
+)
+from MAKSIMAR_CORE_LIB.memory_engine.media_memory.media_storage_binding_preview_builder import (
+    build_media_storage_binding_preview,
+)
 from MAKSIMAR_CORE_LIB.memory_engine.media_memory.artifact_dedup_models import (
     ArtifactDedupContract,
     ArtifactDedupDecision,
@@ -36,6 +46,10 @@ from MAKSIMAR_CORE_LIB.memory_engine.media_memory.project_output_artifact_models
 )
 
 __all__ = [
+    "build_media_storage_binding_preview",
+    "build_media_storage_binding_contract",
+    "MediaStorageBindingEntry",
+    "MediaStorageBindingContract",
     "ArtifactDedupContract",
     "ArtifactDedupDecision",
     "DatasetArtifactMemory",
