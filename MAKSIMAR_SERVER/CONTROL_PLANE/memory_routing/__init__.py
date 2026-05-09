@@ -1,3 +1,13 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.evidence_source_chain_models import (
+    EvidenceSourceChainContract,
+    EvidenceSourceChainEntry,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.evidence_source_chain_builder import (
+    build_evidence_source_chain_contract,
+)
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.evidence_source_chain_preview import (
+    build_evidence_source_chain_preview,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_backend_policy_gate import (
     RetrievalBackendCandidate,
     RetrievalBackendPolicyEntry,
@@ -63,6 +73,10 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.retrieval_trace_builder import
 )
 
 __all__ = [
+    "build_evidence_source_chain_preview",
+    "build_evidence_source_chain_contract",
+    "EvidenceSourceChainEntry",
+    "EvidenceSourceChainContract",
     "build_retrieval_phase_readiness",
     "build_retrieval_backend_policy_gate",
     "RetrievalPhaseReadiness",
