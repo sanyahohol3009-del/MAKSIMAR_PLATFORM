@@ -4,6 +4,13 @@
 
 PHASE 4.1 Batch 2 принят.
 
+## Roadmap reconciliation
+
+Primary roadmap: v5.1 corrected.
+Control roadmap: old v5.
+
+PHASE 4.1 продолжает Tenant / Regulatory / Policy Expansion.
+
 ## Добавлено
 
 - enterprise_policy_memory_models.py
