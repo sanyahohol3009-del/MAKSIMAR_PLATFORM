@@ -13,6 +13,66 @@ from MAKSIMAR_CORE_LIB.display_topology.display_topology_contract import (
 )
 
 _LAZY_EXPORTS = {
+    "build_display_assignment_binding_contract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_assignment_binding_models",
+        "build_display_assignment_binding_contract",
+    ),
+    "build_display_capability_binding_contract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_capability_models",
+        "build_display_capability_binding_contract",
+    ),
+    "build_zone_layout_contract": (
+        "MAKSIMAR_CORE_LIB.display_topology.zone_layout_models",
+        "build_zone_layout_contract",
+    ),
+    "build_display_role_binding_contract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_role_models",
+        "build_display_role_binding_contract",
+    ),
+    "build_display_registry_contract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_registry_models",
+        "build_display_registry_contract",
+    ),
+    "DisplayAssignmentBindingEntry": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_assignment_binding_models",
+        "DisplayAssignmentBindingEntry",
+    ),
+    "DisplayAssignmentBindingContract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_assignment_binding_models",
+        "DisplayAssignmentBindingContract",
+    ),
+    "DisplayCapabilityBindingEntry": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_capability_models",
+        "DisplayCapabilityBindingEntry",
+    ),
+    "DisplayCapabilityBindingContract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_capability_models",
+        "DisplayCapabilityBindingContract",
+    ),
+    "ZoneLayoutEntry": (
+        "MAKSIMAR_CORE_LIB.display_topology.zone_layout_models",
+        "ZoneLayoutEntry",
+    ),
+    "ZoneLayoutContract": (
+        "MAKSIMAR_CORE_LIB.display_topology.zone_layout_models",
+        "ZoneLayoutContract",
+    ),
+    "DisplayRoleBindingEntry": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_role_models",
+        "DisplayRoleBindingEntry",
+    ),
+    "DisplayRoleBindingContract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_role_models",
+        "DisplayRoleBindingContract",
+    ),
+    "DisplayRegistryEntry": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_registry_models",
+        "DisplayRegistryEntry",
+    ),
+    "DisplayRegistryContract": (
+        "MAKSIMAR_CORE_LIB.display_topology.display_registry_models",
+        "DisplayRegistryContract",
+    ),
     "DisplayTopologyPhaseReadiness": (
         "MAKSIMAR_CORE_LIB.display_topology.display_topology_phase_readiness",
         "DisplayTopologyPhaseReadiness",
