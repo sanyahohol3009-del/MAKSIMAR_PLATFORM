@@ -11,6 +11,9 @@ from MAKSIMAR_SERVER.DISPLAY_ORCHESTRATION.memory_presentation.panel_resolution_
 from MAKSIMAR_SERVER.DISPLAY_ORCHESTRATION.memory_presentation.presentation_request_models import (
     build_presentation_request_contract,
 )
+from MAKSIMAR_SERVER.DISPLAY_ORCHESTRATION.memory_presentation.presentation_router import (
+    build_presentation_router_contract,
+)
 from MAKSIMAR_SERVER.DISPLAY_ORCHESTRATION.memory_presentation.view_resolution_models import (
     build_view_resolution_contract,
 )
@@ -21,16 +24,24 @@ def build_presentation_summary() -> Dict[str, object]:
     views = build_view_resolution_contract()
     panels = build_panel_resolution_contract()
     targets = build_display_target_selection_contract()
+    router = build_presentation_router_contract()
 
     summary_ready = (
         requests.ready_requests == requests.total_requests
         and requests.action_execution_allowed_requests == 0
         and requests.direct_display_switching_allowed_requests == 0
         and views.ready_resolutions == views.total_resolutions
+        and views.source_bound_resolutions == views.total_resolutions
         and panels.ready_panels == panels.total_panels
+        and panels.source_bound_panels == panels.total_panels
         and panels.action_execution_allowed_panels == 0
         and targets.ready_selections == targets.total_selections
         and targets.direct_display_switching_allowed_selections == 0
+        and router.ready_routes == router.total_routes
+        and router.source_bound_routes == router.total_routes
+        and router.registry_routed_routes == router.total_routes
+        and router.action_execution_allowed_routes == 0
+        and router.direct_display_switching_allowed_routes == 0
     )
 
     return {
@@ -44,10 +55,19 @@ def build_presentation_summary() -> Dict[str, object]:
         "view_source_bound_resolutions": views.source_bound_resolutions,
         "panel_resolutions": panels.total_panels,
         "panel_ready_resolutions": panels.ready_panels,
+        "panel_dashboard_bound_resolutions": panels.dashboard_bound_panels,
         "panel_source_bound_resolutions": panels.source_bound_panels,
         "panel_action_execution_allowed": panels.action_execution_allowed_panels,
         "display_target_selections": targets.total_selections,
         "display_target_ready_selections": targets.ready_selections,
         "display_target_direct_switching_allowed": targets.direct_display_switching_allowed_selections,
+        "presentation_routes": router.total_routes,
+        "presentation_ready_routes": router.ready_routes,
+        "presentation_dashboard_bound_routes": router.dashboard_bound_routes,
+        "presentation_route_bound_routes": router.route_bound_routes,
+        "presentation_source_bound_routes": router.source_bound_routes,
+        "presentation_registry_routed_routes": router.registry_routed_routes,
+        "presentation_action_execution_allowed_routes": router.action_execution_allowed_routes,
+        "presentation_direct_display_switching_allowed_routes": router.direct_display_switching_allowed_routes,
         "summary_ready": summary_ready,
     }
