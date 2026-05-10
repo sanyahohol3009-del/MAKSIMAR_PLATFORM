@@ -8,6 +8,17 @@ from MAKSIMAR_CORE_LIB.project_artifact_memory.model_repository_models import (
     ModelRepositoryEntry,
     build_model_repository_contract,
 )
+from MAKSIMAR_CORE_LIB.project_artifact_memory.project_artifact_binding_models import (
+    ProjectArtifactBindingContract,
+    ProjectArtifactBindingEntry,
+    build_project_artifact_binding_contract,
+)
+from MAKSIMAR_CORE_LIB.project_artifact_memory.project_artifact_preview_builder import (
+    build_project_artifact_preview,
+)
+from MAKSIMAR_CORE_LIB.project_artifact_memory.project_artifact_summary_builder import (
+    build_project_artifact_summary,
+)
 from MAKSIMAR_CORE_LIB.project_artifact_memory.project_workspace_models import (
     ProjectWorkspaceContract,
     ProjectWorkspaceEntry,
@@ -19,9 +30,14 @@ __all__ = [
     "KnowledgeBaseEntry",
     "ModelRepositoryContract",
     "ModelRepositoryEntry",
+    "ProjectArtifactBindingContract",
+    "ProjectArtifactBindingEntry",
     "ProjectWorkspaceContract",
     "ProjectWorkspaceEntry",
     "build_knowledge_base_contract",
     "build_model_repository_contract",
+    "build_project_artifact_binding_contract",
+    "build_project_artifact_preview",
+    "build_project_artifact_summary",
     "build_project_workspace_contract",
 ]
