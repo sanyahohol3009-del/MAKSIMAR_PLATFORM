@@ -8,7 +8,7 @@ import signal
 import time
 from pathlib import Path
 
-from heartbeat_io import atomic_write_json, build_heartbeat
+from CORE_ROOT.heartbeat_io import atomic_write_json, build_heartbeat
 
 
 class HeartbeatWriter:
