@@ -11,6 +11,18 @@ from MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_view_binding_models im
 )
 
 _LAZY_EXPORTS = {
+    "build_explainable_phase_readiness": (
+        "MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_phase_readiness",
+        "build_explainable_phase_readiness",
+    ),
+    "build_explainable_phase_preview": (
+        "MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_phase_readiness",
+        "build_explainable_phase_preview",
+    ),
+    "ExplainablePhaseReadiness": (
+        "MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_phase_readiness",
+        "ExplainablePhaseReadiness",
+    ),
     "ExplainablePresentationBindingContract": (
         "MAKSIMAR_SERVER.EXPLAINABLE_VIEW_BINDING.explainable_presentation_binding_models",
         "ExplainablePresentationBindingContract",
