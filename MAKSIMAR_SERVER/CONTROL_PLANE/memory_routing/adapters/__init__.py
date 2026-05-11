@@ -1,3 +1,10 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_risk_review_classification import (
+    MemPalaceRiskFindingClassification,
+    MemPalaceRiskReviewClassificationReport,
+    build_mempalace_risk_review_classification_preview,
+    build_mempalace_risk_review_classification_report,
+    write_mempalace_risk_review_classification_report,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_real_backend_security_boundary import (
     MemPalaceFilesystemBoundary,
     MemPalaceNetworkBoundary,
@@ -62,6 +69,11 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_write_model
 )
 
 __all__ = [
+    "write_mempalace_risk_review_classification_report",
+    "build_mempalace_risk_review_classification_report",
+    "build_mempalace_risk_review_classification_preview",
+    "MemPalaceRiskReviewClassificationReport",
+    "MemPalaceRiskFindingClassification",
     "build_mempalace_real_backend_security_boundary_preview",
     "build_mempalace_real_backend_security_boundary",
     "build_mempalace_process_boundary",

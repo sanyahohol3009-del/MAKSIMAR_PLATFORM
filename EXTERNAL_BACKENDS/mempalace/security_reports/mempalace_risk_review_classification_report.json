@@ -1,0 +1,1005 @@
+{
+  "report_id": "mempalace_risk_review_classification_001",
+  "total_findings": 98,
+  "classified_findings": 98,
+  "vendor_tests_findings": 64,
+  "vendor_benchmark_findings": 11,
+  "sandbox_allowed_findings": 2,
+  "forbidden_until_review_findings": 21,
+  "manual_review_findings": 0,
+  "production_surface_findings": 23,
+  "network_sensitive_findings": 8,
+  "subprocess_sensitive_findings": 8,
+  "destructive_fs_sensitive_findings": 5,
+  "pickle_sensitive_findings": 2,
+  "hard_gate_passed": true,
+  "manual_security_review_required": true,
+  "manual_security_review_completed": false,
+  "real_backend_enablement_allowed": false,
+  "real_backend_query_allowed": false,
+  "canonical_write_allowed": false,
+  "runtime_mutation_allowed": false,
+  "classification_ready": true,
+  "entries": [
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "socket",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "socket",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "benchmarks/mine_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_benchmark_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_benchmark_surface",
+      "reason": "Finding is inside vendor benchmarks and must not be used by MAKSIMAR runtime adapter."
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle",
+      "category": "serialization_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "allowed_only_with_sandbox_boundary",
+      "reason": "Pickle usage can be unsafe with untrusted data and requires sandbox-only data policy."
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle",
+      "category": "serialization_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "allowed_only_with_sandbox_boundary",
+      "reason": "Pickle usage can be unsafe with untrusted data and requires sandbox-only data policy."
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "destructive_filesystem_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Destructive filesystem operations are blocked outside sandbox_data."
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "destructive_filesystem_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Destructive filesystem operations are blocked outside sandbox_data."
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.error",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.request",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.parse",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.request",
+      "category": "network_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "high_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Network-capable code requires explicit network policy review before real backend query execution."
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "destructive_filesystem_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Destructive filesystem operations are blocked outside sandbox_data."
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "destructive_filesystem_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Destructive filesystem operations are blocked outside sandbox_data."
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "destructive_filesystem_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Destructive filesystem operations are blocked outside sandbox_data."
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "process_execution_sensitive",
+      "runtime_surface": "production_package_surface",
+      "severity": "critical_review",
+      "decision": "forbidden_for_real_backend_until_manual_review",
+      "reason": "Process/shell execution is blocked by the MemPalace process boundary."
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "os.unlink",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "subprocess.check_output",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_import",
+      "detail": "pickle",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_closets.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "os.remove",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_import",
+      "detail": "subprocess",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run",
+      "category": "vendor_test_surface",
+      "runtime_surface": "excluded_from_maksimar_runtime",
+      "severity": "review_info",
+      "decision": "excluded_vendor_test_surface",
+      "reason": "Finding is inside vendor tests and EXTERNAL_BACKENDS is excluded from MAKSIMAR pytest/runtime collection."
+    }
+  ]
+}
