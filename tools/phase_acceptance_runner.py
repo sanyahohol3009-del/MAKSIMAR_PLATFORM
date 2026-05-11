@@ -21,6 +21,7 @@ def main() -> int:
     parser.add_argument("--full-auto", action="store_true")
     parser.add_argument("--tb", default="short")
     parser.add_argument("--skip-pre-step", action="store_true")
+    parser.add_argument("--skip-post-step", action="store_true")
     args = parser.parse_args()
 
     run(["git", "restore", ".pymon"], "RESTORE GENERATED MONITOR FILE")
@@ -58,6 +59,9 @@ def main() -> int:
             ],
             f"{args.phase} FULL AUTO PARALLEL",
         )
+
+    if not args.skip_post_step:
+        run([sys.executable, "tools/roadmap_post_step_drift_check.py"], f"{args.phase} ROADMAP POST-STEP FULL DRIFT CHECK")
 
     run(["git", "status", "--short"], f"{args.phase} STATUS")
     return 0
