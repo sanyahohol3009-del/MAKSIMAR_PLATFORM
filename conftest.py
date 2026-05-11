@@ -69,3 +69,53 @@ except NameError:
 for _external_path in ("EXTERNAL_BACKENDS",):
     if _external_path not in collect_ignore:
         collect_ignore.append(_external_path)
+
+# MAKSIMAR pytest drift guard.
+# Runs on every pytest session without spawning nested pytest.
+def _maksimar_pytest_drift_guard_run(command: list[str], label: str) -> None:
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parent
+    completed = subprocess.run(
+        command,
+        cwd=root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    if completed.returncode != 0:
+        output = completed.stdout + completed.stderr
+        raise RuntimeError(f"{label} failed:\n{output}")
+
+
+def pytest_sessionstart(session):  # type: ignore[no-untyped-def]
+    import os
+    import sys
+
+    if os.environ.get("MAKSIMAR_SKIP_PYTEST_DRIFT_GUARD") == "1":
+        return
+
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        return
+
+    if getattr(session.config, "workerinput", None) is not None:
+        return
+
+    _maksimar_pytest_drift_guard_run(
+        [sys.executable, "tools/git_stage_guard.py", "--staged", "--worktree-summary"],
+        "pytest git stage guard",
+    )
+
+    _maksimar_pytest_drift_guard_run(
+        [sys.executable, "tools/roadmap_pre_step_check.py", "--inventory-only"],
+        "pytest roadmap pre-step inventory check",
+    )
+
+    _maksimar_pytest_drift_guard_run(
+        [sys.executable, "tools/roadmap_post_step_drift_check.py"],
+        "pytest roadmap post-step full drift check",
+    )
