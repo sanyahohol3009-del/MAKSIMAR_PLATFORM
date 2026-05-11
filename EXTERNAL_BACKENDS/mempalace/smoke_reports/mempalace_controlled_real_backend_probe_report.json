@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "probe_id": "mempalace_controlled_real_backend_probe_001",
+  "timestamp_utc": "2026-05-11T17:18:37.195926+00:00",
+  "approval_report": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_real_backend_approval_envelope_report.json",
+  "sandbox_dir": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/sandbox_data/controlled_probe",
+  "venv_python": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/venv/bin/python",
+  "probe_harness_used_subprocess": true,
+  "backend_subprocess_allowed": false,
+  "backend_network_allowed": false,
+  "backend_destructive_filesystem_allowed": false,
+  "canonical_write_allowed": false,
+  "runtime_mutation_allowed": false,
+  "full_real_backend_enablement_allowed": false,
+  "general_real_backend_query_allowed": false,
+  "controlled_probe_success": true,
+  "child_returncode": 0,
+  "child_stdout_head": "{\"import_success\": true, \"module_name\": \"mempalace\", \"module_file\": \"/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/source/mempalace/__init__.py\", \"cwd\": \"/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/sandbox_data/controlled_probe\", \"python_executable\": \"/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/venv/bin/python\", \"denied_env_present_after_scrub\": [], \"network_operations_blocked\": true, \"subprocess_operations_blocked\": true, \"destructive_filesystem_operations_blocked\": true, \"canonical_write_allowed\": false, \"runtime_mutation_allowed\": false}\n",
+  "child_stderr_head": "",
+  "child_payload": {
+    "import_success": true,
+    "module_name": "mempalace",
+    "module_file": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/source/mempalace/__init__.py",
+    "cwd": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/sandbox_data/controlled_probe",
+    "python_executable": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/venv/bin/python",
+    "denied_env_present_after_scrub": [],
+    "network_operations_blocked": true,
+    "subprocess_operations_blocked": true,
+    "destructive_filesystem_operations_blocked": true,
+    "canonical_write_allowed": false,
+    "runtime_mutation_allowed": false
+  }
+}
