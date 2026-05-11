@@ -1,0 +1,21 @@
+{
+  "binding_id": "mempalace_probe_result_binding_001",
+  "binding_ready": true,
+  "controlled_probe_success": true,
+  "real_import_verified": true,
+  "vendor_venv_used": true,
+  "denied_env_scrubbed": true,
+  "network_blocked": true,
+  "subprocess_blocked": true,
+  "destructive_filesystem_blocked": true,
+  "read_only_adapter_binding_allowed": true,
+  "full_real_backend_enablement_allowed": false,
+  "general_real_backend_query_allowed": false,
+  "canonical_write_allowed": false,
+  "runtime_mutation_allowed": false,
+  "evidence_pack": [
+    "EXTERNAL_BACKENDS/mempalace/smoke_reports/mempalace_controlled_real_backend_probe_report.json",
+    "EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_real_backend_approval_envelope_report.json",
+    "EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_vendor_gate_report.json"
+  ]
+}

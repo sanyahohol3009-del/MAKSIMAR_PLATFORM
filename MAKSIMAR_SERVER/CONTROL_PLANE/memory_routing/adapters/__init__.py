@@ -1,3 +1,9 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_probe_result_binding import (
+    MemPalaceProbeResultBinding,
+    build_mempalace_probe_result_binding,
+    build_mempalace_probe_result_binding_preview,
+    write_mempalace_probe_result_binding_report,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_real_backend_approval_envelope import (
     MemPalaceRealBackendApprovalEnvelope,
     build_mempalace_real_backend_approval_envelope,
@@ -75,6 +81,10 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_write_model
 )
 
 __all__ = [
+    "write_mempalace_probe_result_binding_report",
+    "build_mempalace_probe_result_binding_preview",
+    "build_mempalace_probe_result_binding",
+    "MemPalaceProbeResultBinding",
     "write_mempalace_real_backend_approval_envelope_report",
     "build_mempalace_real_backend_approval_envelope_preview",
     "build_mempalace_real_backend_approval_envelope",
