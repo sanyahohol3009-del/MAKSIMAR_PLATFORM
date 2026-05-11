@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "===== PRE-COMMIT: MAKSIMAR STAGE GUARD ====="
+./.venv/bin/python tools/git_stage_guard.py --staged --worktree-summary
