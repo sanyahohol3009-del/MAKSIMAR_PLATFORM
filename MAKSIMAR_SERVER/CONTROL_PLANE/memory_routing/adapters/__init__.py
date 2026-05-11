@@ -1,3 +1,9 @@
+from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_real_backend_approval_envelope import (
+    MemPalaceRealBackendApprovalEnvelope,
+    build_mempalace_real_backend_approval_envelope,
+    build_mempalace_real_backend_approval_envelope_preview,
+    write_mempalace_real_backend_approval_envelope_report,
+)
 from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_risk_review_classification import (
     MemPalaceRiskFindingClassification,
     MemPalaceRiskReviewClassificationReport,
@@ -69,6 +75,10 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_write_model
 )
 
 __all__ = [
+    "write_mempalace_real_backend_approval_envelope_report",
+    "build_mempalace_real_backend_approval_envelope_preview",
+    "build_mempalace_real_backend_approval_envelope",
+    "MemPalaceRealBackendApprovalEnvelope",
     "write_mempalace_risk_review_classification_report",
     "build_mempalace_risk_review_classification_report",
     "build_mempalace_risk_review_classification_preview",

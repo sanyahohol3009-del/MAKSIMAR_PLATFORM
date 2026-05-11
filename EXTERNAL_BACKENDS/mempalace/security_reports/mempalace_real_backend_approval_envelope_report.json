@@ -1,0 +1,36 @@
+{
+  "envelope_id": "mempalace_real_backend_approval_envelope_001",
+  "hard_gate_passed": true,
+  "security_boundary_ready": true,
+  "classification_ready": true,
+  "manual_security_review_required": true,
+  "manual_security_review_completed": true,
+  "controlled_real_backend_probe_allowed": true,
+  "full_real_backend_enablement_allowed": false,
+  "general_real_backend_query_allowed": false,
+  "network_allowed": false,
+  "subprocess_allowed": false,
+  "shell_execution_allowed": false,
+  "destructive_fs_allowed": false,
+  "secrets_access_allowed": false,
+  "canonical_write_allowed": false,
+  "runtime_mutation_allowed": false,
+  "auto_promotion_allowed": false,
+  "auto_conflict_resolution_allowed": false,
+  "allowed_probe_scope": "single_controlled_import_and_sandbox_query_probe_only",
+  "blocked_runtime_surfaces": [
+    "network_sensitive_runtime_paths",
+    "process_execution_sensitive_runtime_paths",
+    "destructive_filesystem_runtime_paths",
+    "canonical_memory_paths",
+    "runtime_state_paths",
+    "project_secret_paths"
+  ],
+  "required_evidence_reports": [
+    "EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_vendor_gate_report.json",
+    "EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_risk_review_classification_report.json",
+    "EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_integrity_security_report.json",
+    "EXTERNAL_BACKENDS/mempalace/smoke_reports/mempalace_sandbox_smoke_report.json"
+  ],
+  "approval_envelope_ready": true
+}
