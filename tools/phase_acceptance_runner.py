@@ -20,9 +20,13 @@ def main() -> int:
     parser.add_argument("--related-tests", nargs="*", default=[])
     parser.add_argument("--full-auto", action="store_true")
     parser.add_argument("--tb", default="short")
+    parser.add_argument("--skip-pre-step", action="store_true")
     args = parser.parse_args()
 
     run(["git", "restore", ".pymon"], "RESTORE GENERATED MONITOR FILE")
+
+    if not args.skip_pre_step:
+        run([sys.executable, "tools/roadmap_pre_step_check.py"], f"{args.phase} ROADMAP PRE-STEP CHECK")
 
     if args.compile:
         run([sys.executable, "-m", "py_compile", *args.compile], f"PY_COMPILE {args.phase}")

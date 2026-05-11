@@ -4,6 +4,9 @@ set -eu
 echo "===== PRE-PUSH: MAKSIMAR STAGE GUARD ====="
 ./.venv/bin/python tools/git_stage_guard.py --staged --worktree-summary
 
+echo "===== PRE-PUSH: ROADMAP PRE-STEP CHECK ====="
+./.venv/bin/python tools/roadmap_pre_step_check.py
+
 if [ "${MAKSIMAR_PRE_PUSH_FULL_AUTO:-0}" = "1" ]; then
   echo "===== PRE-PUSH: FULL AUTO ENABLED ====="
   ./.venv/bin/python -m pytest -n auto --dist=loadfile --import-mode=importlib -q --tb=short
