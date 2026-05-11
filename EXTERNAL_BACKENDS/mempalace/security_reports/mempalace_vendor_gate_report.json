@@ -1,0 +1,698 @@
+{
+  "schema_version": 1,
+  "vendor_name": "MemPalace",
+  "timestamp_utc": "2026-05-11T15:06:15.138419+00:00",
+  "source_dir": "EXTERNAL_BACKENDS/mempalace/source",
+  "expected_remote": "https://github.com/MemPalace/mempalace.git",
+  "observed_remote": "https://github.com/MemPalace/mempalace.git",
+  "official_remote_verified": true,
+  "commit": "bc5c354ec1cc080f1f1faa639aebae253658759e",
+  "commit_seen_in_remote_refs": true,
+  "commit_in_remote_ref_tips": false,
+  "commit_matches_version_lock": true,
+  "version_lock_paths": [
+    "EXTERNAL_BACKENDS/mempalace/manifests/mempalace_version_lock.json"
+  ],
+  "tree_sha": "7e3371c400f9df9578e6e65d410397cd48a1792a",
+  "archive_sha256": "5c10a5b85625c496cbcbfa52c93d36a50f48f31dad41fc8677764d71736f6ffc",
+  "tracked_file_count": 291,
+  "python_file_count": 141,
+  "required_files_present": {
+    "README.md": true,
+    "pyproject.toml": true
+  },
+  "non_empty_project": true,
+  "external_code_not_committed": true,
+  "canonical_memory_access": false,
+  "runtime_mutation_allowed": false,
+  "forbidden_coupling_findings_count": 0,
+  "forbidden_coupling_findings": [],
+  "risky_static_findings_count": 98,
+  "risky_static_findings": [
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "socket"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "socket"
+    },
+    {
+      "file": "benchmarks/mine_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "os.unlink"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "subprocess.check_output"
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_closets.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "os.remove"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    }
+  ],
+  "scanner_results": {
+    "bandit": {
+      "command": [
+        "/home/aleksandr/MAKSIMAR_PLATFORM/.venv/bin/python",
+        "-m",
+        "bandit",
+        "-r",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "-f",
+        "json",
+        "-o",
+        "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_bandit_report.json"
+      ],
+      "available": true,
+      "returncode": 1,
+      "stdout_head": "Working... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:06\n",
+      "stderr_head": "[main]\tINFO\tprofile include tests: None\n[main]\tINFO\tprofile exclude tests: None\n[main]\tINFO\tcli include tests: None\n[main]\tINFO\tcli exclude tests: None\n[json]\tINFO\tJSON output written to file: EXTERNAL_BACKENDS/mempalace/security_reports/vendor_bandit_report.json\n",
+      "output_path": null,
+      "skipped_reason": null
+    },
+    "pip_audit": {
+      "command": [
+        "EXTERNAL_BACKENDS/mempalace/venv/bin/python",
+        "-m",
+        "pip_audit",
+        "-f",
+        "json",
+        "-o",
+        "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_pip_audit_report.json"
+      ],
+      "available": true,
+      "returncode": 0,
+      "stdout_head": "",
+      "stderr_head": "WARNING:pip_audit._dependency_source.pip:pip-audit will run pip against /home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/venv/bin/python, but you have a virtual environment loaded at /home/aleksandr/MAKSIMAR_PLATFORM/.venv. This may result in unintuitive audits, since your local environment will not be audited. You can forcefully override this behavior by setting PIPAPI_PYTHON_LOCATION to the location of your virtual environment's Python interpreter.\nNo known vulnerabilities found\n",
+      "output_path": null,
+      "skipped_reason": null
+    },
+    "clamscan": {
+      "command": [
+        "clamscan",
+        "-r",
+        "EXTERNAL_BACKENDS/mempalace/source"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_clamscan_report.json",
+      "skipped_reason": "clamscan not installed"
+    },
+    "detect_secrets": {
+      "command": [
+        "/home/aleksandr/MAKSIMAR_PLATFORM/.venv/bin/python",
+        "-m",
+        "detect_secrets",
+        "scan",
+        "EXTERNAL_BACKENDS/mempalace/source"
+      ],
+      "available": true,
+      "returncode": 1,
+      "stdout_head": "",
+      "stderr_head": "/home/aleksandr/MAKSIMAR_PLATFORM/.venv/bin/python: No module named detect_secrets\n",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_detect_secrets_report.json",
+      "skipped_reason": null
+    },
+    "semgrep": {
+      "command": [
+        "/home/aleksandr/MAKSIMAR_PLATFORM/.venv/bin/python",
+        "-m",
+        "semgrep",
+        "scan",
+        "--json",
+        "EXTERNAL_BACKENDS/mempalace/source"
+      ],
+      "available": true,
+      "returncode": 1,
+      "stdout_head": "",
+      "stderr_head": "/home/aleksandr/MAKSIMAR_PLATFORM/.venv/bin/python: No module named semgrep\n",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_semgrep_report.json",
+      "skipped_reason": null
+    },
+    "gitleaks": {
+      "command": [
+        "gitleaks",
+        "detect",
+        "--source",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "--report-format",
+        "json",
+        "--report-path",
+        "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_gitleaks_report.json",
+        "--no-banner"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": null,
+      "skipped_reason": "gitleaks not installed"
+    },
+    "trufflehog": {
+      "command": [
+        "trufflehog",
+        "filesystem",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "--json"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_trufflehog_report.json",
+      "skipped_reason": "trufflehog not installed"
+    },
+    "osv_scanner": {
+      "command": [
+        "osv-scanner",
+        "scan",
+        "source",
+        "-r",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "--format",
+        "json"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_osv_scanner_report.json",
+      "skipped_reason": "osv-scanner not installed"
+    },
+    "syft": {
+      "command": [
+        "syft",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "-o",
+        "json"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_syft_sbom.json",
+      "skipped_reason": "syft not installed"
+    },
+    "grype": {
+      "command": [
+        "grype",
+        "EXTERNAL_BACKENDS/mempalace/source",
+        "-o",
+        "json"
+      ],
+      "available": false,
+      "returncode": null,
+      "stdout_head": "",
+      "stderr_head": "",
+      "output_path": "EXTERNAL_BACKENDS/mempalace/security_reports/vendor_grype_report.json",
+      "skipped_reason": "grype not installed"
+    }
+  },
+  "hard_gate_passed": true,
+  "manual_security_review_required": true,
+  "hard_blockers": [],
+  "manual_review_reasons": [
+    "risky_static_findings_present",
+    "bandit_returned_1",
+    "clamscan_skipped",
+    "detect_secrets_returned_1",
+    "semgrep_returned_1",
+    "gitleaks_skipped",
+    "trufflehog_skipped",
+    "osv_scanner_skipped",
+    "syft_skipped",
+    "grype_skipped"
+  ]
+}
