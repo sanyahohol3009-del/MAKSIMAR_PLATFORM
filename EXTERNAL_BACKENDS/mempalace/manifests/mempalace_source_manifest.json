@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "vendor": "MemPalace",
+  "official_source_verified": true,
+  "official_git_remote": "https://github.com/MemPalace/mempalace.git",
+  "observed_git_remote": "https://github.com/MemPalace/mempalace.git",
+  "docs_site": "mempalaceofficial.com",
+  "pypi_package": "mempalace",
+  "impostor_domains_blocked": [
+    "mempalace.tech"
+  ],
+  "download_timestamp_utc": "2026-05-11T00:06:39.900148+00:00",
+  "external_code_not_committed": true,
+  "canonical_memory_access": false,
+  "runtime_mutation_allowed": false,
+  "network_access_reviewed": true,
+  "sandbox_data_only": true
+}

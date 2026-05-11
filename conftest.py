@@ -58,3 +58,14 @@ def _patch_pytest_monitor_insert_session() -> None:
 
 
 _patch_pytest_monitor_insert_session()
+
+# External vendor sandboxes are not part of MAKSIMAR test collection.
+# They are validated only through explicit vendor acquisition smoke tests.
+try:
+    collect_ignore
+except NameError:
+    collect_ignore = []
+
+for _external_path in ("EXTERNAL_BACKENDS",):
+    if _external_path not in collect_ignore:
+        collect_ignore.append(_external_path)

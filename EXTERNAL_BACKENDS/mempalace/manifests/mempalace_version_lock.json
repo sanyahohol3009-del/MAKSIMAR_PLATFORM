@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "vendor": "MemPalace",
+  "version_or_commit_pinned": true,
+  "git_remote": "https://github.com/MemPalace/mempalace.git",
+  "git_branch": "develop",
+  "git_commit": "bc5c354ec1cc080f1f1faa639aebae253658759e",
+  "install_mode": "editable_from_external_source",
+  "separate_venv": true,
+  "external_code_not_committed": true
+}

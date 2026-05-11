@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "vendor": "MemPalace",
+  "smoke_timestamp_utc": "2026-05-11T00:06:59.668181+00:00",
+  "official_source_verified": true,
+  "version_or_commit_pinned": true,
+  "external_code_not_committed": true,
+  "separate_venv": true,
+  "sandbox_data_only": true,
+  "canonical_memory_access": false,
+  "runtime_mutation_allowed": false,
+  "network_access_reviewed": true,
+  "cli_import_smoke_passed": true,
+  "adapter_fake_backend_passed": true,
+  "real_backend_query_smoke_passed": true,
+  "python_executable": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/venv/bin/python",
+  "import_module": "mempalace",
+  "import_path": "/home/aleksandr/MAKSIMAR_PLATFORM/EXTERNAL_BACKENDS/mempalace/source/mempalace/__init__.py",
+  "installed_version": "3.3.5",
+  "cli_path": null,
+  "cli_help_returncode": null
+}

@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "timestamp_utc": "2026-05-11T00:13:16.938117+00:00",
+  "official_remote_expected": "https://github.com/MemPalace/mempalace.git",
+  "official_remote_observed": "https://github.com/MemPalace/mempalace.git",
+  "official_remote_verified": true,
+  "commit": "bc5c354ec1cc080f1f1faa639aebae253658759e",
+  "commit_seen_in_remote_refs": true,
+  "tree_sha": "7e3371c400f9df9578e6e65d410397cd48a1792a",
+  "archive_sha256": "5c10a5b85625c496cbcbfa52c93d36a50f48f31dad41fc8677764d71736f6ffc",
+  "tracked_file_count": 291,
+  "python_file_count": 141,
+  "required_files_present": {
+    "README.md": true,
+    "pyproject.toml": true
+  },
+  "non_empty_project": true,
+  "risky_static_findings_count": 98,
+  "risky_static_findings": [
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/convomem_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_import",
+      "detail": "socket"
+    },
+    {
+      "file": "benchmarks/locomo_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "benchmarks/longmemeval_bench.py",
+      "kind": "risky_import",
+      "detail": "socket"
+    },
+    {
+      "file": "benchmarks/mine_bench.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "mempalace/backends/chroma.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/cli.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/closet_llm.py",
+      "kind": "risky_import",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/entity_registry.py",
+      "kind": "risky_import",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.Popen"
+    },
+    {
+      "file": "mempalace/hooks_cli.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.parse"
+    },
+    {
+      "file": "mempalace/llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.request"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/migrate.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "mempalace/project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "os.unlink"
+    },
+    {
+      "file": "tests/benchmarks/conftest.py",
+      "kind": "risky_call",
+      "detail": "subprocess.check_output"
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_backends.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_claude_plugin_hook_wrappers.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_closets.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_convo_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_exporter.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_hnsw_capacity.py",
+      "kind": "risky_import",
+      "detail": "pickle"
+    },
+    {
+      "file": "tests/test_hooks_cli.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_hooks_shell.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_llm_client.py",
+      "kind": "risky_import_from",
+      "detail": "urllib.error"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_server.py",
+      "kind": "risky_call",
+      "detail": "os.remove"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_mcp_stdio_protection.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_miner.py",
+      "kind": "risky_call",
+      "detail": "shutil.rmtree"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_project_scanner.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_import",
+      "detail": "subprocess"
+    },
+    {
+      "file": "tests/test_save_hook_mines.py",
+      "kind": "risky_call",
+      "detail": "subprocess.run"
+    }
+  ],
+  "external_code_not_committed_required": true,
+  "canonical_memory_access": false,
+  "runtime_mutation_allowed": false,
+  "manual_security_review_required": true
+}
