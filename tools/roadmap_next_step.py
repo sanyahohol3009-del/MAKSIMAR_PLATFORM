@@ -6,15 +6,36 @@ from pathlib import Path
 
 PHASE_5_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_5_2_final_dashboard_memory_map_acceptance_v1.md")
 PHASE_6_0_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_0_product_ready_hardening_acceptance_v1.md")
+PHASE_6_1_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_1_governance_federation_gap_pass_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
-    phase_6_closed = PHASE_6_0_ACCEPTANCE.exists()
+    phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
+    phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_closed:
+    if phase_6_1_closed:
+        current_closed_phase = "PHASE 6.1"
+        next_step = "Proposal / Audit / Approval Spine"
+        next_folder = "integration package over existing evolution/proposal/audit surfaces"
+        why = "Governance / Federation Gap Pass is present; next roadmap block is proposal/audit/approval visibility before controlled codegen."
+        required_first = [
+            "proposal inspector binding",
+            "audit inspector binding",
+            "approval read model",
+            "proposal audit summary builder",
+            "no code writing yet",
+        ]
+        do_not_start_yet = [
+            "Controlled Codegen Context",
+            "Sandbox / Simulation / Owner Review",
+            "Self-expansion",
+            "Productization",
+        ]
+    elif phase_6_0_closed:
+        current_closed_phase = "PHASE 6.0"
         next_step = "Governance / Federation Gap Pass"
-        next_folder = "MAKSIMAR_CORE_LIB/memory_engine/governance_binding/ + existing memory_policy surfaces"
+        next_folder = "MAKSIMAR_CORE_LIB/memory_policy/ + existing memory governance surfaces"
         why = "PHASE 6.0 Product-Ready Hardening is present; next roadmap block is governance/federation gap verification before Proposal/Audit."
         required_first = [
             "trust scope gap check",
@@ -31,6 +52,7 @@ def build_next_step_report() -> dict[str, object]:
             "Productization",
         ]
     else:
+        current_closed_phase = "PHASE 5.2"
         next_step = "PHASE 6.0 — Product-Ready Hardening"
         next_folder = "MAKSIMAR_SERVER/MEMORY_ACCEPTANCE/"
         why = "PHASE 5.2 Final Dashboard Memory Map is closed; next primary v5.1 block is product-ready hardening."
@@ -51,7 +73,7 @@ def build_next_step_report() -> dict[str, object]:
 
     report = {
         "roadmap_family": "memory_roadmap_v5_1",
-        "current_closed_phase": "PHASE 6.0" if phase_6_closed else "PHASE 5.2",
+        "current_closed_phase": current_closed_phase,
         "next_step": next_step,
         "next_folder": next_folder,
         "why": why,
@@ -60,6 +82,7 @@ def build_next_step_report() -> dict[str, object]:
         "audit_doc_exists": CONSOLIDATED_AUDIT.exists(),
         "phase_5_2_acceptance_exists": PHASE_5_2_ACCEPTANCE.exists(),
         "phase_6_0_acceptance_exists": PHASE_6_0_ACCEPTANCE.exists(),
+        "phase_6_1_acceptance_exists": PHASE_6_1_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
