@@ -4,8 +4,11 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+import os
+import pytest
 
 
+@pytest.mark.skipif(os.environ.get("MAKSIMAR_VENDOR_ONLINE_CHECK") != "1", reason="online vendor remote check is opt-in")
 def test_vendor_security_gate_mempalace_smoke() -> None:
     tool = Path("tools/vendor_security_gate.py")
     output = Path("EXTERNAL_BACKENDS/mempalace/security_reports/mempalace_vendor_gate_report.json")

@@ -119,3 +119,36 @@ def pytest_sessionstart(session):  # type: ignore[no-untyped-def]
         [sys.executable, "tools/roadmap_post_step_drift_check.py"],
         "pytest roadmap post-step full drift check",
     )
+
+# MAKSIMAR roadmap next-step summary.
+def pytest_terminal_summary(terminalreporter, exitstatus, config):  # type: ignore[no-untyped-def]
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    if os.environ.get("MAKSIMAR_SKIP_ROADMAP_NEXT_STEP_SUMMARY") == "1":
+        return
+
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        return
+
+    root = Path(__file__).resolve().parent
+    tool = root / "tools" / "roadmap_next_step.py"
+
+    if not tool.exists():
+        return
+
+    completed = subprocess.run(
+        [sys.executable, str(tool)],
+        cwd=root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    terminalreporter.write_sep("=", "MAKSIMAR ROADMAP NEXT STEP")
+    terminalreporter.write(completed.stdout)
+    if completed.returncode != 0:
+        terminalreporter.write(completed.stderr)
