@@ -7,14 +7,33 @@ from pathlib import Path
 PHASE_5_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_5_2_final_dashboard_memory_map_acceptance_v1.md")
 PHASE_6_0_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_0_product_ready_hardening_acceptance_v1.md")
 PHASE_6_1_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_1_governance_federation_gap_pass_acceptance_v1.md")
+PHASE_6_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_2_proposal_audit_approval_spine_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    phase_6_2_closed = PHASE_6_2_ACCEPTANCE.exists()
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_1_closed:
+    if phase_6_2_closed:
+        current_closed_phase = "PHASE 6.2"
+        next_step = "Controlled Codegen Context"
+        next_folder = "integration package over proposal/audit spine and future codegen context surfaces"
+        why = "Proposal / Audit / Approval Spine is present; next roadmap block is controlled codegen context, still without direct deploy."
+        required_first = [
+            "codegen intent models",
+            "codegen boundary models",
+            "codegen proposal builder",
+            "codegen read summary",
+            "no direct write to core",
+        ]
+        do_not_start_yet = [
+            "Sandbox / Simulation / Owner Review",
+            "Self-expansion",
+            "Productization",
+        ]
+    elif phase_6_1_closed:
         current_closed_phase = "PHASE 6.1"
         next_step = "Proposal / Audit / Approval Spine"
         next_folder = "integration package over existing evolution/proposal/audit surfaces"
@@ -83,6 +102,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_5_2_acceptance_exists": PHASE_5_2_ACCEPTANCE.exists(),
         "phase_6_0_acceptance_exists": PHASE_6_0_ACCEPTANCE.exists(),
         "phase_6_1_acceptance_exists": PHASE_6_1_ACCEPTANCE.exists(),
+        "phase_6_2_acceptance_exists": PHASE_6_2_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
