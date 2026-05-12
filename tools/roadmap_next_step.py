@@ -8,15 +8,33 @@ PHASE_5_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_5_2_final_dashbo
 PHASE_6_0_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_0_product_ready_hardening_acceptance_v1.md")
 PHASE_6_1_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_1_governance_federation_gap_pass_acceptance_v1.md")
 PHASE_6_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_2_proposal_audit_approval_spine_acceptance_v1.md")
+PHASE_6_3_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_3_controlled_codegen_context_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    phase_6_3_closed = PHASE_6_3_ACCEPTANCE.exists()
     phase_6_2_closed = PHASE_6_2_ACCEPTANCE.exists()
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_2_closed:
+    if phase_6_3_closed:
+        current_closed_phase = "PHASE 6.3"
+        next_step = "Sandbox / Simulation / Owner Review"
+        next_folder = "integration package over evolution_debug sandbox models and owner review package"
+        why = "Controlled Codegen Context is present; next roadmap block validates generated artifacts through sandbox/simulation/owner review."
+        required_first = [
+            "sandbox binding models",
+            "sandbox result reader",
+            "simulation result reader",
+            "owner review package builder",
+            "still no self-expansion",
+        ]
+        do_not_start_yet = [
+            "Self-expansion",
+            "Productization",
+        ]
+    elif phase_6_2_closed:
         current_closed_phase = "PHASE 6.2"
         next_step = "Controlled Codegen Context"
         next_folder = "integration package over proposal/audit spine and future codegen context surfaces"
@@ -90,7 +108,7 @@ def build_next_step_report() -> dict[str, object]:
             "Productization",
         ]
 
-    report = {
+    return {
         "roadmap_family": "memory_roadmap_v5_1",
         "current_closed_phase": current_closed_phase,
         "next_step": next_step,
@@ -103,10 +121,9 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_0_acceptance_exists": PHASE_6_0_ACCEPTANCE.exists(),
         "phase_6_1_acceptance_exists": PHASE_6_1_ACCEPTANCE.exists(),
         "phase_6_2_acceptance_exists": PHASE_6_2_ACCEPTANCE.exists(),
+        "phase_6_3_acceptance_exists": PHASE_6_3_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
-
-    return report
 
 
 def main() -> int:
