@@ -11,10 +11,12 @@ PHASE_6_2_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_2_proposal_aud
 PHASE_6_3_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_3_controlled_codegen_context_acceptance_v1.md")
 PHASE_6_4_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_4_sandbox_simulation_owner_review_acceptance_v1.md")
 PHASE_6_5_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_5_bootstrapped_self_expansion_gate_acceptance_v1.md")
+PHASE_6_6_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_6_client_metrics_learning_input_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    phase_6_6_closed = PHASE_6_6_ACCEPTANCE.exists()
     phase_6_5_closed = PHASE_6_5_ACCEPTANCE.exists()
     phase_6_4_closed = PHASE_6_4_ACCEPTANCE.exists()
     phase_6_3_closed = PHASE_6_3_ACCEPTANCE.exists()
@@ -22,7 +24,22 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_5_closed:
+    if phase_6_6_closed:
+        current_closed_phase = "PHASE 6.6"
+        next_step = "Polyglot / Model / Worker Bridge"
+        next_folder = "bridge package over model routing, language artifacts and worker boundaries"
+        why = "Client Metrics / Learning Input is present; next roadmap block is polyglot/model/worker bridge before productization."
+        required_first = [
+            "artifact language models",
+            "language bridge models",
+            "model worker bridge models",
+            "build/test bridge read model",
+            "no productization yet",
+        ]
+        do_not_start_yet = [
+            "Productization",
+        ]
+    elif phase_6_5_closed:
         current_closed_phase = "PHASE 6.5"
         next_step = "Client Metrics / Learning Input"
         next_folder = "governed learning input over client metrics and accepted proposal/review surfaces"
@@ -159,6 +176,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_3_acceptance_exists": PHASE_6_3_ACCEPTANCE.exists(),
         "phase_6_4_acceptance_exists": PHASE_6_4_ACCEPTANCE.exists(),
         "phase_6_5_acceptance_exists": PHASE_6_5_ACCEPTANCE.exists(),
+        "phase_6_6_acceptance_exists": PHASE_6_6_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
