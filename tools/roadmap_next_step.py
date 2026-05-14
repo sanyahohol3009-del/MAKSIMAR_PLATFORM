@@ -15,10 +15,12 @@ PHASE_6_6_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_6_client_metri
 PHASE_6_7_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_7_polyglot_model_worker_bridge_acceptance_v1.md")
 PHASE_6_8_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_8_productization_sale_ready_sovereign_ai_acceptance_v1.md")
 FINAL_CLOSURE = Path("docs/architecture/roadmap_index/memory_roadmap_v5_1_final_closure_v1.md")
+REGULATORY_STEP_1_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_track_entry_surface_inventory_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    regulatory_step_1_closed = REGULATORY_STEP_1_ACCEPTANCE.exists()
     final_closure_closed = FINAL_CLOSURE.exists()
     phase_6_8_closed = PHASE_6_8_ACCEPTANCE.exists()
     phase_6_7_closed = PHASE_6_7_ACCEPTANCE.exists()
@@ -30,7 +32,25 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if final_closure_closed:
+    if regulatory_step_1_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_1"
+        next_step = "STEP 2 — Country / Jurisdiction Registry Binding"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Regulatory track entry and surface inventory are present; next step binds countries, jurisdictions and applicability."
+        required_first = [
+            "country registry models",
+            "jurisdiction binding",
+            "applicability builder",
+            "jurisdiction preview",
+            "no cross-jurisdiction merge",
+        ]
+        do_not_start_yet = [
+            "Tenant Regulatory Scope & Isolation",
+            "Source Version / Effective Date / Precedence",
+            "Regulatory Update Approval Gate",
+            "Final Closure",
+        ]
+    elif final_closure_closed:
         current_closed_phase = "memory_roadmap_v5_1_FINAL_CLOSURE"
         next_step = "Next Roadmap Selection"
         next_folder = "recommended: multi-tenant / multi-country regulatory memory foundation"
@@ -193,6 +213,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_7_acceptance_exists": PHASE_6_7_ACCEPTANCE.exists(),
         "phase_6_8_acceptance_exists": PHASE_6_8_ACCEPTANCE.exists(),
         "final_closure_exists": FINAL_CLOSURE.exists(),
+        "regulatory_step_1_acceptance_exists": REGULATORY_STEP_1_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
