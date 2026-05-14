@@ -12,10 +12,12 @@ PHASE_6_3_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_3_controlled_c
 PHASE_6_4_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_4_sandbox_simulation_owner_review_acceptance_v1.md")
 PHASE_6_5_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_5_bootstrapped_self_expansion_gate_acceptance_v1.md")
 PHASE_6_6_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_6_client_metrics_learning_input_acceptance_v1.md")
+PHASE_6_7_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_7_polyglot_model_worker_bridge_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    phase_6_7_closed = PHASE_6_7_ACCEPTANCE.exists()
     phase_6_6_closed = PHASE_6_6_ACCEPTANCE.exists()
     phase_6_5_closed = PHASE_6_5_ACCEPTANCE.exists()
     phase_6_4_closed = PHASE_6_4_ACCEPTANCE.exists()
@@ -24,7 +26,20 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_6_closed:
+    if phase_6_7_closed:
+        current_closed_phase = "PHASE 6.7"
+        next_step = "Productization / Sale-Ready Sovereign AI"
+        next_folder = "productization package over accepted roadmap v5.1 memory/governance/self-evolution surfaces"
+        why = "Polyglot / Model / Worker Bridge is present; next roadmap block is sale-ready productization."
+        required_first = [
+            "product readiness model",
+            "sale-ready package model",
+            "deployment boundary review",
+            "operator acceptance package",
+            "no hidden autonomy",
+        ]
+        do_not_start_yet = []
+    elif phase_6_6_closed:
         current_closed_phase = "PHASE 6.6"
         next_step = "Polyglot / Model / Worker Bridge"
         next_folder = "bridge package over model routing, language artifacts and worker boundaries"
@@ -67,9 +82,7 @@ def build_next_step_report() -> dict[str, object]:
             "no direct core write",
             "no productization",
         ]
-        do_not_start_yet = [
-            "Productization",
-        ]
+        do_not_start_yet = ["Productization"]
     elif phase_6_3_closed:
         current_closed_phase = "PHASE 6.3"
         next_step = "Sandbox / Simulation / Owner Review"
@@ -82,10 +95,7 @@ def build_next_step_report() -> dict[str, object]:
             "owner review package builder",
             "still no self-expansion",
         ]
-        do_not_start_yet = [
-            "Self-expansion",
-            "Productization",
-        ]
+        do_not_start_yet = ["Self-expansion", "Productization"]
     elif phase_6_2_closed:
         current_closed_phase = "PHASE 6.2"
         next_step = "Controlled Codegen Context"
@@ -98,11 +108,7 @@ def build_next_step_report() -> dict[str, object]:
             "codegen read summary",
             "no direct write to core",
         ]
-        do_not_start_yet = [
-            "Sandbox / Simulation / Owner Review",
-            "Self-expansion",
-            "Productization",
-        ]
+        do_not_start_yet = ["Sandbox / Simulation / Owner Review", "Self-expansion", "Productization"]
     elif phase_6_1_closed:
         current_closed_phase = "PHASE 6.1"
         next_step = "Proposal / Audit / Approval Spine"
@@ -115,12 +121,7 @@ def build_next_step_report() -> dict[str, object]:
             "proposal audit summary builder",
             "no code writing yet",
         ]
-        do_not_start_yet = [
-            "Controlled Codegen Context",
-            "Sandbox / Simulation / Owner Review",
-            "Self-expansion",
-            "Productization",
-        ]
+        do_not_start_yet = ["Controlled Codegen Context", "Sandbox / Simulation / Owner Review", "Self-expansion", "Productization"]
     elif phase_6_0_closed:
         current_closed_phase = "PHASE 6.0"
         next_step = "Governance / Federation Gap Pass"
@@ -133,13 +134,7 @@ def build_next_step_report() -> dict[str, object]:
             "tenant/personal separation gap check",
             "reuse existing governance bindings before creating anything new",
         ]
-        do_not_start_yet = [
-            "Proposal / Audit / Approval Spine",
-            "Controlled Codegen Context",
-            "Sandbox / Simulation / Owner Review",
-            "Self-expansion",
-            "Productization",
-        ]
+        do_not_start_yet = ["Proposal / Audit / Approval Spine", "Controlled Codegen Context", "Sandbox / Simulation / Owner Review", "Self-expansion", "Productization"]
     else:
         current_closed_phase = "PHASE 5.2"
         next_step = "PHASE 6.0 — Product-Ready Hardening"
@@ -152,13 +147,7 @@ def build_next_step_report() -> dict[str, object]:
             "release candidate builder",
             "release preview builder",
         ]
-        do_not_start_yet = [
-            "Proposal / Audit / Approval Spine",
-            "Controlled Codegen Context",
-            "Sandbox / Simulation / Owner Review",
-            "Self-expansion",
-            "Productization",
-        ]
+        do_not_start_yet = ["Proposal / Audit / Approval Spine", "Controlled Codegen Context", "Sandbox / Simulation / Owner Review", "Self-expansion", "Productization"]
 
     return {
         "roadmap_family": "memory_roadmap_v5_1",
@@ -177,6 +166,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_4_acceptance_exists": PHASE_6_4_ACCEPTANCE.exists(),
         "phase_6_5_acceptance_exists": PHASE_6_5_ACCEPTANCE.exists(),
         "phase_6_6_acceptance_exists": PHASE_6_6_ACCEPTANCE.exists(),
+        "phase_6_7_acceptance_exists": PHASE_6_7_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
