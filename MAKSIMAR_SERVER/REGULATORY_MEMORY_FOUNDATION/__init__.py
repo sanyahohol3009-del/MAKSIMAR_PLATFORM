@@ -43,6 +43,16 @@ __all__ = [
     "build_tenant_regulatory_isolation_preview",
     "build_tenant_regulatory_scope_preview",
     "build_tenant_regulatory_scope_registry",
+    "EffectiveDatePrecedenceEntry",
+    "EffectiveDatePrecedenceMatrix",
+    "LegalPrecedenceResolverResult",
+    "RegulatorySourceVersion",
+    "RegulatorySourceVersionRegistry",
+    "build_effective_date_precedence_matrix",
+    "build_legal_precedence_resolver_preview",
+    "build_legal_precedence_resolver_result",
+    "build_regulatory_source_version_registry",
+    "build_source_version_precedence_preview",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -82,4 +92,23 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.tenant_regulatory_scope_models
     TenantRegulatoryScopeEntry,
     TenantRegulatoryScopeRegistry,
     build_tenant_regulatory_scope_registry,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.effective_date_precedence_models import (
+    EffectiveDatePrecedenceEntry,
+    EffectiveDatePrecedenceMatrix,
+    build_effective_date_precedence_matrix,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.legal_precedence_resolver import (
+    LegalPrecedenceResolverResult,
+    build_legal_precedence_resolver_preview,
+    build_legal_precedence_resolver_result,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_source_version_models import (
+    RegulatorySourceVersion,
+    RegulatorySourceVersionRegistry,
+    build_regulatory_source_version_registry,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.source_version_precedence_preview_builder import (
+    build_source_version_precedence_preview,
 )
