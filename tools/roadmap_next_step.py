@@ -16,10 +16,12 @@ PHASE_6_7_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_7_polyglot_mod
 PHASE_6_8_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_8_productization_sale_ready_sovereign_ai_acceptance_v1.md")
 FINAL_CLOSURE = Path("docs/architecture/roadmap_index/memory_roadmap_v5_1_final_closure_v1.md")
 REGULATORY_STEP_1_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_track_entry_surface_inventory_v1.md")
+REGULATORY_STEP_2_ACCEPTANCE = Path("docs/architecture/foundation/country_jurisdiction_registry_binding_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    regulatory_step_2_closed = REGULATORY_STEP_2_ACCEPTANCE.exists()
     regulatory_step_1_closed = REGULATORY_STEP_1_ACCEPTANCE.exists()
     final_closure_closed = FINAL_CLOSURE.exists()
     phase_6_8_closed = PHASE_6_8_ACCEPTANCE.exists()
@@ -32,7 +34,41 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if regulatory_step_1_closed:
+    if regulatory_step_2_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_2"
+        next_step = "STEP 3 — Tenant Regulatory Scope & Isolation"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Country / Jurisdiction Registry Binding is present; next step isolates tenant regulatory scopes."
+        required_first = [
+            "tenant regulatory scope models",
+            "tenant isolation gate",
+            "tenant country scope binding",
+            "tenant regulatory preview",
+            "no cross-tenant merge",
+        ]
+        do_not_start_yet = [
+            "Source Version / Effective Date / Precedence",
+            "Regulatory Update Approval Gate",
+            "Final Closure",
+        ]
+    elif regulatory_step_2_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_2"
+        next_step = "STEP 3 — Tenant Regulatory Scope & Isolation"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Country / Jurisdiction Registry Binding is present; next step isolates tenant regulatory scopes."
+        required_first = [
+            "tenant regulatory scope models",
+            "tenant isolation gate",
+            "tenant country scope binding",
+            "tenant regulatory preview",
+            "no cross-tenant merge",
+        ]
+        do_not_start_yet = [
+            "Source Version / Effective Date / Precedence",
+            "Regulatory Update Approval Gate",
+            "Final Closure",
+        ]
+    elif regulatory_step_1_closed:
         current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_1"
         next_step = "STEP 2 — Country / Jurisdiction Registry Binding"
         next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
@@ -214,6 +250,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_8_acceptance_exists": PHASE_6_8_ACCEPTANCE.exists(),
         "final_closure_exists": FINAL_CLOSURE.exists(),
         "regulatory_step_1_acceptance_exists": REGULATORY_STEP_1_ACCEPTANCE.exists(),
+        "regulatory_step_2_acceptance_exists": REGULATORY_STEP_2_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 

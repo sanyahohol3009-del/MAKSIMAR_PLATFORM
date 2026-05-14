@@ -22,7 +22,13 @@ def test_roadmap_next_step_report_smoke() -> None:
     assert report["roadmap_family"] == "memory_roadmap_v5_1"
     assert report["next_step_ready"] is True
 
-    if report.get("regulatory_step_1_acceptance_exists") is True:
+    if report.get("regulatory_step_2_acceptance_exists") is True:
+        assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_2"
+        assert report["next_step"] == "STEP 3 — Tenant Regulatory Scope & Isolation"
+    elif report.get("regulatory_step_2_acceptance_exists") is True:
+        assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_2"
+        assert report["next_step"] == "STEP 3 — Tenant Regulatory Scope & Isolation"
+    elif report.get("regulatory_step_1_acceptance_exists") is True:
         assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_1"
         assert report["next_step"] == "STEP 2 — Country / Jurisdiction Registry Binding"
     elif report.get("final_closure_exists") is True:
