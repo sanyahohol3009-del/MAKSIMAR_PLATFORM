@@ -14,10 +14,12 @@ PHASE_6_5_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_5_bootstrapped
 PHASE_6_6_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_6_client_metrics_learning_input_acceptance_v1.md")
 PHASE_6_7_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_7_polyglot_model_worker_bridge_acceptance_v1.md")
 PHASE_6_8_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_8_productization_sale_ready_sovereign_ai_acceptance_v1.md")
+FINAL_CLOSURE = Path("docs/architecture/roadmap_index/memory_roadmap_v5_1_final_closure_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    final_closure_closed = FINAL_CLOSURE.exists()
     phase_6_8_closed = PHASE_6_8_ACCEPTANCE.exists()
     phase_6_7_closed = PHASE_6_7_ACCEPTANCE.exists()
     phase_6_6_closed = PHASE_6_6_ACCEPTANCE.exists()
@@ -28,7 +30,19 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_8_closed:
+    if final_closure_closed:
+        current_closed_phase = "memory_roadmap_v5_1_FINAL_CLOSURE"
+        next_step = "Next Roadmap Selection"
+        next_folder = "recommended: multi-tenant / multi-country regulatory memory foundation"
+        why = "Memory roadmap v5.1 is closed; select the next roadmap entrypoint."
+        required_first = [
+            "choose next roadmap track",
+            "run pre-step drift check",
+            "keep memory_roadmap_v5_1 as closed reference",
+            "do not reopen closed phases without explicit correction pass",
+        ]
+        do_not_start_yet = []
+    elif phase_6_8_closed:
         current_closed_phase = "PHASE 6.8"
         next_step = "Roadmap v5.1 Final Closure / Continuity Savepoint"
         next_folder = "docs/architecture/roadmap_index/ + final closure summary"
@@ -66,9 +80,7 @@ def build_next_step_report() -> dict[str, object]:
             "build/test bridge read model",
             "no productization yet",
         ]
-        do_not_start_yet = [
-            "Productization",
-        ]
+        do_not_start_yet = ["Productization"]
     elif phase_6_5_closed:
         current_closed_phase = "PHASE 6.5"
         next_step = "Client Metrics / Learning Input"
@@ -81,10 +93,7 @@ def build_next_step_report() -> dict[str, object]:
             "no automatic training mutation",
             "no productization yet",
         ]
-        do_not_start_yet = [
-            "Polyglot / Model / Worker Bridge",
-            "Productization",
-        ]
+        do_not_start_yet = ["Polyglot / Model / Worker Bridge", "Productization"]
     elif phase_6_4_closed:
         current_closed_phase = "PHASE 6.4"
         next_step = "Bootstrapped Self-Expansion Gate"
@@ -183,6 +192,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_6_acceptance_exists": PHASE_6_6_ACCEPTANCE.exists(),
         "phase_6_7_acceptance_exists": PHASE_6_7_ACCEPTANCE.exists(),
         "phase_6_8_acceptance_exists": PHASE_6_8_ACCEPTANCE.exists(),
+        "final_closure_exists": FINAL_CLOSURE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
