@@ -33,6 +33,16 @@ __all__ = [
     "build_jurisdiction_applicability_preview",
     "build_jurisdiction_registry",
     "build_jurisdiction_registry_preview",
+    "TenantCountryScopeBinding",
+    "TenantRegulatoryIsolationGate",
+    "TenantRegulatoryScopeEntry",
+    "TenantRegulatoryScopeRegistry",
+    "build_tenant_country_scope_binding",
+    "build_tenant_country_scope_binding_preview",
+    "build_tenant_regulatory_isolation_gate",
+    "build_tenant_regulatory_isolation_preview",
+    "build_tenant_regulatory_scope_preview",
+    "build_tenant_regulatory_scope_registry",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -53,4 +63,23 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.jurisdiction_registry_models i
 )
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.jurisdiction_registry_preview_builder import (
     build_jurisdiction_registry_preview,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.tenant_country_scope_binding import (
+    TenantCountryScopeBinding,
+    build_tenant_country_scope_binding,
+    build_tenant_country_scope_binding_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.tenant_regulatory_isolation_gate import (
+    TenantRegulatoryIsolationGate,
+    build_tenant_regulatory_isolation_gate,
+    build_tenant_regulatory_isolation_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.tenant_regulatory_preview_builder import (
+    build_tenant_regulatory_scope_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.tenant_regulatory_scope_models import (
+    TenantRegulatoryScopeEntry,
+    TenantRegulatoryScopeRegistry,
+    build_tenant_regulatory_scope_registry,
 )
