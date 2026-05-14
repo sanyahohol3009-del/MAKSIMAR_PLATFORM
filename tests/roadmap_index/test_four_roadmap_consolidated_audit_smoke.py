@@ -22,7 +22,10 @@ def test_roadmap_next_step_report_smoke() -> None:
     assert report["roadmap_family"] == "memory_roadmap_v5_1"
     assert report["next_step_ready"] is True
 
-    if report["phase_6_7_acceptance_exists"] is True:
+    if report["phase_6_8_acceptance_exists"] is True:
+        assert report["current_closed_phase"] == "PHASE 6.8"
+        assert report["next_step"] == "Roadmap v5.1 Final Closure / Continuity Savepoint"
+    elif report["phase_6_7_acceptance_exists"] is True:
         assert report["current_closed_phase"] == "PHASE 6.7"
         assert report["next_step"] == "Productization / Sale-Ready Sovereign AI"
     elif report["phase_6_6_acceptance_exists"] is True:

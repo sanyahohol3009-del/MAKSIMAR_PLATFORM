@@ -13,10 +13,12 @@ PHASE_6_4_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_4_sandbox_simu
 PHASE_6_5_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_5_bootstrapped_self_expansion_gate_acceptance_v1.md")
 PHASE_6_6_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_6_client_metrics_learning_input_acceptance_v1.md")
 PHASE_6_7_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_7_polyglot_model_worker_bridge_acceptance_v1.md")
+PHASE_6_8_ACCEPTANCE = Path("docs/architecture/foundation/phase_6_8_productization_sale_ready_sovereign_ai_acceptance_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    phase_6_8_closed = PHASE_6_8_ACCEPTANCE.exists()
     phase_6_7_closed = PHASE_6_7_ACCEPTANCE.exists()
     phase_6_6_closed = PHASE_6_6_ACCEPTANCE.exists()
     phase_6_5_closed = PHASE_6_5_ACCEPTANCE.exists()
@@ -26,7 +28,20 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if phase_6_7_closed:
+    if phase_6_8_closed:
+        current_closed_phase = "PHASE 6.8"
+        next_step = "Roadmap v5.1 Final Closure / Continuity Savepoint"
+        next_folder = "docs/architecture/roadmap_index/ + final closure summary"
+        why = "Productization / Sale-Ready Sovereign AI is present; next step is final roadmap closure and continuity savepoint."
+        required_first = [
+            "final acceptance index",
+            "final continuity summary",
+            "current state handoff",
+            "next roadmap entrypoint",
+            "project memory savepoint after full roadmap",
+        ]
+        do_not_start_yet = []
+    elif phase_6_7_closed:
         current_closed_phase = "PHASE 6.7"
         next_step = "Productization / Sale-Ready Sovereign AI"
         next_folder = "productization package over accepted roadmap v5.1 memory/governance/self-evolution surfaces"
@@ -167,6 +182,7 @@ def build_next_step_report() -> dict[str, object]:
         "phase_6_5_acceptance_exists": PHASE_6_5_ACCEPTANCE.exists(),
         "phase_6_6_acceptance_exists": PHASE_6_6_ACCEPTANCE.exists(),
         "phase_6_7_acceptance_exists": PHASE_6_7_ACCEPTANCE.exists(),
+        "phase_6_8_acceptance_exists": PHASE_6_8_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
