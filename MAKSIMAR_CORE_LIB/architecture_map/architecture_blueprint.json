@@ -1,0 +1,999 @@
+{
+  "schema_version": "1.0",
+  "blueprint_id": "MAKSIMAR_PLATFORM_FULL_CONSOLIDATED_SKELETON_vFINAL_FREEZE",
+  "project_name": "MAKSIMAR_PLATFORM",
+  "purpose": "Canonical architecture blueprint for Architecture Radar, Semantic Drift Guard, Structure Guard and Containerization Readiness checks.",
+  "core_laws": [
+    "No direct cube-to-cube coupling.",
+    "No UI-to-execution direct path.",
+    "No dashboard-to-action direct path.",
+    "No product-to-CORE_ROOT direct import.",
+    "No runtime-to-canonical-write path.",
+    "No external backend may import or mutate core/runtime/supervisor directly.",
+    "All risky actions must pass proposal, sandbox, validation, diff, approval and audit.",
+    "Dashboard is read-only display and intent surface only.",
+    "Memory retrieval must pass policy, tenant and jurisdiction boundaries.",
+    "Physical/robotics execution must pass simulation and strict validation first."
+  ],
+  "enforcement": {
+    "fail_on_forbidden_import": true,
+    "fail_on_unknown_local_import": true,
+    "fail_on_unregistered_source_file": true,
+    "fail_on_missing_mandatory_paths": true,
+    "fail_on_container_missing_for_ready_layers": false,
+    "allow_external_imports": true,
+    "scan_tests_for_import_drift": false,
+    "scan_external_backends_for_import_drift": false
+  },
+  "ignored_path_globs": [
+    ".git/**",
+    ".venv/**",
+    "venv/**",
+    "__pycache__/**",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    ".pymon/**",
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "*.egg-info/**",
+    "EXTERNAL_BACKENDS/**/.git/**",
+    "EXTERNAL_BACKENDS/**/.venv/**",
+    "EXTERNAL_BACKENDS/**/venv/**",
+    "EXTERNAL_BACKENDS/**/sandbox_data/**",
+    "EXTERNAL_BACKENDS/**/__pycache__/**"
+  ],
+  "allowed_unmapped_file_globs": [
+    "setup.py",
+    "conftest.py"
+  ],
+  "containerization": {
+    "purpose": "Read-only readiness radar. It reports missing container markers but does not fail by default.",
+    "ready_markers": [
+      "container_contract.yaml",
+      "container_contract.yml",
+      "Dockerfile",
+      ".dockerignore"
+    ],
+    "recommended_markers_by_profile": {
+      "core_library": [
+        "container_contract.yaml"
+      ],
+      "server_service": [
+        "container_contract.yaml",
+        "Dockerfile",
+        ".dockerignore"
+      ],
+      "worker_service": [
+        "container_contract.yaml",
+        "Dockerfile",
+        ".dockerignore"
+      ],
+      "product_cube": [
+        "module_manifest.yaml",
+        "container_contract.yaml",
+        "Dockerfile",
+        ".dockerignore"
+      ],
+      "external_backend": [
+        "vendor_security_report.json",
+        "container_contract.yaml"
+      ],
+      "docs_or_tests": []
+    }
+  },
+  "layers": [
+    {
+      "id": "CORE_ROOT",
+      "title": "Immutable / low-level safety core",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "core_library",
+      "path_prefixes": [
+        "CORE_ROOT"
+      ],
+      "module_prefixes": [
+        "CORE_ROOT"
+      ],
+      "expected_paths": [
+        {
+          "path": "CORE_ROOT",
+          "mandatory": true
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "CORE_ROOT"
+      ],
+      "forbidden_import_layer_ids": [
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION",
+        "AI_SERVICES_WORKERS",
+        "SIMULATION_PHYSICS",
+        "ROBOTICS_CAD_CAM",
+        "CLIENTS_MOBILE",
+        "PRODUCTS_CUBES",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "MAKSIMAR_CORE_LIB",
+      "title": "Canonical contracts, models, validators and builders",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "core_library",
+      "path_prefixes": [
+        "MAKSIMAR_CORE_LIB"
+      ],
+      "module_prefixes": [
+        "MAKSIMAR_CORE_LIB"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_CORE_LIB",
+          "mandatory": true
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/architecture_map",
+          "mandatory": true
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB"
+      ],
+      "forbidden_import_layer_ids": [
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION",
+        "AI_SERVICES_WORKERS",
+        "SIMULATION_PHYSICS",
+        "ROBOTICS_CAD_CAM",
+        "CLIENTS_MOBILE",
+        "PRODUCTS_CUBES",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "MAKSIMAR_SERVER_ROOT",
+      "title": "Server runtime application shell",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "MAKSIMAR_SERVER"
+      ],
+      "module_prefixes": [
+        "MAKSIMAR_SERVER"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_SERVER",
+          "mandatory": true
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "MAKSIMAR_SERVER_ROOT",
+        "CORE_ROOT",
+        "OBSERVABILITY",
+        "CONTROL_PLANE",
+        "MEMORY_FOUNDATION",
+        "DATA_PLANE",
+        "PLATFORM_BINDINGS_READ_MODELS"
+      ],
+      "forbidden_import_layer_ids": [
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "CONTROL_PLANE",
+      "title": "Intent, policy-aware orchestration and routing",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "CONTROL_PLANE",
+        "MAKSIMAR_SERVER/CONTROL_PLANE"
+      ],
+      "module_prefixes": [
+        "CONTROL_PLANE",
+        "MAKSIMAR_SERVER.CONTROL_PLANE"
+      ],
+      "expected_paths": [
+        {
+          "path": "CONTROL_PLANE",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/CONTROL_PLANE",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "CONTROL_PLANE",
+        "OBSERVABILITY",
+        "MAKSIMAR_SERVER_ROOT",
+        "MEMORY_FOUNDATION",
+        "DATA_PLANE",
+        "PLATFORM_BINDINGS_READ_MODELS"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "EXECUTION_CONTROL",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "EXECUTION_CONTROL",
+      "title": "Execution gates, pressure, admission and runtime action boundaries",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "SUPERVISOR",
+        "RUNTIME",
+        "MAKSIMAR_SERVER/EXECUTION_CONTROL",
+        "MAKSIMAR_SERVER/SUPERVISOR",
+        "MAKSIMAR_SERVER/RUNTIME"
+      ],
+      "module_prefixes": [
+        "SUPERVISOR",
+        "RUNTIME",
+        "MAKSIMAR_SERVER.EXECUTION_CONTROL",
+        "MAKSIMAR_SERVER.SUPERVISOR",
+        "MAKSIMAR_SERVER.RUNTIME"
+      ],
+      "expected_paths": [
+        {
+          "path": "SUPERVISOR",
+          "mandatory": false
+        },
+        {
+          "path": "RUNTIME",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/EXECUTION_CONTROL",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "EXECUTION_CONTROL",
+        "CORE_ROOT",
+        "OBSERVABILITY",
+        "CONTROL_PLANE",
+        "MEMORY_FOUNDATION",
+        "DATA_PLANE"
+      ],
+      "forbidden_import_layer_ids": [
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "DATA_PLANE",
+      "title": "Data plane, artifacts, storage and payload handling",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "DATA_PLANE",
+        "MAKSIMAR_SERVER/DATA_PLANE",
+        "storage",
+        "STORAGE"
+      ],
+      "module_prefixes": [
+        "DATA_PLANE",
+        "MAKSIMAR_SERVER.DATA_PLANE",
+        "storage",
+        "STORAGE"
+      ],
+      "expected_paths": [
+        {
+          "path": "DATA_PLANE",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/DATA_PLANE",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "DATA_PLANE",
+        "OBSERVABILITY"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "OBSERVABILITY",
+      "title": "Metrics, traces, incidents, summaries and read-only runtime visibility",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "OBSERVABILITY",
+        "MAKSIMAR_SERVER/OBSERVABILITY",
+        "MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS"
+      ],
+      "module_prefixes": [
+        "OBSERVABILITY",
+        "MAKSIMAR_SERVER.OBSERVABILITY",
+        "MAKSIMAR_SERVER.DASHBOARD_READ_ONLY_VIEWS"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_SERVER/OBSERVABILITY",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/DASHBOARD_READ_ONLY_VIEWS",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "OBSERVABILITY",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "MEMORY_FOUNDATION",
+        "PLATFORM_BINDINGS_READ_MODELS"
+      ],
+      "forbidden_import_layer_ids": [
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "DASHBOARD_UI",
+      "title": "Read-only dashboards, panels, display and operator UI",
+      "status": "canonical",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "DASHBOARD",
+        "DASHBOARDS",
+        "MAKSIMAR_SERVER/DASHBOARD",
+        "MAKSIMAR_SERVER/DASHBOARDS",
+        "MAKSIMAR_SERVER/OPERATOR_UI",
+        "MAKSIMAR_SERVER/VISUAL_OPERATOR"
+      ],
+      "module_prefixes": [
+        "DASHBOARD",
+        "DASHBOARDS",
+        "MAKSIMAR_SERVER.DASHBOARD",
+        "MAKSIMAR_SERVER.DASHBOARDS",
+        "MAKSIMAR_SERVER.OPERATOR_UI",
+        "MAKSIMAR_SERVER.VISUAL_OPERATOR"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_SERVER/DASHBOARD",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/OPERATOR_UI",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "DASHBOARD_UI",
+        "OBSERVABILITY"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "MEMORY_FOUNDATION",
+      "title": "Memory, retrieval, regulatory memory and evidence packs",
+      "status": "canonical_closed_reference",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "MEMORY",
+        "MAKSIMAR_CORE_LIB/memory_engine",
+        "MAKSIMAR_CORE_LIB/memory_domains",
+        "MAKSIMAR_SERVER/MEMORY",
+        "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION"
+      ],
+      "module_prefixes": [
+        "MEMORY",
+        "MAKSIMAR_CORE_LIB.memory_engine",
+        "MAKSIMAR_CORE_LIB.memory_domains",
+        "MAKSIMAR_SERVER.MEMORY",
+        "MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/memory_engine",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "MEMORY_FOUNDATION",
+        "OBSERVABILITY",
+        "DATA_PLANE"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "AI_SERVICES_WORKERS",
+      "title": "AI services, model router, workers and engine adapters",
+      "status": "planned_or_partial",
+      "import_guard": true,
+      "container_profile": "worker_service",
+      "path_prefixes": [
+        "AI_SERVICES",
+        "WORKERS",
+        "MAKSIMAR_SERVER/AI_SERVICES",
+        "MAKSIMAR_SERVER/WORKERS"
+      ],
+      "module_prefixes": [
+        "AI_SERVICES",
+        "WORKERS",
+        "MAKSIMAR_SERVER.AI_SERVICES",
+        "MAKSIMAR_SERVER.WORKERS"
+      ],
+      "expected_paths": [
+        {
+          "path": "AI_SERVICES",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/AI_SERVICES",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_SERVER/WORKERS",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "AI_SERVICES_WORKERS",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "MEMORY_FOUNDATION",
+        "EXECUTION_CONTROL"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "SIMULATION_PHYSICS",
+      "title": "Simulation, physics runtime, digital twin and validation engines",
+      "status": "planned_or_partial",
+      "import_guard": true,
+      "container_profile": "worker_service",
+      "path_prefixes": [
+        "SIMULATION_LAYER",
+        "PHYSICS_RUNTIME",
+        "DIGITAL_TWIN",
+        "MAKSIMAR_SERVER/SIMULATION_LAYER",
+        "MAKSIMAR_SERVER/PHYSICS_RUNTIME",
+        "MAKSIMAR_SERVER/DIGITAL_TWIN"
+      ],
+      "module_prefixes": [
+        "SIMULATION_LAYER",
+        "PHYSICS_RUNTIME",
+        "DIGITAL_TWIN",
+        "MAKSIMAR_SERVER.SIMULATION_LAYER",
+        "MAKSIMAR_SERVER.PHYSICS_RUNTIME",
+        "MAKSIMAR_SERVER.DIGITAL_TWIN"
+      ],
+      "expected_paths": [
+        {
+          "path": "SIMULATION_LAYER",
+          "mandatory": false
+        },
+        {
+          "path": "PHYSICS_RUNTIME",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "SIMULATION_PHYSICS",
+        "DATA_PLANE",
+        "OBSERVABILITY"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "ROBOTICS_CAD_CAM",
+      "title": "Robotics, CAD, CAM, CNC, engraving and machine-facing modules",
+      "status": "planned_or_partial",
+      "import_guard": true,
+      "container_profile": "worker_service",
+      "path_prefixes": [
+        "ROBOTICS_MODULE",
+        "CAD_3D_CAM_LAYER",
+        "ENGRAVING_BLOCK",
+        "MAKSIMAR_SERVER/ROBOTICS",
+        "MAKSIMAR_SERVER/CAD_3D_CAM",
+        "MAKSIMAR_SERVER/ENGRAVING_BLOCK"
+      ],
+      "module_prefixes": [
+        "ROBOTICS_MODULE",
+        "CAD_3D_CAM_LAYER",
+        "ENGRAVING_BLOCK",
+        "MAKSIMAR_SERVER.ROBOTICS",
+        "MAKSIMAR_SERVER.CAD_3D_CAM",
+        "MAKSIMAR_SERVER.ENGRAVING_BLOCK"
+      ],
+      "expected_paths": [
+        {
+          "path": "ROBOTICS_MODULE",
+          "mandatory": false
+        },
+        {
+          "path": "CAD_3D_CAM_LAYER",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "ROBOTICS_CAD_CAM",
+        "SIMULATION_PHYSICS",
+        "DATA_PLANE",
+        "OBSERVABILITY"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DASHBOARD_UI",
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "CLIENTS_MOBILE",
+      "title": "Android, iOS, mobile bridge and client shells",
+      "status": "planned_or_partial",
+      "import_guard": true,
+      "container_profile": "product_cube",
+      "path_prefixes": [
+        "CLIENTS",
+        "clients",
+        "MOBILE",
+        "mobile",
+        "ANDROID_CLIENT",
+        "IOS_CLIENT",
+        "JARVIS_MOBILE"
+      ],
+      "module_prefixes": [
+        "CLIENTS",
+        "clients",
+        "MOBILE",
+        "mobile",
+        "ANDROID_CLIENT",
+        "IOS_CLIENT",
+        "JARVIS_MOBILE"
+      ],
+      "expected_paths": [
+        {
+          "path": "clients",
+          "mandatory": false
+        },
+        {
+          "path": "mobile",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "CLIENTS_MOBILE"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION",
+        "AI_SERVICES_WORKERS",
+        "SIMULATION_PHYSICS",
+        "ROBOTICS_CAD_CAM",
+        "PRODUCTS_CUBES",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "PRODUCTS_CUBES",
+      "title": "Product cubes, SaaS modules, blogger cube and commercial containers",
+      "status": "planned_or_partial",
+      "import_guard": true,
+      "container_profile": "product_cube",
+      "path_prefixes": [
+        "PRODUCTS",
+        "PRODUCT_CUBES",
+        "CUBES",
+        "MODULES",
+        "BLOGGER_CONTENT_CUBE",
+        "MAKSIMAR_SERVER/PRODUCTS",
+        "MAKSIMAR_SERVER/CUBES",
+        "MAKSIMAR_SERVER/MODULES"
+      ],
+      "module_prefixes": [
+        "PRODUCTS",
+        "PRODUCT_CUBES",
+        "CUBES",
+        "MODULES",
+        "BLOGGER_CONTENT_CUBE",
+        "MAKSIMAR_SERVER.PRODUCTS",
+        "MAKSIMAR_SERVER.CUBES",
+        "MAKSIMAR_SERVER.MODULES"
+      ],
+      "expected_paths": [
+        {
+          "path": "PRODUCTS",
+          "mandatory": false
+        },
+        {
+          "path": "BLOGGER_CONTENT_CUBE",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_LIB",
+        "PRODUCTS_CUBES"
+      ],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION",
+        "AI_SERVICES_WORKERS",
+        "SIMULATION_PHYSICS",
+        "ROBOTICS_CAD_CAM",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "EXTERNAL_BACKENDS",
+      "title": "External vendor/open-source backends under security gate",
+      "status": "sandbox_or_adapter_only",
+      "import_guard": false,
+      "container_profile": "external_backend",
+      "path_prefixes": [
+        "EXTERNAL_BACKENDS"
+      ],
+      "module_prefixes": [
+        "EXTERNAL_BACKENDS"
+      ],
+      "expected_paths": [
+        {
+          "path": "EXTERNAL_BACKENDS",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [],
+      "forbidden_import_layer_ids": [
+        "CORE_ROOT",
+        "MAKSIMAR_CORE_LIB",
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL"
+      ]
+    },
+    {
+      "id": "TOOLS",
+      "title": "Developer tools, scanners and acceptance runners",
+      "status": "auxiliary",
+      "import_guard": false,
+      "container_profile": "docs_or_tests",
+      "path_prefixes": [
+        "tools"
+      ],
+      "module_prefixes": [
+        "tools"
+      ],
+      "expected_paths": [
+        {
+          "path": "tools",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "ANY"
+      ],
+      "forbidden_import_layer_ids": []
+    },
+    {
+      "id": "TESTS",
+      "title": "Tests and smoke checks",
+      "status": "auxiliary",
+      "import_guard": false,
+      "container_profile": "docs_or_tests",
+      "path_prefixes": [
+        "tests"
+      ],
+      "module_prefixes": [
+        "tests"
+      ],
+      "expected_paths": [
+        {
+          "path": "tests",
+          "mandatory": true
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "ANY"
+      ],
+      "forbidden_import_layer_ids": []
+    },
+    {
+      "id": "DOCS",
+      "title": "Architecture documentation and acceptance records",
+      "status": "auxiliary",
+      "import_guard": false,
+      "container_profile": "docs_or_tests",
+      "path_prefixes": [
+        "docs"
+      ],
+      "module_prefixes": [
+        "docs"
+      ],
+      "expected_paths": [
+        {
+          "path": "docs",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "ANY"
+      ],
+      "forbidden_import_layer_ids": []
+    },
+    {
+      "id": "MAKSIMAR_CORE_ROOT",
+      "title": "Existing MAKSIMAR_CORE root: shared services, contracts and early canonical core surfaces",
+      "status": "existing_canonical_or_legacy_root",
+      "import_guard": true,
+      "container_profile": "core_library",
+      "path_prefixes": [
+        "MAKSIMAR_CORE"
+      ],
+      "module_prefixes": [
+        "MAKSIMAR_CORE"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_CORE",
+          "mandatory": true
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "MAKSIMAR_CORE_ROOT",
+        "MAKSIMAR_CORE_LIB"
+      ],
+      "forbidden_import_layer_ids": [
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION",
+        "AI_SERVICES_WORKERS",
+        "SIMULATION_PHYSICS",
+        "ROBOTICS_CAD_CAM",
+        "CLIENTS_MOBILE",
+        "PRODUCTS_CUBES",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "BOOTSTRAP_ENTRYPOINTS",
+      "title": "Boot, local runtime context and maintenance entrypoints",
+      "status": "existing_bootstrap_surface",
+      "import_guard": true,
+      "container_profile": "server_service",
+      "path_prefixes": [
+        "BOOT",
+        "run_context.py",
+        "refactor.py"
+      ],
+      "module_prefixes": [
+        "BOOT",
+        "run_context",
+        "refactor"
+      ],
+      "expected_paths": [
+        {
+          "path": "BOOT",
+          "mandatory": false
+        },
+        {
+          "path": "run_context.py",
+          "mandatory": false
+        },
+        {
+          "path": "refactor.py",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "BOOTSTRAP_ENTRYPOINTS",
+        "MAKSIMAR_CORE_ROOT",
+        "MAKSIMAR_CORE_LIB",
+        "CORE_ROOT",
+        "OBSERVABILITY"
+      ],
+      "forbidden_import_layer_ids": [
+        "PRODUCTS_CUBES",
+        "CLIENTS_MOBILE",
+        "EXTERNAL_BACKENDS"
+      ]
+    },
+    {
+      "id": "PLATFORM_BINDINGS_READ_MODELS",
+      "title": "Cross-layer contracts, read-model bindings, previews and completion summaries",
+      "status": "existing_binding_surface",
+      "import_guard": true,
+      "container_profile": "core_library",
+      "path_prefixes": [
+        "MAKSIMAR_CORE_LIB/platform_integration",
+        "MAKSIMAR_CORE_LIB/validation_policy_completion",
+        "MAKSIMAR_CORE_LIB/real_voice_runtime",
+        "MAKSIMAR_CORE_LIB/display_topology",
+        "MAKSIMAR_CORE_LIB/memory_policy",
+        "MAKSIMAR_CORE_LIB/execution_pressure_completion",
+        "MAKSIMAR_CORE_LIB/observability_completion",
+        "MAKSIMAR_CORE_LIB/voice_layer",
+        "MAKSIMAR_CORE_LIB/skill_domain_binding",
+        "MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging",
+        "MAKSIMAR_CORE_LIB/real_ai_services_model_adapters",
+        "MAKSIMAR_CORE_LIB/full_test_suite",
+        "MAKSIMAR_CORE_LIB/runtime_observability",
+        "MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents"
+      ],
+      "module_prefixes": [
+        "MAKSIMAR_CORE_LIB.platform_integration",
+        "MAKSIMAR_CORE_LIB.validation_policy_completion",
+        "MAKSIMAR_CORE_LIB.real_voice_runtime",
+        "MAKSIMAR_CORE_LIB.display_topology",
+        "MAKSIMAR_CORE_LIB.memory_policy",
+        "MAKSIMAR_CORE_LIB.execution_pressure_completion",
+        "MAKSIMAR_CORE_LIB.observability_completion",
+        "MAKSIMAR_CORE_LIB.voice_layer",
+        "MAKSIMAR_CORE_LIB.skill_domain_binding",
+        "MAKSIMAR_CORE_LIB.product_hardening_onboarding_packaging",
+        "MAKSIMAR_CORE_LIB.real_ai_services_model_adapters",
+        "MAKSIMAR_CORE_LIB.full_test_suite",
+        "MAKSIMAR_CORE_LIB.runtime_observability",
+        "MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents"
+      ],
+      "expected_paths": [
+        {
+          "path": "MAKSIMAR_CORE_LIB/platform_integration",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/skill_domain_binding",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/display_topology",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/product_hardening_onboarding_packaging",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/real_ai_services_model_adapters",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/full_test_suite",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/runtime_observability",
+          "mandatory": false
+        },
+        {
+          "path": "MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents",
+          "mandatory": false
+        }
+      ],
+      "allowed_import_layer_ids": [
+        "PLATFORM_BINDINGS_READ_MODELS",
+        "MAKSIMAR_CORE_ROOT",
+        "MAKSIMAR_CORE_LIB",
+        "MAKSIMAR_SERVER_ROOT",
+        "CONTROL_PLANE",
+        "EXECUTION_CONTROL",
+        "DATA_PLANE",
+        "OBSERVABILITY",
+        "DASHBOARD_UI",
+        "MEMORY_FOUNDATION"
+      ],
+      "forbidden_import_layer_ids": [
+        "CLIENTS_MOBILE",
+        "PRODUCTS_CUBES",
+        "EXTERNAL_BACKENDS"
+      ]
+    }
+  ],
+  "stabilization_notes": [
+    "v2: formalized MAKSIMAR_CORE_ROOT, BOOTSTRAP_ENTRYPOINTS and PLATFORM_BINDINGS_READ_MODELS to distinguish existing read-model/binding surfaces from pure core library code.",
+    "v3: allowed read-only imports from CONTROL_PLANE, MAKSIMAR_SERVER_ROOT and OBSERVABILITY into PLATFORM_BINDINGS_READ_MODELS; classified completion/readiness CORE_LIB subfolders as PLATFORM_BINDINGS_READ_MODELS to avoid false pure-core drift.",
+    "v3.1: classified MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents as PLATFORM_BINDINGS_READ_MODELS because it depends on full_test_suite readiness/completion contracts and is not pure canonical core."
+  ]
+}
