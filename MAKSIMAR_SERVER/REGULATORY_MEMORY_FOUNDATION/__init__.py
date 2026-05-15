@@ -87,6 +87,16 @@ __all__ = [
     "build_regulatory_update_approval_registry",
     "build_regulatory_update_diff_pack",
     "build_regulatory_update_diff_preview",
+    "CrossTenantLeakGuardResult",
+    "RegulatoryMemoryRoute",
+    "RegulatoryMemoryRoutingRegistry",
+    "RegulatoryRetrievalScopeGate",
+    "build_cross_tenant_leak_guard_preview",
+    "build_cross_tenant_leak_guard_result",
+    "build_regulatory_memory_routing_registry",
+    "build_regulatory_retrieval_scope_gate",
+    "build_regulatory_retrieval_scope_gate_preview",
+    "build_regulatory_routing_preview",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -206,4 +216,23 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_diff_builder
 )
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_preview_builder import (
     build_regulatory_update_approval_preview,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.cross_tenant_leak_guard import (
+    CrossTenantLeakGuardResult,
+    build_cross_tenant_leak_guard_preview,
+    build_cross_tenant_leak_guard_result,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_memory_routing_models import (
+    RegulatoryMemoryRoute,
+    RegulatoryMemoryRoutingRegistry,
+    build_regulatory_memory_routing_registry,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_retrieval_scope_gate import (
+    RegulatoryRetrievalScopeGate,
+    build_regulatory_retrieval_scope_gate,
+    build_regulatory_retrieval_scope_gate_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_routing_preview_builder import (
+    build_regulatory_routing_preview,
 )
