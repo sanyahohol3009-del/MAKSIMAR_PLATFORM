@@ -21,10 +21,12 @@ REGULATORY_STEP_3_ACCEPTANCE = Path("docs/architecture/foundation/tenant_regulat
 REGULATORY_STEP_4_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_source_version_effective_date_precedence_v1.md")
 REGULATORY_STEP_5_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_conflict_drift_supersession_v1.md")
 REGULATORY_STEP_6_ACCEPTANCE = Path("docs/architecture/foundation/compliance_evidence_pack_audit_read_model_v1.md")
+REGULATORY_STEP_7_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_update_approval_gate_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    regulatory_step_7_closed = REGULATORY_STEP_7_ACCEPTANCE.exists()
     regulatory_step_6_closed = REGULATORY_STEP_6_ACCEPTANCE.exists()
     regulatory_step_5_closed = REGULATORY_STEP_5_ACCEPTANCE.exists()
     regulatory_step_4_closed = REGULATORY_STEP_4_ACCEPTANCE.exists()
@@ -42,7 +44,22 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if regulatory_step_6_closed:
+    if regulatory_step_7_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_7"
+        next_step = "STEP 8 — Regulatory Routing / No Cross-Tenant Leak"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Regulatory Update Approval Gate is present; next step gates regulatory routing and prevents cross-tenant leaks."
+        required_first = [
+            "regulatory memory routing models",
+            "regulatory retrieval scope gate",
+            "cross tenant leak guard",
+            "regulatory routing preview",
+            "no cross-tenant regulatory retrieval",
+        ]
+        do_not_start_yet = [
+            "Final Closure",
+        ]
+    elif regulatory_step_6_closed:
         current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_6"
         next_step = "STEP 7 — Regulatory Update Approval Gate"
         next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
@@ -124,6 +141,21 @@ def build_next_step_report() -> dict[str, object]:
         do_not_start_yet = [
             "Source Version / Effective Date / Precedence",
             "Regulatory Update Approval Gate",
+            "Final Closure",
+        ]
+    elif regulatory_step_7_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_7"
+        next_step = "STEP 8 — Regulatory Routing / No Cross-Tenant Leak"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Regulatory Update Approval Gate is present; next step gates regulatory routing and prevents cross-tenant leaks."
+        required_first = [
+            "regulatory memory routing models",
+            "regulatory retrieval scope gate",
+            "cross tenant leak guard",
+            "regulatory routing preview",
+            "no cross-tenant regulatory retrieval",
+        ]
+        do_not_start_yet = [
             "Final Closure",
         ]
     elif regulatory_step_6_closed:
@@ -397,6 +429,7 @@ def build_next_step_report() -> dict[str, object]:
         "regulatory_step_4_acceptance_exists": REGULATORY_STEP_4_ACCEPTANCE.exists(),
         "regulatory_step_5_acceptance_exists": REGULATORY_STEP_5_ACCEPTANCE.exists(),
         "regulatory_step_6_acceptance_exists": REGULATORY_STEP_6_ACCEPTANCE.exists(),
+        "regulatory_step_7_acceptance_exists": REGULATORY_STEP_7_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 

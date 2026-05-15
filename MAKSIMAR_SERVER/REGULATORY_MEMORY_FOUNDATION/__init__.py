@@ -76,6 +76,17 @@ __all__ = [
     "build_compliance_traceability_preview",
     "build_regulatory_audit_read_model",
     "build_regulatory_audit_read_model_preview",
+    "RegulatoryUpdateApprovalGate",
+    "RegulatoryUpdateApprovalRegistry",
+    "RegulatoryUpdateDiffEntry",
+    "RegulatoryUpdateDiffPack",
+    "RegulatoryUpdateProposal",
+    "build_regulatory_update_approval_gate",
+    "build_regulatory_update_approval_gate_preview",
+    "build_regulatory_update_approval_preview",
+    "build_regulatory_update_approval_registry",
+    "build_regulatory_update_diff_pack",
+    "build_regulatory_update_diff_preview",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -175,4 +186,24 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_audit_read_model im
     RegulatoryAuditReadModel,
     build_regulatory_audit_read_model,
     build_regulatory_audit_read_model_preview,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_approval_gate import (
+    RegulatoryUpdateApprovalGate,
+    build_regulatory_update_approval_gate,
+    build_regulatory_update_approval_gate_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_approval_models import (
+    RegulatoryUpdateApprovalRegistry,
+    RegulatoryUpdateProposal,
+    build_regulatory_update_approval_registry,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_diff_builder import (
+    RegulatoryUpdateDiffEntry,
+    RegulatoryUpdateDiffPack,
+    build_regulatory_update_diff_pack,
+    build_regulatory_update_diff_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_update_preview_builder import (
+    build_regulatory_update_approval_preview,
 )
