@@ -53,6 +53,18 @@ __all__ = [
     "build_legal_precedence_resolver_result",
     "build_regulatory_source_version_registry",
     "build_source_version_precedence_preview",
+    "RegulatoryConflictCandidate",
+    "RegulatoryConflictRegistry",
+    "RegulatoryDriftReport",
+    "RegulatoryDriftSignal",
+    "RegulatorySupersessionCandidate",
+    "RegulatorySupersessionRegistry",
+    "build_regulatory_conflict_registry",
+    "build_regulatory_conflict_drift_supersession_preview",
+    "build_regulatory_drift_preview",
+    "build_regulatory_drift_report",
+    "build_regulatory_supersession_preview",
+    "build_regulatory_supersession_registry",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -111,4 +123,25 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_source_version_mode
 )
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.source_version_precedence_preview_builder import (
     build_source_version_precedence_preview,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_conflict_models import (
+    RegulatoryConflictCandidate,
+    RegulatoryConflictRegistry,
+    build_regulatory_conflict_registry,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_conflict_preview_builder import (
+    build_regulatory_conflict_drift_supersession_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_drift_detector import (
+    RegulatoryDriftReport,
+    RegulatoryDriftSignal,
+    build_regulatory_drift_preview,
+    build_regulatory_drift_report,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_supersession_models import (
+    RegulatorySupersessionCandidate,
+    RegulatorySupersessionRegistry,
+    build_regulatory_supersession_preview,
+    build_regulatory_supersession_registry,
 )

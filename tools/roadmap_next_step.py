@@ -19,10 +19,12 @@ REGULATORY_STEP_1_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_tra
 REGULATORY_STEP_2_ACCEPTANCE = Path("docs/architecture/foundation/country_jurisdiction_registry_binding_v1.md")
 REGULATORY_STEP_3_ACCEPTANCE = Path("docs/architecture/foundation/tenant_regulatory_scope_isolation_v1.md")
 REGULATORY_STEP_4_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_source_version_effective_date_precedence_v1.md")
+REGULATORY_STEP_5_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_conflict_drift_supersession_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    regulatory_step_5_closed = REGULATORY_STEP_5_ACCEPTANCE.exists()
     regulatory_step_4_closed = REGULATORY_STEP_4_ACCEPTANCE.exists()
     regulatory_step_3_closed = REGULATORY_STEP_3_ACCEPTANCE.exists()
     regulatory_step_2_closed = REGULATORY_STEP_2_ACCEPTANCE.exists()
@@ -38,7 +40,24 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if regulatory_step_4_closed:
+    if regulatory_step_5_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_5"
+        next_step = "STEP 6 — Compliance Evidence Pack / Audit Read Model"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Regulatory Conflict / Drift / Supersession is present; next step builds compliance evidence and audit read model."
+        required_first = [
+            "compliance evidence pack models",
+            "regulatory audit read model",
+            "compliance traceability builder",
+            "compliance evidence preview",
+            "source-to-decision trace required",
+        ]
+        do_not_start_yet = [
+            "Regulatory Update Approval Gate",
+            "Regulatory Routing / No Cross-Tenant Leak",
+            "Final Closure",
+        ]
+    elif regulatory_step_4_closed:
         current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_4"
         next_step = "STEP 5 — Regulatory Conflict / Drift / Supersession"
         next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
@@ -87,6 +106,23 @@ def build_next_step_report() -> dict[str, object]:
         do_not_start_yet = [
             "Source Version / Effective Date / Precedence",
             "Regulatory Update Approval Gate",
+            "Final Closure",
+        ]
+    elif regulatory_step_5_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_5"
+        next_step = "STEP 6 — Compliance Evidence Pack / Audit Read Model"
+        next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/"
+        why = "Regulatory Conflict / Drift / Supersession is present; next step builds compliance evidence and audit read model."
+        required_first = [
+            "compliance evidence pack models",
+            "regulatory audit read model",
+            "compliance traceability builder",
+            "compliance evidence preview",
+            "source-to-decision trace required",
+        ]
+        do_not_start_yet = [
+            "Regulatory Update Approval Gate",
+            "Regulatory Routing / No Cross-Tenant Leak",
             "Final Closure",
         ]
     elif regulatory_step_4_closed:
@@ -325,6 +361,7 @@ def build_next_step_report() -> dict[str, object]:
         "regulatory_step_2_acceptance_exists": REGULATORY_STEP_2_ACCEPTANCE.exists(),
         "regulatory_step_3_acceptance_exists": REGULATORY_STEP_3_ACCEPTANCE.exists(),
         "regulatory_step_4_acceptance_exists": REGULATORY_STEP_4_ACCEPTANCE.exists(),
+        "regulatory_step_5_acceptance_exists": REGULATORY_STEP_5_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 
