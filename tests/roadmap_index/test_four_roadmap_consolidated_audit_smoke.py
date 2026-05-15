@@ -22,7 +22,10 @@ def test_roadmap_next_step_report_smoke() -> None:
     assert report["roadmap_family"] == "memory_roadmap_v5_1"
     assert report["next_step_ready"] is True
 
-    if report.get("regulatory_step_8_acceptance_exists") is True:
+    if report.get("regulatory_step_9_acceptance_exists") is True:
+        assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_FINAL_CLOSURE"
+        assert report["next_step"] == "Memory Foundation Complete / Next Roadmap Selection"
+    elif report.get("regulatory_step_8_acceptance_exists") is True:
         assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_8"
         assert report["next_step"] == "STEP 9 — Regulatory Memory Final Closure"
     elif report.get("regulatory_step_7_acceptance_exists") is True:
@@ -43,6 +46,9 @@ def test_roadmap_next_step_report_smoke() -> None:
     elif report.get("regulatory_step_2_acceptance_exists") is True:
         assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_2"
         assert report["next_step"] == "STEP 3 — Tenant Regulatory Scope & Isolation"
+    elif report.get("regulatory_step_9_acceptance_exists") is True:
+        assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_FINAL_CLOSURE"
+        assert report["next_step"] == "Memory Foundation Complete / Next Roadmap Selection"
     elif report.get("regulatory_step_8_acceptance_exists") is True:
         assert report["current_closed_phase"] == "REGULATORY_MEMORY_FOUNDATION_STEP_8"
         assert report["next_step"] == "STEP 9 — Regulatory Memory Final Closure"

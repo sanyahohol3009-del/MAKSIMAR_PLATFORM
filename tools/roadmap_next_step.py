@@ -23,10 +23,12 @@ REGULATORY_STEP_5_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_con
 REGULATORY_STEP_6_ACCEPTANCE = Path("docs/architecture/foundation/compliance_evidence_pack_audit_read_model_v1.md")
 REGULATORY_STEP_7_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_update_approval_gate_v1.md")
 REGULATORY_STEP_8_ACCEPTANCE = Path("docs/architecture/foundation/regulatory_memory_routing_no_cross_tenant_leak_v1.md")
+REGULATORY_STEP_9_ACCEPTANCE = Path("docs/architecture/roadmap_index/regulatory_memory_final_closure_v1.md")
 CONSOLIDATED_AUDIT = Path("docs/architecture/roadmap_index/four_roadmap_consolidated_audit_v1.md")
 
 
 def build_next_step_report() -> dict[str, object]:
+    regulatory_step_9_closed = REGULATORY_STEP_9_ACCEPTANCE.exists()
     regulatory_step_8_closed = REGULATORY_STEP_8_ACCEPTANCE.exists()
     regulatory_step_7_closed = REGULATORY_STEP_7_ACCEPTANCE.exists()
     regulatory_step_6_closed = REGULATORY_STEP_6_ACCEPTANCE.exists()
@@ -46,7 +48,19 @@ def build_next_step_report() -> dict[str, object]:
     phase_6_1_closed = PHASE_6_1_ACCEPTANCE.exists()
     phase_6_0_closed = PHASE_6_0_ACCEPTANCE.exists()
 
-    if regulatory_step_8_closed:
+    if regulatory_step_9_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_FINAL_CLOSURE"
+        next_step = "Memory Foundation Complete / Next Roadmap Selection"
+        next_folder = "docs/architecture/roadmap_index/"
+        why = "Regulatory Memory Foundation is closed; memory foundation is complete and ready for next roadmap selection."
+        required_first = [
+            "keep memory foundation closed as reference",
+            "do not reopen without explicit correction pass",
+            "select next roadmap track",
+            "run pre-step drift check before any new track",
+        ]
+        do_not_start_yet = []
+    elif regulatory_step_8_closed:
         current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_8"
         next_step = "STEP 9 — Regulatory Memory Final Closure"
         next_folder = "MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/ + docs/architecture/roadmap_index/"
@@ -158,6 +172,18 @@ def build_next_step_report() -> dict[str, object]:
             "Regulatory Update Approval Gate",
             "Final Closure",
         ]
+    elif regulatory_step_9_closed:
+        current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_FINAL_CLOSURE"
+        next_step = "Memory Foundation Complete / Next Roadmap Selection"
+        next_folder = "docs/architecture/roadmap_index/"
+        why = "Regulatory Memory Foundation is closed; memory foundation is complete and ready for next roadmap selection."
+        required_first = [
+            "keep memory foundation closed as reference",
+            "do not reopen without explicit correction pass",
+            "select next roadmap track",
+            "run pre-step drift check before any new track",
+        ]
+        do_not_start_yet = []
     elif regulatory_step_8_closed:
         current_closed_phase = "REGULATORY_MEMORY_FOUNDATION_STEP_8"
         next_step = "STEP 9 — Regulatory Memory Final Closure"
@@ -459,6 +485,7 @@ def build_next_step_report() -> dict[str, object]:
         "regulatory_step_6_acceptance_exists": REGULATORY_STEP_6_ACCEPTANCE.exists(),
         "regulatory_step_7_acceptance_exists": REGULATORY_STEP_7_ACCEPTANCE.exists(),
         "regulatory_step_8_acceptance_exists": REGULATORY_STEP_8_ACCEPTANCE.exists(),
+        "regulatory_step_9_acceptance_exists": REGULATORY_STEP_9_ACCEPTANCE.exists(),
         "next_step_ready": CONSOLIDATED_AUDIT.exists() and PHASE_5_2_ACCEPTANCE.exists(),
     }
 

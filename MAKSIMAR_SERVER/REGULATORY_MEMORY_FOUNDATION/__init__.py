@@ -97,6 +97,11 @@ __all__ = [
     "build_regulatory_retrieval_scope_gate",
     "build_regulatory_retrieval_scope_gate_preview",
     "build_regulatory_routing_preview",
+    "RegulatoryMemoryFinalIndex",
+    "build_regulatory_memory_final_closure",
+    "build_regulatory_memory_final_closure_preview",
+    "build_regulatory_memory_final_index",
+    "build_regulatory_memory_final_index_preview",
     "build_regulatory_track_entry_summary",
 ]
 
@@ -235,4 +240,14 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_retrieval_scope_gat
 )
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_routing_preview_builder import (
     build_regulatory_routing_preview,
+)
+
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_memory_final_closure_builder import (
+    build_regulatory_memory_final_closure,
+    build_regulatory_memory_final_closure_preview,
+)
+from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_memory_final_index import (
+    RegulatoryMemoryFinalIndex,
+    build_regulatory_memory_final_index,
+    build_regulatory_memory_final_index_preview,
 )
