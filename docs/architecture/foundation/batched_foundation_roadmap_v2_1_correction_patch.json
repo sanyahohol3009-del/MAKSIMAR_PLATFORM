@@ -1,0 +1,463 @@
+{
+  "roadmap_id": "batched_foundation_roadmap_v2_1_correction_patch",
+  "version": "2.1",
+  "title": "BATCHED FOUNDATION ROADMAP v2.1 / CORRECTION PATCH EDITION",
+  "status": "active",
+  "description": "Machine-readable roadmap v2.1 correction patch for foundation layers. This extends v1/v2 with manifest, semantic duplicate scan, container adapter boundary, PHASE 6 registry enrollment, typo prevention and anti-duplication gates.",
+  "global_rules": {
+    "roadmap_reconciliation_required": true,
+    "exact_path_location_slice_required": true,
+    "semantic_duplicate_scan_required": true,
+    "location_validation_table_required": true,
+    "no_delete_without_correction_pass": true,
+    "no_move_without_correction_pass": true,
+    "dataclass_post_init_required": true,
+    "drift_guard_required": true,
+    "xray_required": true,
+    "dashboard_ready_output_required": true,
+    "no_dashboard_mutation": true,
+    "no_ui_to_execution": true,
+    "full_auto_pytest_required": true,
+    "full_auto_pytest_command": "./.venv/bin/python -m pytest -q -n auto",
+    "separate_commit_required": true,
+    "push_after_clean_commit_required": true
+  },
+  "decision_actions": [
+    "create_new",
+    "reuse_in_place",
+    "wrap_as_adapter",
+    "keep_legacy",
+    "migration_candidate",
+    "true_duplicate_risk",
+    "container_boundary_duplicate_allowed"
+  ],
+  "semantic_families": [
+    "security",
+    "rbac",
+    "policy",
+    "approval",
+    "signature",
+    "vault",
+    "quarantine",
+    "data",
+    "storage",
+    "ledger",
+    "append",
+    "journal",
+    "artifact",
+    "vector",
+    "postgres",
+    "update",
+    "recovery",
+    "rollback",
+    "snapshot",
+    "sync",
+    "network",
+    "trust",
+    "boundary",
+    "vpn",
+    "compose",
+    "docker",
+    "container",
+    "ai",
+    "model_router",
+    "worker",
+    "orchestration",
+    "agent",
+    "proposal",
+    "tool_call",
+    "registry",
+    "enrollment",
+    "domain",
+    "memory_registry",
+    "dashboard_visibility"
+  ],
+  "forbidden_paths": [
+    "MAKSIMAR_CORE_LIB/data_plane/append_on y_log_models.py",
+    "MAKSIMAR_CORE_LIB/data_plane/immutable_ledge_contract.py",
+    "MAKSIMAR_CORE_LIB/update_recovery/signature_verifier_contract.py",
+    "tests/network_containerization/test_network_network_topology_builder_smoke.py"
+  ],
+  "phases": [
+    {
+      "phase_id": "0",
+      "title": "Root Artifact Hygiene / Archival Pass",
+      "status": "active",
+      "description": "Create root artifact hygiene layer for root artifacts, backup/report/generated/vendor files, dashboard-readiness, no auto-delete and no auto-move.",
+      "batches": [
+        {
+          "batch_id": "0.1",
+          "status": "CLOSED",
+          "title": "Baseline + Location Inventory",
+          "description": "Baseline inventory. Root artifacts are read-only. No move/delete.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/__init__.py",
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/root_surface_inventory_models.py",
+            "tests/root_artifact_hygiene/__init__.py",
+            "tests/root_artifact_hygiene/test_artifact_location_policy_smoke.py"
+          ],
+          "correction_additions": [],
+          "base_tests": [
+            "tests/root_artifact_hygiene/test_artifact_location_policy_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "RootSurfaceInventoryReadModel"
+          ],
+          "acceptance_gates": [
+            "target tests green",
+            "Drift Guard OK",
+            "X-Ray executed",
+            "full pytest -q -n auto green",
+            "no move/delete"
+          ],
+          "semantic_duplicate_scan_required": false,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "0.2",
+          "status": "ACTIVE",
+          "title": "Artifact Classification Models",
+          "description": "Artifact classification models and no-auto-delete policy. Correction patch adds semantic duplicate scan models/policy.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/artifact_classification_models.py",
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/artifact_location_policy.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/semantic_duplicate_scan_models.py",
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/semantic_duplicate_scan_policy.py"
+          ],
+          "base_tests": [
+            "tests/root_artifact_hygiene/test_artifact_classification_models_smoke.py",
+            "tests/root_artifact_hygiene/test_no_auto_delete_policy_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/root_artifact_hygiene/test_semantic_duplicate_scan_models_smoke.py",
+            "tests/root_artifact_hygiene/test_semantic_duplicate_scan_policy_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "ArtifactClassificationReadModel",
+            "SemanticDuplicateScanReadModel"
+          ],
+          "acceptance_gates": [
+            "artifact classification read model exists",
+            "semantic duplicate scan read model exists",
+            "auto_delete_allowed false",
+            "auto_move_allowed false",
+            "requires approval for correction/archive actions",
+            "target tests green",
+            "Drift Guard OK",
+            "X-Ray executed",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "0.3",
+          "status": "PLANNED",
+          "title": "Root Report Builder",
+          "description": "Readable root report without deletion. Semantic duplicate report is separate.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/root_artifact_report_builder.py",
+            "tools/root_artifact_hygiene_report.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/root_artifact_hygiene/semantic_duplicate_report_builder.py",
+            "tools/root_artifact_semantic_duplicate_scan.py"
+          ],
+          "base_tests": [
+            "tests/root_artifact_hygiene/test_root_artifact_report_builder_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/root_artifact_hygiene/test_semantic_duplicate_report_builder_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "RootArtifactReportReadModel",
+            "SemanticDuplicateReportReadModel"
+          ],
+          "acceptance_gates": [
+            "readable report without deletion",
+            "semantic duplicate report exists",
+            "target tests green",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "0.4",
+          "status": "PLANNED",
+          "title": "Preview + Documentation",
+          "description": "Operator sees what can be archived later and what must not be touched. Semantic duplicate preview included.",
+          "base_files": [
+            "tools/root_artifact_location_validation_preview.py",
+            "docs/architecture/foundation/root_artifact_hygiene_archival_policy_v1.md",
+            "docs/architecture/foundation/root_artifact_hygiene_location_matrix_v1.md"
+          ],
+          "correction_additions": [
+            "tools/root_artifact_semantic_duplicate_preview.py",
+            "docs/architecture/foundation/semantic_duplicate_scan_policy_v1.md",
+            "docs/architecture/foundation/container_boundary_duplicate_policy_v1.md"
+          ],
+          "base_tests": [],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "LocationValidationPreviewReadModel",
+            "SemanticDuplicatePreviewReadModel"
+          ],
+          "acceptance_gates": [
+            "location validation preview works",
+            "semantic duplicate preview works",
+            "documentation exists",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "0.5",
+          "status": "PLANNED",
+          "title": "Acceptance + Radar/X-Ray Binding",
+          "description": "Radar/X-Ray understands hygiene layer and correction patch policy.",
+          "base_files": [
+            ".gitignore",
+            "MAKSIMAR_CORE_LIB/architecture_map/architecture_blueprint.json",
+            "tools/architecture_xray_radar.py",
+            "docs/architecture/roadmap_index/roadmap_document_provenance_index_v1.md"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/foundation_roadmap_correction_patch_v1.md",
+            "docs/architecture/foundation/root_artifact_hygiene_acceptance_v1.md"
+          ],
+          "base_tests": [],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "RootArtifactHygieneAcceptanceReadModel"
+          ],
+          "acceptance_gates": [
+            "root_artifact_hygiene visible in X-Ray / blueprint",
+            "semantic duplicate scan policy documented",
+            "no auto-delete",
+            "no auto-move",
+            "correction pass required before move",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        }
+      ]
+    },
+    {
+      "phase_id": "1",
+      "title": "SECURITY_LAYER FOUNDATION v1",
+      "status": "planned",
+      "description": "Official security foundation: RBAC, policy enforcement, approval, voice identity, vault boundary, signature decision, USB/media quarantine, security gate, read models, preview and E2E tracer.",
+      "batches": [
+        {
+          "batch_id": "1.1",
+          "status": "PLANNED",
+          "title": "Security Layer Surface",
+          "description": "Create official security foundation surface and bind it to future containerization.",
+          "base_files": [
+            "SECURITY_LAYER/README.md",
+            "SECURITY_LAYER/container_contract.yaml",
+            "SECURITY_LAYER/config/security_layer_policy.yaml",
+            "MAKSIMAR_CORE_LIB/security_layer/__init__.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/__init__.py",
+            "MAKSIMAR_CORE_LIB/architecture_map/architecture_blueprint.json",
+            "tools/architecture_xray_radar.py"
+          ],
+          "correction_additions": [
+            "SECURITY_LAYER/layer_manifest.yaml",
+            "SECURITY_LAYER/boundaries/container_adapter_boundary.yaml",
+            "SECURITY_LAYER/adapters/README.md",
+            "SECURITY_LAYER/existing_bindings/security_existing_sources.yaml"
+          ],
+          "base_tests": [],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "SecurityLayerSurfaceReadModel"
+          ],
+          "acceptance_gates": [
+            "semantic duplicate scan over security/policy/approval/signature/vault/quarantine",
+            "layer manifest exists",
+            "container boundary exists",
+            "existing bindings visible",
+            "Drift Guard OK",
+            "X-Ray executed",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "1.2",
+          "status": "PLANNED",
+          "title": "Security Request / Decision / RBAC",
+          "description": "Formal request, decision and RBAC models. Explicit semantic duplicate binding layer.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/security_layer/security_request_models.py",
+            "MAKSIMAR_CORE_LIB/security_layer/security_decision_models.py",
+            "MAKSIMAR_CORE_LIB/security_layer/rbac_models.py",
+            "MAKSIMAR_CORE_LIB/security_layer/rbac_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/policy_enforcer_contract.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/security_layer/security_semantic_duplicate_binding.py"
+          ],
+          "base_tests": [
+            "tests/security_layer/test_security_request_models_smoke.py",
+            "tests/security_layer/test_security_decision_models_smoke.py",
+            "tests/security_layer/test_rbac_contract_smoke.py",
+            "tests/security_layer/test_policy_enforcer_contract_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/security_layer/test_security_semantic_duplicate_binding_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "SecurityDecisionReadModel"
+          ],
+          "acceptance_gates": [
+            "RBAC/policy/security decision pipeline dashboard-safe",
+            "target tests green",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "1.3",
+          "status": "PLANNED",
+          "title": "Security Gates and Verifiers",
+          "description": "Approval, bundle verification, voice identity, vault, generic security signature decision, USB guard, media quarantine and security gate.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/security_layer/approval_service_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/execution_bundle_verifier_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/voice_identity_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/vault_boundary_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/signature_verifier_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/usb_guard_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/media_quarantine_contract.py",
+            "MAKSIMAR_CORE_LIB/security_layer/security_gate_contract.py"
+          ],
+          "correction_additions": [],
+          "base_tests": [
+            "tests/security_layer/test_approval_service_contract_smoke.py",
+            "tests/security_layer/test_execution_bundle_verifier_contract_smoke.py",
+            "tests/security_layer/test_voice_identity_contract_smoke.py",
+            "tests/security_layer/test_signature_verifier_contract_smoke.py",
+            "tests/security_layer/test_security_gate_contract_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "SecurityVerifierReadinessReadModel"
+          ],
+          "acceptance_gates": [
+            "security signature verifier is general trust boundary only",
+            "not used as update-package-specific verifier",
+            "verifier readiness visible",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "1.4",
+          "status": "PLANNED",
+          "title": "Runtime Adapter + Read Model + Preview",
+          "description": "Working deny/allow pipe, telemetry read model and preview tools through adapters/facades.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/security_layer/security_read_model.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/security_gate.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/security_decision_builder.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/security_telemetry_read_model_builder.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/security_layer_health.py",
+            "tools/monitor/runtime_input/security_layer_terminal_preview.py",
+            "tools/monitor/runtime_input/security_layer_web_preview.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_SERVER/SECURITY_LAYER/adapters/__init__.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/adapters/security_existing_policy_adapter.py",
+            "MAKSIMAR_SERVER/SECURITY_LAYER/adapters/security_vendor_gate_adapter.py"
+          ],
+          "base_tests": [
+            "tests/security_layer/test_security_telemetry_read_model_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/security_layer/test_security_existing_policy_adapter_smoke.py",
+            "tests/security_layer/test_security_vendor_gate_adapter_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "SecurityTelemetryReadModel"
+          ],
+          "acceptance_gates": [
+            "runtime adapter uses adapters/facades",
+            "legacy paths not broken",
+            "preview works",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "1.5",
+          "status": "PLANNED",
+          "title": "Tests + E2E Security Tracer",
+          "description": "Check CONTROL/CORE -> SECURITY -> DENY and capture semantic duplicate/container boundary review.",
+          "base_files": [
+            "tests/e2e_tracers/test_security_gate_denies_unauthorized_mock.py",
+            "docs/architecture/foundation/security_layer_foundation_v1.md"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/security_layer_semantic_duplicate_review_v1.md",
+            "docs/architecture/foundation/security_layer_container_boundary_v1.md"
+          ],
+          "base_tests": [
+            "tests/e2e_tracers/test_security_gate_denies_unauthorized_mock.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "SecurityTracerResultReadModel"
+          ],
+          "acceptance_gates": [
+            "high-risk unauthorized mock request denied",
+            "security layer has manifest",
+            "adapter boundary documented",
+            "semantic duplicate scan clean or classified",
+            "full pytest -q -n auto green"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        }
+      ]
+    }
+  ],
+  "phase_placeholders": [
+    "PHASE 2 DATA_PLANE FOUNDATION v1",
+    "PHASE 3 UPDATE_RECOVERY_INFRA FOUNDATION v1",
+    "PHASE 4 NETWORK_CONTAINERIZATION BLUEPRINT v1",
+    "PHASE 5 AI_ORCHESTRATION / Multi-Agent / Autonomous Planning",
+    "PHASE 6 Domain / Registry Enrollment for Foundation Layers"
+  ]
+}

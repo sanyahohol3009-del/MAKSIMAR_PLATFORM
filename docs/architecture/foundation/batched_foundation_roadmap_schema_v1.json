@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maksimar://schemas/batched_foundation_roadmap_schema_v1.json",
+  "title": "MAKSIMAR Batched Foundation Roadmap Schema v1",
+  "type": "object",
+  "required": [
+    "roadmap_id",
+    "version",
+    "title",
+    "status",
+    "description",
+    "global_rules",
+    "decision_actions",
+    "semantic_families",
+    "forbidden_paths",
+    "phases"
+  ],
+  "properties": {
+    "roadmap_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "closed"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "global_rules": {
+      "type": "object",
+      "required": [
+        "roadmap_reconciliation_required",
+        "exact_path_location_slice_required",
+        "semantic_duplicate_scan_required",
+        "location_validation_table_required",
+        "no_delete_without_correction_pass",
+        "no_move_without_correction_pass",
+        "dataclass_post_init_required",
+        "drift_guard_required",
+        "xray_required",
+        "dashboard_ready_output_required",
+        "no_dashboard_mutation",
+        "no_ui_to_execution",
+        "full_auto_pytest_required",
+        "full_auto_pytest_command",
+        "separate_commit_required",
+        "push_after_clean_commit_required"
+      ]
+    },
+    "decision_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "semantic_families": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      },
+      "minItems": 1
+    },
+    "phase_placeholders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": [
+        "phase_id",
+        "title",
+        "status",
+        "description",
+        "batches"
+      ],
+      "properties": {
+        "phase_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "active",
+            "closed"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "batches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/batch"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "batch": {
+      "type": "object",
+      "required": [
+        "batch_id",
+        "status",
+        "title",
+        "description",
+        "base_files",
+        "correction_additions",
+        "base_tests",
+        "correction_tests",
+        "dashboard_read_models",
+        "acceptance_gates",
+        "semantic_duplicate_scan_required",
+        "manifest_required",
+        "container_boundary_required",
+        "full_auto_pytest_required"
+      ],
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "CLOSED",
+            "ACTIVE",
+            "PLANNED"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "correction_additions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "base_tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "correction_tests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dashboard_read_models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "acceptance_gates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "semantic_duplicate_scan_required": {
+          "type": "boolean"
+        },
+        "manifest_required": {
+          "type": "boolean"
+        },
+        "container_boundary_required": {
+          "type": "boolean"
+        },
+        "full_auto_pytest_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
