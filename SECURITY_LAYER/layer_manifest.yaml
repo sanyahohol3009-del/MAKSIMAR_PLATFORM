@@ -1,0 +1,18 @@
+id: SECURITY_LAYER
+name: Security Layer Foundation
+kind: foundation_security_layer
+version: "1.0"
+owner: MAKSIMAR_PLATFORM
+layer_family: security
+container_ready: false
+dashboard_read_model: SecurityLayerSurfaceReadModel
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+direct_execution_allowed: false
+dashboard_mutation_allowed: false
+ui_to_execution_allowed: false
+required_security_gate: SECURITY_LAYER_GATE
+observability_binding: security_layer_surface_observability
+manifest_status: surface_declared
+batch_id: "PHASE_1_BATCH_1_1"
+roadmap_id: batched_foundation_roadmap_v2_1_correction_patch

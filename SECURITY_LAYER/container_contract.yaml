@@ -1,0 +1,21 @@
+id: SECURITY_LAYER_CONTAINER_CONTRACT
+layer_id: SECURITY_LAYER
+kind: container_contract
+version: "1.0"
+status: surface_declared
+container_enabled_by_default: false
+container_ready: false
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+direct_execution_allowed: false
+dashboard_mutation_allowed: false
+network_exposure_default: none
+public_exposure_allowed: false
+requires_manifest: true
+requires_container_adapter_boundary: true
+requires_existing_bindings: true
+batch_id: "PHASE_1_BATCH_1_1"
+notes:
+  - Existing working code remains in place.
+  - Container extraction will use adapters/facades.
+  - This contract does not deploy a container.

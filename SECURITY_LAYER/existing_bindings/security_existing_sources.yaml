@@ -1,0 +1,1007 @@
+id: SECURITY_LAYER_EXISTING_SOURCES
+layer_id: SECURITY_LAYER
+kind: existing_sources_binding
+version: "1.0"
+status: read_only_reference
+batch_id: "PHASE_1_BATCH_1_1"
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+direct_execution_allowed: false
+dashboard_mutation_allowed: false
+source_count: 199
+sources:
+  - path: MAKSIMAR_CORE/contracts/action/action_permission.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/federation/trust_link.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/governance/approval_policy.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/governance/permission_matrix.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/governance/trust_policy.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/mobile/mobile_permission_bridge.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/module/module_permission_matrix.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/visual_engineering/visual_approval.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/contracts/vpn/vpn_policy.v1.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/governance/config/approval_policy.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/governance/config/permission_matrix.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/governance/config/trust_policies.yaml
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE/shared_services/policy_loader.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/backend_selection_policy/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/backend_selection_policy/backend_selection_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/enterprise_memory_domains/enterprise_policy_memory_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_engine/storage_registry/storage_portability_policy_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/governance_binding_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/governance_federation_gap_report_builder.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/governance_preview_builder.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/governance_summary_builder.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/memory_classification_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/memory_federation_policy_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/memory_policy_scope_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/memory_source_priority_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/memory_policy/memory_trust_scope_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/network_trust_boundaries/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/approval_queue_panel_content_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/display_replacement_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/gesture_policy_handoff_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/graph_interaction_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/module_permission_matrix_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/panel_exposure_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/panel_visibility_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/panel_visibility_policy_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/policy_aware_action_exposure_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/security_telemetry_panel_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/test_warning_cleanup_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/oob_dashboard/visual_backend_import_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/payload_policy_hardening/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/payload_policy_hardening/payload_policy_hardening_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/payload_policy_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/enforcement_engine.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/enforcement_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/enforcement_rules.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/policy_accessor.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/policy_loader.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/policy_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/policy_engine/policy_registry.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/root_artifact_hygiene/artifact_location_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/root_artifact_hygiene/semantic_duplicate_scan_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/runtime_observability/alert_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_builders.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_error_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_payload_class_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_policy_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_task_class_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy/validation_tier_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy_completion/__init__.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_CORE_LIB/validation_policy_completion/validation_policy_completion_contract.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/CONTROL_PLANE/memory_routing/adapters/mempalace_real_backend_approval_envelope.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/CONTROL_PLANE/memory_routing/adapters/mempalace_real_backend_security_boundary.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/CONTROL_PLANE/memory_routing/retrieval_backend_policy_gate.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/CONTROL_PLANE/memory_routing/retrieval_selection_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/PROPOSAL_AUDIT/approval_read_model.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/regulatory_update_approval_gate.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/REGULATORY_MEMORY_FOUNDATION/regulatory_update_approval_models.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: MAKSIMAR_SERVER/WORKERS/simulation_worker/backend_selection_policy.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/container_boundary_duplicate_policy_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_2_3_batch1_core_governance_policy_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_4_1_batch2_enterprise_policy_metrics_summary_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_5_1_batch3a_vendor_security_gate_automation_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_5_1_batch4a_mempalace_real_backend_security_boundary_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_5_1_batch4c_mempalace_real_backend_approval_envelope_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/phase_6_2_proposal_audit_approval_spine_acceptance_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/regulatory_update_approval_gate_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/root_artifact_hygiene_archival_policy_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/architecture/foundation/semantic_duplicate_scan_policy_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/core_architecture/core_authority_model/CORE_AUTHORITY_AND_TRUTH_RELATION_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/core_architecture/core_authority_model/CORE_AUTHORITY_BOUNDARIES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/core_architecture/core_authority_model/CORE_AUTHORITY_GAP_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/core_architecture/core_authority_model/CORE_AUTHORITY_MODEL_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_meta_governance/03_DOCUMENT_TYPE_AND_AUTHORITY_MODEL_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/01_DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/02_PACKAGE_AUTHORITY_SCOPE_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/03_PACKAGE_PRECEDENCE_MODEL_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/04_CANONICAL_OVER_AUDIT_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/05_AUDIT_OVER_HISTORY_INTERPRETATION_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/06_PACKAGE_CONFLICT_PRECEDENCE_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/07_INCREMENTAL_PRECEDENCE_HARDENING_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/08_PRECEDENCE_RESULT_INTERPRETATION_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/09_DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_GAP_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/10_DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_COMPLETION_NOTE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/document_package_authority_and_precedence_audit/DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_AUDIT_COMPLETION_STATE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/document_package_authority_and_precedence_audit/DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_AUDIT_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/document_package_authority_and_precedence_audit/DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_CONSOLIDATED_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_authority_and_precedence/document_package_authority_and_precedence_audit/DOCUMENT_PACKAGE_AUTHORITY_AND_PRECEDENCE_NEXT_DEEPENING_HINTS_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_change_control/03_PACKAGE_CHANGE_APPROVAL_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/document_package_manifests/04_PACKAGE_AUTHORITY_DECLARATION_RULE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/mobile_accelerator/MOBILE_THERMAL_POWER_POLICY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/mobile_bridge_accelerator_deep/THERMAL_AND_POWER_POLICY_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/naming_drift_policy.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/project_documentation_system/DOCUMENTATION_GAP_POLICY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/APPROVAL_AND_CONSENT_MODEL_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/IMMUTABLE_CORE_RULES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/SECURITY_GOVERNANCE_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/SECURITY_GOVERNANCE_GAP_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/TRUST_BOUNDARIES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/governed_action_model/GOVERNED_ACTION_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/governed_action_model/GOVERNED_ACTION_GAP_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/governed_action_model/PROPOSAL_TO_ACTION_TRANSITION_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/governed_action_model/WRITE_APPLY_BOUNDARY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_baseline_audit/SECURITY_BASELINE_NEXT_REMEDIATION_HINTS_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_baseline_audit/SECURITY_GOVERNANCE_AUDIT_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_baseline_audit/SECURITY_GOVERNANCE_CONSOLIDATED_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_baseline_audit/SECURITY_PRIORITY2_COMPLETION_STATE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_semantics/GOVERNANCE_ENFORCEMENT_ORIENTATION_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_semantics/PROTECTED_BEHAVIOR_CLASSES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_semantics/SECURITY_SEMANTICS_BASELINE_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/security_governance/security_semantics/SECURITY_SEMANTICS_GAP_NOTES_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/validation_bootstrap_automation/03_WRAPPER_SCRIPT_POLICY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/validation_bootstrap_canonicalization/03_PYTEST_ENTRYPOINT_POLICY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: docs/validation_followthrough/PARALLEL_AND_SERIAL_EXECUTION_POLICY_v1.md
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/architecture_map_runtime/test_architecture_control_backend_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/backend_selection_policy/test_backend_selection_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/enterprise_memory/test_enterprise_policy_memory_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/governance_federation_gap/test_memory_federation_policy_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/governance_federation_gap/test_memory_trust_scope_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_engine/test_relative_path_policy_ready_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_governance_binding_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_governance_binding_ready_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_governance_preview_builder_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_governance_summary_builder_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_memory_classification_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_memory_policy_scope_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_memory_promotion_and_conflict_binding_ready_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_policy/test_phase_2_3_final_acceptance_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_routing_adapters/test_mempalace_integrity_security_report_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_routing_adapters/test_mempalace_real_backend_approval_envelope_preview_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_routing_adapters/test_mempalace_real_backend_approval_envelope_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_routing_adapters/test_mempalace_real_backend_approval_report_written_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/memory_routing_adapters/test_mempalace_real_backend_security_boundary_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/network_trust_boundaries/test_network_trust_boundaries_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_approval_queue_panel_content_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_display_replacement_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_gesture_policy_handoff_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_graph_interaction_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_module_permission_matrix_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_panel_exposure_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_panel_visibility_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_panel_visibility_policy_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_policy_aware_action_exposure_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_security_telemetry_panel_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_test_warning_cleanup_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/oob_dashboard/test_visual_backend_import_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/payload_policy_hardening/test_payload_policy_hardening_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/policy_engine/test_enforcement_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/policy_engine/test_policy_loader_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/project_artifact_memory/test_phase_4_2_artifact_approval_gate_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/proposal_audit_spine/test_approval_read_model_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/proposal_audit_spine/test_proposal_audit_approval_final_acceptance_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/regulatory_memory_foundation/test_regulatory_update_approval_acceptance_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/regulatory_memory_foundation/test_regulatory_update_approval_gate_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/regulatory_memory_foundation/test_regulatory_update_approval_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_evidence_bound_memory_backend_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_evidence_memory_core_backend_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_evidence_source_chain_backend_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_retrieval_backend_policy_blocks_mgrep_sqlite_vec_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_retrieval_backend_policy_gate_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_retrieval_policy_blocks_forbidden_source_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/retrieval_orchestration/test_retrieval_selection_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/root_artifact_hygiene/test_artifact_location_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/root_artifact_hygiene/test_no_auto_delete_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/root_artifact_hygiene/test_semantic_duplicate_scan_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/runtime_observability/test_alert_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/storage_registry/test_storage_portability_policy_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/test_payload_policy_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_builders_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_error_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_payload_class_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_policy_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_task_class_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy/test_validation_tier_models_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/validation_policy_completion/test_validation_policy_completion_contract_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/vendor_security_gate/test_vendor_security_gate_mempalace_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/vendor_security_gate/test_vendor_security_gate_tool_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tests/workers/test_simulation_backend_selection_policy_smoke.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/approval_queue_panel_terminal_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/display_replacement_policy_terminal_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/display_replacement_policy_web_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/family_avatar_security_telemetry_family_terminal_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/family_avatar_security_telemetry_family_web_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/graph_interaction_policy_terminal_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/monitor/runtime_input/panel_visibility_policy_terminal_preview.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false
+  - path: tools/vendor_security_gate.py
+    relation: existing_security_related_surface
+    action: reference_only
+    move_allowed: false
+    delete_allowed: false

@@ -196,8 +196,11 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             "MAKSIMAR_SERVER/APPROVAL",
             "MAKSIMAR_SERVER/VAULT",
             "MAKSIMAR_CORE/contracts/security",
+            "MAKSIMAR_CORE_LIB/security_layer",
+            "MAKSIMAR_SERVER/SECURITY_LAYER",
         ),
         expected_laws=(
+            law("security_layer_surface", "Security layer surface", "SECURITY_LAYER", "security_layer_surface", "layer_manifest"),
             law("rbac", "RBAC service", "rbac", "role", "permission"),
             law("policy_enforcer", "Policy enforcer", "policy_enforcer", "policy engine"),
             law("execution_bundle_verifier", "Execution bundle verifier", "execution_bundle_verifier", "bundle_verifier"),

@@ -16,7 +16,10 @@
     "Physical/robotics execution must pass simulation and strict validation first.",
     "Root artifact hygiene is read-only and must not delete or move files automatically.",
     "Semantic duplicate scan must classify duplicates before new batch files are created.",
-    "Container-boundary duplicates are allowed only when explicitly marked as adapter/facade boundaries."
+    "Container-boundary duplicates are allowed only when explicitly marked as adapter/facade boundaries.",
+    "Security Layer surface must expose manifest, container boundary and existing source bindings before runtime enforcement.",
+    "Security Layer BATCH 1.1 must not move or delete existing policy/governance/security-related files.",
+    "Security Layer dashboard exposure must remain read-only."
   ],
   "enforcement": {
     "fail_on_forbidden_import": true,
@@ -1009,5 +1012,27 @@
     "v2: formalized MAKSIMAR_CORE_ROOT, BOOTSTRAP_ENTRYPOINTS and PLATFORM_BINDINGS_READ_MODELS to distinguish existing read-model/binding surfaces from pure core library code.",
     "v3: allowed read-only imports from CONTROL_PLANE, MAKSIMAR_SERVER_ROOT and OBSERVABILITY into PLATFORM_BINDINGS_READ_MODELS; classified completion/readiness CORE_LIB subfolders as PLATFORM_BINDINGS_READ_MODELS to avoid false pure-core drift.",
     "v3.1: classified MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents as PLATFORM_BINDINGS_READ_MODELS because it depends on full_test_suite readiness/completion contracts and is not pure canonical core."
-  ]
+  ],
+  "foundation_layer_bindings": {
+    "SECURITY_LAYER": {
+      "id": "SECURITY_LAYER",
+      "name": "Security Layer Foundation",
+      "kind": "foundation_security_layer",
+      "version": "1.0",
+      "path_prefixes": [
+        "SECURITY_LAYER",
+        "MAKSIMAR_CORE_LIB/security_layer",
+        "MAKSIMAR_SERVER/SECURITY_LAYER"
+      ],
+      "runtime_mutation_allowed": false,
+      "canonical_write_allowed": false,
+      "direct_execution_allowed": false,
+      "dashboard_mutation_allowed": false,
+      "container_ready": false,
+      "manifest_path": "SECURITY_LAYER/layer_manifest.yaml",
+      "container_boundary_path": "SECURITY_LAYER/boundaries/container_adapter_boundary.yaml",
+      "existing_bindings_path": "SECURITY_LAYER/existing_bindings/security_existing_sources.yaml",
+      "batch_id": "PHASE_1_BATCH_1_1"
+    }
+  }
 }

@@ -1,0 +1,24 @@
+id: SECURITY_LAYER_CONTAINER_ADAPTER_BOUNDARY
+layer_id: SECURITY_LAYER
+kind: container_adapter_boundary
+version: "1.0"
+status: surface_declared
+boundary_role: adapter_facade_boundary
+container_ready: false
+legacy_runtime_moved: false
+legacy_runtime_deleted: false
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+direct_execution_allowed: false
+dashboard_mutation_allowed: false
+allowed_boundary_pattern:
+  - existing_code
+  - stable_contract
+  - thin_adapter_or_facade
+  - future_container_service
+forbidden_boundary_pattern:
+  - dashboard_to_execution
+  - direct_container_to_core_write
+  - direct_ui_to_security_runtime
+  - duplicated_business_logic
+batch_id: "PHASE_1_BATCH_1_1"
