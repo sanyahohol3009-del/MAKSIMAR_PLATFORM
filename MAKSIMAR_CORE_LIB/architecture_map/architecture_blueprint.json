@@ -13,7 +13,10 @@
     "All risky actions must pass proposal, sandbox, validation, diff, approval and audit.",
     "Dashboard is read-only display and intent surface only.",
     "Memory retrieval must pass policy, tenant and jurisdiction boundaries.",
-    "Physical/robotics execution must pass simulation and strict validation first."
+    "Physical/robotics execution must pass simulation and strict validation first.",
+    "Root artifact hygiene is read-only and must not delete or move files automatically.",
+    "Semantic duplicate scan must classify duplicates before new batch files are created.",
+    "Container-boundary duplicates are allowed only when explicitly marked as adapter/facade boundaries."
   ],
   "enforcement": {
     "fail_on_forbidden_import": true,
@@ -42,7 +45,18 @@
     "EXTERNAL_BACKENDS/**/.venv/**",
     "EXTERNAL_BACKENDS/**/venv/**",
     "EXTERNAL_BACKENDS/**/sandbox_data/**",
-    "EXTERNAL_BACKENDS/**/__pycache__/**"
+    "EXTERNAL_BACKENDS/**/__pycache__/**",
+    "project_audit/**",
+    "_frontend_graveyard/**",
+    "audit_*.txt",
+    "full_*_report.txt",
+    "full_pytest_run.txt",
+    "oob_dashboard_pytest_run.txt",
+    "phase*_coverage*.txt",
+    "history_track_*",
+    "FOUNDATION_REPORT.md",
+    "*.bak*",
+    "EXTERNAL_BACKENDS/**/security_reports/*.json"
   ],
   "allowed_unmapped_file_globs": [
     "setup.py",

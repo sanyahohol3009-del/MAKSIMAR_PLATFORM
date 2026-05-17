@@ -49,3 +49,15 @@ storage/
 .aider*
 runtime_imports/
 runtime_history_store/
+# MAKSIMAR root artifact hygiene generated/local reports
+/project_audit/
+/_frontend_graveyard/
+/audit_*.txt
+/full_*_report.txt
+/full_pytest_run.txt
+/oob_dashboard_pytest_run.txt
+/phase*_coverage*.txt
+/history_track_*
+/FOUNDATION_REPORT.md
+*.bak*
+EXTERNAL_BACKENDS/**/security_reports/*.json

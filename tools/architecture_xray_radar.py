@@ -164,6 +164,9 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             law("approval_models", "Approval models", "approval"),
             law("audit_models", "Audit models", "audit"),
             law("rollback_models", "Rollback models", "rollback"),
+            law("root_artifact_hygiene", "Root artifact hygiene", "root_artifact_hygiene", "RootArtifact"),
+            law("semantic_duplicate_scan", "Semantic duplicate scan", "semantic_duplicate", "SemanticDuplicate"),
+            law("root_artifact_report", "Root artifact report builder", "root_artifact_report", "RootArtifactReport"),
         ),
     ),
     LayerSpec(
@@ -611,6 +614,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             law("drift_guard", "Drift guard", "drift_guard", "semantic drift"),
             law("roadmap_index", "Roadmap index", "roadmap_index"),
             law("acceptance_docs", "Acceptance docs", "acceptance", "closure"),
+            law("foundation_roadmap_machine_check", "Foundation roadmap machine check", "foundation_roadmap_ci_check", "batched_foundation_roadmap"),
             law("smoke_tests", "Smoke tests", "smoke"),
         ),
     ),
