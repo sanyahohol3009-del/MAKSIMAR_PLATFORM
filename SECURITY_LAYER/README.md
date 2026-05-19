@@ -40,7 +40,7 @@ It does not implement runtime authorization yet.
 
 ## Dashboard output
 
-The layer may expose read-only status fields later:
+The layer exposes dashboard-compatible read-only status fields through batch-controlled read models:
 
 - security layer surface ready
 - manifest present

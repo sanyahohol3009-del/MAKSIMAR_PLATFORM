@@ -6,7 +6,7 @@ PHASE 1 / BATCH 1.1 surface.
 
 ## Purpose
 
-This directory is reserved for future thin adapters/facades between existing working policy/governance/security-related code and future container-ready SECURITY_LAYER services.
+This directory is the batch-controlled adapter/facade boundary between existing working policy/governance/security-related code and container-ready SECURITY_LAYER services.
 
 ## Rules
 
