@@ -283,6 +283,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
         path_candidates=(
             "DATA_PLANE",
             "MAKSIMAR_SERVER/DATA_PLANE",
+            "MAKSIMAR_CORE_LIB/data_plane",
             "storage",
             "STORAGE",
             "MAKSIMAR_SERVER/STORAGE",
@@ -296,7 +297,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             law("vector_store", "Vector store", "vector_store", "qdrant", "sqlite_vec"),
             law("object_storage", "Object storage", "object_storage", "artifact"),
             law("memory_index", "Memory index", "memory_index"),
-            law("no_direct_canonical_write", "No direct canonical write", "canonical_write_allowed", "direct_runtime_to_canonical_write"),
+            law("no_direct_canonical_write", "No direct canonical write", "NoDirectCanonicalWriteContract", "DATA_PLANE_NO_DIRECT_CANONICAL_WRITE_CONTRACT", "no_direct_canonical_write_contract", "data_plane_never_writes_directly_to_canonical_store"),
         ),
     ),
     LayerSpec(

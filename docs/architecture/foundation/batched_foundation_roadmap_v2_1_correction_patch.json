@@ -514,7 +514,8 @@
             "MAKSIMAR_CORE_LIB/data_plane/immutable_ledger_contract.py"
           ],
           "correction_additions": [
-            "MAKSIMAR_CORE_LIB/data_plane/data_plane_semantic_duplicate_binding.py"
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_semantic_duplicate_binding.py",
+            "MAKSIMAR_CORE_LIB/data_plane/no_direct_canonical_write_contract.py"
           ],
           "base_tests": [
             "tests/data_plane/test_append_only_log_models_smoke.py",
@@ -523,7 +524,8 @@
             "tests/data_plane/test_immutable_ledger_contract_smoke.py"
           ],
           "correction_tests": [
-            "tests/data_plane/test_data_plane_no_delete_no_overwrite_smoke.py"
+            "tests/data_plane/test_data_plane_no_delete_no_overwrite_smoke.py",
+            "tests/data_plane/test_no_direct_canonical_write_contract_smoke.py"
           ],
           "dashboard_read_models": [
             "Append-only log read model",
