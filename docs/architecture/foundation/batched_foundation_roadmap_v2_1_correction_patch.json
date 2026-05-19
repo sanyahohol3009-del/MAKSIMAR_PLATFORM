@@ -706,6 +706,61 @@
           "full_auto_pytest_required": true
         }
       ]
+    },
+    {
+      "phase_id": "PHASE_3_UPDATE_RECOVERY_INFRA_FOUNDATION_V1",
+      "title": "PHASE 3 — UPDATE_RECOVERY_INFRA FOUNDATION v1",
+      "status": "planned",
+      "description": "Foundation phase for update/recovery layer: update packages, update-specific signature verification, signed update service, snapshots, rollback, recovery service, offline import gate, preview and E2E unsigned update rejection. Roadmap correction: do not replace secure_sync_update_transport; use it as existing foundation/facade input.",
+      "batches": [
+        {
+          "batch_id": "3.1",
+          "status": "PLANNED",
+          "title": "Update/Recovery Surface + Existing Binding",
+          "description": "Create UPDATE_RECOVERY foundation surface, manifest, container boundary, policy config, server package entrypoint and existing source bindings. secure_sync_update_transport is existing foundation. update_recovery is facade/wrapper. RUNTIME/recovery_manager.py must not be moved.",
+          "base_files": [
+            "UPDATE_RECOVERY/README.md",
+            "UPDATE_RECOVERY/container_contract.yaml",
+            "UPDATE_RECOVERY/config/update_recovery_policy.yaml",
+            "MAKSIMAR_CORE_LIB/update_recovery/__init__.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/__init__.py"
+          ],
+          "correction_additions": [
+            "UPDATE_RECOVERY/layer_manifest.yaml",
+            "UPDATE_RECOVERY/boundaries/container_adapter_boundary.yaml",
+            "UPDATE_RECOVERY/existing_bindings/secure_sync_update_transport_binding.yaml",
+            "UPDATE_RECOVERY/existing_bindings/runtime_recovery_manager_binding.yaml",
+            "MAKSIMAR_CORE_LIB/update_recovery/existing_update_recovery_binding_models.py"
+          ],
+          "base_tests": [
+            "tests/update_recovery/test_existing_update_recovery_binding_models_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "UpdateRecoverySurfaceReadModel",
+            "ExistingUpdateRecoveryBindingReadModel"
+          ],
+          "acceptance_gates": [
+            "pre-batch location slice completed",
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "secure_sync_update_transport reused as existing foundation",
+            "RUNTIME/recovery_manager.py not moved",
+            "update_recovery layer acts as facade/wrapper",
+            "Roadmap CI batch 3.1 without require-files passes before code",
+            "Roadmap CI batch 3.1 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray UPDATE_RECOVERY_INFRA surface binding visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        }
+      ]
     }
   ],
   "phase_placeholders": [
