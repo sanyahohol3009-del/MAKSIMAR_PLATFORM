@@ -412,6 +412,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             "INFRA",
             "INFRASTRUCTURE",
             "MAKSIMAR_SERVER/UPDATE_RECOVERY",
+            "MAKSIMAR_CORE_LIB/update_recovery",
             "MAKSIMAR_SERVER/UPDATE_CHANNEL",
             "MAKSIMAR_SERVER/RECOVERY",
             "MAKSIMAR_SERVER/ROADMAP_CLOSURE",
