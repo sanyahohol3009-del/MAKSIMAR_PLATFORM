@@ -600,7 +600,7 @@
           "batch_id": "2.4",
           "status": "PLANNED",
           "title": "Data Plane Runtime Adapter + Read Model + Preview",
-          "description": "Add server-side DATA_PLANE runtime facade, append-only local text log adapter, telemetry builder, health read model and terminal/web previews. Preview output must be dashboard-ready and read-only.",
+          "description": "Add server-side DATA_PLANE runtime facade, append-only local text log adapter, telemetry builder, health read model and terminal/web previews. Preview output must be dashboard-ready and read-only. Roadmap reconciliation: v1 Runtime Logger + Read Model + Preview filenames are preserved as compatibility/facade surfaces; v2.1 dashboard-ready read-model names remain canonical implementation surfaces.",
           "base_files": [
             "MAKSIMAR_CORE_LIB/data_plane/data_plane_read_model.py",
             "MAKSIMAR_SERVER/DATA_PLANE/data_plane_append_log_adapter.py",
@@ -612,7 +612,15 @@
           ],
           "correction_additions": [
             "MAKSIMAR_SERVER/DATA_PLANE/adapters/__init__.py",
-            "MAKSIMAR_SERVER/DATA_PLANE/adapters/data_plane_existing_storage_adapter.py"
+            "MAKSIMAR_SERVER/DATA_PLANE/adapters/data_plane_existing_storage_adapter.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/append_only_log_writer.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/immutable_ledger_builder.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_logger.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_read_model_builder.py",
+            "tools/monitor/runtime_input/data_plane_append_log_terminal_preview.py",
+            "tools/monitor/runtime_input/data_plane_append_log_web_preview.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/adapters/event_journal_adapter.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/adapters/existing_storage_registry_adapter.py"
           ],
           "base_tests": [
             "tests/data_plane/test_data_plane_read_model_smoke.py",
@@ -623,13 +631,17 @@
           ],
           "correction_tests": [
             "tests/data_plane/test_data_plane_terminal_preview_smoke.py",
-            "tests/data_plane/test_data_plane_web_preview_smoke.py"
+            "tests/data_plane/test_data_plane_web_preview_smoke.py",
+            "tests/data_plane/test_data_plane_logger_smoke.py",
+            "tests/data_plane/test_event_journal_adapter_smoke.py",
+            "tests/data_plane/test_existing_storage_registry_adapter_smoke.py"
           ],
           "dashboard_read_models": [
             "DataPlaneHealthReadModel",
             "DataPlaneAppendLogReadModel",
             "DataPlaneLedgerReadModel",
-            "DataPlaneTelemetryReadModel"
+            "DataPlaneTelemetryReadModel",
+            "DataPlaneRuntimeReadModel"
           ],
           "acceptance_gates": [
             "terminal preview works",
@@ -642,7 +654,8 @@
             "Architecture Drift Guard passes",
             "X-Ray DATA_PLANE read model markers visible",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "v1 compatibility preserved: runtime writes only; canonical truth untouched"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
