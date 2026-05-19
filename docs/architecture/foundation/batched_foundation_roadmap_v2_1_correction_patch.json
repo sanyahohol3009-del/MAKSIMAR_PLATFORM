@@ -802,6 +802,57 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "3.3",
+          "status": "PLANNED",
+          "title": "Snapshot / Rollback / Recovery Contracts",
+          "description": "Add snapshot, rollback, recovery service, offline import gate and update recovery read model contracts. Add secure_sync_update facade contract as correction/facade over existing secure_sync_update_transport. No update is allowed without snapshot, rollback and recovery readiness.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/update_recovery/snapshot_manager_contract.py",
+            "MAKSIMAR_CORE_LIB/update_recovery/rollback_manager_contract.py",
+            "MAKSIMAR_CORE_LIB/update_recovery/recovery_service_contract.py",
+            "MAKSIMAR_CORE_LIB/update_recovery/offline_import_gate_contract.py",
+            "MAKSIMAR_CORE_LIB/update_recovery/update_recovery_read_model.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/update_recovery/secure_sync_update_facade_contract.py",
+            "docs/architecture/foundation/update_recovery_batch_3_3_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/update_recovery/test_snapshot_manager_contract_smoke.py",
+            "tests/update_recovery/test_rollback_manager_contract_smoke.py",
+            "tests/update_recovery/test_recovery_service_contract_smoke.py",
+            "tests/update_recovery/test_offline_import_gate_contract_smoke.py",
+            "tests/update_recovery/test_update_recovery_read_model_smoke.py",
+            "tests/update_recovery/test_secure_sync_update_facade_contract_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "UpdateRecoveryReadinessReadModel",
+            "SecureSyncUpdateFacadeReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 3.3 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "secure_sync_update_transport reused through facade contract",
+            "no update without snapshot readiness",
+            "no update without rollback readiness",
+            "no update without recovery readiness",
+            "offline import gate rejects unsafe import",
+            "Roadmap CI batch 3.3 without require-files passes before code",
+            "Roadmap CI batch 3.3 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray UPDATE_RECOVERY_INFRA offline_import_gate marker visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
