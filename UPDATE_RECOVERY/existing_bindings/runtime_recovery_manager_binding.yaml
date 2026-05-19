@@ -1,0 +1,11 @@
+binding_id: runtime_recovery_manager_binding_v1
+layer_id: UPDATE_RECOVERY_INFRA
+source_surface: runtime_recovery_manager
+source_path: RUNTIME/recovery_manager.py
+binding_mode: reference_only_facade
+move_source_allowed: false
+delete_source_allowed: false
+migration_allowed: false
+runtime_behavior_change_allowed: false
+container_adapter_required: true
+dashboard_safe: true

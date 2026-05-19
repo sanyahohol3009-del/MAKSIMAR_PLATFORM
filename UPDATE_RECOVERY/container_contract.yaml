@@ -1,0 +1,18 @@
+container_contract_id: update_recovery_container_contract_v1
+layer_id: UPDATE_RECOVERY_INFRA
+container_surface: UPDATE_RECOVERY
+service_role: update_recovery_facade
+default_runtime_enabled: false
+adapter_boundary_required: true
+existing_foundation_reuse_required: true
+disconnectable_unit: true
+rules:
+  no_direct_core_write: true
+  no_dashboard_execution: true
+  no_source_move: true
+  no_source_delete: true
+  no_source_migration: true
+  no_runtime_behavior_change_in_batch_3_1: true
+bindings:
+  secure_sync_update_transport: reference_only
+  runtime_recovery_manager: reference_only

@@ -1,0 +1,19 @@
+layer_id: UPDATE_RECOVERY_INFRA
+surface_id: update_recovery_surface_v1
+surface_role: container_ready_facade
+phase: PHASE_3_UPDATE_RECOVERY_INFRA_FOUNDATION_V1
+batch: "3.1"
+existing_foundations:
+  - MAKSIMAR_CORE_LIB/secure_sync_update_transport/secure_sync_update_transport_contract.py
+  - RUNTIME/recovery_manager.py
+rules:
+  move_allowed: false
+  delete_allowed: false
+  migration_allowed: false
+  runtime_behavior_change_allowed: false
+  canonical_write_allowed: false
+  dashboard_execution_allowed: false
+  container_disable_safe: true
+read_models:
+  - UpdateRecoverySurfaceReadModel
+  - ExistingUpdateRecoveryBindingReadModel

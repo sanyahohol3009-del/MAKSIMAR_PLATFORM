@@ -1,0 +1,17 @@
+boundary_id: update_recovery_container_adapter_boundary_v1
+layer_id: UPDATE_RECOVERY_INFRA
+boundary_type: facade_adapter
+allowed_inputs:
+  - signed_update_package_reference
+  - recovery_status_reference
+  - update_transport_status_reference
+allowed_outputs:
+  - UpdateRecoverySurfaceReadModel
+  - ExistingUpdateRecoveryBindingReadModel
+forbidden:
+  direct_dashboard_execution: true
+  direct_canonical_write: true
+  source_move: true
+  source_delete: true
+  source_migration: true
+  runtime_behavior_change_in_batch_3_1: true

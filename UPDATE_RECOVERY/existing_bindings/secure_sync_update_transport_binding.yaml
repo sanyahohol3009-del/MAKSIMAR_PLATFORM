@@ -1,0 +1,11 @@
+binding_id: secure_sync_update_transport_binding_v1
+layer_id: UPDATE_RECOVERY_INFRA
+source_surface: secure_sync_update_transport
+source_path: MAKSIMAR_CORE_LIB/secure_sync_update_transport/secure_sync_update_transport_contract.py
+binding_mode: reference_only_facade
+replace_source_allowed: false
+move_source_allowed: false
+delete_source_allowed: false
+migration_allowed: false
+container_adapter_required: true
+dashboard_safe: true

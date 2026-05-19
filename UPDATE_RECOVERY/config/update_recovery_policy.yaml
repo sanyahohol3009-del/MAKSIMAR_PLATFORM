@@ -1,0 +1,17 @@
+policy_id: update_recovery_policy_v1
+layer_id: UPDATE_RECOVERY_INFRA
+batch: "3.1"
+mode: surface_binding_only
+source_policy:
+  secure_sync_update_transport_reuse: true
+  runtime_recovery_manager_reuse: true
+  runtime_recovery_manager_move_allowed: false
+  secure_sync_update_transport_replacement_allowed: false
+write_policy:
+  canonical_write_allowed: false
+  runtime_behavior_change_allowed: false
+  dashboard_write_allowed: false
+container_policy:
+  container_ready: true
+  adapter_required: true
+  disable_safe: true
