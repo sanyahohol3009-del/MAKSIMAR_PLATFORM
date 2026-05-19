@@ -916,6 +916,52 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "3.5",
+          "status": "PLANNED",
+          "title": "Tests + E2E Update Tracer",
+          "description": "Add E2E update tracer proving that unsigned update packages are rejected, no update apply is performed, secure_sync_update_transport is preserved, runtime_recovery_manager remains wrapped, manifest is present, and full target/security/source-of-truth/version-control/drift/X-Ray/full pytest gates pass.",
+          "base_files": [
+            "tests/e2e_tracers/test_update_channel_rejects_unsigned_mock.py",
+            "docs/architecture/foundation/update_recovery_infra_foundation_v1.md"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/update_recovery_existing_binding_review_v1.md",
+            "docs/architecture/foundation/update_recovery_container_boundary_v1.md",
+            "docs/architecture/foundation/update_recovery_batch_3_5_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/e2e_tracers/test_update_channel_rejects_unsigned_mock.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "UpdateTracerResultReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 3.5 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "unsigned update rejected",
+            "no update apply performed",
+            "secure_sync_update_transport preserved",
+            "runtime_recovery_manager wrapped",
+            "manifest present",
+            "source_of_truth check passes",
+            "version_control check passes",
+            "drift guard passes",
+            "X-Ray non-regression check passes",
+            "Roadmap CI batch 3.5 without require-files passes before code",
+            "Roadmap CI batch 3.5 --require-files passes after code",
+            "full target tests pass",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
