@@ -451,10 +451,249 @@
           "full_auto_pytest_required": true
         }
       ]
+    },
+    {
+      "phase_id": "PHASE_2_DATA_PLANE_FOUNDATION_V1",
+      "title": "PHASE 2 — DATA_PLANE FOUNDATION v1",
+      "status": "planned",
+      "description": "Foundation phase for append-only logs, immutable ledger contracts, storage/data-plane surface, runtime adapters, read-only dashboard output and E2E logging tracer. Existing MAKSIMAR_CORE_LIB/data_plane artifact cleanup/ownership/retention/shell contracts must be reused as existing source surfaces. No move/delete/migration is allowed without correction pass.",
+      "batches": [
+        {
+          "batch_id": "2.1",
+          "status": "PLANNED",
+          "title": "Data Plane Surface + Existing Source Binding",
+          "description": "Create DATA_PLANE foundation surface, manifest, container boundary, policy config, server package entrypoint and existing source binding. This batch extends existing MAKSIMAR_CORE_LIB/data_plane; it does not recreate or move existing artifact contracts.",
+          "base_files": [
+            "DATA_PLANE/README.md",
+            "DATA_PLANE/layer_manifest.yaml",
+            "DATA_PLANE/container_contract.yaml",
+            "DATA_PLANE/config/data_plane_policy.yaml",
+            "DATA_PLANE/boundaries/container_adapter_boundary.yaml",
+            "DATA_PLANE/existing_bindings/data_plane_existing_sources.yaml",
+            "MAKSIMAR_SERVER/DATA_PLANE/__init__.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/architecture_map/architecture_blueprint.json",
+            "tools/architecture_xray_radar.py"
+          ],
+          "base_tests": [
+            "tests/data_plane/test_data_plane_surface_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/data_plane/test_data_plane_existing_sources_binding_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "DATA_PLANE exposes dashboard-ready status fields through later read models; no dashboard mutation; no UI-to-execution."
+          ],
+          "acceptance_gates": [
+            "pre-batch location slice completed",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "existing MAKSIMAR_CORE_LIB/data_plane files preserved",
+            "Roadmap CI batch 2.1 without require-files passes before code",
+            "Roadmap CI batch 2.1 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray DATA_PLANE surface binding visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "2.2",
+          "status": "PLANNED",
+          "title": "Append-Only Log + Immutable Ledger Contracts",
+          "description": "Add canonical append-only log and immutable ledger contracts. These contracts must prevent overwrite/delete semantics and must provide dashboard-safe read models.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/data_plane/append_only_log_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/append_only_log_contract.py",
+            "MAKSIMAR_CORE_LIB/data_plane/immutable_ledger_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/immutable_ledger_contract.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_semantic_duplicate_binding.py"
+          ],
+          "base_tests": [
+            "tests/data_plane/test_append_only_log_models_smoke.py",
+            "tests/data_plane/test_append_only_log_contract_smoke.py",
+            "tests/data_plane/test_immutable_ledger_models_smoke.py",
+            "tests/data_plane/test_immutable_ledger_contract_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/data_plane/test_data_plane_no_delete_no_overwrite_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "Append-only log read model",
+            "Immutable ledger read model"
+          ],
+          "acceptance_gates": [
+            "append-only contracts reject overwrite/delete intent",
+            "ledger entries are hash-linked or reference-linked",
+            "dataclass __post_init__ validation present",
+            "Roadmap CI batch 2.2 --require-files passes",
+            "Architecture Drift Guard passes",
+            "X-Ray DATA_PLANE append_only_log and immutable_ledger markers visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "2.3",
+          "status": "PLANNED",
+          "title": "Storage / Vector / Object / Memory Index Contracts",
+          "description": "Add data-plane contracts for storage backend references, object storage references, vector store references, memory index references and data-plane routing policy. Heavy payloads must stay in DATA_PLANE.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/data_plane/storage_backend_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/storage_backend_contract.py",
+            "MAKSIMAR_CORE_LIB/data_plane/object_storage_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/object_storage_contract.py",
+            "MAKSIMAR_CORE_LIB/data_plane/vector_store_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/vector_store_contract.py",
+            "MAKSIMAR_CORE_LIB/data_plane/memory_index_models.py",
+            "MAKSIMAR_CORE_LIB/data_plane/memory_index_contract.py",
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_routing_policy.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_payload_reference_models.py"
+          ],
+          "base_tests": [
+            "tests/data_plane/test_storage_backend_contract_smoke.py",
+            "tests/data_plane/test_object_storage_contract_smoke.py",
+            "tests/data_plane/test_vector_store_contract_smoke.py",
+            "tests/data_plane/test_memory_index_contract_smoke.py",
+            "tests/data_plane/test_data_plane_routing_policy_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/data_plane/test_data_plane_no_heavy_payload_in_control_path_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "Storage backend readiness read model",
+            "Object storage readiness read model",
+            "Vector store readiness read model",
+            "Memory index readiness read model"
+          ],
+          "acceptance_gates": [
+            "contracts use references, not heavy payload transfer through control path",
+            "no direct canonical write",
+            "dataclass __post_init__ validation present",
+            "Roadmap CI batch 2.3 --require-files passes",
+            "Architecture Drift Guard passes",
+            "X-Ray DATA_PLANE storage/vector/object/memory_index markers visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "2.4",
+          "status": "PLANNED",
+          "title": "Data Plane Runtime Adapter + Read Model + Preview",
+          "description": "Add server-side DATA_PLANE runtime facade, append-only local text log adapter, telemetry builder, health read model and terminal/web previews. Preview output must be dashboard-ready and read-only.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_read_model.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_append_log_adapter.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_ledger_adapter.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_telemetry_read_model_builder.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/data_plane_health.py",
+            "tools/monitor/runtime_input/data_plane_terminal_preview.py",
+            "tools/monitor/runtime_input/data_plane_web_preview.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_SERVER/DATA_PLANE/adapters/__init__.py",
+            "MAKSIMAR_SERVER/DATA_PLANE/adapters/data_plane_existing_storage_adapter.py"
+          ],
+          "base_tests": [
+            "tests/data_plane/test_data_plane_read_model_smoke.py",
+            "tests/data_plane/test_data_plane_append_log_adapter_smoke.py",
+            "tests/data_plane/test_data_plane_ledger_adapter_smoke.py",
+            "tests/data_plane/test_data_plane_telemetry_read_model_builder_smoke.py",
+            "tests/data_plane/test_data_plane_health_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/data_plane/test_data_plane_terminal_preview_smoke.py",
+            "tests/data_plane/test_data_plane_web_preview_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "DataPlaneHealthReadModel",
+            "DataPlaneAppendLogReadModel",
+            "DataPlaneLedgerReadModel",
+            "DataPlaneTelemetryReadModel"
+          ],
+          "acceptance_gates": [
+            "terminal preview works",
+            "web preview writes HTML",
+            "preview/read models are dashboard-safe",
+            "actual execution is not performed by preview",
+            "no dashboard mutation",
+            "dataclass __post_init__ validation present",
+            "Roadmap CI batch 2.4 --require-files passes",
+            "Architecture Drift Guard passes",
+            "X-Ray DATA_PLANE read model markers visible",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "2.5",
+          "status": "PLANNED",
+          "title": "Data Plane E2E Tracer + Foundation Acceptance",
+          "description": "Add E2E tracer proving that a safe core/control-plane operation is written to the DATA_PLANE append-only log and exposed as dashboard-safe telemetry. Close DATA_PLANE FOUNDATION v1.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/data_plane/data_plane_tracer_read_model.py",
+            "tests/e2e_tracers/test_data_plane_logs_execution_mock.py",
+            "docs/architecture/foundation/data_plane_foundation_v1.md",
+            "docs/architecture/foundation/data_plane_semantic_duplicate_review_v1.md",
+            "docs/architecture/foundation/data_plane_container_boundary_v1.md"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/data_plane_append_only_log_policy_v1.md"
+          ],
+          "base_tests": [
+            "tests/e2e_tracers/test_data_plane_logs_execution_mock.py"
+          ],
+          "correction_tests": [
+            "tests/data_plane/test_data_plane_foundation_acceptance_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "DataPlaneTracerResultReadModel",
+            "DataPlaneTelemetryReadModel"
+          ],
+          "acceptance_gates": [
+            "E2E tracer proves append-only log receives operation record",
+            "operation log entry is text/materialized and read-only",
+            "dashboard-ready telemetry exists",
+            "no direct canonical write",
+            "anti-stub scan clean",
+            "Roadmap CI batch 2.5 --require-files passes",
+            "Architecture Drift Guard passes",
+            "X-Ray DATA_PLANE READY target reached",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push",
+            "save PHASE 2 closure to project memory after push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
+        }
+      ]
     }
   ],
   "phase_placeholders": [
-    "PHASE 2 DATA_PLANE FOUNDATION v1",
     "PHASE 3 UPDATE_RECOVERY_INFRA FOUNDATION v1",
     "PHASE 4 NETWORK_CONTAINERIZATION BLUEPRINT v1",
     "PHASE 5 AI_ORCHESTRATION / Multi-Agent / Autonomous Planning",
