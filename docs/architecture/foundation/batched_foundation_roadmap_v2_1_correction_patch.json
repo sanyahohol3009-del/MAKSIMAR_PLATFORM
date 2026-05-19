@@ -853,6 +853,69 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "3.4",
+          "status": "PLANNED",
+          "title": "Runtime Services + Preview",
+          "description": "Add runtime wrapper services and preview for UPDATE_RECOVERY. Runtime services must wrap existing update/recovery contracts and existing foundations only. secure_sync_update_transport and RUNTIME/recovery_manager.py must be preserved; adapters may bind them, but must not replace, move, delete, or migrate them.",
+          "base_files": [
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/update_signature_verifier.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/signed_update_service.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/snapshot_manager.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/rollback_manager.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/recovery_service.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/offline_import_gate.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/update_recovery_health.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/update_recovery_read_model_builder.py",
+            "tools/monitor/runtime_input/update_recovery_terminal_preview.py",
+            "tools/monitor/runtime_input/update_recovery_web_preview.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/adapters/__init__.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/adapters/secure_sync_update_transport_adapter.py",
+            "MAKSIMAR_SERVER/UPDATE_RECOVERY/adapters/runtime_recovery_manager_adapter.py",
+            "docs/architecture/foundation/update_recovery_batch_3_4_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/update_recovery/test_secure_sync_update_transport_adapter_smoke.py",
+            "tests/update_recovery/test_runtime_recovery_manager_adapter_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/update_recovery/test_update_recovery_runtime_services_smoke.py",
+            "tests/update_recovery/test_update_recovery_health_smoke.py",
+            "tests/update_recovery/test_update_recovery_read_model_builder_smoke.py",
+            "tests/update_recovery/test_update_recovery_terminal_preview_smoke.py",
+            "tests/update_recovery/test_update_recovery_web_preview_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "UpdateRecoveryRuntimeReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 3.4 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "runtime wrapper only",
+            "secure_sync_update_transport preserved",
+            "RUNTIME/recovery_manager.py preserved",
+            "adapters wrap existing transport and recovery manager",
+            "no source move",
+            "no source delete",
+            "no source migration",
+            "no runtime update apply in BATCH 3.4",
+            "preview/read-model outputs are dashboard-safe and read-only",
+            "Roadmap CI batch 3.4 without require-files passes before code",
+            "Roadmap CI batch 3.4 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray UPDATE_RECOVERY_INFRA non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
