@@ -1,0 +1,38 @@
+policy_id: data_plane_policy_v1
+layer_id: DATA_PLANE
+phase: PHASE_2_DATA_PLANE_FOUNDATION_V1
+batch: BATCH_2_1
+
+append_only:
+  required: true
+  overwrite_allowed: false
+  delete_allowed: false
+  truncate_allowed: false
+
+immutable_ledger:
+  required: true
+  mutation_allowed: false
+  hash_or_reference_link_required: true
+
+payload_policy:
+  heavy_payload_in_control_path_allowed: false
+  payload_reference_required: true
+  artifact_reference_required: true
+
+canonical_write_policy:
+  direct_canonical_write_allowed: false
+  write_requires_policy_gate: true
+  write_requires_data_plane_contract: true
+
+dashboard_policy:
+  read_only: true
+  mutation_allowed: false
+  execution_allowed: false
+  status_fields_required: true
+
+existing_sources_policy:
+  reuse_existing_maksimar_core_lib_data_plane: true
+  migration_allowed: false
+  move_allowed: false
+  delete_allowed: false
+  correction_pass_required_for_relocation: true

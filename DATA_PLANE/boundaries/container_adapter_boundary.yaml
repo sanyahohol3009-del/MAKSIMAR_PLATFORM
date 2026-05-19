@@ -1,0 +1,34 @@
+boundary_id: data_plane_container_adapter_boundary_v1
+layer_id: DATA_PLANE
+phase: PHASE_2_DATA_PLANE_FOUNDATION_V1
+batch: BATCH_2_1
+
+boundary_type: container_adapter_boundary
+status: declared
+
+allowed_flow:
+  - existing_data_plane_contracts
+  - stable_core_contracts
+  - server_runtime_facade
+  - container_ready_service_boundary
+  - dashboard_read_only_output
+
+forbidden_flow:
+  - dashboard_to_data_plane_mutation
+  - ui_to_data_plane_execution
+  - control_plane_heavy_payload_transfer
+  - data_plane_direct_core_write
+  - container_direct_core_write
+  - legacy_file_move_without_correction_gate
+  - legacy_file_delete_without_correction_gate
+
+existing_sources:
+  reference_only: true
+  import_directly_from_container: false
+  wrap_through_adapter_boundary: true
+
+safety:
+  runtime_mutation_from_read_models_allowed: false
+  canonical_write_from_read_models_allowed: false
+  append_only_overwrite_allowed: false
+  append_only_delete_allowed: false

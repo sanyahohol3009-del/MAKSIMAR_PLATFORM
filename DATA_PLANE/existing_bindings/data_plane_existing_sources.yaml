@@ -1,0 +1,41 @@
+binding_id: data_plane_existing_sources_v1
+layer_id: DATA_PLANE
+phase: PHASE_2_DATA_PLANE_FOUNDATION_V1
+batch: BATCH_2_1
+decision: reference_existing_sources_no_move_no_delete
+
+sources:
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_cleanup_contract.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_cleanup_models.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_ownership_contract.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_ownership_models.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_retention_contract.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/artifact_retention_models.py
+    relation: existing_data_plane_artifact_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/data_plane_shell_contract.py
+    relation: existing_data_plane_shell_surface
+    action: reference_only
+  - path: MAKSIMAR_CORE_LIB/data_plane/data_plane_shell_models.py
+    relation: existing_data_plane_shell_surface
+    action: reference_only
+  - path: RUNTIME/state/README.md
+    relation: existing_runtime_state_surface
+    action: reference_only
+
+rules:
+  no_move_without_correction_pass: true
+  no_delete_without_correction_pass: true
+  no_migration_without_correction_pass: true
+  no_direct_canonical_write: true
+  dashboard_read_only: true

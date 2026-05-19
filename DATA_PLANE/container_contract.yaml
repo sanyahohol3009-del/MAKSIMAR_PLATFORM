@@ -1,0 +1,38 @@
+contract_id: data_plane_container_contract_v1
+layer_id: DATA_PLANE
+phase: PHASE_2_DATA_PLANE_FOUNDATION_V1
+batch: BATCH_2_1
+status: declared
+
+container_ready_design: true
+container_runtime_enabled: false
+
+allowed_roots:
+  - DATA_PLANE
+  - MAKSIMAR_SERVER/DATA_PLANE
+  - MAKSIMAR_CORE_LIB/data_plane
+  - RUNTIME/state
+
+forbidden_actions:
+  - direct_dashboard_mutation
+  - direct_ui_execution
+  - direct_core_write
+  - heavy_payload_through_control_path
+  - overwrite_append_only_record
+  - delete_append_only_record
+  - mutate_ledger_record
+
+adapter_boundary:
+  required: true
+  current_mode: facade_first
+  existing_sources_reference_only: true
+  no_legacy_move: true
+  no_legacy_delete: true
+
+secrets_policy:
+  secret_material_allowed: false
+  secret_ref_allowed: true
+
+network_policy:
+  public_exposure_allowed: false
+  explicit_network_binding_required: true

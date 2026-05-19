@@ -289,6 +289,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             "RUNTIME/state",
         ),
         expected_laws=(
+            law("data_plane_surface", "Data plane surface", "DATA_PLANE", "data_plane_surface", "layer_manifest"),
             law("append_only_log", "Append-only log", "append_only", "event_journal", "jsonl"),
             law("immutable_ledger", "Immutable ledger", "immutable_ledger", "ledger"),
             law("postgres_main", "Postgres main", "postgres", "postgres_main"),

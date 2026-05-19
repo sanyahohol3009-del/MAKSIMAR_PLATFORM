@@ -1,0 +1,38 @@
+layer_id: DATA_PLANE
+layer_name: Data Plane Foundation
+version: v1
+phase: PHASE_2_DATA_PLANE_FOUNDATION_V1
+batch: BATCH_2_1
+kind: foundation_layer
+owner: MAKSIMAR_PLATFORM
+status: surface_declared
+
+canonical_roots:
+  - DATA_PLANE
+  - MAKSIMAR_CORE_LIB/data_plane
+  - MAKSIMAR_SERVER/DATA_PLANE
+  - RUNTIME/state
+
+existing_source_policy:
+  reuse_existing_core_lib_data_plane: true
+  no_move_without_correction_pass: true
+  no_delete_without_correction_pass: true
+  no_migration_without_correction_pass: true
+
+dashboard_policy:
+  dashboard_ready_output_required: true
+  dashboard_read_only: true
+  dashboard_mutation_allowed: false
+  ui_to_execution_allowed: false
+
+runtime_policy:
+  runtime_mutation_from_read_models_allowed: false
+  direct_canonical_write_allowed: false
+  heavy_payload_in_control_path_allowed: false
+  append_only_required: true
+  immutable_ledger_required: true
+
+containerization:
+  container_ready_design: true
+  container_runtime_enabled: false
+  adapter_boundary_required: true
