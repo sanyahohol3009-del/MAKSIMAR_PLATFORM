@@ -1,0 +1,12 @@
+binding_id: ai_orchestration_existing_control_plane_ai_router_binding_v1
+binding_type: existing_surface_binding
+target_layer: AI_ORCHESTRATION
+existing_sources:
+  - MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding
+  - CONTROL_PLANE
+  - MAKSIMAR_SERVER/CONTROL_PLANE
+rules:
+  duplicate_router_allowed: false
+  route_execution_allowed: false
+  direct_control_plane_execution_allowed: false
+  read_only_binding: true

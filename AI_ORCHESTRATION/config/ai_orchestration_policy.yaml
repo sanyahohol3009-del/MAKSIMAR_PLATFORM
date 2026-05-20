@@ -1,0 +1,22 @@
+policy_id: ai_orchestration_policy_v1
+layer_id: AI_ORCHESTRATION
+policy_type: binding_surface_policy
+dashboard_safe: true
+read_only: true
+required_bindings:
+  ai_services: true
+  workers: true
+  control_plane_ai_router: true
+forbidden_actions:
+  direct_autonomous_execution: true
+  proposal_execution: true
+  stage_execution: true
+  runtime_mutation: true
+  production_deployment: true
+  public_exposure: true
+  duplicate_ai_service_registry: true
+  duplicate_worker_registry: true
+  duplicate_control_plane_router: true
+mempalace_role:
+  subordinate_backend_history_only: true
+  source_of_truth: false

@@ -1,0 +1,26 @@
+contract_id: ai_orchestration_container_contract_v1
+layer_id: AI_ORCHESTRATION
+contract_type: inert_container_contract
+dashboard_safe: true
+read_only: true
+active_deployment_allowed: false
+production_deployment_allowed: false
+active_docker_deployment_allowed: false
+active_compose_deployment_allowed: false
+public_exposure_allowed: false
+runtime_mutation_allowed: false
+direct_autonomous_execution_allowed: false
+proposal_execution_allowed: false
+stage_execution_allowed: false
+duplicate_ai_services_allowed: false
+duplicate_workers_allowed: false
+duplicate_router_allowed: false
+bound_existing_surfaces:
+  - AI_SERVICES
+  - MAKSIMAR_CORE_LIB/ai_services
+  - MAKSIMAR_CORE_LIB/real_ai_services_model_adapters
+  - MAKSIMAR_CORE_LIB/workers_registry
+  - MAKSIMAR_CORE_LIB/workers_runtime
+  - MAKSIMAR_SERVER/WORKERS
+  - MAKSIMAR_SERVER/CONTROL_PLANE/ai_router_binding
+  - MAKSIMAR_SERVER/POLYGLOT_MODEL_WORKER_BRIDGE

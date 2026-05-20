@@ -1,0 +1,22 @@
+boundary_id: ai_orchestration_container_adapter_boundary_v1
+layer_id: AI_ORCHESTRATION
+boundary_type: container_adapter_boundary
+dashboard_safe: true
+read_only: true
+allowed:
+  - read_existing_ai_service_surface
+  - read_existing_worker_surface
+  - read_existing_control_plane_router_surface
+  - expose_dashboard_safe_read_model
+forbidden:
+  - create_new_ai_service_registry
+  - create_new_worker_registry
+  - create_new_control_plane_router
+  - execute_proposal
+  - execute_stage
+  - direct_autonomous_execution
+  - runtime_mutation
+  - production_deployment
+  - public_exposure
+  - active_docker_deployment
+  - active_compose_deployment

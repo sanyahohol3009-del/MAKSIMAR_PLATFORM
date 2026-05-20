@@ -1,0 +1,13 @@
+binding_id: ai_orchestration_existing_worker_binding_v1
+binding_type: existing_surface_binding
+target_layer: AI_ORCHESTRATION
+existing_sources:
+  - MAKSIMAR_CORE_LIB/workers_registry
+  - MAKSIMAR_CORE_LIB/workers_runtime
+  - MAKSIMAR_SERVER/WORKERS
+  - MAKSIMAR_SERVER/POLYGLOT_MODEL_WORKER_BRIDGE
+rules:
+  duplicate_worker_registry_allowed: false
+  duplicate_worker_runtime_allowed: false
+  start_worker_allowed: false
+  read_only_binding: true

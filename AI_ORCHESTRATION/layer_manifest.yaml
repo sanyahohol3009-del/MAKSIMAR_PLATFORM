@@ -1,0 +1,23 @@
+layer_id: AI_ORCHESTRATION
+title: AI Orchestration Surface
+phase: PHASE_5_AI_ORCHESTRATION_MULTI_AGENT_AUTONOMOUS_PLANNING_V1
+batch: "5.1"
+status: planned_surface
+dashboard_safe: true
+read_only: true
+source_of_truth: false
+canonical_execution_layer: false
+bindings:
+  ai_services: AI_ORCHESTRATION/existing_bindings/ai_services_binding.yaml
+  workers: AI_ORCHESTRATION/existing_bindings/worker_binding.yaml
+  control_plane_ai_router: AI_ORCHESTRATION/existing_bindings/control_plane_ai_router_binding.yaml
+read_models:
+  - AIOrchestrationSurfaceReadModel
+  - ExistingAIOrchestrationBindingReadModel
+safety:
+  direct_autonomous_execution_allowed: false
+  proposal_execution_allowed: false
+  stage_execution_allowed: false
+  runtime_mutation_allowed: false
+  production_deployment_allowed: false
+  public_exposure_allowed: false

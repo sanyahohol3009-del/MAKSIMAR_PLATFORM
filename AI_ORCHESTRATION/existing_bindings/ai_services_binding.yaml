@@ -1,0 +1,12 @@
+binding_id: ai_orchestration_existing_ai_services_binding_v1
+binding_type: existing_surface_binding
+target_layer: AI_ORCHESTRATION
+existing_sources:
+  - AI_SERVICES
+  - MAKSIMAR_CORE_LIB/ai_services
+  - MAKSIMAR_CORE_LIB/real_ai_services_model_adapters
+rules:
+  duplicate_ai_services_allowed: false
+  duplicate_model_adapters_allowed: false
+  execute_model_call_allowed: false
+  read_only_binding: true
