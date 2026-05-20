@@ -1,0 +1,35 @@
+# CONTAINER_DEPLOYMENT BATCH 4.2 inert Compose service template.
+# This file is not an active docker-compose.yml or compose.yaml.
+
+services:
+  service_name:
+    build:
+      context: .
+      dockerfile: CONTAINER_DEPLOYMENT/Dockerfile.service.template
+    image: "maksimar/service-name:blueprint"
+    user: "1000:1000"
+    read_only: true
+    cap_drop:
+      - "ALL"
+    security_opt:
+      - "no-new-privileges:true"
+    restart: "unless-stopped"
+    networks:
+      - "net_control"
+    healthcheck:
+      test: ["CMD", "python", "-c", "print('healthcheck')"]
+      interval: "30s"
+      timeout: "5s"
+      retries: 3
+    ports: []
+    expose: []
+    volumes: []
+    secrets: []
+    environment:
+      MAKSIMAR_CONTAINER_BLUEPRINT_ONLY: "true"
+      MAKSIMAR_PUBLIC_EXPOSURE_ALLOWED: "false"
+      MAKSIMAR_RUNTIME_NETWORK_MUTATION_ALLOWED: "false"
+
+networks:
+  net_control:
+    internal: true

@@ -1,0 +1,20 @@
+gate_id: "no_production_deploy_until_foundation_green_v1"
+batch_id: "4.2"
+mode: "hard_gate_blueprint"
+rule:
+  production_deployment_allowed: false
+  reason: "foundation gates must be green before any production deployment decision"
+required_green_foundation:
+  security_layer: true
+  data_plane: true
+  update_recovery: true
+  network_segmentation: true
+  architecture_drift_guard: true
+  xray_network_containerization: true
+  full_pytest: true
+forbidden_in_batch_4_2:
+  active_docker_deployment: true
+  active_compose_deployment: true
+  public_exposure: true
+  runtime_network_mutation: true
+  deployment_execution: true

@@ -1,0 +1,21 @@
+gate_id: "security_required_gate_v1"
+batch_id: "4.2"
+mode: "deployment_gate_blueprint"
+required_before_deployment:
+  security_layer_green: true
+  data_plane_green: true
+  update_recovery_green: true
+  network_segmentation_green: true
+  architecture_drift_guard_green: true
+  xray_network_containerization_green: true
+  full_pytest_green: true
+blocked_when:
+  operator_approval_granted: false
+  production_deployment_allowed: false
+  public_exposure_allowed: false
+  runtime_network_mutation_allowed: false
+outputs:
+  deployment_allowed_now: false
+  dashboard_safe: true
+  canonical_write_allowed: false
+  dashboard_execution_allowed: false

@@ -1,0 +1,37 @@
+schema_id: "container_deployment_blueprint_v1"
+batch_id: "4.2"
+mode: "blueprint_template_gate_only"
+deployment_status:
+  production_deployment_allowed: false
+  active_docker_deployment_allowed: false
+  active_compose_deployment_allowed: false
+  public_exposure_allowed: false
+  runtime_network_mutation_allowed: false
+required_foundation_gates:
+  security_layer_green: true
+  data_plane_green: true
+  update_recovery_green: true
+  network_segmentation_green: true
+  architecture_drift_guard_green: true
+  xray_network_containerization_green: true
+  full_pytest_green: true
+service_template_defaults:
+  bind_to_localhost_only: true
+  no_public_exposure: true
+  healthcheck_required: true
+  restart_policy_required: true
+  run_as_non_root_required: true
+  read_only_filesystem_required: true
+  drop_capabilities_required: true
+  no_new_privileges_required: true
+  explicit_network_segment_required: true
+  explicit_volume_policy_required: true
+  explicit_secret_policy_required: true
+source_references:
+  governance_deployment_mode: "MAKSIMAR_CORE/contracts/governance/deployment_mode.v1.yaml"
+  product_deployment: "MAKSIMAR_CORE/contracts/product/product_deployment.v1.yaml"
+  deployment_modes_config: "MAKSIMAR_CORE/governance/config/deployment_modes.yaml"
+  network_segments: "NETWORK_SEGMENTATION/network_segments.yaml"
+  container_network_rules: "NETWORK_SEGMENTATION/container_network_rules.yaml"
+  data_plane_container_contract: "DATA_PLANE/container_contract.yaml"
+  update_recovery_container_contract: "UPDATE_RECOVERY/container_contract.yaml"

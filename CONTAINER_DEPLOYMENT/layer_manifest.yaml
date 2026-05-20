@@ -1,0 +1,32 @@
+layer_id: NETWORK_CONTAINERIZATION
+surface_id: CONTAINER_DEPLOYMENT
+batch_id: "4.2"
+title: "Container Deployment Blueprint"
+mode: "blueprint_template_gate_only"
+source_references:
+  deployment_mode_contract: "MAKSIMAR_CORE/contracts/governance/deployment_mode.v1.yaml"
+  product_deployment_contract: "MAKSIMAR_CORE/contracts/product/product_deployment.v1.yaml"
+  deployment_modes_config: "MAKSIMAR_CORE/governance/config/deployment_modes.yaml"
+  operations_deployment_contract: "MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents/operations_deployment_backup_incidents_contract.py"
+  productization_boundary_review: "MAKSIMAR_SERVER/PRODUCTIZATION/deployment_boundary_review.py"
+  vpn_contracts_root: "MAKSIMAR_CORE/contracts/vpn/"
+  network_segmentation_root: "NETWORK_SEGMENTATION/"
+  data_plane_container_contract: "DATA_PLANE/container_contract.yaml"
+  update_recovery_container_contract: "UPDATE_RECOVERY/container_contract.yaml"
+read_models:
+  - ContainerDeploymentBlueprintReadModel
+  - DeploymentGateReadModel
+safety:
+  production_deployment_allowed: false
+  active_docker_deployment_allowed: false
+  active_compose_deployment_allowed: false
+  public_exposure_allowed: false
+  runtime_network_mutation_allowed: false
+  canonical_write_allowed: false
+  dashboard_execution_allowed: false
+  source_move_allowed: false
+  source_delete_allowed: false
+  source_migration_allowed: false
+gates:
+  security_required_gate: "CONTAINER_DEPLOYMENT/deployment_gates/security_required_gate.yaml"
+  foundation_green_gate: "CONTAINER_DEPLOYMENT/no_production_deploy_until_foundation_green.yaml"

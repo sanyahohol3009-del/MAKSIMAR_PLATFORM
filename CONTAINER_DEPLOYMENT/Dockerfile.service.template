@@ -1,0 +1,21 @@
+# CONTAINER_DEPLOYMENT BATCH 4.2 inert service Dockerfile template.
+# This file is not an active production Dockerfile.
+
+ARG BASE_IMAGE=python:3.12-slim
+
+FROM ${BASE_IMAGE}
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN addgroup --system maksimary && adduser --system --ingroup maksimary maksimary
+
+WORKDIR /app
+
+COPY ./service/ /app/
+
+USER maksimary
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD python -c "print('healthcheck')"
+
+CMD ["python", "-m", "service"]

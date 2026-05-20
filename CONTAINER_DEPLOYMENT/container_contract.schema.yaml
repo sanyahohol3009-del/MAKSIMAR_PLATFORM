@@ -1,0 +1,54 @@
+schema_id: "container_contract_schema_v1"
+batch_id: "4.2"
+mode: "blueprint_template_gate_only"
+required_fields:
+  service_id:
+    type: "string"
+    required: true
+  image_source:
+    type: "string"
+    required: true
+  network_segment:
+    type: "string"
+    required: true
+  healthcheck:
+    type: "object"
+    required: true
+  restart_policy:
+    type: "string"
+    required: true
+  security:
+    type: "object"
+    required: true
+  exposure:
+    type: "object"
+    required: true
+  volumes:
+    type: "list"
+    required: true
+  secrets:
+    type: "list"
+    required: true
+invariants:
+  production_deployment_allowed: false
+  active_deployment_allowed: false
+  public_exposure_allowed: false
+  runtime_network_mutation_allowed: false
+  canonical_write_allowed: false
+  dashboard_execution_allowed: false
+  run_as_non_root_required: true
+  read_only_filesystem_required: true
+  no_new_privileges_required: true
+  healthcheck_required: true
+  restart_policy_required: true
+allowed_restart_policies:
+  - "no"
+  - "on-failure"
+  - "unless-stopped"
+forbidden:
+  privileged: true
+  host_network: true
+  public_port_binding: true
+  root_user: true
+  broad_host_mount: true
+  unaudited_secret_mount: true
