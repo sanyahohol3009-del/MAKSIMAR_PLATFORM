@@ -1316,6 +1316,68 @@
           "manifest_required": true,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "5.2",
+          "status": "PLANNED",
+          "title": "Model Router + Request/Response Contracts",
+          "description": "Create model router, request/response, agent plan and tool-call boundary contracts. The model router must not execute actions. Tool calls remain proposal-boundary only. No direct ACTION_LIBRARY execution and no direct WORKFLOW_ENGINE execution are allowed.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/ai_orchestration/model_router_contract.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/model_request_models.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/model_response_models.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/agent_plan_models.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/tool_call_boundary_models.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/ai_orchestration_batch_5_2_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/ai_orchestration/__init__.py",
+            "tests/ai_orchestration/test_model_router_contract_smoke.py",
+            "tests/ai_orchestration/test_model_request_models_smoke.py",
+            "tests/ai_orchestration/test_model_response_models_smoke.py",
+            "tests/ai_orchestration/test_agent_plan_models_smoke.py",
+            "tests/ai_orchestration/test_tool_call_boundary_models_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/ai_orchestration/test_tool_call_boundary_blocks_direct_execution_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "ModelRouterReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 5.2 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "model router is contract/read-model only",
+            "request model is dashboard-safe",
+            "response model is dashboard-safe",
+            "agent plan model is proposal-only",
+            "tool call boundary remains proposal-only",
+            "tool_call_allowed is false by default",
+            "execution_allowed is false by default",
+            "no direct ACTION_LIBRARY execution",
+            "no direct WORKFLOW_ENGINE execution",
+            "no direct autonomous execution",
+            "no runtime mutation",
+            "no production deployment",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no public exposure",
+            "ModelRouterReadModel exposed",
+            "Roadmap CI batch 5.2 without require-files passes before code",
+            "Roadmap CI batch 5.2 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
