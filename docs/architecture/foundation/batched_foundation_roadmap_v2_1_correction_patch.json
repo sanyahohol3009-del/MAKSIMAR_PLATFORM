@@ -1187,6 +1187,62 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "4.5",
+          "status": "PLANNED",
+          "title": "Tests + Acceptance",
+          "description": "Close NETWORK_CONTAINERIZATION foundation acceptance. Base acceptance from v2 is retained. Add explicit deployment gate tests requiring SECURITY_LAYER, DATA_PLANE and UPDATE_RECOVERY readiness. Acceptance requires no public exposure by default, security/data/update gates, network_trust_boundaries accounting, manifest presence, drift guard, X-Ray and full pytest -q -n auto green.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/network_containerization/network_containerization_acceptance_read_model.py",
+            "docs/architecture/foundation/network_containerization_foundation_acceptance_v1.md"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/network_containerization_batch_4_5_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/network_containerization/test_network_containerization_acceptance_read_model_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/network_containerization/test_deployment_requires_security_layer_green_smoke.py",
+            "tests/network_containerization/test_deployment_requires_data_plane_green_smoke.py",
+            "tests/network_containerization/test_deployment_requires_update_recovery_green_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "NetworkContainerizationAcceptanceReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 4.5 names preserved",
+            "base acceptance from v2 retained",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "no public exposure by default",
+            "security layer deployment gate required",
+            "data plane deployment gate required",
+            "update recovery deployment gate required",
+            "network_trust_boundaries accounted",
+            "manifest present",
+            "tests/network_containerization -q passes",
+            "tests/network_trust_boundaries -q passes",
+            "architecture control no mutation/no network passes",
+            "Architecture Drift Guard passes",
+            "X-Ray NETWORK_CONTAINERIZATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "NetworkContainerizationAcceptanceReadModel exposed",
+            "no production deployment",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no public exposure",
+            "no runtime network mutation",
+            "Roadmap CI batch 4.5 without require-files passes before code",
+            "Roadmap CI batch 4.5 --require-files passes after code",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
