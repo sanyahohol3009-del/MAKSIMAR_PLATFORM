@@ -1073,6 +1073,64 @@
           "manifest_required": true,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "4.3",
+          "status": "PLANNED",
+          "title": "Network/Container Models",
+          "description": "Create network/container model contracts for network segments, container contracts, healthchecks, exposure policy, restart policy, topology builder and container deployment read model. No public exposure by default. Do not create the typo test path tests/network_containerization/test_network_network_topology_builder_smoke.py.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/network_containerization/__init__.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/network_segment_models.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/container_contract_models.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/container_healthcheck_models.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/container_exposure_policy.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/restart_policy_models.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/network_topology_builder.py",
+            "MAKSIMAR_CORE_LIB/network_containerization/container_deployment_read_model.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/network_containerization_batch_4_3_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/network_containerization/test_network_segment_models_smoke.py",
+            "tests/network_containerization/test_container_contract_models_smoke.py",
+            "tests/network_containerization/test_container_healthcheck_models_smoke.py",
+            "tests/network_containerization/test_container_exposure_policy_smoke.py",
+            "tests/network_containerization/test_restart_policy_models_smoke.py",
+            "tests/network_containerization/test_network_topology_builder_smoke.py",
+            "tests/network_containerization/test_no_public_exposure_by_default_smoke.py",
+            "tests/network_containerization/test_container_deployment_read_model_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "ContainerDeploymentReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 4.3 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "no public exposure by default",
+            "container exposure policy defaults to public_exposure_allowed=false",
+            "container deployment read model is dashboard-safe",
+            "network topology builder is read-model/builder only",
+            "do not create tests/network_containerization/test_network_network_topology_builder_smoke.py",
+            "no production deployment",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no runtime network mutation",
+            "Roadmap CI batch 4.3 without require-files passes before code",
+            "Roadmap CI batch 4.3 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray NETWORK_CONTAINERIZATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
