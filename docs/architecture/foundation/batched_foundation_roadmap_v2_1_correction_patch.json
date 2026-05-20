@@ -986,7 +986,8 @@
             "NETWORK_SEGMENTATION/boundaries/container_adapter_boundary.yaml",
             "NETWORK_SEGMENTATION/existing_bindings/network_trust_boundaries_binding.yaml",
             "MAKSIMAR_CORE_LIB/network_containerization/network_trust_boundary_binding_models.py",
-            "docs/architecture/foundation/network_containerization_batch_4_1_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/network_containerization_batch_4_1_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/network_containerization_batch_4_1_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/network_containerization/test_network_trust_boundary_binding_models_smoke.py"
@@ -1014,7 +1015,8 @@
             "Architecture Drift Guard passes",
             "X-Ray NETWORK_CONTAINERIZATION surface binding visible or non-regression accepted",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate high-risk targets classified as adapter/binding surfaces"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": true,
