@@ -1271,7 +1271,8 @@
             "AI_ORCHESTRATION/existing_bindings/worker_binding.yaml",
             "AI_ORCHESTRATION/existing_bindings/control_plane_ai_router_binding.yaml",
             "MAKSIMAR_CORE_LIB/ai_orchestration/existing_ai_orchestration_binding_models.py",
-            "docs/architecture/foundation/ai_orchestration_batch_5_1_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/ai_orchestration_batch_5_1_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/ai_orchestration_batch_5_1_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/ai_orchestration/test_existing_ai_orchestration_binding_models_smoke.py"
@@ -1308,7 +1309,8 @@
             "Architecture Drift Guard passes",
             "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate high-risk targets classified as binding/facade/surface only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": true,
