@@ -28,3 +28,17 @@ def test_network_containerization_acceptance_read_model_exports_required_command
     assert "tests/network_containerization -q" in read_model.acceptance_test_commands
     assert "tests/network_trust_boundaries -q" in read_model.acceptance_test_commands
     assert "pytest -q -n auto" in read_model.acceptance_test_commands
+
+def test_network_containerization_acceptance_read_model_is_exposed_from_package_facade() -> None:
+    from MAKSIMAR_CORE_LIB.network_containerization import (
+        NetworkContainerizationAcceptanceReadModel,
+        build_network_containerization_acceptance_read_model,
+    )
+
+    read_model = build_network_containerization_acceptance_read_model()
+
+    assert isinstance(read_model, NetworkContainerizationAcceptanceReadModel)
+    assert read_model.read_model_id == "network_containerization_acceptance_read_model_v1"
+    assert read_model.dashboard_safe is True
+    assert read_model.read_only is True
+

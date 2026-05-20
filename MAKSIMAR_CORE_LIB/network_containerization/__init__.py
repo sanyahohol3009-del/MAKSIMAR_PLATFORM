@@ -23,6 +23,10 @@ from MAKSIMAR_CORE_LIB.network_containerization.network_topology_builder import 
     NetworkTopologyReadModel,
     build_network_topology_read_model,
 )
+from MAKSIMAR_CORE_LIB.network_containerization.network_containerization_acceptance_read_model import (
+    NetworkContainerizationAcceptanceReadModel,
+    build_network_containerization_acceptance_read_model,
+)
 from MAKSIMAR_CORE_LIB.network_containerization.network_trust_boundary_binding_models import (
     NetworkSegmentationReadModel,
     NetworkTrustBoundaryBindingReadModel,
@@ -39,6 +43,7 @@ __all__ = (
     "ContainerDeploymentReadModel",
     "ContainerExposurePolicy",
     "ContainerHealthcheckModel",
+    "NetworkContainerizationAcceptanceReadModel",
     "NetworkSegmentModel",
     "NetworkSegmentationReadModel",
     "NetworkTopologyReadModel",
@@ -49,6 +54,7 @@ __all__ = (
     "build_default_container_healthcheck_model",
     "build_default_network_segments",
     "build_default_restart_policy_model",
+    "build_network_containerization_acceptance_read_model",
     "build_network_segment_model",
     "build_network_segmentation_read_model",
     "build_network_topology_read_model",
