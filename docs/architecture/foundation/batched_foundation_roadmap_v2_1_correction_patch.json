@@ -1022,6 +1022,55 @@
           "manifest_required": true,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "4.2",
+          "status": "PLANNED",
+          "title": "Container Deployment Blueprint",
+          "description": "Create CONTAINER_DEPLOYMENT blueprint, container contract schema, Dockerfile/service templates, compose service template and deployment gates. This batch is blueprint/template/gate only. It must not create active production deployment, public exposure, runtime network mutation, or enabled Docker/Compose deployment.",
+          "base_files": [
+            "CONTAINER_DEPLOYMENT/README.md",
+            "CONTAINER_DEPLOYMENT/container_deployment_blueprint.yaml",
+            "CONTAINER_DEPLOYMENT/container_contract.schema.yaml",
+            "CONTAINER_DEPLOYMENT/Dockerfile.service.template",
+            "CONTAINER_DEPLOYMENT/dockerignore.template",
+            "CONTAINER_DEPLOYMENT/compose.service.template.yaml"
+          ],
+          "correction_additions": [
+            "CONTAINER_DEPLOYMENT/layer_manifest.yaml",
+            "CONTAINER_DEPLOYMENT/deployment_gates/security_required_gate.yaml",
+            "CONTAINER_DEPLOYMENT/no_production_deploy_until_foundation_green.yaml",
+            "docs/architecture/foundation/network_containerization_batch_4_2_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "ContainerDeploymentBlueprintReadModel",
+            "DeploymentGateReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 4.2 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "blueprint/template/gate only",
+            "no production deploy until foundation green",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no public exposure",
+            "no runtime network mutation",
+            "existing deployment/governance/product deployment surfaces considered",
+            "Roadmap CI batch 4.2 without require-files passes before code",
+            "Roadmap CI batch 4.2 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray NETWORK_CONTAINERIZATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": true,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
