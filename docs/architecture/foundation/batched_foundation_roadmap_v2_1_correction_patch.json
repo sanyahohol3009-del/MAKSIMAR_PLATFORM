@@ -1090,7 +1090,8 @@
             "MAKSIMAR_CORE_LIB/network_containerization/container_deployment_read_model.py"
           ],
           "correction_additions": [
-            "docs/architecture/foundation/network_containerization_batch_4_3_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/network_containerization_batch_4_3_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/network_containerization_batch_4_3_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/network_containerization/test_network_segment_models_smoke.py",
@@ -1125,7 +1126,8 @@
             "Architecture Drift Guard passes",
             "X-Ray NETWORK_CONTAINERIZATION non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "__init__.py classified as package export facade only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
