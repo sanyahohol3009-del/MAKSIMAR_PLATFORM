@@ -1330,7 +1330,8 @@
             "MAKSIMAR_CORE_LIB/ai_orchestration/tool_call_boundary_models.py"
           ],
           "correction_additions": [
-            "docs/architecture/foundation/ai_orchestration_batch_5_2_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/ai_orchestration_batch_5_2_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/ai_orchestration_batch_5_2_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/ai_orchestration/__init__.py",
@@ -1372,7 +1373,8 @@
             "Architecture Drift Guard passes",
             "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate high-risk targets classified as contract/model/test-package-marker only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
