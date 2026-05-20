@@ -561,6 +561,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
         path_candidates=(
             "NETWORK",
             "NETWORK_SEGMENTATION",
+            "MAKSIMAR_CORE_LIB/network_containerization",
             "CONTAINER_DEPLOYMENT",
             "DEPLOYMENT",
             "docker",
@@ -583,7 +584,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
             law("net_update", "net_update", "net_update"),
             law("healthcheck", "Healthcheck declared", "healthcheck", "/health"),
             law("restart_policy", "Restart policy declared", "restart", "unless-stopped", "on-failure"),
-            law("no_public_exposure", "No public exposure by default", "localhost", "expose outside"),
+            law("no_public_exposure", "No public exposure by default", "no_public_exposure", "public_exposure_allowed", "localhost", "expose outside"),
         ),
     ),
     LayerSpec(

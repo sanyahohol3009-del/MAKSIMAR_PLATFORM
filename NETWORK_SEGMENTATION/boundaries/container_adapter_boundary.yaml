@@ -1,0 +1,22 @@
+boundary_id: "network_segmentation_container_adapter_boundary_v1"
+batch_id: "4.1"
+classification: "adapter_binding_boundary"
+source_authority: "MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py"
+allowed:
+  blueprint_read_model: true
+  existing_source_binding: true
+  dashboard_safe_preview: true
+forbidden:
+  production_deployment: true
+  public_exposure: true
+  runtime_network_mutation: true
+  canonical_write: true
+  dashboard_execution: true
+  replace_network_trust_boundaries: true
+  move_network_trust_boundaries: true
+  delete_network_trust_boundaries: true
+  migrate_network_trust_boundaries: true
+xray_markers:
+  healthcheck: true
+  restart_policy: true
+  no_public_exposure: true

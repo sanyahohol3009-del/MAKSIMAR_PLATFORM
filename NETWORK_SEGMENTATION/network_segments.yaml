@@ -1,0 +1,46 @@
+schema_id: "network_segments_v1"
+batch_id: "4.1"
+mode: "blueprint_read_model_only"
+source_authority: "MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py"
+segments:
+  - segment_id: "net_core_safety"
+    title: "Core safety network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_control"
+    title: "Control-plane network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_security"
+    title: "Security layer network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_governance"
+    title: "Governance layer network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_data"
+    title: "Data plane network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_ai"
+    title: "AI services network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_products"
+    title: "Product cubes network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_observability"
+    title: "Observability network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+  - segment_id: "net_update"
+    title: "Update recovery network segment"
+    public_exposure_allowed: false
+    runtime_network_mutation_allowed: false
+defaults:
+  no_public_exposure: true
+  healthcheck_required: true
+  restart_policy_required: true
+  production_deployment_allowed: false

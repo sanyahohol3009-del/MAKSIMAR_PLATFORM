@@ -1,0 +1,33 @@
+layer_id: NETWORK_CONTAINERIZATION
+surface_id: NETWORK_SEGMENTATION
+batch_id: "4.1"
+title: "Network Segmentation Surface"
+mode: "blueprint_read_model_only"
+source_authority:
+  trust_boundaries: "MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py"
+  governance_doc: "docs/security_governance/TRUST_BOUNDARIES_v1.md"
+read_models:
+  - NetworkSegmentationReadModel
+  - NetworkTrustBoundaryBindingReadModel
+safety:
+  production_deployment_allowed: false
+  public_exposure_allowed: false
+  runtime_network_mutation_allowed: false
+  canonical_write_allowed: false
+  dashboard_execution_allowed: false
+  source_move_allowed: false
+  source_delete_allowed: false
+  source_migration_allowed: false
+markers:
+  net_core_safety: true
+  net_control: true
+  net_security: true
+  net_governance: true
+  net_data: true
+  net_ai: true
+  net_products: true
+  net_observability: true
+  net_update: true
+  healthcheck: true
+  restart_policy: true
+  no_public_exposure: true

@@ -1,0 +1,36 @@
+schema_id: "container_network_rules_v1"
+batch_id: "4.1"
+mode: "blueprint_read_model_only"
+source_authority: "MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py"
+rules:
+  - rule_id: "no_public_exposure_default"
+    applies_to: "all_segments"
+    no_public_exposure: true
+    public_exposure_allowed: false
+  - rule_id: "healthcheck_required_default"
+    applies_to: "all_segments"
+    healthcheck: true
+    healthcheck_required: true
+  - rule_id: "restart_policy_required_default"
+    applies_to: "all_segments"
+    restart_policy: true
+    restart_policy_required: true
+  - rule_id: "no_runtime_network_mutation"
+    applies_to: "all_segments"
+    runtime_network_mutation_allowed: false
+  - rule_id: "no_production_deployment_in_batch_4_1"
+    applies_to: "all_segments"
+    production_deployment_allowed: false
+declared_markers:
+  net_core_safety: true
+  net_control: true
+  net_security: true
+  net_governance: true
+  net_data: true
+  net_ai: true
+  net_products: true
+  net_observability: true
+  net_update: true
+  healthcheck: true
+  restart_policy: true
+  no_public_exposure: true

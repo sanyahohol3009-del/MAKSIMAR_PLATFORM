@@ -1,0 +1,20 @@
+binding_id: "network_trust_boundaries_binding_v1"
+batch_id: "4.1"
+binding_type: "existing_source_binding"
+existing_source:
+  package: "MAKSIMAR_CORE_LIB.network_trust_boundaries"
+  contract_path: "MAKSIMAR_CORE_LIB/network_trust_boundaries/network_trust_boundaries_contract.py"
+  test_path: "tests/network_trust_boundaries/test_network_trust_boundaries_contract_smoke.py"
+  governance_doc: "docs/security_governance/TRUST_BOUNDARIES_v1.md"
+network_segmentation_role:
+  source_authority: false
+  adapter_binding: true
+  blueprint_read_model: true
+safety:
+  replace_existing_source_allowed: false
+  move_existing_source_allowed: false
+  delete_existing_source_allowed: false
+  migrate_existing_source_allowed: false
+  public_exposure_allowed: false
+  production_deployment_allowed: false
+  runtime_network_mutation_allowed: false
