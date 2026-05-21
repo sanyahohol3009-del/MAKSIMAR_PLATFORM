@@ -1599,7 +1599,7 @@
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/__init__.py",
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_manifest_models.py",
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_domain_enrollment_models.py",
-            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_contract.py"
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_binding_contract.py"
           ],
           "correction_additions": [
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_dashboard_visibility_models.py",
@@ -1609,7 +1609,7 @@
           "base_tests": [
             "tests/foundation_registry_enrollment/test_foundation_layer_manifest_models_smoke.py",
             "tests/foundation_registry_enrollment/test_foundation_domain_enrollment_models_smoke.py",
-            "tests/foundation_registry_enrollment/test_foundation_registry_contract_smoke.py"
+            "tests/foundation_registry_enrollment/test_foundation_registry_binding_contract_smoke.py"
           ],
           "correction_tests": [
             "tests/foundation_registry_enrollment/test_foundation_dashboard_visibility_models_smoke.py"

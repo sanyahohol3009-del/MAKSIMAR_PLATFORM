@@ -43,7 +43,7 @@ It must not contain:
 | MAKSIMAR_CORE_LIB/foundation_registry_enrollment/__init__.py | create package marker / export facade only | Required package boundary for foundation registry enrollment models; no implementation duplication allowed. |
 | MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_manifest_models.py | create canonical model file | Defines foundation layer manifest model only. |
 | MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_domain_enrollment_models.py | create canonical model file | Defines foundation domain enrollment model only. |
-| MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_contract.py | create canonical contract/read model | Defines foundation registry enrollment contract only. |
+| MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_binding_contract.py | create canonical contract/read model | Defines foundation registry enrollment contract only. |
 | MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_dashboard_visibility_models.py | create dashboard-safe read model | Defines dashboard visibility model only. |
 
 ## Non-replacement rule

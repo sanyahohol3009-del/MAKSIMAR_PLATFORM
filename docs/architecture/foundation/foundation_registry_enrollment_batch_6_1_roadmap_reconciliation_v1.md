@@ -15,7 +15,7 @@ Base files / v2:
 - foundation_registry_enrollment/__init__.py
 - foundation_layer_manifest_models.py
 - foundation_domain_enrollment_models.py
-- foundation_registry_contract.py
+- foundation_registry_binding_contract.py
 
 Correction additions:
 
@@ -26,7 +26,7 @@ Tests:
 
 - tests/foundation_registry_enrollment/test_foundation_layer_manifest_models_smoke.py
 - tests/foundation_registry_enrollment/test_foundation_domain_enrollment_models_smoke.py
-- tests/foundation_registry_enrollment/test_foundation_registry_contract_smoke.py
+- tests/foundation_registry_enrollment/test_foundation_registry_binding_contract_smoke.py
 - tests/foundation_registry_enrollment/test_foundation_dashboard_visibility_models_smoke.py
 
 Dashboard / read model:
@@ -44,11 +44,11 @@ The printed roadmap entries are normalized to:
 - MAKSIMAR_CORE_LIB/foundation_registry_enrollment/__init__.py
 - MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_manifest_models.py
 - MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_domain_enrollment_models.py
-- MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_contract.py
+- MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_binding_contract.py
 - MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_dashboard_visibility_models.py
 - tests/foundation_registry_enrollment/test_foundation_layer_manifest_models_smoke.py
 - tests/foundation_registry_enrollment/test_foundation_domain_enrollment_models_smoke.py
-- tests/foundation_registry_enrollment/test_foundation_registry_contract_smoke.py
+- tests/foundation_registry_enrollment/test_foundation_registry_binding_contract_smoke.py
 - tests/foundation_registry_enrollment/test_foundation_dashboard_visibility_models_smoke.py
 
 ## Important distinction
