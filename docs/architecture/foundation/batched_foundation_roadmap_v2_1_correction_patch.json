@@ -1716,7 +1716,8 @@
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_network_containerization_enrollment_builder.py"
           ],
           "correction_additions": [
-            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_3_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_3_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_3_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/foundation_registry_enrollment/test_foundation_update_recovery_enrollment_builder_smoke.py",
@@ -1751,7 +1752,8 @@
             "Architecture Drift Guard passes",
             "X-Ray non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate scan resolved with no true/high-risk duplicates; update/network builders constrained to read-model only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
