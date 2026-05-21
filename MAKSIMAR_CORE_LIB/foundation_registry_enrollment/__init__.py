@@ -4,6 +4,11 @@ from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_dashboard_visib
     build_default_foundation_dashboard_visibility_models,
     build_foundation_dashboard_visibility_model,
 )
+from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_data_plane_enrollment_builder import (
+    DATA_PLANE_FOUNDATION_EXISTING_SURFACES,
+    DataPlaneFoundationEnrollmentReadModel,
+    build_data_plane_foundation_enrollment_read_model,
+)
 from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_domain_enrollment_models import (
     FoundationDomainEnrollmentModel,
     build_default_foundation_domain_enrollments,
@@ -20,15 +25,25 @@ from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_registry_bindin
     FoundationRegistryEnrollmentReadModel,
     build_foundation_registry_enrollment_read_model,
 )
+from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_security_enrollment_builder import (
+    SECURITY_FOUNDATION_EXISTING_SURFACES,
+    SecurityFoundationEnrollmentReadModel,
+    build_security_foundation_enrollment_read_model,
+)
 
 __all__ = (
+    "DATA_PLANE_FOUNDATION_EXISTING_SURFACES",
     "FOUNDATION_LAYER_IDS",
+    "SECURITY_FOUNDATION_EXISTING_SURFACES",
+    "DataPlaneFoundationEnrollmentReadModel",
     "FoundationDashboardVisibilityModel",
     "FoundationDomainEnrollmentModel",
     "FoundationLayerId",
     "FoundationLayerManifestModel",
     "FoundationRegistryEnrollmentReadModel",
+    "SecurityFoundationEnrollmentReadModel",
     "build_dashboard_visibility_from_enrollments",
+    "build_data_plane_foundation_enrollment_read_model",
     "build_default_foundation_dashboard_visibility_models",
     "build_default_foundation_domain_enrollments",
     "build_default_foundation_layer_manifests",
@@ -36,4 +51,5 @@ __all__ = (
     "build_foundation_domain_enrollment_model",
     "build_foundation_layer_manifest_model",
     "build_foundation_registry_enrollment_read_model",
+    "build_security_foundation_enrollment_read_model",
 )
