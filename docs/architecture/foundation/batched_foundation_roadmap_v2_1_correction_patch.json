@@ -1651,6 +1651,58 @@
           "manifest_required": false,
           "container_boundary_required": false,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "6.2",
+          "status": "PLANNED",
+          "title": "Security + Data Plane Enrollment",
+          "description": "Make Security Layer and Data Plane registry-visible through foundation registry enrollment builders. This batch must bind to existing security_layer and data_plane surfaces without replacing, migrating, renaming or duplicating them. It must remain read-model only and must not write into registries.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_security_enrollment_builder.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_data_plane_enrollment_builder.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_2_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/foundation_registry_enrollment/test_foundation_security_enrollment_builder_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_data_plane_enrollment_builder_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "SecurityFoundationEnrollmentReadModel",
+            "DataPlaneFoundationEnrollmentReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 6.2 names preserved",
+            "pre-step location slice completed",
+            "semantic duplicate scan completed before code",
+            "anti-stub scan clean",
+            "Security Layer registry visibility formalized",
+            "Data Plane registry visibility formalized",
+            "existing security_layer surfaces accounted",
+            "existing data_plane surfaces accounted",
+            "existing security_layer not replaced",
+            "existing data_plane not replaced",
+            "existing REGISTRY_AUTO_ENROLLMENT not replaced",
+            "registry write blocked",
+            "auto enrollment write blocked",
+            "runtime mutation blocked",
+            "dashboard-safe",
+            "read-model only",
+            "production deployment blocked",
+            "Roadmap CI batch 6.2 without require-files passes before code",
+            "Roadmap CI batch 6.2 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
         }
       ]
     }
