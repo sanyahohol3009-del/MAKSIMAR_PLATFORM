@@ -1705,6 +1705,58 @@
           "manifest_required": false,
           "container_boundary_required": false,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "6.3",
+          "status": "PLANNED",
+          "title": "Update + Network Enrollment",
+          "description": "Make Update Recovery and Network Containerization registry-visible through foundation registry enrollment builders. This batch must bind to existing update_recovery and network_containerization surfaces without replacing, migrating, renaming or duplicating them. It must remain read-model only and must not write into registries.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_update_recovery_enrollment_builder.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_network_containerization_enrollment_builder.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_3_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/foundation_registry_enrollment/test_foundation_update_recovery_enrollment_builder_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_network_containerization_enrollment_builder_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "UpdateRecoveryFoundationEnrollmentReadModel",
+            "NetworkContainerizationFoundationEnrollmentReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 6.3 names preserved",
+            "pre-step location slice completed",
+            "semantic duplicate scan completed before code",
+            "anti-stub scan clean",
+            "Update Recovery registry visibility formalized",
+            "Network Containerization registry visibility formalized",
+            "existing update_recovery surfaces accounted",
+            "existing network_containerization surfaces accounted",
+            "existing update_recovery not replaced",
+            "existing network_containerization not replaced",
+            "existing REGISTRY_AUTO_ENROLLMENT not replaced",
+            "registry write blocked",
+            "auto enrollment write blocked",
+            "runtime mutation blocked",
+            "dashboard-safe",
+            "read-model only",
+            "production deployment blocked",
+            "Roadmap CI batch 6.3 without require-files passes before code",
+            "Roadmap CI batch 6.3 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
         }
       ]
     }
