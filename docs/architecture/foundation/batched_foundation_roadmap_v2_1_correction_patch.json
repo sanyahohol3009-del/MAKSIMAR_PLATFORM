@@ -1380,6 +1380,67 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "5.3",
+          "status": "PLANNED",
+          "title": "Proposal / Provenance / Budget / Feedback",
+          "description": "Create proposal staging, model provenance, FinOps budget, feedback engine, orchestration policy and AI orchestration read-model contracts. AI may only propose, not apply. No direct execution, no runtime mutation and no deployment are allowed.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/ai_orchestration/proposal_staging_contract.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/model_provenance_contract.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/finops_budget_contract.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/feedback_engine_contract.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/orchestration_policy.py",
+            "MAKSIMAR_CORE_LIB/ai_orchestration/ai_orchestration_read_model.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/ai_orchestration_batch_5_3_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/ai_orchestration/test_proposal_staging_contract_smoke.py",
+            "tests/ai_orchestration/test_model_provenance_contract_smoke.py",
+            "tests/ai_orchestration/test_finops_budget_contract_smoke.py",
+            "tests/ai_orchestration/test_feedback_engine_contract_smoke.py",
+            "tests/ai_orchestration/test_ai_orchestration_policy_blocks_direct_execution_smoke.py",
+            "tests/ai_orchestration/test_ai_orchestration_requires_security_data_update_network_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "AIOrchestrationReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 5.3 names preserved",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "AI may only propose and not apply",
+            "proposal staging is proposal-only",
+            "model provenance is read-model/contract only",
+            "FinOps budget guard is contract only",
+            "feedback engine is contract/read-model only",
+            "orchestration policy blocks direct execution",
+            "AI orchestration requires security/data/update/network readiness",
+            "no direct ACTION_LIBRARY execution",
+            "no direct WORKFLOW_ENGINE execution",
+            "no direct autonomous execution",
+            "no runtime mutation",
+            "no production deployment",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no public exposure",
+            "AIOrchestrationReadModel exposed",
+            "Roadmap CI batch 5.3 without require-files passes before code",
+            "Roadmap CI batch 5.3 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
