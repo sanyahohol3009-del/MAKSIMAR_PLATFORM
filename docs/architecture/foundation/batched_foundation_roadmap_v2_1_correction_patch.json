@@ -1531,7 +1531,8 @@
           "correction_additions": [
             "docs/architecture/foundation/ai_orchestration_existing_binding_review_v1.md",
             "docs/architecture/foundation/ai_orchestration_container_boundary_v1.md",
-            "docs/architecture/foundation/ai_orchestration_batch_5_5_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/ai_orchestration_batch_5_5_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/ai_orchestration_batch_5_5_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/ai_orchestration/test_ai_orchestration_acceptance_read_model_smoke.py",
@@ -1571,7 +1572,10 @@
             "no public exposure",
             "Roadmap CI batch 5.5 without require-files passes before code",
             "Roadmap CI batch 5.5 --require-files passes after code",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "ai_router_binding_contract classified as acceptance accounting contract only",
+            "existing CONTROL_PLANE ai_router_binding must not be duplicated or replaced",
+            "tests/ai_orchestration/test_ai_router_binding_contract_smoke.py classified as AI_ORCHESTRATION acceptance test only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": true,
