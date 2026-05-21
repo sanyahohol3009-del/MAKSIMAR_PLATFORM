@@ -1583,6 +1583,74 @@
           "full_auto_pytest_required": true
         }
       ]
+    },
+    {
+      "phase_id": "PHASE_6_DOMAIN_REGISTRY_ENROLLMENT_FOR_FOUNDATION_LAYERS_V1",
+      "status": "planned",
+      "title": "Domain / Registry Enrollment for Foundation Layers",
+      "description": "Register foundation layers in registry/domain/dashboard visibility surfaces. This phase must formalize visibility without runtime mutation, without direct dashboard control authority, and without replacing existing REGISTRY_AUTO_ENROLLMENT or memory registry surfaces.",
+      "batches": [
+        {
+          "batch_id": "6.1",
+          "status": "PLANNED",
+          "title": "Registry Enrollment Core Models",
+          "description": "Create foundation registry enrollment core models. This batch formalizes foundation layer manifest, foundation domain enrollment, registry contract, and dashboard visibility read model. It must not replace existing REGISTRY_AUTO_ENROLLMENT, memory registry, module manifest, skill/domain binding, or dashboard registry surfaces.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/__init__.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_manifest_models.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_domain_enrollment_models.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_registry_contract.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_dashboard_visibility_models.py",
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_1_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/foundation_registry_enrollment/test_foundation_layer_manifest_models_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_domain_enrollment_models_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_registry_contract_smoke.py"
+          ],
+          "correction_tests": [
+            "tests/foundation_registry_enrollment/test_foundation_dashboard_visibility_models_smoke.py"
+          ],
+          "dashboard_read_models": [
+            "FoundationRegistryEnrollmentReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 6.1 names preserved",
+            "pre-step location slice completed",
+            "semantic duplicate scan completed before code",
+            "anti-stub scan clean",
+            "foundation visibility formalized",
+            "foundation layer manifest formalized",
+            "foundation domain enrollment formalized",
+            "foundation registry contract formalized",
+            "dashboard visibility read model formalized",
+            "existing REGISTRY_AUTO_ENROLLMENT not replaced",
+            "existing memory registry not replaced",
+            "existing module manifest not replaced",
+            "existing skill/domain binding not replaced",
+            "existing dashboard registry not replaced",
+            "read-model only",
+            "dashboard-safe",
+            "runtime mutation blocked",
+            "registry write blocked",
+            "auto enrollment write blocked",
+            "production deployment blocked",
+            "Roadmap CI batch 6.1 without require-files passes before code",
+            "Roadmap CI batch 6.1 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
+        }
+      ]
     }
   ],
   "phase_placeholders": [
