@@ -1603,7 +1603,8 @@
           ],
           "correction_additions": [
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_dashboard_visibility_models.py",
-            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_1_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_1_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_1_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/foundation_registry_enrollment/test_foundation_layer_manifest_models_smoke.py",
@@ -1643,7 +1644,8 @@
             "Architecture Drift Guard passes",
             "X-Ray non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "foundation_registry_enrollment __init__ classified as package marker and export facade only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
