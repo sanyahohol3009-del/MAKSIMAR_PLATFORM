@@ -1443,6 +1443,74 @@
           "manifest_required": false,
           "container_boundary_required": true,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "5.4",
+          "status": "PLANNED",
+          "title": "Runtime Adapter + Preview",
+          "description": "Create AI orchestration runtime adapter and preview surfaces. Runtime adapters must point to existing AI services, workers and CONTROL_PLANE ai router bindings and remain proposal-only. No direct autonomous execution, no workflow/action execution, no runtime mutation and no deployment are allowed.",
+          "base_files": [
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/model_router.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/proposal_staging_service.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/model_provenance_service.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/feedback_engine.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/finops_guard.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/ai_orchestration_health.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/ai_orchestration_read_model_builder.py",
+            "tools/monitor/runtime_input/ai_orchestration_terminal_preview.py",
+            "tools/monitor/runtime_input/ai_orchestration_web_preview.py"
+          ],
+          "correction_additions": [
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/__init__.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/ai_services_adapter.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/workers_adapter.py",
+            "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/control_plane_ai_router_adapter.py",
+            "docs/architecture/foundation/ai_orchestration_batch_5_4_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/ai_orchestration/test_ai_services_adapter_smoke.py",
+            "tests/ai_orchestration/test_workers_adapter_smoke.py",
+            "tests/ai_orchestration/test_control_plane_ai_router_adapter_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "AIOrchestrationRuntimeReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 5.4 names preserved",
+            "printed preview tools expanded into terminal and web preview tools",
+            "semantic duplicate scan completed",
+            "anti-stub scan clean",
+            "runtime adapters point to existing AI services",
+            "runtime adapters point to existing workers",
+            "runtime adapters point to existing CONTROL_PLANE ai router binding",
+            "runtime adapters remain proposal-only",
+            "runtime adapters do not execute models directly",
+            "runtime adapters do not execute ACTION_LIBRARY directly",
+            "runtime adapters do not execute WORKFLOW_ENGINE directly",
+            "runtime adapters do not mutate runtime",
+            "runtime adapters do not deploy",
+            "AIOrchestrationRuntimeReadModel exposed",
+            "preview tools are read-only",
+            "health read model is dashboard-safe",
+            "no direct autonomous execution",
+            "no runtime mutation",
+            "no production deployment",
+            "no active Docker deployment",
+            "no active Compose deployment",
+            "no public exposure",
+            "Roadmap CI batch 5.4 without require-files passes before code",
+            "Roadmap CI batch 5.4 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
