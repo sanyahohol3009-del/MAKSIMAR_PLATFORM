@@ -1759,6 +1759,70 @@
           "manifest_required": false,
           "container_boundary_required": false,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "6.4",
+          "status": "PLANNED",
+          "title": "AI + Dashboard Visibility Enrollment",
+          "description": "Make AI Orchestration and all foundation layer registry entries visible through dashboard-safe read-only visibility/readiness builders. Dashboard visibility becomes mandatory. This batch must not replace existing AI_ORCHESTRATION, dashboard, registry or foundation enrollment surfaces.",
+          "base_files": [
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_ai_orchestration_enrollment_builder.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layers/__init__.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_readiness_summary_builder.py",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layer_dashboard_visibility_builder.py",
+            "tools/foundation_registry_enrollment_preview.py",
+            "tools/foundation_layer_dashboard_visibility_preview.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_4_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/foundation_registry_enrollment/test_foundation_ai_orchestration_enrollment_builder_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_layer_readiness_summary_builder_smoke.py",
+            "tests/foundation_registry_enrollment/test_foundation_layer_dashboard_visibility_builder_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "FoundationLayerDashboardVisibilityReadModel",
+            "FoundationLayerReadinessSummaryReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 6.4 names preserved",
+            "pre-step location slice completed",
+            "semantic duplicate scan completed before code",
+            "anti-stub scan clean",
+            "AI Orchestration registry visibility formalized",
+            "foundation layer readiness summary formalized",
+            "foundation layer dashboard visibility formalized",
+            "dashboard visibility becomes mandatory",
+            "AI foundation visible in registry",
+            "AI foundation visible in dashboard read-only views",
+            "all foundation layers visible in registry read-model",
+            "all foundation layers visible in dashboard read-only view",
+            "existing AI_ORCHESTRATION surfaces accounted",
+            "existing dashboard visibility surfaces accounted",
+            "existing AI_ORCHESTRATION not replaced",
+            "existing dashboard read-only views not replaced",
+            "registry write blocked",
+            "auto enrollment write blocked",
+            "runtime mutation blocked",
+            "dashboard control blocked",
+            "read-model only",
+            "preview tools read-only",
+            "production deployment blocked",
+            "public exposure blocked",
+            "Roadmap CI batch 6.4 without require-files passes before code",
+            "Roadmap CI batch 6.4 --require-files passes after code",
+            "Architecture Drift Guard passes",
+            "X-Ray non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": false,
+          "full_auto_pytest_required": true
         }
       ]
     }
