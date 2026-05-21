@@ -1395,7 +1395,8 @@
             "MAKSIMAR_CORE_LIB/ai_orchestration/ai_orchestration_read_model.py"
           ],
           "correction_additions": [
-            "docs/architecture/foundation/ai_orchestration_batch_5_3_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/ai_orchestration_batch_5_3_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/ai_orchestration_batch_5_3_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/ai_orchestration/test_proposal_staging_contract_smoke.py",
@@ -1435,7 +1436,8 @@
             "Architecture Drift Guard passes",
             "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate migration candidates classified as existing surfaces to account for only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
