@@ -1465,7 +1465,8 @@
             "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/ai_services_adapter.py",
             "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/workers_adapter.py",
             "MAKSIMAR_SERVER/AI_ORCHESTRATION/adapters/control_plane_ai_router_adapter.py",
-            "docs/architecture/foundation/ai_orchestration_batch_5_4_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/ai_orchestration_batch_5_4_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/ai_orchestration_batch_5_4_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/ai_orchestration/test_ai_services_adapter_smoke.py",
@@ -1505,7 +1506,8 @@
             "Architecture Drift Guard passes",
             "X-Ray AI_SERVICES_ORCHESTRATION non-regression check passes",
             "./.venv/bin/python -m pytest -q -n auto passes",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "adapters __init__ classified as package marker and export facade only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
