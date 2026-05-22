@@ -1840,7 +1840,8 @@
             "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layers_final_acceptance_read_model.py"
           ],
           "correction_additions": [
-            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_5_roadmap_reconciliation_v1.md"
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_5_roadmap_reconciliation_v1.md",
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_5_semantic_duplicate_resolution_v1.md"
           ],
           "base_tests": [
             "tests/foundation_registry_enrollment/test_all_foundation_layers_have_manifest_smoke.py",
@@ -1879,7 +1880,8 @@
             "./.venv/bin/python -m pytest -q -n auto passes",
             "Roadmap CI batch 6.5 without require-files passes before code",
             "Roadmap CI batch 6.5 --require-files passes after code",
-            "separate clean commit and push"
+            "separate clean commit and push",
+            "semantic duplicate scan resolved with no true/high-risk duplicates; final acceptance constrained to read-model only"
           ],
           "semantic_duplicate_scan_required": true,
           "manifest_required": false,
