@@ -36,6 +36,13 @@ from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_layer_readiness
     FoundationLayerReadinessSummaryReadModel,
     build_foundation_layer_readiness_summary_read_model,
 )
+from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_layers_final_acceptance_read_model import (
+    FOUNDATION_LAYER_CONTAINER_BOUNDARY_PATHS,
+    FOUNDATION_LAYER_MANIFEST_PATHS,
+    FoundationLayerFinalAcceptanceEntry,
+    FoundationLayersFinalAcceptanceReadModel,
+    build_foundation_layers_final_acceptance_read_model,
+)
 from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_network_containerization_enrollment_builder import (
     NETWORK_CONTAINERIZATION_FOUNDATION_EXISTING_SURFACES,
     NetworkContainerizationFoundationEnrollmentReadModel,
@@ -59,7 +66,9 @@ from MAKSIMAR_CORE_LIB.foundation_registry_enrollment.foundation_update_recovery
 __all__ = (
     "AI_ORCHESTRATION_FOUNDATION_EXISTING_SURFACES",
     "DATA_PLANE_FOUNDATION_EXISTING_SURFACES",
+    "FOUNDATION_LAYER_CONTAINER_BOUNDARY_PATHS",
     "FOUNDATION_LAYER_IDS",
+    "FOUNDATION_LAYER_MANIFEST_PATHS",
     "NETWORK_CONTAINERIZATION_FOUNDATION_EXISTING_SURFACES",
     "SECURITY_FOUNDATION_EXISTING_SURFACES",
     "UPDATE_RECOVERY_FOUNDATION_EXISTING_SURFACES",
@@ -69,10 +78,12 @@ __all__ = (
     "FoundationDomainEnrollmentModel",
     "FoundationLayerDashboardVisibilityEntry",
     "FoundationLayerDashboardVisibilityReadModel",
+    "FoundationLayerFinalAcceptanceEntry",
     "FoundationLayerId",
     "FoundationLayerManifestModel",
     "FoundationLayerReadinessEntry",
     "FoundationLayerReadinessSummaryReadModel",
+    "FoundationLayersFinalAcceptanceReadModel",
     "FoundationRegistryEnrollmentReadModel",
     "NetworkContainerizationFoundationEnrollmentReadModel",
     "SecurityFoundationEnrollmentReadModel",
@@ -88,6 +99,7 @@ __all__ = (
     "build_foundation_layer_dashboard_visibility_read_model",
     "build_foundation_layer_manifest_model",
     "build_foundation_layer_readiness_summary_read_model",
+    "build_foundation_layers_final_acceptance_read_model",
     "build_foundation_registry_enrollment_read_model",
     "build_network_containerization_foundation_enrollment_read_model",
     "build_security_foundation_enrollment_read_model",
