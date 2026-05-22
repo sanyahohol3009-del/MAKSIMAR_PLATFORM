@@ -1825,6 +1825,66 @@
           "manifest_required": false,
           "container_boundary_required": false,
           "full_auto_pytest_required": true
+        },
+        {
+          "batch_id": "6.5",
+          "status": "PLANNED",
+          "title": "Final Enrollment Acceptance",
+          "description": "Close Foundation Registry Enrollment final acceptance after phases 0-5. All foundation layers must have manifest, dashboard visibility, container boundary, registry enrollment, no direct execution, no dashboard mutation, E2E tracer tests green where present, Architecture Drift Guard, X-Ray and full pytest -q -n auto green.",
+          "base_files": [
+            "docs/architecture/foundation/foundation_registry_enrollment_v1.md",
+            "docs/architecture/foundation/foundation_layers_final_acceptance_v1.md",
+            "MAKSIMAR_CORE_LIB/architecture_map/architecture_blueprint.json",
+            "tools/architecture_xray_radar.py",
+            "docs/architecture/roadmap_index/roadmap_document_provenance_index_v1.md",
+            "MAKSIMAR_CORE_LIB/foundation_registry_enrollment/foundation_layers_final_acceptance_read_model.py"
+          ],
+          "correction_additions": [
+            "docs/architecture/foundation/foundation_registry_enrollment_batch_6_5_roadmap_reconciliation_v1.md"
+          ],
+          "base_tests": [
+            "tests/foundation_registry_enrollment/test_all_foundation_layers_have_manifest_smoke.py",
+            "tests/foundation_registry_enrollment/test_all_foundation_layers_have_dashboard_visibility_smoke.py",
+            "tests/foundation_registry_enrollment/test_all_foundation_layers_have_container_boundary_smoke.py",
+            "tests/foundation_registry_enrollment/test_all_foundation_layers_enrolled_without_direct_execution_smoke.py"
+          ],
+          "correction_tests": [],
+          "dashboard_read_models": [
+            "FoundationLayersFinalAcceptanceReadModel"
+          ],
+          "acceptance_gates": [
+            "roadmap v1/v2/v2.1 reconciliation completed",
+            "printed roadmap BATCH 6.5 names preserved",
+            "pre-step location slice completed",
+            "semantic duplicate scan completed before code",
+            "anti-stub scan clean",
+            "foundation_registry_enrollment_v1 documentation present",
+            "foundation_layers_final_acceptance_v1 documentation present",
+            "FoundationLayersFinalAcceptanceReadModel exposed",
+            "all foundation layers have manifest",
+            "all foundation layers have dashboard visibility",
+            "all foundation layers have container boundary",
+            "all foundation layers enrolled",
+            "all foundation layers enrolled without direct execution",
+            "no direct execution",
+            "no dashboard mutation",
+            "no registry write",
+            "no auto-enrollment write",
+            "no runtime mutation",
+            "no deployment",
+            "no public exposure",
+            "all E2E tracer tests green where present",
+            "Architecture Drift Guard passes",
+            "X-Ray non-regression check passes",
+            "./.venv/bin/python -m pytest -q -n auto passes",
+            "Roadmap CI batch 6.5 without require-files passes before code",
+            "Roadmap CI batch 6.5 --require-files passes after code",
+            "separate clean commit and push"
+          ],
+          "semantic_duplicate_scan_required": true,
+          "manifest_required": false,
+          "container_boundary_required": true,
+          "full_auto_pytest_required": true
         }
       ]
     }
