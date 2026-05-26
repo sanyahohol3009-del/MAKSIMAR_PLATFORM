@@ -1,0 +1,107 @@
+{
+  "schema_version": "open_source_exclusion_registry.v1",
+  "registry_id": "phase_1_open_source_exclusion_registry",
+  "phase": "PHASE 1 - Open Source Canonicalization",
+  "default_policy": {
+    "external_project_may_enter_immutable_core": false,
+    "external_project_may_be_source_of_truth": false,
+    "external_project_may_mutate_runtime": false,
+    "external_project_may_bypass_security_gate": false,
+    "allowed_ingress": [
+      "quarantine",
+      "vendor_security_scan",
+      "adapter_only_after_approval"
+    ],
+    "required_boundaries": [
+      "security_vendor_gate",
+      "repository_quarantine_policy",
+      "container_boundary",
+      "read_model_or_adapter",
+      "operator_approval_for_runtime_enablement"
+    ]
+  },
+  "excluded_capabilities": [
+    {
+      "capability_id": "generic_workflow_brain",
+      "title": "Generic workflow brain",
+      "status": "EXCLUDED_FROM_CORE",
+      "reason": "MAKSIMAR already owns workflow, orchestration and control-plane boundaries.",
+      "existing_maksimar_surfaces": [
+        "MAKSIMAR_CORE_LIB/workflow_engine/workflow_registry.py",
+        "MAKSIMAR_SERVER/CONTROL_PLANE",
+        "MAKSIMAR_SERVER/AI_ORCHESTRATION"
+      ],
+      "external_project_may_enter_immutable_core": false,
+      "allowed_runtime_integration": "none",
+      "core_dependency_required": false,
+      "allowed_core_import": false,
+      "container_profile": "not_loaded"
+    },
+    {
+      "capability_id": "generic_approval_action_model",
+      "title": "Generic approval/action model",
+      "status": "EXCLUDED_FROM_CORE",
+      "reason": "Approval and action boundaries are governed by MAKSIMAR proposal, audit, policy and execution-control layers.",
+      "existing_maksimar_surfaces": [
+        "MAKSIMAR_SERVER/PROPOSAL_AUDIT",
+        "MAKSIMAR_CORE_LIB/action_executor/action_registry.py",
+        "MAKSIMAR_CORE_LIB/security_layer/security_decision_models.py"
+      ],
+      "external_project_may_enter_immutable_core": false,
+      "allowed_runtime_integration": "none",
+      "core_dependency_required": false,
+      "allowed_core_import": false,
+      "container_profile": "not_loaded"
+    },
+    {
+      "capability_id": "retrieval_source_of_truth",
+      "title": "Retrieval source of truth",
+      "status": "EXCLUDED_FROM_CORE",
+      "reason": "External retrieval systems may be subordinate adapters only; MAKSIMAR memory and evidence layers remain canonical truth.",
+      "existing_maksimar_surfaces": [
+        "MAKSIMAR_CORE_LIB/memory_engine/memory_registry.py",
+        "MAKSIMAR_SERVER/MEMORY_REGISTRY",
+        "MAKSIMAR_SERVER/CONTROL_PLANE/memory_routing"
+      ],
+      "external_project_may_enter_immutable_core": false,
+      "allowed_runtime_integration": "adapter_only_after_approval",
+      "core_dependency_required": false,
+      "allowed_core_import": false,
+      "container_profile": "external_backend"
+    },
+    {
+      "capability_id": "proposal_codegen_governance_spine",
+      "title": "Proposal/codegen governance spine",
+      "status": "EXCLUDED_FROM_CORE",
+      "reason": "Code generation, proposal, sandbox, review and approval spine is already governed by MAKSIMAR safety layers.",
+      "existing_maksimar_surfaces": [
+        "MAKSIMAR_SERVER/CODEGEN_CONTEXT",
+        "MAKSIMAR_SERVER/SANDBOX_REVIEW",
+        "MAKSIMAR_SERVER/SELF_EXPANSION_GATE",
+        "MAKSIMAR_SERVER/PROPOSAL_AUDIT"
+      ],
+      "external_project_may_enter_immutable_core": false,
+      "allowed_runtime_integration": "none",
+      "core_dependency_required": false,
+      "allowed_core_import": false,
+      "container_profile": "not_loaded"
+    },
+    {
+      "capability_id": "media_artifact_memory",
+      "title": "Media artifact memory",
+      "status": "EXCLUDED_FROM_CORE",
+      "reason": "Media artifacts are handled through MAKSIMAR storage registry, data-plane and quarantine policy.",
+      "existing_maksimar_surfaces": [
+        "MAKSIMAR_CORE_LIB/memory_engine/media_memory/media_memory_read_model.py",
+        "MAKSIMAR_CORE_LIB/memory_engine/storage_registry/media_artifact_reference_models.py",
+        "MAKSIMAR_CORE_LIB/security_layer/media_quarantine_contract.py",
+        "MAKSIMAR_SERVER/DATA_PLANE"
+      ],
+      "external_project_may_enter_immutable_core": false,
+      "allowed_runtime_integration": "adapter_only_after_approval",
+      "core_dependency_required": false,
+      "allowed_core_import": false,
+      "container_profile": "external_backend"
+    }
+  ]
+}

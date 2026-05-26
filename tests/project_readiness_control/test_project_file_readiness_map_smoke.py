@@ -18,6 +18,7 @@ def test_project_file_readiness_map_for_batch_0_1_smoke() -> None:
     assert payload["status"] == "READY"
     assert payload["total_batches"] == 1
     assert payload["ready_batches"] == 1
+    assert payload["missing_batches"] == 0
 
     rendered = render_text(payload)
     assert "MAKSIMAR PROJECT FILE READINESS MAP" in rendered
@@ -31,12 +32,20 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     reports = build_readiness_reports(project_root=project_root)
     payload = reports_to_payload(reports)
 
-    assert payload["status"] == "READY"
-    assert payload["total_batches"] == 8
-    assert payload["ready_batches"] == 8
-    assert payload["missing_batches"] == 0
+    assert payload["status"] == "PARTIAL"
+    assert payload["total_batches"] == 13
+    assert payload["ready_batches"] == 9
+    assert payload["partial_batches"] == 0
+    assert payload["missing_batches"] == 4
 
     rendered = render_text(payload)
     assert "PHASE/BATCH 0.6" in rendered
     assert "tools/project_readiness_control/surface_inventory.py" in rendered
     assert "[OK] tools/project_readiness_control/surface_inventory.py" in rendered
+
+    assert "PHASE/BATCH 1.1" in rendered
+    assert "docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json" in rendered
+    assert "[OK] docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json" in rendered
+
+    assert "PHASE/BATCH 1.5" in rendered
+    assert "[MISSING] docs/architecture/open_source_integration/phase_1_open_source_canonicalization_acceptance_v1.md" in rendered

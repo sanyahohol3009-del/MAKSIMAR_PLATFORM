@@ -336,6 +336,131 @@ ROADMAP_EXPECTED_BATCHES: tuple[RoadmapExpectedBatch, ...] = (
             ),
         ),
     ),
+ RoadmapExpectedBatch(
+  batch_id="1.1",
+  title="Open Source Exclusion Registry",
+  expected_files=(
+   ExpectedProjectFile(
+    path="docs/architecture/open_source_integration/open_source_exclusion_registry_v1.md",
+    role="doc",
+    description="Open-source exclusion registry documentation.",
+   ),
+   ExpectedProjectFile(
+    path="docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json",
+    role="doc",
+    description="Machine-readable open-source exclusion registry.",
+   ),
+   ExpectedProjectFile(
+    path="tests/open_source_integration/test_open_source_exclusion_registry_schema_smoke.py",
+    role="test",
+    description="Open-source exclusion registry schema smoke test.",
+   ),
+   ExpectedProjectFile(
+    path="tests/open_source_integration/test_exclusion_registry_no_core_dependencies_smoke.py",
+    role="test",
+    description="Open-source exclusion registry no-core-dependencies smoke test.",
+   ),
+  ),
+ ),
+ RoadmapExpectedBatch(
+  batch_id="1.2",
+  title="Canonical Capability Registry Models",
+  expected_files=(
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/__init__.py",
+    role="source",
+    description="Canonical capability registry package.",
+   ),
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/capability_registry_models.py",
+    role="source",
+    description="Canonical capability registry models.",
+   ),
+   ExpectedProjectFile(
+    path="docs/architecture/open_source_integration/canonical_capability_registry_v1.yaml",
+    role="doc",
+    description="Canonical capability registry YAML.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_capability_registry_models_smoke.py",
+    role="test",
+    description="Canonical capability registry models smoke test.",
+   ),
+  ),
+ ),
+ RoadmapExpectedBatch(
+  batch_id="1.3",
+  title="Capability Registry Loader / Summary",
+  expected_files=(
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/capability_registry_loader.py",
+    role="source",
+    description="Capability registry loader.",
+   ),
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/capability_registry_summary_builder.py",
+    role="source",
+    description="Capability registry summary builder.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_capability_registry_loader_smoke.py",
+    role="test",
+    description="Capability registry loader smoke test.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_capability_registry_summary_builder_smoke.py",
+    role="test",
+    description="Capability registry summary builder smoke test.",
+   ),
+  ),
+ ),
+ RoadmapExpectedBatch(
+  batch_id="1.4",
+  title="Truth Status Marking",
+  expected_files=(
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/capability_truth_status_models.py",
+    role="source",
+    description="Capability truth status models.",
+   ),
+   ExpectedProjectFile(
+    path="MAKSIMAR_CORE_LIB/capability_registry/capability_truth_status_loader.py",
+    role="source",
+    description="Capability truth status loader.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_capability_truth_status_models_smoke.py",
+    role="test",
+    description="Capability truth status models smoke test.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_manifest_only_status_is_not_runtime_smoke.py",
+    role="test",
+    description="Manifest-only status does not count as runtime smoke test.",
+   ),
+   ExpectedProjectFile(
+    path="tests/capability_registry/test_spec_only_docs_do_not_count_as_implemented_smoke.py",
+    role="test",
+    description="Spec-only docs do not count as implemented smoke test.",
+   ),
+  ),
+ ),
+ RoadmapExpectedBatch(
+  batch_id="1.5",
+  title="PHASE 1 Acceptance",
+  expected_files=(
+   ExpectedProjectFile(
+    path="docs/architecture/open_source_integration/phase_1_open_source_canonicalization_acceptance_v1.md",
+    role="doc",
+    description="PHASE 1 open-source canonicalization acceptance document.",
+   ),
+   ExpectedProjectFile(
+    path="tests/open_source_integration/test_phase_1_acceptance_smoke.py",
+    role="test",
+    description="PHASE 1 acceptance smoke test.",
+   ),
+  ),
+ ),
 )
 
 
