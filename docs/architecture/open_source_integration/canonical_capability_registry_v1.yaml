@@ -1,0 +1,61 @@
+schema_version: canonical_capability_registry.v1
+registry_id: phase_1_canonical_capability_registry
+phase: PHASE 1 - Open Source Canonicalization
+batch: "1.2"
+status: model_ready
+purpose: >
+  Defines the canonical capability registry model for MAKSIMAR. This layer does
+  not replace module manifests, worker registries, engine capability contracts,
+  cube bindings, container contracts or security quarantine policy. It binds
+  those existing surfaces into one capability-level read model.
+
+safety_rules:
+  direct_core_import_allowed: false
+  source_of_truth_override_allowed: false
+  runtime_mutation_allowed: false
+  dashboard_read_only: true
+  disable_safe_required: true
+  active_deployment_created: false
+  ports_opened: false
+  containers_started: false
+
+binding_policy:
+  module_manifest: reference_only
+  module_registry: reference_only
+  worker_capability: reference_only
+  engine_capability: reference_only
+  cube_binding: reference_only
+  container_contract: reference_only
+  repository_quarantine_policy: reference_only
+  external_backend: adapter_only_after_approval
+
+canonical_entries:
+  - capability_id: cap_module_manifest_surface
+    family: module_dashboard
+    integration_policy: maksimar_owned
+    owner_surface: MAKSIMAR_CORE_LIB/module_manifest/module_manifest_schema.py
+
+  - capability_id: cap_container_boundary_surface
+    family: container_boundary
+    integration_policy: maksimar_owned
+    owner_surface: MAKSIMAR_CORE_LIB/network_containerization/container_contract_models.py
+
+  - capability_id: cap_engine_runtime_surface
+    family: engine_runtime
+    integration_policy: maksimar_owned
+    owner_surface: MAKSIMAR_CORE_LIB/engine_capability_contract/engine_capability_contract.py
+
+  - capability_id: cap_worker_runtime_surface
+    family: worker_runtime
+    integration_policy: maksimar_owned
+    owner_surface: MAKSIMAR_CORE_LIB/workers_registry/worker_capability_models.py
+
+  - capability_id: cap_domain_cube_surface
+    family: domain_cube
+    integration_policy: maksimar_owned
+    owner_surface: MAKSIMAR_CORE_LIB/skill_domain_binding/cube_binding_models.py
+
+  - capability_id: cap_external_retrieval_adapter_candidate
+    family: retrieval_memory
+    integration_policy: adapter_only
+    owner_surface: docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json
