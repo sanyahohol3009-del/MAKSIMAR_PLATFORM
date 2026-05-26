@@ -31,12 +31,12 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     reports = build_readiness_reports(project_root=project_root)
     payload = reports_to_payload(reports)
 
-    assert payload["status"] == "PARTIAL"
+    assert payload["status"] == "READY"
     assert payload["total_batches"] == 8
-    assert payload["ready_batches"] >= 2
-    assert payload["missing_batches"] >= 1
+    assert payload["ready_batches"] == 8
+    assert payload["missing_batches"] == 0
 
     rendered = render_text(payload)
     assert "PHASE/BATCH 0.6" in rendered
     assert "tools/project_readiness_control/surface_inventory.py" in rendered
-    assert "[MISSING] tools/project_readiness_control/surface_inventory.py" in rendered
+    assert "[OK] tools/project_readiness_control/surface_inventory.py" in rendered

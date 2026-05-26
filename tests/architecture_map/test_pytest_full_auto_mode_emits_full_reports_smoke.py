@@ -45,6 +45,7 @@ class _Reporter:
 
 def test_pytest_full_auto_mode_emits_full_reports_smoke(monkeypatch) -> None:
     monkeypatch.setenv("MAKSIMAR_FULL_PLATFORM_REPORTS", "1")
+    monkeypatch.delenv("PYTEST_XDIST_WORKER", raising=False)
 
     root_conftest = _load_root_conftest()
     reporter = _Reporter()
