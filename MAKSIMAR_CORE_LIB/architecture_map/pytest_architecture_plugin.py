@@ -11,13 +11,18 @@ from types import ModuleType
 from MAKSIMAR_CORE_LIB.architecture_map.architecture_radar import (
     build_architecture_report,
 )
-
+from MAKSIMAR_CORE_LIB.architecture_map.pytest_report_gate import (
+    is_maksimar_full_platform_report_enabled,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 XRAY_PATH = PROJECT_ROOT / "tools" / "architecture_xray_radar.py"
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config) -> None:
+    if not is_maksimar_full_platform_report_enabled(config):
+        return
+
     _render_architecture_radar(terminalreporter)
     _render_project_xray(terminalreporter)
 
@@ -49,7 +54,6 @@ def _render_project_xray(terminalreporter) -> None:
 
     try:
         module = _load_xray_module(XRAY_PATH)
-
         layer_specs = module.build_layer_specs(
             project_root=PROJECT_ROOT,
             blueprint_path=PROJECT_ROOT
@@ -58,14 +62,12 @@ def _render_project_xray(terminalreporter) -> None:
             / "architecture_blueprint.json",
             use_blueprint=True,
         )
-
         reports = module.build_reports(
             project_root=PROJECT_ROOT,
             layer_specs=layer_specs,
             include_external=True,
             max_files_per_layer=0,
         )
-
         buffer = StringIO()
         with redirect_stdout(buffer):
             module.print_dashboard(
@@ -78,9 +80,7 @@ def _render_project_xray(terminalreporter) -> None:
                 details=False,
                 show_missing_laws=True,
             )
-
         terminalreporter.write_line(buffer.getvalue())
-
     except Exception as exc:  # pragma: no cover
         terminalreporter.write_sep(
             "=",
@@ -94,17 +94,14 @@ def _render_project_xray(terminalreporter) -> None:
 
 def _load_xray_module(path: Path) -> ModuleType:
     module_name = "maksimar_architecture_xray_radar"
-
     spec = importlib.util.spec_from_file_location(
         module_name,
         path,
     )
-
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Cannot load X-Ray module from {path}")
 
     module = importlib.util.module_from_spec(spec)
-
     # Required for dataclasses: dataclass internals resolve cls.__module__
     # through sys.modules[module_name].__dict__ during class creation.
     sys.modules[module_name] = module
