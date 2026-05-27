@@ -1,0 +1,71 @@
+schema_id: "network_security_container_contract_v1"
+cube_id: "network_security"
+service_id: "network_security_runtime"
+phase_batch: "2.9"
+contract_kind: "cube_specific_container_readiness"
+status: "readiness_projection_only"
+description: "Network security cube container readiness contract. This is not an active deployment."
+network_segment: "net_security"
+image_source:
+  type: "template_reference_only"
+  template_ref: "CONTAINER_DEPLOYMENT/Dockerfile.service.template"
+  build_allowed: false
+compose_source:
+  type: "template_reference_only"
+  template_ref: "CONTAINER_DEPLOYMENT/compose.service.template.yaml"
+  compose_up_allowed: false
+global_container_layer:
+  schema_ref: "CONTAINER_DEPLOYMENT/container_contract.schema.yaml"
+  blueprint_ref: "CONTAINER_DEPLOYMENT/container_deployment_blueprint.yaml"
+  layer_manifest_ref: "CONTAINER_DEPLOYMENT/layer_manifest.yaml"
+  security_gate_ref: "CONTAINER_DEPLOYMENT/deployment_gates/security_required_gate.yaml"
+  no_production_gate_ref: "CONTAINER_DEPLOYMENT/no_production_deploy_until_foundation_green.yaml"
+network_containerization_foundation:
+  container_contract_models: "MAKSIMAR_CORE_LIB/network_containerization/container_contract_models.py"
+  container_deployment_read_model: "MAKSIMAR_CORE_LIB/network_containerization/container_deployment_read_model.py"
+  container_exposure_policy: "MAKSIMAR_CORE_LIB/network_containerization/container_exposure_policy.py"
+  container_healthcheck_models: "MAKSIMAR_CORE_LIB/network_containerization/container_healthcheck_models.py"
+  network_segment_models: "MAKSIMAR_CORE_LIB/network_containerization/network_segment_models.py"
+network_security_sources:
+  core_contracts: "MAKSIMAR_CORE_LIB/network_security"
+  runtime_read_models: "MAKSIMAR_SERVER/NETWORK_SECURITY_RUNTIME"
+  shared_mobile_p2p: "shared_mobile_core/p2p_mesh_network"
+
+safety_flags:
+  active_deployment_allowed: false
+  active_docker_deployment_allowed: false
+  active_compose_deployment_allowed: false
+  docker_start_allowed: false
+  compose_start_allowed: false
+  ports_opened: false
+  published_ports_allowed: false
+  public_exposure_allowed: false
+  external_network_access_enabled: false
+  runtime_mutation_allowed: false
+  runtime_network_mutation_allowed: false
+  core_write_allowed: false
+  canonical_write_allowed: false
+  source_of_truth_override_allowed: false
+  direct_execution_allowed: false
+  production_deployment_allowed: false
+  privileged: false
+  host_network: false
+  host_pid: false
+  host_ipc: false
+  host_mount_allowed: false
+  secret_mount_allowed: false
+  read_only_readiness_only: true
+  dashboard_visible: true
+  operator_approval_required: true
+  read_only_filesystem_required: true
+  run_as_non_root_required: true
+  no_new_privileges_required: true
+  drop_capabilities_required: true
+  healthcheck_required: true
+  readiness_probe_required: true
+
+reason_codes:
+  - "cube_specific_container_contract_only"
+  - "global_container_deployment_layer_reused"
+  - "no_active_network_security_deployment"
+  - "no_ports_no_runtime_mutation"
