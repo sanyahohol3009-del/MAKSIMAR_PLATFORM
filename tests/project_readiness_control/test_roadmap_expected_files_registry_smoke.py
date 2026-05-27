@@ -46,10 +46,17 @@ def test_roadmap_expected_files_registry_smoke() -> None:
         "3.10",
         "3.11",
         "3.12",
+        "4.1",
+        "4.2",
+        "4.3",
+        "4.4",
+        "4.5",
+        "4.6",
+        "4.7",
     }
 
     assert batch_ids == expected_batch_ids
-    assert len(batches) == 35
+    assert len(batches) == 42
 
     titles = {batch.batch_id: batch.title for batch in batches}
     assert titles["2.1"] == "Network Backend Adapter Contract"
@@ -67,3 +74,5 @@ def test_phase_3_expected_files_registry_titles_smoke() -> None:
     assert titles["3.1"] == "Chat Core Contracts"
     assert titles["3.3"] == "Chat Command Boundary / OpenIM Adapter Contract"
     assert titles["3.12"] == "PHASE 3 Acceptance"
+    assert titles["4.1"] == "Screen Observer Contracts"
+    assert titles["4.7"] == "PHASE 4 Acceptance"
