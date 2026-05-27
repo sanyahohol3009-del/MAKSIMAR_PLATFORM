@@ -643,7 +643,9 @@
         "mobile",
         "ANDROID_CLIENT",
         "IOS_CLIENT",
-        "JARVIS_MOBILE"
+        "JARVIS_MOBILE",
+        "ANDROID_SHELL",
+        "IOS_SHELL"
       ],
       "module_prefixes": [
         "CLIENTS",
@@ -652,7 +654,9 @@
         "mobile",
         "ANDROID_CLIENT",
         "IOS_CLIENT",
-        "JARVIS_MOBILE"
+        "JARVIS_MOBILE",
+        "ANDROID_SHELL",
+        "IOS_SHELL"
       ],
       "expected_paths": [
         {
@@ -666,7 +670,8 @@
       ],
       "allowed_import_layer_ids": [
         "MAKSIMAR_CORE_LIB",
-        "CLIENTS_MOBILE"
+        "CLIENTS_MOBILE",
+        "PLATFORM_BINDINGS_READ_MODELS"
       ],
       "forbidden_import_layer_ids": [
         "CORE_ROOT",
@@ -937,7 +942,8 @@
         "MAKSIMAR_CORE_LIB/real_ai_services_model_adapters",
         "MAKSIMAR_CORE_LIB/full_test_suite",
         "MAKSIMAR_CORE_LIB/runtime_observability",
-        "MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents"
+        "MAKSIMAR_CORE_LIB/operations_deployment_backup_incidents",
+        "shared_mobile_core"
       ],
       "module_prefixes": [
         "MAKSIMAR_CORE_LIB.platform_integration",
@@ -953,7 +959,8 @@
         "MAKSIMAR_CORE_LIB.real_ai_services_model_adapters",
         "MAKSIMAR_CORE_LIB.full_test_suite",
         "MAKSIMAR_CORE_LIB.runtime_observability",
-        "MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents"
+        "MAKSIMAR_CORE_LIB.operations_deployment_backup_incidents",
+        "shared_mobile_core"
       ],
       "expected_paths": [
         {
