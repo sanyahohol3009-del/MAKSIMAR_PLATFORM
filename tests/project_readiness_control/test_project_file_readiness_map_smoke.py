@@ -34,9 +34,9 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
 
     assert payload["status"] == "PARTIAL"
     assert payload["total_batches"] == 23
-    assert payload["ready_batches"] == 13
+    assert payload["ready_batches"] == 14
     assert payload["partial_batches"] == 0
-    assert payload["missing_batches"] == 10
+    assert payload["missing_batches"] == 9
 
     rendered = render_text(payload)
 
@@ -49,8 +49,11 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
 
     assert "PHASE/BATCH 2.1" in rendered
     assert "Network Backend Adapter Contract" in rendered
-    assert "[MISSING] MAKSIMAR_CORE_LIB/network_security/network_backend_adapter_contract.py" in rendered
-    assert "[MISSING] MAKSIMAR_CORE_LIB/network_security/vpn_policy_disable_contract.py" in rendered
+    assert "[OK] MAKSIMAR_CORE_LIB/network_security/network_backend_adapter_contract.py" in rendered
+    assert "[OK] MAKSIMAR_CORE_LIB/network_security/vpn_policy_disable_contract.py" in rendered
+    assert "[OK] tests/network_security/test_network_backend_adapter_contract_smoke.py" in rendered
+    assert "[OK] tests/network_security/test_vpn_policy_can_disable_runtime_smoke.py" in rendered
+    assert "[OK] tests/network_security/test_vpn_disabled_state_dashboard_visible_smoke.py" in rendered
 
     assert "PHASE/BATCH 2.10" in rendered
     assert "PHASE 2 Acceptance" in rendered
