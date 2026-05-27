@@ -1,0 +1,19 @@
+id: chat_command_container_contract_v1
+cube_id: chat_command
+name: Chat Command Container Readiness
+kind: container_readiness_contract
+version: 1
+container_ready: true
+adapter_only: true
+read_model_only: true
+source_of_truth_allowed: false
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+direct_execution_allowed: false
+dashboard_control_allowed: false
+external_network_access_allowed: false
+host_network_allowed: false
+host_pid_allowed: false
+privileged_allowed: false
+required_security_gate: chat_command_security_gate_v1
+observability_binding: chat_command_observability_read_model_v1

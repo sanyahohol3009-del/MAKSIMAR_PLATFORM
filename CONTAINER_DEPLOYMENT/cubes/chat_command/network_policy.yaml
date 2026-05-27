@@ -1,0 +1,12 @@
+id: chat_command_network_policy_v1
+cube_id: chat_command
+kind: network_policy
+version: 1
+ingress_allowed: false
+egress_allowed: false
+open_ports_allowed: false
+external_network_access_allowed: false
+host_network_allowed: false
+p2p_network_runtime_allowed: false
+direct_mobile_network_call_allowed: false
+direct_server_sync_allowed: false

@@ -1,0 +1,17 @@
+id: chat_command_runtime_profile_v1
+cube_id: chat_command
+kind: runtime_profile
+version: 1
+runtime_enabled_by_default: false
+container_start_allowed_by_dashboard: false
+background_workers_allowed: false
+direct_message_delivery_allowed: false
+direct_file_transfer_allowed: false
+direct_sync_execution_allowed: false
+openim_runtime_allowed: false
+spika_runtime_allowed: false
+matrix_runtime_allowed: false
+runtime_mutation_allowed: false
+canonical_write_allowed: false
+dashboard_control_allowed: false
+direct_execution_allowed: false
