@@ -18,47 +18,41 @@ def test_project_file_readiness_map_for_batch_0_1_smoke() -> None:
     assert payload["status"] == "READY"
     assert payload["total_batches"] == 1
     assert payload["ready_batches"] == 1
+    assert payload["partial_batches"] == 0
     assert payload["missing_batches"] == 0
 
     rendered = render_text(payload)
-    assert "MAKSIMAR PROJECT FILE READINESS MAP" in rendered
     assert "PHASE/BATCH 0.1" in rendered
-    assert "tools/project_readiness_control/scanner_discovery.py" in rendered
-
-
+    assert "Existing Scanner Discovery" in rendered
+    assert "[OK] docs/architecture/open_source_integration/existing_scanner_discovery_v1.md" in rendered
+    assert "[OK] tools/project_readiness_control/scanner_discovery.py" in rendered
 def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     project_root = Path(__file__).resolve().parents[2]
 
     reports = build_readiness_reports(project_root=project_root)
     payload = reports_to_payload(reports)
 
-    assert payload["status"] == "READY"
-    assert payload["total_batches"] == 13
+    assert payload["status"] == "PARTIAL"
+    assert payload["total_batches"] == 23
     assert payload["ready_batches"] == 13
     assert payload["partial_batches"] == 0
-    assert payload["missing_batches"] == 0
+    assert payload["missing_batches"] == 10
 
     rendered = render_text(payload)
-    assert "PHASE/BATCH 0.6" in rendered
-    assert "tools/project_readiness_control/surface_inventory.py" in rendered
-    assert "[OK] tools/project_readiness_control/surface_inventory.py" in rendered
 
-    assert "PHASE/BATCH 1.1" in rendered
-    assert "docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json" in rendered
-    assert "[OK] docs/architecture/open_source_integration/open_source_exclusion_registry_v1.json" in rendered
-
-    assert "PHASE/BATCH 1.2" in rendered
-    assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_registry_models.py" in rendered
-    assert "[OK] docs/architecture/open_source_integration/canonical_capability_registry_v1.yaml" in rendered
-
-    assert "PHASE/BATCH 1.3" in rendered
-    assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_registry_loader.py" in rendered
-    assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_registry_summary_builder.py" in rendered
-
-    assert "PHASE/BATCH 1.4" in rendered
-    assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_truth_status_models.py" in rendered
-    assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_truth_status_loader.py" in rendered
+    assert "PHASE/BATCH 0.8" in rendered
+    assert "[OK] docs/architecture/foundation/phase_0_readiness_output_hygiene_acceptance_v1.md" in rendered
 
     assert "PHASE/BATCH 1.5" in rendered
     assert "[OK] docs/architecture/open_source_integration/phase_1_open_source_canonicalization_acceptance_v1.md" in rendered
     assert "[OK] tests/open_source_integration/test_phase_1_acceptance_smoke.py" in rendered
+
+    assert "PHASE/BATCH 2.1" in rendered
+    assert "Network Backend Adapter Contract" in rendered
+    assert "[MISSING] MAKSIMAR_CORE_LIB/network_security/network_backend_adapter_contract.py" in rendered
+    assert "[MISSING] MAKSIMAR_CORE_LIB/network_security/vpn_policy_disable_contract.py" in rendered
+
+    assert "PHASE/BATCH 2.10" in rendered
+    assert "PHASE 2 Acceptance" in rendered
+    assert "[MISSING] docs/architecture/network_security/phase_2_network_security_acceptance_v1.md" in rendered
+    assert "[MISSING] tests/network_security/test_phase_2_acceptance_smoke.py" in rendered
