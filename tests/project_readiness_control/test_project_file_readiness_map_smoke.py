@@ -32,11 +32,11 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     reports = build_readiness_reports(project_root=project_root)
     payload = reports_to_payload(reports)
 
-    assert payload["status"] == "PARTIAL"
+    assert payload["status"] == "READY"
     assert payload["total_batches"] == 13
-    assert payload["ready_batches"] == 12
+    assert payload["ready_batches"] == 13
     assert payload["partial_batches"] == 0
-    assert payload["missing_batches"] == 1
+    assert payload["missing_batches"] == 0
 
     rendered = render_text(payload)
     assert "PHASE/BATCH 0.6" in rendered
@@ -60,4 +60,5 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     assert "[OK] MAKSIMAR_CORE_LIB/capability_registry/capability_truth_status_loader.py" in rendered
 
     assert "PHASE/BATCH 1.5" in rendered
-    assert "[MISSING] docs/architecture/open_source_integration/phase_1_open_source_canonicalization_acceptance_v1.md" in rendered
+    assert "[OK] docs/architecture/open_source_integration/phase_1_open_source_canonicalization_acceptance_v1.md" in rendered
+    assert "[OK] tests/open_source_integration/test_phase_1_acceptance_smoke.py" in rendered

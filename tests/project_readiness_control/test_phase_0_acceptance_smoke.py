@@ -42,6 +42,8 @@ def test_phase_0_full_readiness_map_is_ready() -> None:
         (
             sys.executable,
             "tools/project_readiness_control/project_file_readiness_map.py",
+            "--batch-id",
+            "0.8",
         ),
         text=True,
         stdout=subprocess.PIPE,
@@ -53,10 +55,10 @@ def test_phase_0_full_readiness_map_is_ready() -> None:
     assert completed.returncode == 0, completed.stderr
     assert "MAKSIMAR PROJECT FILE READINESS MAP" in completed.stdout
     assert "status=READY" in completed.stdout
-    assert "total_batches=8" in completed.stdout
-    assert "ready_batches=8" in completed.stdout
+    assert "total_batches=1" in completed.stdout
+    assert "ready_batches=1" in completed.stdout
     assert "partial_batches=0" in completed.stdout
     assert "missing_batches=0" in completed.stdout
 
-    for batch in EXPECTED_BATCHES:
-        assert batch in completed.stdout
+    assert "PHASE/BATCH 0.8" in completed.stdout
+    assert "PHASE 0 Acceptance" in completed.stdout
