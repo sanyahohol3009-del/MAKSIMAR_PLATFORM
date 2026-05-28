@@ -51,3 +51,20 @@ Adjacent surfaces exist but must not be treated as source of truth:
 - No runtime mutation.
 - No canonical write.
 - No source-of-truth override.
+
+
+## Correction v1.1 — Family Child Device Control
+
+BATCH 4.2 is extended before implementation.
+
+Normal Mobile Screen Observer remains read-only by default.
+
+Family Child Device Control is added as a separate core policy/contract domain:
+
+- `MAKSIMAR_CORE_LIB/family_child_device_control/`
+
+This prevents hidden remote-control semantics from being placed inside the normal phone observer.
+
+Batch readiness check commands are documented here:
+
+- `docs/architecture/mobile_screen_observer/phase_4_batch_readiness_check_commands_v1.md`
