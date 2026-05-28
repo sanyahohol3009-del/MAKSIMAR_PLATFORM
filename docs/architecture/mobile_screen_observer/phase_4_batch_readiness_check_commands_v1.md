@@ -66,3 +66,16 @@ Batch можно считать готовым только когда:
 Ожидаемый результат после реализации:
 
     BATCH 4.4 READY 30/30
+
+
+## Проверить BATCH 4.5
+
+    ./.venv/bin/python tools/project_readiness_control/project_file_readiness_map.py --batch-id 4.5
+
+Ожидаемый результат после registry correction и до реализации:
+
+    BATCH 4.5 MISSING 0/30
+
+Ожидаемый результат после реализации:
+
+    BATCH 4.5 READY 30/30
