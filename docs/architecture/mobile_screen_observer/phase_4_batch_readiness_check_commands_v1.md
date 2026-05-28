@@ -40,3 +40,16 @@ Batch можно считать готовым только когда:
 - target tests проходят;
 - readiness map показывает batch как READY;
 - unrelated dirty/untracked файлы не staged.
+
+
+## Проверить BATCH 4.3
+
+    ./.venv/bin/python tools/project_readiness_control/project_file_readiness_map.py --batch-id 4.3
+
+Ожидаемый результат после registry correction и до реализации:
+
+    BATCH 4.3 MISSING 0/30
+
+Ожидаемый результат после реализации:
+
+    BATCH 4.3 READY 30/30

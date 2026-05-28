@@ -68,3 +68,22 @@ This prevents hidden remote-control semantics from being placed inside the norma
 Batch readiness check commands are documented here:
 
 - `docs/architecture/mobile_screen_observer/phase_4_batch_readiness_check_commands_v1.md`
+
+
+## Correction v1.2 — Family Child Device Runtime
+
+BATCH 4.3 is extended before implementation.
+
+Normal server observer runtime remains under:
+
+- `MAKSIMAR_SERVER/MOBILE_SCREEN_OBSERVER_RUNTIME/`
+
+Family child device runtime is added separately under:
+
+- `MAKSIMAR_SERVER/FAMILY_CHILD_DEVICE_RUNTIME/`
+
+This preserves the BATCH 4.2 split between normal observer contracts and family child device contracts.
+
+Normal observer runtime must not enable child control.
+
+Family child device runtime must require guardian authority, audit, visible child-device status, and reject dashboard bypass.
