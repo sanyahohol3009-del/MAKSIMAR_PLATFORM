@@ -87,3 +87,24 @@ This preserves the BATCH 4.2 split between normal observer contracts and family 
 Normal observer runtime must not enable child control.
 
 Family child device runtime must require guardian authority, audit, visible child-device status, and reject dashboard bypass.
+
+
+## Correction v1.3 — Android Family Child Device Bridge
+
+BATCH 4.4 is extended before implementation.
+
+Normal Android observer remains under:
+
+- `ANDROID_SHELL/screen_observer_client/`
+
+Android family child device bridge is added separately under:
+
+- `ANDROID_SHELL/family_child_device/`
+
+This preserves the BATCH 4.2 core split and BATCH 4.3 server runtime split.
+
+Normal Android observer must not enable child control.
+
+Android family child bridge must require guardian authority, audit, visible child-device status, and reject dashboard bypass.
+
+BATCH 4.4 remains Android shell bridge / policy projection only. It must not call Android platform APIs or execute real screen capture, touch, keyboard, network, tunnel, canonical write, or source-of-truth override.
