@@ -38,7 +38,7 @@ def test_project_file_readiness_map_all_registered_batches_smoke() -> None:
     expected_status = "READY" if expected_ready == len(reports) else "PARTIAL"
 
     assert payload["status"] == expected_status
-    assert payload["total_batches"] == 42
+    assert payload["total_batches"] == len(reports)
     assert payload["ready_batches"] == expected_ready
     assert payload["partial_batches"] == expected_partial
     assert payload["missing_batches"] == expected_missing

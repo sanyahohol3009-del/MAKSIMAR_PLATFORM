@@ -53,10 +53,20 @@ def test_roadmap_expected_files_registry_smoke() -> None:
         "4.5",
         "4.6",
         "4.7",
+        "5.1",
+        "5.2",
+        "5.3",
+        "5.4",
+        "5.5",
+        "5.6",
+        "5.7",
+        "5.8",
+        "5.9",
+        "5.10",
     }
 
     assert batch_ids == expected_batch_ids
-    assert len(batches) == 42
+    assert len(batches) == len(expected_batch_ids)
 
     titles = {batch.batch_id: batch.title for batch in batches}
     assert titles["2.1"] == "Network Backend Adapter Contract"
