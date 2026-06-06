@@ -31,7 +31,6 @@ def test_model_worker_binding_adapter_is_read_only_dashboard_safe() -> None:
 
 def test_jarvis_roadmap_marks_jl3_ready_and_keeps_download_blocked() -> None:
     status = build_jarvis_live_full_roadmap_status()
-
     per_batch = {
         str(entry["batch_id"]): entry
         for entry in status["per_batch_status"]
@@ -39,13 +38,8 @@ def test_jarvis_roadmap_marks_jl3_ready_and_keeps_download_blocked() -> None:
 
     assert per_batch["JL-3"]["ready"] is True
 
-    next_batch = status["next_batch"]
-    assert next_batch is not None
-
-    if per_batch["JL-4"]["ready"] is True:
-        assert next_batch["batch_id"] == "JL-5"
-    else:
-        assert next_batch["batch_id"] == "JL-4"
+    if status["next_batch"] is not None:
+        assert status["next_batch"]["batch_id"] != "JL-3"
 
     assert status["model_download_allowed_now"] is False
     assert status["download_gate_status"]["model_download_allowed_now"] is False

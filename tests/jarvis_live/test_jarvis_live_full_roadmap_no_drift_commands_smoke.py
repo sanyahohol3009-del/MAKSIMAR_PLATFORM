@@ -50,12 +50,14 @@ def test_jarvis_live_full_status_cli_renderer_shows_next_and_commands_dynamicall
     status = build_jarvis_live_full_roadmap_status()
     rendered = render_status(status)
 
-    ready_batches = ", ".join(status["ready_batches"])
-    next_batch = status["next_batch"]
-    assert next_batch is not None
+    assert f"ready_batches={', '.join(status['ready_batches'])}" in rendered
 
-    assert f"ready_batches={ready_batches}" in rendered
-    assert f"next_batch={next_batch['batch_id']}" in rendered
+    next_batch = status["next_batch"]
+    if next_batch is None:
+        assert "next_batch=NONE" in rendered
+    else:
+        assert f"next_batch={next_batch['batch_id']}" in rendered
+
     assert XRAY_COMMAND_HINT in rendered
     assert DRIFT_COMMAND_HINT in rendered
     assert FULL_AUTO_COMMAND_HINT in rendered
@@ -65,13 +67,10 @@ def test_jarvis_live_full_status_cli_renderer_reports_current_next_batch() -> No
     status = build_jarvis_live_full_roadmap_status()
     rendered = render_status(status)
 
-    next_batch = status["next_batch"]
-    assert next_batch is not None
-
     assert f"ready_batches={', '.join(status['ready_batches'])}" in rendered
-    assert f"next_batch={next_batch['batch_id']}" in rendered
 
-    if "JL-4" in status["ready_batches"]:
-        assert "next_batch=JL-5" in rendered
-    elif "JL-3" in status["ready_batches"]:
-        assert "next_batch=JL-4" in rendered
+    next_batch = status["next_batch"]
+    if next_batch is None:
+        assert "next_batch=NONE" in rendered
+    else:
+        assert f"next_batch={next_batch['batch_id']}" in rendered

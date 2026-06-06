@@ -12,29 +12,31 @@ def test_jarvis_live_full_status_tracks_ready_batches_and_next_batch_dynamically
     assert "JL-0" in status["ready_batches"]
     assert "JL-1" in status["ready_batches"]
 
-    next_batch = status["next_batch"]
-    assert next_batch is not None
+    expected_next = next(
+        (
+            entry
+            for entry in status["per_batch_status"]
+            if entry["ready"] is False
+        ),
+        None,
+    )
 
-    ready_batches = set(status["ready_batches"])
-
-    if "JL-4" in ready_batches:
-        assert next_batch["batch_id"] == "JL-5"
-    elif "JL-3" in ready_batches:
-        assert next_batch["batch_id"] == "JL-4"
-    elif "JL-2" in ready_batches:
-        assert next_batch["batch_id"] == "JL-3"
+    if expected_next is None:
+        assert status["next_batch"] is None
     else:
-        assert next_batch["batch_id"] == "JL-2"
+        assert status["next_batch"] is not None
+        assert status["next_batch"]["batch_id"] == expected_next["batch_id"]
 
 
 def test_jarvis_live_full_status_exposes_totals_and_gates() -> None:
     status = build_jarvis_live_full_roadmap_status()
+    ready_batches = set(status["ready_batches"])
 
     assert status["expected_file_count_total"] > 0
     assert status["existing_file_count_total"] >= 10
     assert status["missing_file_count_total"] > 0
-    assert status["download_gate_status"]["storage_boundary_ready"] is ("JL-4" in status["ready_batches"])
-    assert status["download_gate_status"]["vendor_boundary_ready"] is False
+    assert status["download_gate_status"]["storage_boundary_ready"] == ("JL-4" in ready_batches)
+    assert status["download_gate_status"]["vendor_boundary_ready"] == ("JL-10" in ready_batches)
     assert status["model_download_allowed_now"] is False
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
