@@ -63,6 +63,13 @@ def test_roadmap_expected_files_registry_smoke() -> None:
         "5.8",
         "5.9",
         "5.10",
+        "6.0",
+        "6.1",
+        "6.2",
+        "6.3",
+        "6.4",
+        "6.5",
+        "6.6",
     }
 
     assert batch_ids == expected_batch_ids
