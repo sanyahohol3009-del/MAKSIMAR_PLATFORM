@@ -30,10 +30,15 @@ def test_jarvis_live_ci_status_render_is_operator_readable() -> None:
     assert "FORBIDDEN_PARALLEL_WORLD_ROOTS_PRESENT=NONE" in output
 
 
-def test_jarvis_live_ci_status_reports_jl3_after_jl2_files_exist() -> None:
+def test_jarvis_live_ci_status_reports_current_next_batch_dynamically() -> None:
     status = build_jarvis_live_full_roadmap_status()
     output = render_jarvis_live_ci_status(status)
 
-    if "JL-2" in status["ready_batches"]:
-        assert "READY_BATCHES=JL-0,JL-1,JL-2" in output
-        assert "NEXT_BATCH=JL-3" in output
+    next_batch = status["next_batch"]
+    assert next_batch is not None
+
+    assert f"READY_BATCHES={','.join(status['ready_batches'])}" in output
+    assert f"NEXT_BATCH={next_batch['batch_id']}" in output
+
+    if "JL-3" in status["ready_batches"]:
+        assert "NEXT_BATCH=JL-4" in output

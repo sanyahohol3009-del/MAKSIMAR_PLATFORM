@@ -12,12 +12,14 @@ def test_jarvis_live_full_status_tracks_ready_batches_and_next_batch_dynamically
     assert "JL-0" in status["ready_batches"]
     assert "JL-1" in status["ready_batches"]
 
-    ready_batches = set(status["ready_batches"])
     next_batch = status["next_batch"]
-
     assert next_batch is not None
 
-    if "JL-2" in ready_batches:
+    ready_batches = set(status["ready_batches"])
+
+    if "JL-3" in ready_batches:
+        assert next_batch["batch_id"] == "JL-4"
+    elif "JL-2" in ready_batches:
         assert next_batch["batch_id"] == "JL-3"
     else:
         assert next_batch["batch_id"] == "JL-2"

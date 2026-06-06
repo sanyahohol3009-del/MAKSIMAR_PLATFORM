@@ -61,10 +61,15 @@ def test_jarvis_live_full_status_cli_renderer_shows_next_and_commands_dynamicall
     assert FULL_AUTO_COMMAND_HINT in rendered
 
 
-def test_jarvis_live_full_status_cli_renderer_reports_jl3_after_jl2_files_exist() -> None:
+def test_jarvis_live_full_status_cli_renderer_reports_current_next_batch() -> None:
     status = build_jarvis_live_full_roadmap_status()
     rendered = render_status(status)
 
-    if "JL-2" in status["ready_batches"]:
-        assert "ready_batches=JL-0, JL-1, JL-2" in rendered
-        assert "next_batch=JL-3" in rendered
+    next_batch = status["next_batch"]
+    assert next_batch is not None
+
+    assert f"ready_batches={', '.join(status['ready_batches'])}" in rendered
+    assert f"next_batch={next_batch['batch_id']}" in rendered
+
+    if "JL-3" in status["ready_batches"]:
+        assert "next_batch=JL-4" in rendered
