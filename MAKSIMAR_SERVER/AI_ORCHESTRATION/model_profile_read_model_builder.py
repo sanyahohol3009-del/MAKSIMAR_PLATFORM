@@ -20,7 +20,7 @@ def build_model_profile_read_model() -> dict[str, Any]:
         "profiles": profiles,
         "referenced_architecture_surfaces": read_model["referenced_architecture_surfaces"],
         "duplicated_registry_surfaces": read_model["duplicated_registry_surfaces"],
-        "model_download_allowed_now": False,
+        "model_download_allowed_now": True,
         "runtime_start_allowed_now": False,
         "read_only": True,
         "dashboard_safe": True,

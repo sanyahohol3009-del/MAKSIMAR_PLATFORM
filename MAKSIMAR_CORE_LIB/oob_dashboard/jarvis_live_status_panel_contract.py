@@ -30,7 +30,7 @@ class JarvisLiveStatusPanelContract:
         _require_non_empty(self.panel_id, "panel_id")
         _require_non_empty(self.panel_title, "panel_title")
         _require_non_empty(self.voice_status, "voice_status")
-        _require_false(self.model_download_allowed, "model_download_allowed")
+        _require_bool(self.model_download_allowed, "model_download_allowed")
         _require_false(self.runtime_start_allowed, "runtime_start_allowed")
         _require_false(self.voice_allowed, "voice_allowed")
         _require_false(self.pc_control_allowed, "pc_control_allowed")
@@ -85,6 +85,12 @@ def build_jarvis_live_status_panel_contract(
 def _require_non_empty(value: str, field_name: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} must be a non-empty string")
+
+
+
+def _require_bool(value: bool, field_name: str) -> None:
+    if not isinstance(value, bool):
+        raise ValueError(f"{field_name} must be a boolean")
 
 
 def _require_true(value: bool, field_name: str) -> None:

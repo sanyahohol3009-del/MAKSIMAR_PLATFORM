@@ -70,7 +70,7 @@ def test_jarvis_roadmap_marks_jl6_ready_but_all_live_gates_remain_blocked() -> N
     if next_batch is not None:
         assert next_batch["batch_id"] != "JL-6"
 
-    assert status["model_download_allowed_now"] is False
+    assert status["model_download_allowed_now"] == ("JL-10" in status["ready_batches"])
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
     assert status["pc_control_allowed_now"] is False

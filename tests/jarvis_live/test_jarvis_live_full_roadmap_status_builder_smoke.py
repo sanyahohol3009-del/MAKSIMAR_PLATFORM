@@ -37,7 +37,7 @@ def test_jarvis_live_full_status_exposes_totals_and_gates() -> None:
     assert status["missing_file_count_total"] > 0
     assert status["download_gate_status"]["storage_boundary_ready"] == ("JL-4" in ready_batches)
     assert status["download_gate_status"]["vendor_boundary_ready"] == ("JL-10" in ready_batches)
-    assert status["model_download_allowed_now"] is False
+    assert status["model_download_allowed_now"] == ("JL-10" in ready_batches)
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
     assert status["pc_control_allowed_now"] is False
@@ -55,13 +55,14 @@ def test_jarvis_live_full_status_builder_is_dashboard_safe_read_only() -> None:
     assert status["pc_control_started"] is False
 
 
-def test_jarvis_live_full_status_keeps_download_voice_and_pc_gates_blocked_before_later_batches() -> None:
+def test_jarvis_live_full_status_keeps_runtime_voice_and_pc_gates_blocked() -> None:
     status = build_jarvis_live_full_roadmap_status()
+    ready_batches = set(status["ready_batches"])
 
-    assert status["model_download_allowed_now"] is False
+    assert status["model_download_allowed_now"] == ("JL-10" in ready_batches)
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
     assert status["pc_control_allowed_now"] is False
-    assert status["download_gate_status"]["model_download_allowed_now"] is False
+    assert status["download_gate_status"]["model_download_allowed_now"] == ("JL-10" in ready_batches)
     assert status["voice_gate_status"]["first_voice_batch"] == "JL-11"
     assert status["pc_control_gate_status"]["first_pc_control_batch"] == "JL-14"

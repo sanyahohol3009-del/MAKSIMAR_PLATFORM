@@ -29,13 +29,15 @@ def test_external_task_broker_audit_binding_is_proposal_only() -> None:
     assert read_model["pc_control_allowed"] is False
 
 
-def test_jl9_ready_moves_next_batch_to_jl10_and_download_stays_blocked() -> None:
+def test_jl9_ready_keeps_external_brokers_proposal_only() -> None:
     status = build_jarvis_live_full_roadmap_status()
     per_batch = {str(entry["batch_id"]): entry for entry in status["per_batch_status"]}
 
     assert per_batch["JL-9"]["ready"] is True
-    assert status["next_batch"]["batch_id"] == "JL-10"
-    assert status["model_download_allowed_now"] is False
+
+    if status["next_batch"] is not None:
+        assert status["next_batch"]["batch_id"] != "JL-9"
+
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
     assert status["pc_control_allowed_now"] is False

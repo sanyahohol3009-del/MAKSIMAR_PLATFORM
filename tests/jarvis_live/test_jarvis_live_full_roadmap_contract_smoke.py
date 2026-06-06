@@ -40,7 +40,7 @@ def test_jarvis_live_full_roadmap_read_model_is_read_only_and_has_command_hints(
 
     assert read_model["read_only"] is True
     assert read_model["runtime_start_allowed_now"] is False
-    assert read_model["model_download_allowed_now"] is False
+    assert read_model["model_download_allowed_now"] is True
     assert read_model["voice_allowed_now"] is False
     assert read_model["pc_control_allowed_now"] is False
     assert read_model["xray_command_hint"] == XRAY_COMMAND_HINT

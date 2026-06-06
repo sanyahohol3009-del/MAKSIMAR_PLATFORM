@@ -31,8 +31,8 @@ def build_jarvis_live_observability_read_model() -> dict[str, Any]:
         "read_only": True,
         "dashboard_safe": True,
         "dashboard_execution_allowed": False,
-        "runtime_start_allowed": False,
-        "model_download_allowed": False,
+        "runtime_start_allowed": bool(roadmap_status["runtime_start_allowed_now"]),
+        "model_download_allowed": bool(roadmap_status["model_download_allowed_now"]),
         "live_status_panel": live_panel,
         "model_status_panel": model_panel,
         "resource_status_panel": resource_panel,
@@ -40,10 +40,10 @@ def build_jarvis_live_observability_read_model() -> dict[str, Any]:
         "ready_batches": roadmap_status["ready_batches"],
         "next_batch": roadmap_status["next_batch"],
         "gates": {
-            "model_download_allowed": False,
-            "runtime_start_allowed": False,
-            "voice_allowed": False,
-            "pc_control_allowed": False,
+            "model_download_allowed": bool(roadmap_status["model_download_allowed_now"]),
+            "runtime_start_allowed": bool(roadmap_status["runtime_start_allowed_now"]),
+            "voice_allowed": bool(roadmap_status["voice_allowed_now"]),
+            "pc_control_allowed": bool(roadmap_status["pc_control_allowed_now"]),
         },
     }
 

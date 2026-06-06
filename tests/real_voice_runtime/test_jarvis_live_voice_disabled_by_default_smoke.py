@@ -50,4 +50,4 @@ def test_jl5_ready_but_voice_stays_blocked() -> None:
     assert roadmap_status["runtime_start_allowed_now"] is False
     assert roadmap_status["voice_allowed_now"] is False
     assert roadmap_status["pc_control_allowed_now"] is False
-    assert roadmap_status["model_download_allowed_now"] is False
+    assert roadmap_status["model_download_allowed_now"] == ("JL-10" in roadmap_status["ready_batches"])

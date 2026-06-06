@@ -41,5 +41,5 @@ def test_jarvis_roadmap_marks_jl3_ready_and_keeps_download_blocked() -> None:
     if status["next_batch"] is not None:
         assert status["next_batch"]["batch_id"] != "JL-3"
 
-    assert status["model_download_allowed_now"] is False
-    assert status["download_gate_status"]["model_download_allowed_now"] is False
+    assert status["model_download_allowed_now"] == ("JL-10" in status["ready_batches"])
+    assert status["download_gate_status"]["model_download_allowed_now"] == ("JL-10" in status["ready_batches"])

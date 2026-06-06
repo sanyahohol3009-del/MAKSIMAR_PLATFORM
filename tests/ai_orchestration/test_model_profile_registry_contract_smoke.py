@@ -26,7 +26,7 @@ def test_model_profile_registry_covers_all_jarvis_live_roles() -> None:
     assert profile_roles == set(JARVIS_LIVE_MODEL_ROLES)
     assert len(read_model["profiles"]) == 12
     assert read_model["duplicated_registry_surfaces"] == ()
-    assert read_model["model_download_allowed_now"] is False
+    assert read_model["model_download_allowed_now"] is True
     assert read_model["runtime_start_allowed_now"] is False
 
 
@@ -48,7 +48,7 @@ def test_model_profile_read_model_is_dashboard_safe_and_read_only() -> None:
 
     assert read_model["summary_id"] == "jarvis_live_model_profile_read_model_v1"
     assert read_model["profile_count"] == 12
-    assert read_model["model_download_allowed_now"] is False
+    assert read_model["model_download_allowed_now"] is True
     assert read_model["runtime_start_allowed_now"] is False
     assert read_model["read_only"] is True
     assert read_model["dashboard_safe"] is True
@@ -75,5 +75,5 @@ def test_jarvis_live_full_roadmap_now_sees_jl2_ready() -> None:
     status = build_jarvis_live_full_roadmap_status()
 
     assert "JL-2" in status["ready_batches"]
-    assert status["model_download_allowed_now"] is False
+    assert status["model_download_allowed_now"] == ("JL-10" in status["ready_batches"])
     assert status["runtime_start_allowed_now"] is False

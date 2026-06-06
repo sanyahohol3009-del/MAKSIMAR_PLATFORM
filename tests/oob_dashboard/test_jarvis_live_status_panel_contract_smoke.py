@@ -8,14 +8,14 @@ from MAKSIMAR_SERVER.OBSERVABILITY.memory_skill_metrics.jarvis_live_full_roadmap
 )
 
 
-def test_jarvis_live_status_panel_is_read_only_and_blocked() -> None:
+def test_jarvis_live_status_panel_is_read_only_and_tracks_download_gate() -> None:
     roadmap_status = build_jarvis_live_full_roadmap_status()
     panel = build_jarvis_live_status_panel_contract(roadmap_status).to_read_model()
 
     assert panel["read_only"] is True
     assert panel["dashboard_safe"] is True
     assert panel["dashboard_execution_allowed"] is False
-    assert panel["model_download_allowed"] is False
+    assert panel["model_download_allowed"] == roadmap_status["model_download_allowed_now"]
     assert panel["runtime_start_allowed"] is False
     assert panel["voice_allowed"] is False
     assert panel["pc_control_allowed"] is False
@@ -23,7 +23,7 @@ def test_jarvis_live_status_panel_is_read_only_and_blocked() -> None:
     assert panel["next_roadmap_batch"]
 
 
-def test_jl8_ready_but_live_gates_stay_closed() -> None:
+def test_jl8_ready_but_runtime_voice_and_pc_gates_stay_closed() -> None:
     roadmap_status = build_jarvis_live_full_roadmap_status()
     per_batch = {
         str(entry["batch_id"]): entry
@@ -36,7 +36,6 @@ def test_jl8_ready_but_live_gates_stay_closed() -> None:
     if next_batch is not None:
         assert next_batch["batch_id"] != "JL-8"
 
-    assert roadmap_status["model_download_allowed_now"] is False
     assert roadmap_status["runtime_start_allowed_now"] is False
     assert roadmap_status["voice_allowed_now"] is False
     assert roadmap_status["pc_control_allowed_now"] is False

@@ -103,7 +103,7 @@ class ModelProfileRegistry:
             "duplicated_registry_surfaces": self.duplicated_registry_surfaces,
             "read_only": self.read_only,
             "dashboard_safe": self.dashboard_safe,
-            "model_download_allowed_now": False,
+            "model_download_allowed_now": True,
             "runtime_start_allowed_now": False,
         }
 
