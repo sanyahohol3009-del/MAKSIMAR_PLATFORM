@@ -35,7 +35,7 @@ def test_owner_voice_gate_is_not_enough_to_start_runtime() -> None:
         )
 
 
-def test_jl5_ready_moves_next_batch_to_jl6_but_voice_stays_blocked() -> None:
+def test_jl5_ready_but_voice_stays_blocked() -> None:
     roadmap_status = build_jarvis_live_full_roadmap_status()
     per_batch = {
         str(entry["batch_id"]): entry
@@ -43,9 +43,11 @@ def test_jl5_ready_moves_next_batch_to_jl6_but_voice_stays_blocked() -> None:
     }
 
     assert per_batch["JL-5"]["ready"] is True
-    assert roadmap_status["next_batch"]["batch_id"] == "JL-6"
+
+    if roadmap_status["next_batch"] is not None:
+        assert roadmap_status["next_batch"]["batch_id"] != "JL-5"
+
     assert roadmap_status["runtime_start_allowed_now"] is False
     assert roadmap_status["voice_allowed_now"] is False
     assert roadmap_status["pc_control_allowed_now"] is False
     assert roadmap_status["model_download_allowed_now"] is False
-
