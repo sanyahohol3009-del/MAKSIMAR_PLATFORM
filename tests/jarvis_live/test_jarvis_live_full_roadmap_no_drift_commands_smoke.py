@@ -46,11 +46,25 @@ def test_jarvis_live_full_status_has_no_forbidden_parallel_roots() -> None:
     assert all(not Path(root).exists() for root in FORBIDDEN_PARALLEL_WORLD_ROOTS)
 
 
-def test_jarvis_live_full_status_cli_renderer_shows_next_and_commands() -> None:
-    rendered = render_status(build_jarvis_live_full_roadmap_status())
+def test_jarvis_live_full_status_cli_renderer_shows_next_and_commands_dynamically() -> None:
+    status = build_jarvis_live_full_roadmap_status()
+    rendered = render_status(status)
 
-    assert "ready_batches=JL-0, JL-1" in rendered
-    assert "next_batch=JL-2" in rendered
+    ready_batches = ", ".join(status["ready_batches"])
+    next_batch = status["next_batch"]
+    assert next_batch is not None
+
+    assert f"ready_batches={ready_batches}" in rendered
+    assert f"next_batch={next_batch['batch_id']}" in rendered
     assert XRAY_COMMAND_HINT in rendered
     assert DRIFT_COMMAND_HINT in rendered
     assert FULL_AUTO_COMMAND_HINT in rendered
+
+
+def test_jarvis_live_full_status_cli_renderer_reports_jl3_after_jl2_files_exist() -> None:
+    status = build_jarvis_live_full_roadmap_status()
+    rendered = render_status(status)
+
+    if "JL-2" in status["ready_batches"]:
+        assert "ready_batches=JL-0, JL-1, JL-2" in rendered
+        assert "next_batch=JL-3" in rendered

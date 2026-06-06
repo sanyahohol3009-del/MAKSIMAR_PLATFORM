@@ -5,14 +5,22 @@ from MAKSIMAR_SERVER.OBSERVABILITY.memory_skill_metrics.jarvis_live_full_roadmap
 )
 
 
-def test_jarvis_live_full_status_marks_jl0_and_jl1_ready_and_jl2_next() -> None:
+def test_jarvis_live_full_status_tracks_ready_batches_and_next_batch_dynamically() -> None:
     status = build_jarvis_live_full_roadmap_status()
 
     assert status["total_batches"] == 15
     assert "JL-0" in status["ready_batches"]
     assert "JL-1" in status["ready_batches"]
-    assert status["next_batch"]["batch_id"] == "JL-2"
-    assert status["blocked_batches"][0] == "JL-2"
+
+    ready_batches = set(status["ready_batches"])
+    next_batch = status["next_batch"]
+
+    assert next_batch is not None
+
+    if "JL-2" in ready_batches:
+        assert next_batch["batch_id"] == "JL-3"
+    else:
+        assert next_batch["batch_id"] == "JL-2"
 
 
 def test_jarvis_live_full_status_exposes_totals_and_gates() -> None:
@@ -39,3 +47,15 @@ def test_jarvis_live_full_status_builder_is_dashboard_safe_read_only() -> None:
     assert status["model_download_started"] is False
     assert status["audio_runtime_started"] is False
     assert status["pc_control_started"] is False
+
+
+def test_jarvis_live_full_status_keeps_download_voice_and_pc_gates_blocked_before_later_batches() -> None:
+    status = build_jarvis_live_full_roadmap_status()
+
+    assert status["model_download_allowed_now"] is False
+    assert status["runtime_start_allowed_now"] is False
+    assert status["voice_allowed_now"] is False
+    assert status["pc_control_allowed_now"] is False
+    assert status["download_gate_status"]["model_download_allowed_now"] is False
+    assert status["voice_gate_status"]["first_voice_batch"] == "JL-11"
+    assert status["pc_control_gate_status"]["first_pc_control_batch"] == "JL-14"
