@@ -40,5 +40,7 @@ def test_jarvis_live_ci_status_reports_current_next_batch_dynamically() -> None:
     assert f"READY_BATCHES={','.join(status['ready_batches'])}" in output
     assert f"NEXT_BATCH={next_batch['batch_id']}" in output
 
-    if "JL-3" in status["ready_batches"]:
+    if "JL-4" in status["ready_batches"]:
+        assert "NEXT_BATCH=JL-5" in output
+    elif "JL-3" in status["ready_batches"]:
         assert "NEXT_BATCH=JL-4" in output

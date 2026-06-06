@@ -17,7 +17,9 @@ def test_jarvis_live_full_status_tracks_ready_batches_and_next_batch_dynamically
 
     ready_batches = set(status["ready_batches"])
 
-    if "JL-3" in ready_batches:
+    if "JL-4" in ready_batches:
+        assert next_batch["batch_id"] == "JL-5"
+    elif "JL-3" in ready_batches:
         assert next_batch["batch_id"] == "JL-4"
     elif "JL-2" in ready_batches:
         assert next_batch["batch_id"] == "JL-3"
@@ -31,7 +33,7 @@ def test_jarvis_live_full_status_exposes_totals_and_gates() -> None:
     assert status["expected_file_count_total"] > 0
     assert status["existing_file_count_total"] >= 10
     assert status["missing_file_count_total"] > 0
-    assert status["download_gate_status"]["storage_boundary_ready"] is False
+    assert status["download_gate_status"]["storage_boundary_ready"] is ("JL-4" in status["ready_batches"])
     assert status["download_gate_status"]["vendor_boundary_ready"] is False
     assert status["model_download_allowed_now"] is False
     assert status["runtime_start_allowed_now"] is False

@@ -71,5 +71,7 @@ def test_jarvis_live_full_status_cli_renderer_reports_current_next_batch() -> No
     assert f"ready_batches={', '.join(status['ready_batches'])}" in rendered
     assert f"next_batch={next_batch['batch_id']}" in rendered
 
-    if "JL-3" in status["ready_batches"]:
+    if "JL-4" in status["ready_batches"]:
+        assert "next_batch=JL-5" in rendered
+    elif "JL-3" in status["ready_batches"]:
         assert "next_batch=JL-4" in rendered
