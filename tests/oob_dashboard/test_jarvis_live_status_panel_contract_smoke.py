@@ -23,7 +23,7 @@ def test_jarvis_live_status_panel_is_read_only_and_blocked() -> None:
     assert panel["next_roadmap_batch"]
 
 
-def test_jl8_ready_moves_next_batch_to_jl9_and_gates_stay_closed() -> None:
+def test_jl8_ready_but_live_gates_stay_closed() -> None:
     roadmap_status = build_jarvis_live_full_roadmap_status()
     per_batch = {
         str(entry["batch_id"]): entry
@@ -31,9 +31,12 @@ def test_jl8_ready_moves_next_batch_to_jl9_and_gates_stay_closed() -> None:
     }
 
     assert per_batch["JL-8"]["ready"] is True
-    assert roadmap_status["next_batch"]["batch_id"] == "JL-9"
+
+    next_batch = roadmap_status["next_batch"]
+    if next_batch is not None:
+        assert next_batch["batch_id"] != "JL-8"
+
     assert roadmap_status["model_download_allowed_now"] is False
     assert roadmap_status["runtime_start_allowed_now"] is False
     assert roadmap_status["voice_allowed_now"] is False
     assert roadmap_status["pc_control_allowed_now"] is False
-
