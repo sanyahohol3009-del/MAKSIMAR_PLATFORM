@@ -46,7 +46,7 @@ def build_jarvis_live_full_roadmap_status(
 
     storage_boundary_ready = _batch_ready(per_batch_status, "JL-4")
     vendor_boundary_ready = _batch_ready(per_batch_status, "JL-10")
-    voice_gate_ready = _batch_ready(per_batch_status, "JL-11")
+    voice_smoke_visible = _batch_ready(per_batch_status, "JL-11")
     pc_control_gate_ready = _batch_ready(per_batch_status, "JL-14")
     no_parallel_world_guard_ready = len(forbidden_roots_present) == 0
 
@@ -67,7 +67,8 @@ def build_jarvis_live_full_roadmap_status(
             "model_download_allowed_now": storage_boundary_ready and vendor_boundary_ready,
         },
         "voice_gate_status": {
-            "voice_allowed_now": voice_gate_ready,
+            "voice_smoke_visible": voice_smoke_visible,
+            "voice_allowed_now": False,
             "first_voice_batch": "JL-11",
         },
         "pc_control_gate_status": {
@@ -80,8 +81,8 @@ def build_jarvis_live_full_roadmap_status(
             "forbidden_parallel_world_roots_present": forbidden_roots_present,
         },
         "model_download_allowed_now": storage_boundary_ready and vendor_boundary_ready,
-        "runtime_start_allowed_now": voice_gate_ready,
-        "voice_allowed_now": voice_gate_ready,
+        "runtime_start_allowed_now": False,
+        "voice_allowed_now": False,
         "pc_control_allowed_now": pc_control_gate_ready,
         "required_control_commands": {
             "xray": XRAY_COMMAND_HINT,
