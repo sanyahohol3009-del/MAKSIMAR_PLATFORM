@@ -26,7 +26,7 @@ def render_status(status: dict[str, object]) -> str:
         for path in next_batch["target_tests"]:
             lines.append(f"- {path}")
     else:
-        lines.append("next_batch=None")
+        lines.append("next_batch=NONE")
 
     commands = status["required_control_commands"]
     assert isinstance(commands, dict)

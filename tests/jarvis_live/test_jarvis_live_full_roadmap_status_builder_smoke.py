@@ -34,7 +34,10 @@ def test_jarvis_live_full_status_exposes_totals_and_gates() -> None:
 
     assert status["expected_file_count_total"] > 0
     assert status["existing_file_count_total"] >= 10
-    assert status["missing_file_count_total"] > 0
+    if status["next_batch"] is None:
+        assert status["missing_file_count_total"] == 0
+    else:
+        assert status["missing_file_count_total"] > 0
     assert status["download_gate_status"]["storage_boundary_ready"] == ("JL-4" in ready_batches)
     assert status["download_gate_status"]["vendor_boundary_ready"] == ("JL-10" in ready_batches)
     assert status["model_download_allowed_now"] == ("JL-10" in ready_batches)

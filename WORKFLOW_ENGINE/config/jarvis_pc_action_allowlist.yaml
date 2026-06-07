@@ -1,0 +1,49 @@
+allowlist_id: jarvis_pc_action_allowlist_v0_1
+version: "0.1"
+actions:
+  - action_id: open_browser
+    description: Prepare a browser open proposal for owner approval.
+    requires_owner_command: true
+    requires_approval: true
+    requires_audit: true
+    runtime_execution_allowed: false
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    direct_pc_control_allowed: false
+  - action_id: open_youtube
+    description: Prepare a YouTube open proposal for owner approval.
+    requires_owner_command: true
+    requires_approval: true
+    requires_audit: true
+    runtime_execution_allowed: false
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    direct_pc_control_allowed: false
+  - action_id: open_youtube_kids_search
+    description: Prepare a YouTube Kids search proposal for owner approval.
+    requires_owner_command: true
+    requires_approval: true
+    requires_audit: true
+    runtime_execution_allowed: false
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    direct_pc_control_allowed: false
+  - action_id: read_project_status
+    description: Prepare a read-only project status proposal for owner approval.
+    requires_owner_command: true
+    requires_approval: true
+    requires_audit: true
+    runtime_execution_allowed: false
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    direct_pc_control_allowed: false
+  - action_id: show_test_status
+    description: Prepare a read-only test status proposal for owner approval.
+    requires_owner_command: true
+    requires_approval: true
+    requires_audit: true
+    runtime_execution_allowed: false
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    direct_pc_control_allowed: false
+

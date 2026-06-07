@@ -32,7 +32,11 @@ def test_jarvis_live_key_batches_have_expected_gate_semantics() -> None:
     assert jl11.pc_control_allowed is False
 
     jl14 = get_jarvis_live_batch("JL-14")
-    assert jl14.pc_control_allowed is True
+    assert jl14.pc_control_allowed is False
+    assert jl14.runtime_allowed is False
+    assert "allowlist" in jl14.status_rule
+    assert "approval" in jl14.status_rule
+    assert "audit" in jl14.status_rule
 
 
 def test_jarvis_live_full_roadmap_read_model_is_read_only_and_has_command_hints() -> None:

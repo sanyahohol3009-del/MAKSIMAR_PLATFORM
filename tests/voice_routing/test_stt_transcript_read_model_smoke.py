@@ -38,8 +38,11 @@ def test_jl12_ready_moves_next_batch_to_jl13_and_keeps_control_gates_closed() ->
     per_batch = {str(entry["batch_id"]): entry for entry in status["per_batch_status"]}
 
     assert per_batch["JL-12"]["ready"] is True
-    expected_next_batch = "JL-14" if per_batch["JL-13"]["ready"] else "JL-13"
-    assert status["next_batch"]["batch_id"] == expected_next_batch
+    if per_batch["JL-14"]["ready"]:
+        assert status["next_batch"] is None
+    else:
+        expected_next_batch = "JL-14" if per_batch["JL-13"]["ready"] else "JL-13"
+        assert status["next_batch"]["batch_id"] == expected_next_batch
     assert status["model_download_allowed_now"] is True
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
