@@ -22,6 +22,8 @@ def main() -> int:
     print(f"runtime_python={status['runtime_python']}")
     print(f"heartbeat_age_seconds={status['heartbeat_age_seconds']}")
     print(f"voice_loop_enabled={str(status['voice_loop_enabled']).lower()}")
+    print(f"always_listening_enabled={str(status['always_listening_enabled']).lower()}")
+    print(f"owner_detected={str(status['owner_detected']).lower()}")
     print("pc_control_allowed=false")
     print(f"latest_transcript={status['latest_transcript']}")
     print(f"latest_voice_reply={status['latest_voice_reply']}")
@@ -42,6 +44,8 @@ def build_status() -> dict[str, Any]:
         "runtime_python": str(state.get("runtime_python", "")),
         "heartbeat_age_seconds": heartbeat_age if heartbeat_age is not None else "",
         "voice_loop_enabled": bool(state.get("voice_loop_enabled", False)),
+        "always_listening_enabled": bool(state.get("always_listening_enabled", False)),
+        "owner_detected": bool(state.get("owner_detected", False)),
         "pc_control_allowed": False,
         "latest_transcript": str(state.get("latest_transcript", "")),
         "latest_voice_reply": str(state.get("latest_voice_reply", "")),

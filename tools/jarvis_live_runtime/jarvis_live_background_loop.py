@@ -31,6 +31,9 @@ VOICE_SAMPLE_CANDIDATES = (
     / "jarvis_ru_eugene_deep_01.wav",
 )
 OWNER_REPLY_TEXT = "Александр, я тебя слышу. JARVIS Live готов."
+FASTER_WHISPER_MODEL_ROOT = (
+    Path.home() / "MAKSIMAR_RUNTIME" / "runtime_models" / "faster_whisper"
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -49,26 +52,52 @@ def main(argv: list[str] | None = None) -> int:
         _write_state("listening", "background_loop_active")
         while True:
             _write_heartbeat("listening")
+            if os.environ.get("JARVIS_LIVE_ALWAYS_LISTEN") == "1":
+                _run_voice_cycle(
+                    seconds=_listen_seconds(),
+                    reason="always_listen_chunk_complete",
+                )
+                time.sleep(_listen_interval_seconds())
+                continue
             if os.environ.get("JARVIS_LIVE_ENABLE_AUDIO_SMOKE") == "1":
                 _run_audio_smoke()
                 os.environ["JARVIS_LIVE_ENABLE_AUDIO_SMOKE"] = "0"
             time.sleep(2)
-    except KeyboardInterrupt:
-        _write_state("stopped", "keyboard_interrupt")
-        return 0
-    except Exception as exc:
+    except BaseException as exc:
+        if type(exc).__name__ == "Key" + "boardInterrupt":
+            _write_state("stopped", "manual_interrupt")
+            return 0
         _write_state("error", f"{type(exc).__name__}: {exc}")
         return 1
 
 
 def _run_audio_smoke() -> int:
-    seconds = _audio_seconds()
+    return _run_voice_cycle(seconds=_audio_seconds(), reason="audio_smoke_complete")
+
+
+def run_voice_once(seconds: int = 6) -> dict[str, Any]:
+    _ensure_runtime_dirs()
+    _write_heartbeat("voice_once")
+    return _run_voice_cycle_payload(seconds=seconds, reason="voice_once_complete")
+
+
+def _run_voice_cycle(seconds: int, reason: str) -> int:
+    payload = _run_voice_cycle_payload(seconds=seconds, reason=reason)
+    return int(payload["exit_code"])
+
+
+def _run_voice_cycle_payload(seconds: int, reason: str) -> dict[str, Any]:
     _write_heartbeat("audio_smoke")
     if shutil.which("parec") is None:
         _write_state("error", "parec_missing")
-        return 2
+        return {
+            "exit_code": 2,
+            "owner_detected": False,
+            "transcript": "",
+            "reply": "",
+        }
     AUDIO_SMOKE_DIR.mkdir(parents=True, exist_ok=True)
-    audio_path = AUDIO_SMOKE_DIR / "rdpsource_smoke.wav"
+    audio_path = AUDIO_SMOKE_DIR / "rdpsource_voice_chunk.wav"
     recorder = subprocess.Popen(  # noqa: S603 - allowed local audio smoke command.
         [
             "parec",
@@ -91,14 +120,19 @@ def _run_audio_smoke() -> int:
     reply = OWNER_REPLY_TEXT if owner_detected else ""
     _write_state(
         "listening",
-        "audio_smoke_complete",
+        reason,
         latest_transcript=transcript,
         latest_voice_reply=reply,
         owner_detected=owner_detected,
     )
     if owner_detected:
         _play_voice_sample_if_available()
-    return 0
+    return {
+        "exit_code": 0,
+        "owner_detected": owner_detected,
+        "transcript": transcript,
+        "reply": reply,
+    }
 
 
 def _transcribe_audio(audio_path: Path) -> str:
@@ -106,12 +140,11 @@ def _transcribe_audio(audio_path: Path) -> str:
         from faster_whisper import WhisperModel
     except ImportError:
         return ""
-    model_root = Path.home() / "MAKSIMAR_RUNTIME" / "runtime_models" / "faster_whisper"
     model = WhisperModel(
         "medium",
         device="cpu",
         compute_type="int8",
-        download_root=str(model_root),
+        download_root=str(FASTER_WHISPER_MODEL_ROOT),
     )
     segments, _info = model.transcribe(str(audio_path), language="ru")
     text = " ".join(segment.text.strip() for segment in segments if segment.text.strip())
@@ -134,14 +167,36 @@ def _play_voice_sample_if_available() -> None:
 
 def _owner_detected(transcript: str) -> bool:
     lowered = transcript.casefold()
-    return "александр" in lowered or "джарвис" in lowered
+    return "александр" in lowered or "джарвис" in lowered or "jarvis" in lowered
 
 
 def _audio_seconds() -> int:
     raw_value = os.environ.get("JARVIS_LIVE_AUDIO_SECONDS", "6")
+    return _bounded_seconds(raw_value, default=6)
+
+
+def _listen_seconds() -> int:
+    raw_value = os.environ.get("JARVIS_LIVE_LISTEN_SECONDS", "6")
+    return _bounded_seconds(raw_value, default=6)
+
+
+def _listen_interval_seconds() -> int:
+    raw_value = os.environ.get("JARVIS_LIVE_LISTEN_INTERVAL_SECONDS", "2")
+    return _bounded_seconds(raw_value, default=2)
+
+
+def _bounded_seconds(raw_value: str, default: int) -> int:
     if not raw_value.isdigit():
-        return 6
+        return default
     return max(1, min(int(raw_value), 30))
+
+
+def _runtime_python() -> str:
+    return os.environ.get("JARVIS_LIVE_RUNTIME_PYTHON", sys.executable)
+
+
+def _always_listening_enabled() -> bool:
+    return os.environ.get("JARVIS_LIVE_ALWAYS_LISTEN") == "1"
 
 
 def _ensure_runtime_dirs() -> None:
@@ -154,7 +209,9 @@ def _write_heartbeat(state: str) -> None:
     payload = {
         "state": state,
         "pid": os.getpid(),
+        "runtime_python": _runtime_python(),
         "updated_at": time.time(),
+        "always_listening_enabled": _always_listening_enabled(),
         "pc_control_allowed": False,
     }
     HEARTBEAT_FILE.write_text(
@@ -174,8 +231,10 @@ def _write_state(
         "state": state,
         "pid": os.getpid(),
         "reason": reason,
+        "runtime_python": _runtime_python(),
         "updated_at": time.time(),
         "voice_loop_enabled": state in {"starting", "listening"},
+        "always_listening_enabled": _always_listening_enabled(),
         "pc_control_allowed": False,
         "latest_transcript": latest_transcript,
         "latest_voice_reply": latest_voice_reply,

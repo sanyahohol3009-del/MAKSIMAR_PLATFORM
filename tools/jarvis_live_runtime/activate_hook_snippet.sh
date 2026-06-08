@@ -8,5 +8,9 @@ if [ ! -f "tools/jarvis_live_runtime/jarvis_live_start.py" ]; then
   return 0 2>/dev/null || exit 0
 fi
 
-echo "JARVIS Live: starting/background/status"
+export JARVIS_LIVE_ALWAYS_LISTEN="${JARVIS_LIVE_ALWAYS_LISTEN:-1}"
+export JARVIS_LIVE_LISTEN_SECONDS="${JARVIS_LIVE_LISTEN_SECONDS:-6}"
+export JARVIS_LIVE_LISTEN_INTERVAL_SECONDS="${JARVIS_LIVE_LISTEN_INTERVAL_SECONDS:-2}"
+
+echo "JARVIS Live: starting/background/status always-listen=${JARVIS_LIVE_ALWAYS_LISTEN}"
 python tools/jarvis_live_runtime/jarvis_live_start.py --background >/dev/null 2>&1 &
