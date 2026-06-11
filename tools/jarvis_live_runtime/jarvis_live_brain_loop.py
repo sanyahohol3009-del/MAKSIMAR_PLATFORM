@@ -64,7 +64,9 @@ MAX_RECENT_TURNS = 8
 @dataclass(frozen=True)
 class JarvisBrainContext:
     user_text: str
+    request_route: str
     route_mode: str
+    retrieval_mode: str
     selected_model_role: dict[str, Any]
     admission_status: dict[str, Any]
     recent_turns: tuple[dict[str, str], ...]
@@ -83,6 +85,8 @@ class JarvisBrainContext:
             for part in (
                 _system_rules(),
                 build_jarvis_live_identity_prompt(self.user_text),
+                _format_section("REQUEST_ROUTE", self.request_route),
+                _format_section("RETRIEVAL_MODE", self.retrieval_mode),
                 _format_section("MODEL_ROLE", self.selected_model_role["selected_model_role"]),
                 _format_section("MODEL_ROUTE_REASON", self.selected_model_role["route_reason"]),
                 _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
@@ -99,6 +103,8 @@ class JarvisBrainContext:
     def to_read_model(self) -> dict[str, Any]:
         return {
             "route_mode": self.route_mode,
+            "request_route": self.request_route,
+            "retrieval_mode": self.retrieval_mode,
             "selected_model_role": self.selected_model_role,
             "admission_status": self.admission_status,
             "recent_turn_count": len(self.recent_turns),
@@ -192,15 +198,43 @@ def stream_jarvis_live_brain_response(
         yield _event("done", response_text="", route_mode="ignored")
         return
 
+    stream_started_at = time.monotonic()
+    request_plan = _plan_jarvis_request(clean_text)
+    selected_model_role = select_jarvis_live_model_role(clean_text)
+    memory_status = build_jarvis_live_memory_federation_status()
+    yield {
+        **_event("start"),
+        "status": "accepted",
+        "request_route": request_plan["request_route"],
+        "route_mode": request_plan["route_mode"],
+        "retrieval_mode": request_plan["retrieval_mode"],
+        "selected_model_role": selected_model_role["selected_model_role"],
+        "selected_model_id": selected_model_role["model_id"],
+        "selected_model_status": selected_model_role["status"],
+        "session_memory_path": str(SESSION_STATE_PATH),
+        "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+        "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+        "retrieved_snippet_count": 0,
+        "retrieval_surfaces_used": ("session_memory",),
+        "memory_federation_available": memory_status["memory_federation_available"],
+        "mempalace_status": memory_status["mempalace_status"],
+        "canonical_memory_write_allowed": False,
+        "pc_control_allowed": False,
+    }
+
+    context_started_at = time.monotonic()
     SESSION_MEMORY_ROOT.mkdir(parents=True, exist_ok=True)
     state = _load_session_state()
     _append_turn(state, "user", clean_text)
-    context = build_jarvis_live_brain_context(clean_text, state)
+    context = build_jarvis_live_brain_context(clean_text, state, request_plan=request_plan)
     _save_session_state(state)
+    context_elapsed_seconds = round(time.monotonic() - context_started_at, 4)
 
     yield {
-        **_event("start"),
+        **_event("route_selected"),
         "route_mode": context.route_mode,
+        "request_route": context.request_route,
+        "retrieval_mode": context.retrieval_mode,
         "session_memory_path": str(SESSION_STATE_PATH),
         "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
         "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
@@ -215,6 +249,7 @@ def stream_jarvis_live_brain_response(
         "mempalace_status": context.memory_federation_status["mempalace_status"],
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+        "context_elapsed_seconds": context_elapsed_seconds,
     }
 
     guarded_response = _guarded_local_response(clean_text, context)
@@ -225,6 +260,8 @@ def stream_jarvis_live_brain_response(
         _append_assistant_and_summarize(state, sanitized_guarded_response, context)
         yield {
             **_event("done", response_text=sanitized_guarded_response, route_mode=context.route_mode),
+            "request_route": context.request_route,
+            "retrieval_mode": context.retrieval_mode,
             "ollama_model_used": "",
             "stream_chunk_count": len(tuple(_sentence_chunks(sanitized_guarded_response))),
             "retrieved_snippet_count": len(context.retrieved_snippets),
@@ -240,12 +277,17 @@ def stream_jarvis_live_brain_response(
             "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
             "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
             "canonical_memory_write_allowed": False,
+            "pc_control_allowed": False,
+            "context_elapsed_seconds": context_elapsed_seconds,
+            "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
         }
         return
 
     chunks: list[str] = []
     errors: list[dict[str, Any]] = []
     model_used = ""
+    first_chunk_elapsed_seconds = 0.0
+    ollama_started_at = time.monotonic()
     for model_id in _candidate_model_ids_for_context(context):
         streamed = False
         reasoning_state = {"inside_reasoning": False}
@@ -259,6 +301,8 @@ def stream_jarvis_live_brain_response(
             if event["event"] == "chunk":
                 visible_text = _filter_reasoning_chunk(str(event["text"]), reasoning_state)
                 if visible_text:
+                    if not chunks:
+                        first_chunk_elapsed_seconds = round(time.monotonic() - stream_started_at, 4)
                     chunks.append(visible_text)
                     yield {**event, "text": visible_text}
             elif event["event"] == "done":
@@ -282,6 +326,8 @@ def stream_jarvis_live_brain_response(
     _append_assistant_and_summarize(state, response_text, context)
     yield {
         **_event("done", response_text=response_text, route_mode=context.route_mode),
+        "request_route": context.request_route,
+        "retrieval_mode": context.retrieval_mode,
         "ollama_model_used": model_used,
         "stream_chunk_count": len(chunks),
         "retrieved_snippet_count": len(context.retrieved_snippets),
@@ -298,26 +344,35 @@ def stream_jarvis_live_brain_response(
         "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+        "context_elapsed_seconds": context_elapsed_seconds,
+        "ollama_elapsed_seconds": round(time.monotonic() - ollama_started_at, 4),
+        "first_chunk_elapsed_seconds": first_chunk_elapsed_seconds,
+        "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
     }
 
 
 def build_jarvis_live_brain_context(
     user_text: str,
     state: dict[str, Any] | None = None,
+    request_plan: dict[str, str] | None = None,
 ) -> JarvisBrainContext:
     state = _load_session_state() if state is None else state
-    route_mode = _route_mode(user_text)
+    request_plan = _plan_jarvis_request(user_text) if request_plan is None else request_plan
+    route_mode = request_plan["route_mode"]
     selected_model_role = select_jarvis_live_model_role(user_text)
     admission_status = _build_admission_status(selected_model_role)
     retrieved_snippets, retrieval_surfaces_used = _retrieve_memory_federation_snippets(
         user_text,
-        deep=route_mode == "DEEP",
+        deep=request_plan["retrieval_mode"] == "deep_memory",
+        enabled=request_plan["retrieval_mode"] != "session_only",
     )
     memory_federation_status = build_jarvis_live_memory_federation_status()
     project_status = _project_status_summary() if _needs_project_status(user_text) else ""
     return JarvisBrainContext(
         user_text=user_text,
+        request_route=request_plan["request_route"],
         route_mode=route_mode,
+        retrieval_mode=request_plan["retrieval_mode"],
         selected_model_role=selected_model_role,
         admission_status=admission_status,
         recent_turns=tuple(state.get("recent_turns", [])[-MAX_RECENT_TURNS:]),
@@ -573,7 +628,14 @@ def _guarded_local_response(user_text: str, context: JarvisBrainContext) -> str 
     return None
 
 
-def _retrieve_memory_federation_snippets(user_text: str, deep: bool) -> tuple[tuple[str, ...], tuple[str, ...]]:
+def _retrieve_memory_federation_snippets(
+    user_text: str,
+    deep: bool,
+    enabled: bool = True,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if not enabled:
+        return (), ("session_memory",)
+
     snippets: list[str] = []
     surfaces_used: list[str] = []
 
@@ -857,7 +919,49 @@ def _extract_active_topics(text: str) -> list[str]:
 
 
 def _route_mode(text: str) -> str:
+    return _plan_jarvis_request(text)["route_mode"]
+
+
+def _plan_jarvis_request(text: str) -> dict[str, str]:
     lowered = text.casefold()
+    if _asks_pc_action(lowered):
+        return {
+            "request_route": "pc_action_proposal",
+            "route_mode": "FAST",
+            "retrieval_mode": "session_only",
+        }
+    if _asks_weather_or_current_facts(lowered):
+        return {
+            "request_route": "current_facts_tool",
+            "route_mode": "FAST",
+            "retrieval_mode": "session_only",
+        }
+    if _is_deep_code_request(lowered):
+        return {
+            "request_route": "code_deep",
+            "route_mode": "DEEP",
+            "retrieval_mode": "deep_memory",
+        }
+    if _is_simple_code_request(lowered):
+        return {
+            "request_route": "code_simple",
+            "route_mode": "DEEP",
+            "retrieval_mode": "targeted_memory",
+        }
+    if _needs_deep_memory(lowered):
+        return {
+            "request_route": "project_memory",
+            "route_mode": "DEEP",
+            "retrieval_mode": "deep_memory",
+        }
+    return {
+        "request_route": "conversation",
+        "route_mode": "FAST",
+        "retrieval_mode": "session_only",
+    }
+
+
+def _needs_deep_memory(lowered: str) -> bool:
     deep_markers = (
         "проект",
         "memory",
@@ -869,8 +973,32 @@ def _route_mode(text: str) -> str:
         "ошибка",
         "тест",
         "git",
+        "architecture",
+        "архитектур",
+        "approval gate",
+        "суверенн",
+        "business",
+        "sales",
+        "продаж",
+        "enterprise",
+        "закон",
+        "regulatory",
+        "compliance",
+        "mempalace",
+        "vector",
+        "embedding",
     )
-    return "DEEP" if any(marker in lowered for marker in deep_markers) else "FAST"
+    return any(marker in lowered for marker in deep_markers)
+
+
+def _is_simple_code_request(lowered: str) -> bool:
+    markers = ("pytest", "brokenpipeerror", "ошибка", "traceback", "код", "тест", "python")
+    return any(marker in lowered for marker in markers)
+
+
+def _is_deep_code_request(lowered: str) -> bool:
+    markers = ("architecture", "архитектур", "сложн", "complex", "approval gate", "patch proposal")
+    return any(marker in lowered for marker in markers) and _is_simple_code_request(lowered)
 
 
 def _needs_project_status(text: str) -> bool:

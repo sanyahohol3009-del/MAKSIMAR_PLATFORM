@@ -37,9 +37,11 @@ def test_activation_hook_snippet_has_opt_out_and_project_guard() -> None:
     )
 
     assert "JARVIS_LIVE_AUTO_START" in text
-    assert "JARVIS_LIVE_AUTO_START:-1" in text
+    assert "JARVIS_LIVE_AUTO_START:-0" in text
+    assert "JARVIS_LIVE_AUTO_START=1" in text
     assert "jarvis_live_start.py --background" in text
     assert "JARVIS_LIVE_ALWAYS_LISTEN" in text
+    assert "JARVIS_LIVE_ALWAYS_LISTEN:-0" in text
     assert "JARVIS_LIVE_LISTEN_SECONDS" in text
     assert "JARVIS_LIVE_LISTEN_INTERVAL_SECONDS" in text
     assert "not inside MAKSIMAR_PLATFORM root" in text

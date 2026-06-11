@@ -1,5 +1,5 @@
-if [ "${JARVIS_LIVE_AUTO_START:-1}" = "0" ]; then
-  echo "JARVIS Live: auto-start disabled"
+if [ "${JARVIS_LIVE_AUTO_START:-0}" != "1" ]; then
+  echo "JARVIS Live: auto-start disabled; set JARVIS_LIVE_AUTO_START=1 to start background runtime"
   return 0 2>/dev/null || exit 0
 fi
 
@@ -8,7 +8,7 @@ if [ ! -f "tools/jarvis_live_runtime/jarvis_live_start.py" ]; then
   return 0 2>/dev/null || exit 0
 fi
 
-export JARVIS_LIVE_ALWAYS_LISTEN="${JARVIS_LIVE_ALWAYS_LISTEN:-1}"
+export JARVIS_LIVE_ALWAYS_LISTEN="${JARVIS_LIVE_ALWAYS_LISTEN:-0}"
 export JARVIS_LIVE_LISTEN_SECONDS="${JARVIS_LIVE_LISTEN_SECONDS:-6}"
 export JARVIS_LIVE_LISTEN_INTERVAL_SECONDS="${JARVIS_LIVE_LISTEN_INTERVAL_SECONDS:-2}"
 

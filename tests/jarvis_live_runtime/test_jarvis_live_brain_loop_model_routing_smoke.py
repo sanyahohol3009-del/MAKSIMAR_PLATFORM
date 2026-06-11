@@ -65,6 +65,46 @@ def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
     assert done["pc_control_allowed"] is False
 
 
+def test_stream_emits_accepted_start_before_context_assembly(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def broken_context(*args, **kwargs):
+        raise RuntimeError("context should not block first event")
+
+    monkeypatch.setattr(brain_loop, "build_jarvis_live_brain_context", broken_context)
+
+    stream = stream_jarvis_live_brain_response("Джарвис, привет", session_id="test")
+    first = next(stream)
+
+    assert first["event"] == "start"
+    assert first["status"] == "accepted"
+    assert first["request_route"] == "conversation"
+    assert first["retrieval_mode"] == "session_only"
+    assert first["selected_model_id"] == "jarvis:chat8b"
+    assert first["pc_control_allowed"] is False
+
+
+def test_weather_route_uses_current_facts_guard_without_model_hallucination(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def forbidden_model(*args, **kwargs):
+        raise AssertionError("weather/current facts must not call offline model without tool")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", forbidden_model)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис, какая погода сейчас?", session_id="test"))
+    done = events[-1]
+
+    assert done["request_route"] == "current_facts_tool"
+    assert done["retrieval_mode"] == "session_only"
+    assert "tool недоступен" in done["response_text"]
+    assert done["ollama_model_used"] == ""
+    assert done["pc_control_allowed"] is False
+
+
 def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
