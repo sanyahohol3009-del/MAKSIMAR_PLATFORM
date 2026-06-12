@@ -16,6 +16,7 @@ SESSION_ID = "terminal_chat"
 HEALTH_TIMEOUT_SECONDS = 10
 COMMAND_TIMEOUT_SECONDS = 240
 _LAST_API_ERROR = ""
+_THINKING_ACTIVE = False
 
 
 def main() -> int:
@@ -212,8 +213,9 @@ def _request_json(request: urllib.request.Request, timeout: int) -> dict[str, An
 
 
 def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:
-    global _LAST_API_ERROR
+    global _LAST_API_ERROR, _THINKING_ACTIVE
     _LAST_API_ERROR = ""
+    _THINKING_ACTIVE = False
     done_event: dict[str, Any] = {}
     request = urllib.request.Request(
         url,
@@ -263,11 +265,15 @@ def _print_stream_event(line: str) -> dict[str, Any]:
     if event_type == "route_selected":
         _print_stream_route_trace(event)
         return event
+    if event_type == "thinking":
+        _print_thinking_event(event)
+        return event
     if event_type == "error":
         _print_stream_error(event)
         return event
     chunk = event.get("chunk") or event.get("text") or event.get("llm_response") or ""
     if chunk:
+        _finish_thinking_if_active()
         print(str(chunk), end="", flush=True)
         return event
     if event_type and event_type != "done":
@@ -276,8 +282,9 @@ def _print_stream_event(line: str) -> dict[str, Any]:
 
 
 def _print_stream_metadata(event: dict[str, Any]) -> None:
+    _finish_thinking_if_active()
     print()
-    if int(event.get("stream_chunk_count", 0) or 0) == 0 and event.get("error_kind"):
+    if event.get("error_kind"):
         _print_stream_error(event)
     print(
         "[trace] "
@@ -309,8 +316,30 @@ def _print_stream_error(event: dict[str, Any]) -> None:
     if error_kind == "ollama_empty_response":
         print(f"[error] ollama_empty_response model={model_id} elapsed={_seconds(elapsed)}")
         return
+    if error_kind == "ollama_thinking_without_final_response":
+        print(f"[error] ollama_thinking_without_final_response model={model_id} elapsed={_seconds(elapsed)}")
+        return
     message = str(event.get("error_message") or "")
     print(f"[error] {error_kind} model={model_id} {message}".rstrip())
+
+
+def _print_thinking_event(event: dict[str, Any]) -> None:
+    global _THINKING_ACTIVE
+    text = str(event.get("text") or "")
+    if not text:
+        return
+    if not _THINKING_ACTIVE:
+        print("Thinking...")
+        _THINKING_ACTIVE = True
+    print(text, end="", flush=True)
+
+
+def _finish_thinking_if_active() -> None:
+    global _THINKING_ACTIVE
+    if not _THINKING_ACTIVE:
+        return
+    print("\n...done thinking.")
+    _THINKING_ACTIVE = False
 
 
 def _print_stream_start_trace(event: dict[str, Any]) -> None:

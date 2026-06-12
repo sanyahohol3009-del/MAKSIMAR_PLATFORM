@@ -172,6 +172,49 @@ def test_terminal_chat_prints_empty_ollama_response_error(capsys) -> None:
     assert "[trace] first_token= ollama=57.798s total=57.807s chunks=0" in output
 
 
+def test_terminal_chat_prints_thinking_then_answer(capsys) -> None:
+    module = _module()
+
+    module._print_stream_event(
+        '{"event":"thinking","text":"Проверяю локально.","ollama_model_used":"jarvis:chat8b"}'
+    )
+    module._print_stream_event(
+        '{"event":"chunk","text":"Готов.","ollama_model_used":"jarvis:chat8b"}'
+    )
+
+    output = capsys.readouterr().out
+    assert "Thinking..." in output
+    assert "Проверяю локально." in output
+    assert "...done thinking." in output
+    assert "Готов." in output
+
+
+def test_terminal_chat_prints_thinking_without_final_response_error(capsys) -> None:
+    module = _module()
+
+    module._print_stream_event(
+        '{"event":"thinking","text":"Думаю без ответа.","ollama_model_used":"jarvis:chat8b"}'
+    )
+    module._print_stream_metadata(
+        {
+            "error_kind": "ollama_thinking_without_final_response",
+            "selected_model_id": "jarvis:chat8b",
+            "ollama_elapsed_seconds": 1.7,
+            "total_elapsed_seconds": 1.71,
+            "thinking_chunk_count": 1,
+            "answer_chunk_count": 0,
+            "stream_chunk_count": 1,
+            "had_thinking": True,
+        }
+    )
+
+    output = capsys.readouterr().out
+    assert "Thinking..." in output
+    assert "Думаю без ответа." in output
+    assert "...done thinking." in output
+    assert "[error] ollama_thinking_without_final_response model=jarvis:chat8b elapsed=1.700s" in output
+
+
 def test_terminal_chat_command_timeout_does_not_claim_api_is_down(monkeypatch, capsys) -> None:
     module = _module()
 

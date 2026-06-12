@@ -176,7 +176,10 @@ def run_jarvis_live_brain_once(
         "llm_response": response_text,
         "ollama_model_used": str(final_payload.get("ollama_model_used", "")),
         "route_mode": str(final_payload.get("route_mode", "")),
+        "thinking_chunk_count": int(final_payload.get("thinking_chunk_count", 0)),
+        "answer_chunk_count": int(final_payload.get("answer_chunk_count", len(chunks))),
         "stream_chunk_count": int(final_payload.get("stream_chunk_count", len(chunks))),
+        "had_thinking": bool(final_payload.get("had_thinking", False)),
         "selected_model_role": str(final_payload.get("selected_model_role", "")),
         "selected_model_id": str(final_payload.get("selected_model_id", "")),
         "selected_model_status": str(final_payload.get("selected_model_status", "")),
@@ -275,7 +278,10 @@ def stream_jarvis_live_brain_response(
             "request_route": context.request_route,
             "retrieval_mode": context.retrieval_mode,
             "ollama_model_used": "",
+            "thinking_chunk_count": 0,
+            "answer_chunk_count": len(tuple(_sentence_chunks(sanitized_guarded_response))),
             "stream_chunk_count": len(tuple(_sentence_chunks(sanitized_guarded_response))),
+            "had_thinking": False,
             "retrieved_snippet_count": len(context.retrieved_snippets),
             "retrieval_surfaces_used": context.retrieval_surfaces_used,
             "memory_federation_available": context.memory_federation_status["memory_federation_available"],
@@ -296,6 +302,7 @@ def stream_jarvis_live_brain_response(
         return
 
     chunks: list[str] = []
+    thinking_chunks: list[str] = []
     errors: list[dict[str, Any]] = []
     model_used = ""
     empty_model_id = ""
@@ -312,7 +319,12 @@ def stream_jarvis_live_brain_response(
             response_mode_text=clean_text,
         ):
             streamed = True
-            if event["event"] == "chunk":
+            if event["event"] == "thinking":
+                thinking_text = str(event.get("text", ""))
+                if thinking_text:
+                    thinking_chunks.append(thinking_text)
+                    yield event
+            elif event["event"] == "chunk":
                 visible_text = _filter_reasoning_chunk(str(event["text"]), reasoning_state)
                 if visible_text:
                     if not chunks:
@@ -343,6 +355,9 @@ def stream_jarvis_live_brain_response(
         error_kind = str(errors[-1].get("error_kind", "ollama_stream_error"))
         error_message = str(errors[-1].get("error_message", "ollama stream returned an error"))
         response_text = "Модельный runtime сейчас не вернул ответ. Проверь Ollama статус и выбранный wrapper."
+    elif not response_text and thinking_chunks:
+        error_kind = "ollama_thinking_without_final_response"
+        error_message = "model produced thinking but no final response; increase num_predict or disable thinking."
     elif not response_text:
         error_kind = "ollama_empty_response"
         model_for_error = empty_model_id or model_used or context.selected_model_role["model_id"]
@@ -353,7 +368,10 @@ def stream_jarvis_live_brain_response(
         "request_route": context.request_route,
         "retrieval_mode": context.retrieval_mode,
         "ollama_model_used": model_used,
-        "stream_chunk_count": len(chunks),
+        "thinking_chunk_count": len(thinking_chunks),
+        "answer_chunk_count": len(chunks),
+        "stream_chunk_count": len(thinking_chunks) + len(chunks),
+        "had_thinking": bool(thinking_chunks),
         "retrieved_snippet_count": len(context.retrieved_snippets),
         "retrieval_surfaces_used": context.retrieval_surfaces_used,
         "memory_federation_available": context.memory_federation_status["memory_federation_available"],
@@ -531,6 +549,9 @@ def _stream_ollama_model(
                         error_message=str(payload.get("error", "")),
                     )
                     return
+                thinking = str(payload.get("thinking", ""))
+                if thinking:
+                    yield _event("thinking", text=thinking, ollama_model_used=model_id)
                 chunk = str(payload.get("response", ""))
                 if chunk:
                     yield _event("chunk", text=chunk, ollama_model_used=model_id)

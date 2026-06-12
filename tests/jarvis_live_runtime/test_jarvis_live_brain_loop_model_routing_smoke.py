@@ -170,6 +170,68 @@ def test_empty_ollama_done_is_reported_as_visible_error(monkeypatch) -> None:
     assert done["pc_control_allowed"] is False
 
 
+def test_thinking_then_final_response_counts_thinking_and_answer(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def fake_thinking_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
+        assert model_id == "jarvis:chat8b"
+        yield {"event": "thinking", "text": "Проверяю кратко.", "ollama_model_used": model_id, "pc_control_allowed": False}
+        yield {"event": "chunk", "text": "Привет.", "ollama_model_used": model_id, "pc_control_allowed": False}
+        yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_thinking_stream)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис, привет", session_id="test"))
+    done = events[-1]
+
+    assert any(event["event"] == "thinking" for event in events)
+    assert done["had_thinking"] is True
+    assert done["thinking_chunk_count"] == 1
+    assert done["answer_chunk_count"] == 1
+    assert done["stream_chunk_count"] == 2
+    assert done["response_text"] == "Привет."
+    assert done["error_kind"] == ""
+
+
+def test_thinking_without_final_response_is_reported(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def fake_thinking_only_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
+        assert model_id == "jarvis:chat8b"
+        yield {"event": "thinking", "text": "Думаю, но не отвечаю.", "ollama_model_used": model_id, "pc_control_allowed": False}
+        yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_thinking_only_stream)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис, привет", session_id="test"))
+    done = events[-1]
+
+    assert done["had_thinking"] is True
+    assert done["thinking_chunk_count"] == 1
+    assert done["answer_chunk_count"] == 0
+    assert done["stream_chunk_count"] == 1
+    assert done["error_kind"] == "ollama_thinking_without_final_response"
+    assert "increase num_predict or disable thinking" in done["error_message"]
+
+
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
