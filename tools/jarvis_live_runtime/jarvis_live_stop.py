@@ -7,7 +7,9 @@ import time
 from pathlib import Path
 
 
-RUNTIME_ROOT = Path.home() / "MAKSIMAR_RUNTIME" / "jarvis_live"
+RUNTIME_ROOT = Path(
+    os.environ.get("JARVIS_LIVE_RUNTIME_ROOT", str(Path.home() / "MAKSIMAR_RUNTIME" / "jarvis_live"))
+).expanduser()
 STATE_DIR = RUNTIME_ROOT / "state"
 LOG_DIR = RUNTIME_ROOT / "logs"
 STATE_FILE = STATE_DIR / "jarvis_live_state.json"
@@ -26,7 +28,10 @@ def main() -> int:
     if _process_alive(pid):
         os.kill(pid, signal.SIGTERM)
         time.sleep(0.2)
-    _write_state("stopped", pid, "explicit_stop_command")
+        reason = "explicit_stop_command"
+    else:
+        reason = "stale_pid_removed"
+    _write_state("stopped", pid, reason)
     PID_FILE.unlink(missing_ok=True)
     _append_event({"event": "stop", "pid": pid})
     print(f"JARVIS Live: stopped pid={pid}")
@@ -59,6 +64,10 @@ def _write_state(state: str, pid: int | None, reason: str) -> None:
         "reason": reason,
         "updated_at": time.time(),
         "voice_loop_enabled": False,
+        "supervisor_running": False,
+        "runtime_alive": False,
+        "runtime_dead_reason": "stopped",
+        "state_truth_source": "current_turn",
         "pc_control_allowed": False,
         "latest_transcript": "",
         "latest_voice_reply": "",
