@@ -247,17 +247,30 @@ def _print_stream_event(line: str) -> dict[str, Any]:
         print(str(event))
         return {}
     event_type = str(event.get("event") or event.get("type") or "")
+    if event_type == "start":
+        _print_stream_start_trace(event)
+        return event
+    if event_type == "route_selected":
+        _print_stream_route_trace(event)
+        return event
     chunk = event.get("chunk") or event.get("text") or event.get("llm_response") or ""
     if chunk:
         print(str(chunk), end="", flush=True)
         return event
-    if event_type:
+    if event_type and event_type != "done":
         print(f"\nstream_event={event_type}")
     return event
 
 
 def _print_stream_metadata(event: dict[str, Any]) -> None:
     print()
+    print(
+        "[trace] "
+        f"first_token={_seconds(event.get('first_chunk_elapsed_seconds', ''))} "
+        f"ollama={_seconds(event.get('ollama_elapsed_seconds', ''))} "
+        f"total={_seconds(event.get('total_elapsed_seconds', ''))} "
+        f"chunks={event.get('stream_chunk_count', 0)}"
+    )
     print(f"selected_model_id={event.get('selected_model_id', '')}")
     print(f"selected_model_role={event.get('selected_model_role', '')}")
     print(f"retrieved_snippet_count={event.get('retrieved_snippet_count', 0)}")
@@ -267,6 +280,26 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
     print(
         "canonical_memory_write_allowed="
         f"{str(bool(event.get('canonical_memory_write_allowed', False))).lower()}"
+    )
+
+
+def _print_stream_start_trace(event: dict[str, Any]) -> None:
+    print(
+        "[trace] "
+        f"route={event.get('request_route', '')} "
+        f"mode={event.get('route_mode', '')} "
+        f"memory={event.get('retrieval_mode', '')} "
+        f"model={event.get('selected_model_id', '')} "
+        f"status={event.get('selected_model_status', '')}"
+    )
+
+
+def _print_stream_route_trace(event: dict[str, Any]) -> None:
+    print(
+        "[trace] "
+        f"context={_seconds(event.get('context_elapsed_seconds', ''))} "
+        f"snippets={event.get('retrieved_snippet_count', 0)} "
+        f"surfaces={_csv(event.get('retrieval_surfaces_used', ())) }"
     )
 
 
@@ -320,6 +353,15 @@ def _csv(value: Any) -> str:
     if isinstance(value, (list, tuple)):
         return ",".join(str(item) for item in value)
     return str(value)
+
+
+def _seconds(value: Any) -> str:
+    if value == "" or value is None:
+        return ""
+    try:
+        return f"{float(value):.3f}s"
+    except (TypeError, ValueError):
+        return f"{value}s"
 
 
 def _sanitize_text(value: str) -> str:

@@ -22,8 +22,8 @@ def test_brain_context_includes_session_history_project_boundaries() -> None:
     assert read_model["pc_control_allowed"] is False
     assert read_model["canonical_memory_write_allowed"] is False
     assert "RECENT_SESSION_TURNS" in prompt
-    assert "ROLLING_SESSION_SUMMARY" in prompt
-    assert "RETRIEVED_LONG_TERM_MEMORY" in prompt or read_model["retrieved_snippets"] == ()
+    assert "ROLLING_SESSION_SUMMARY" not in prompt
+    assert "RETRIEVED_LONG_TERM_MEMORY" not in prompt
 
 
 def test_fast_conversation_uses_session_memory_without_deep_retrieval() -> None:
@@ -47,7 +47,8 @@ def test_fast_conversation_uses_session_memory_without_deep_retrieval() -> None:
     assert read_model["retrieval_surfaces_used"] == ("session_memory",)
     assert read_model["retrieved_snippet_count"] == 0
     assert "RECENT_SESSION_TURNS" in prompt
-    assert "owner prefers calm conversation" in prompt
+    assert "owner prefers calm conversation" not in prompt
+    assert "RETRIEVED_LONG_TERM_MEMORY" not in prompt
     assert read_model["pc_control_allowed"] is False
 
 

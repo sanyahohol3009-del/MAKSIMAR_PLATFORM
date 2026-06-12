@@ -58,7 +58,7 @@ DEFAULT_OLLAMA_MODEL_ID = os.environ.get("JARVIS_LIVE_OLLAMA_MODEL", PRIMARY_CON
 FALLBACK_OLLAMA_MODEL_ID = "jarvis-live:qwen14b"
 HEAVY_CODER_MODEL_ID = "jarvis:coder14b"
 BASE_HEAVY_CODER_MODEL_ID = "qwen2.5-coder:14b"
-MAX_RECENT_TURNS = 8
+MAX_RECENT_TURNS = 4
 
 
 @dataclass(frozen=True)
@@ -80,10 +80,21 @@ class JarvisBrainContext:
     canonical_memory_write_allowed: bool = False
 
     def to_prompt(self) -> str:
+        if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
+            return "\n".join(
+                part
+                for part in (
+                    _system_rules(short=True),
+                    build_jarvis_live_identity_prompt(self.user_text),
+                    _format_turns(self.recent_turns[-4:]),
+                    f"USER_MESSAGE: {self.user_text}",
+                )
+                if part
+            )
         return "\n".join(
             part
             for part in (
-                _system_rules(),
+                _system_rules(short=False),
                 build_jarvis_live_identity_prompt(self.user_text),
                 _format_section("REQUEST_ROUTE", self.request_route),
                 _format_section("RETRIEVAL_MODE", self.retrieval_mode),
@@ -296,6 +307,7 @@ def stream_jarvis_live_brain_response(
             context.to_prompt(),
             context.route_mode,
             timeout_seconds=ollama_timeout_seconds,
+            response_mode_text=clean_text,
         ):
             streamed = True
             if event["event"] == "chunk":
@@ -469,8 +481,9 @@ def _stream_ollama_model(
     prompt: str,
     route_mode: str,
     timeout_seconds: float | None = None,
+    response_mode_text: str | None = None,
 ) -> Iterator[dict[str, Any]]:
-    response_mode = classify_response_mode(prompt)
+    response_mode = classify_response_mode(response_mode_text or prompt)
     options = build_ollama_options(response_mode)
     if route_mode == "FAST":
         options = {**options, "num_predict": min(int(options.get("num_predict", 120)), 120)}
@@ -558,6 +571,8 @@ def _candidate_model_ids_for_context(context: JarvisBrainContext) -> tuple[str, 
     selected_model_id = str(context.selected_model_role["model_id"])
     role_id = context.selected_model_role["selected_model_role"]
     candidates = [selected_model_id]
+    if context.route_mode == "FAST" and os.environ.get("JARVIS_LIVE_FAST_FALLBACK_ENABLED") != "1":
+        return tuple(candidates)
     if role_id == "heavy_coder_model":
         candidates.extend((HEAVY_CODER_MODEL_ID, BASE_HEAVY_CODER_MODEL_ID, FALLBACK_OLLAMA_MODEL_ID))
     elif role_id == "daily_coder_model":
@@ -1114,7 +1129,15 @@ def _format_list(title: str, values: tuple[str, ...]) -> str:
     return title + ":\n" + "\n".join(f"- {value}" for value in values)
 
 
-def _system_rules() -> str:
+def _system_rules(short: bool = False) -> str:
+    if short:
+        return (
+            "SYSTEM_RULES:\n"
+            "- Ты JARVIS, локальный помощник Александра.\n"
+            "- Отвечай коротко по-русски.\n"
+            "- Не называй себя Qwen, Alibaba, ChatGPT или облачной моделью.\n"
+            "- PC control disabled: pc_control_allowed=false."
+        )
     return (
         "SYSTEM_RULES:\n"
         "- Ты JARVIS, локальный помощник Александра для MAKSIMAR/JARVIS.\n"

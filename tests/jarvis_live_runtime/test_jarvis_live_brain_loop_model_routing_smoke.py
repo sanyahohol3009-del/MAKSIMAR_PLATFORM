@@ -41,11 +41,18 @@ def test_broken_pipe_write_path_does_not_crash() -> None:
 def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
-    def fake_stream(model_id: str, prompt: str, route_mode: str, timeout_seconds: float | None = None):
+    def fake_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
         assert model_id == "jarvis:chat8b"
         assert prompt
         assert route_mode
         assert timeout_seconds is None
+        assert response_mode_text == "Джарвис, кто ты?"
         yield {"event": "chunk", "text": "<think>hidden reasoning</think>Я JARVIS.", "pc_control_allowed": False}
         yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
 
@@ -108,9 +115,16 @@ def test_weather_route_uses_current_facts_guard_without_model_hallucination(monk
 def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
-    def fake_error_stream(model_id: str, prompt: str, route_mode: str, timeout_seconds: float | None = None):
+    def fake_error_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
         assert model_id
         assert timeout_seconds
+        assert response_mode_text == "Джарвис, кто ты?"
         yield {"event": "error", "ollama_model_used": model_id, "pc_control_allowed": False}
 
     monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_error_stream)
@@ -130,10 +144,17 @@ def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monke
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
-    def fake_stream(model_id: str, prompt: str, route_mode: str, timeout_seconds: float | None = None):
+    def fake_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
         assert model_id == "jarvis:chat8b"
         assert "enterprise_business_memory" in prompt
         assert timeout_seconds == 120.0
+        assert response_mode_text == "Что у нас есть по продаже суверенного ИИ?"
         yield {"event": "chunk", "text": "По суверенному ИИ есть business memory context.", "ollama_model_used": model_id, "pc_control_allowed": False}
         yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
 

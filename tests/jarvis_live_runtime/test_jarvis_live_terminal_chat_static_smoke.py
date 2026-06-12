@@ -125,6 +125,35 @@ def test_terminal_chat_has_long_command_timeout_and_stream_route() -> None:
     assert "STREAM_URL" in source
 
 
+def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
+    module = _module()
+
+    module._print_stream_event(
+        '{"event":"start","request_route":"conversation","route_mode":"FAST",'
+        '"retrieval_mode":"session_only","selected_model_id":"jarvis:chat8b",'
+        '"selected_model_status":"installed"}'
+    )
+    module._print_stream_event(
+        '{"event":"route_selected","context_elapsed_seconds":0.018,'
+        '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"]}'
+    )
+    module._print_stream_metadata(
+        {
+            "first_chunk_elapsed_seconds": 0.72,
+            "ollama_elapsed_seconds": 2.14,
+            "total_elapsed_seconds": 2.19,
+            "stream_chunk_count": 34,
+            "selected_model_id": "jarvis:chat8b",
+        }
+    )
+
+    output = capsys.readouterr().out
+    assert "[trace] route=conversation mode=FAST memory=session_only model=jarvis:chat8b status=installed" in output
+    assert "[trace] context=0.018s snippets=0 surfaces=session_memory" in output
+    assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
+    assert "stream_event=start" not in output
+
+
 def test_terminal_chat_command_timeout_does_not_claim_api_is_down(monkeypatch, capsys) -> None:
     module = _module()
 

@@ -7,6 +7,7 @@ JARVIS_IDENTITY_FIRST_SENTENCE = (
 
 
 def build_jarvis_live_identity_prompt(user_message: str) -> str:
+    _ = user_message
     return (
         f"{JARVIS_IDENTITY_FIRST_SENTENCE} "
         "Qwen является только backend-моделью и не является личностью в разговоре. "
@@ -17,8 +18,7 @@ def build_jarvis_live_identity_prompt(user_message: str) -> str:
         "диагностики, планов и локальной системы. "
         "PC control currently disabled: не управляй ПК, мышью, клавиатурой, "
         "браузером или приложениями. "
-        "Отвечай по-русски прямо и от лица JARVIS. "
-        f"Сообщение владельца: {user_message}"
+        "Отвечай по-русски прямо и от лица JARVIS."
     )
 
 
