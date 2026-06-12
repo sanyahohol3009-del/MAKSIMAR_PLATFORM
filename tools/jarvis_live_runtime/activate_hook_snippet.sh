@@ -1,5 +1,4 @@
 if [ "${JARVIS_LIVE_AUTO_START:-0}" != "1" ]; then
-  echo "JARVIS Live: auto-start disabled; set JARVIS_LIVE_AUTO_START=1 to start background runtime"
   return 0 2>/dev/null || exit 0
 fi
 
