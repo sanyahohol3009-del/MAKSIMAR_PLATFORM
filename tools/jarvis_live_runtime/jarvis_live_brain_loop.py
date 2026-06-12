@@ -194,6 +194,7 @@ def run_jarvis_live_brain_once(
         "memory_federation_available": bool(final_payload.get("memory_federation_available", False)),
         "mempalace_status": str(final_payload.get("mempalace_status", "not_detected")),
         "error_kind": str(final_payload.get("error_kind", "")),
+        "error_message": str(final_payload.get("error_message", "")),
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
     }
@@ -297,6 +298,7 @@ def stream_jarvis_live_brain_response(
     chunks: list[str] = []
     errors: list[dict[str, Any]] = []
     model_used = ""
+    empty_model_id = ""
     first_chunk_elapsed_seconds = 0.0
     ollama_started_at = time.monotonic()
     for model_id in _candidate_model_ids_for_context(context):
@@ -319,6 +321,8 @@ def stream_jarvis_live_brain_response(
                     yield {**event, "text": visible_text}
             elif event["event"] == "done":
                 model_used = model_id
+                if not chunks:
+                    empty_model_id = model_id
                 break
             elif event["event"] == "error":
                 error_event = {
@@ -333,8 +337,16 @@ def stream_jarvis_live_brain_response(
             break
 
     response_text = _sanitize_model_output("".join(chunks)).strip()
+    error_kind = ""
+    error_message = ""
     if not response_text and errors:
+        error_kind = str(errors[-1].get("error_kind", "ollama_stream_error"))
+        error_message = str(errors[-1].get("error_message", "ollama stream returned an error"))
         response_text = "Модельный runtime сейчас не вернул ответ. Проверь Ollama статус и выбранный wrapper."
+    elif not response_text:
+        error_kind = "ollama_empty_response"
+        model_for_error = empty_model_id or model_used or context.selected_model_role["model_id"]
+        error_message = f"ollama_empty_response model={model_for_error}"
     _append_assistant_and_summarize(state, response_text, context)
     yield {
         **_event("done", response_text=response_text, route_mode=context.route_mode),
@@ -349,6 +361,8 @@ def stream_jarvis_live_brain_response(
         "selected_model_role": context.selected_model_role["selected_model_role"],
         "selected_model_id": context.selected_model_role["model_id"],
         "selected_model_status": context.selected_model_role["status"],
+        "error_kind": error_kind,
+        "error_message": error_message,
         "admission_allowed": context.admission_status["admission_allowed"],
         "resource_gate_surface": context.admission_status["resource_gate_surface"],
         "session_memory_path": str(SESSION_STATE_PATH),
@@ -510,14 +524,25 @@ def _stream_ollama_model(
                     payload = json.loads(line)
                 except json.JSONDecodeError:
                     continue
+                if payload.get("error"):
+                    yield _event(
+                        "error",
+                        ollama_model_used=model_id,
+                        error_message=str(payload.get("error", "")),
+                    )
+                    return
                 chunk = str(payload.get("response", ""))
                 if chunk:
                     yield _event("chunk", text=chunk, ollama_model_used=model_id)
                 if payload.get("done") is True:
                     yield _event("done", ollama_model_used=model_id)
                     return
-    except (urllib.error.URLError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-        yield _event("error", ollama_model_used=model_id)
+    except (urllib.error.URLError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
+        yield _event(
+            "error",
+            ollama_model_used=model_id,
+            error_message=f"{exc.__class__.__name__}: {exc}",
+        )
 
 
 def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:

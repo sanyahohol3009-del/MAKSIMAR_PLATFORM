@@ -141,6 +141,35 @@ def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monke
     assert payload["pc_control_allowed"] is False
 
 
+def test_empty_ollama_done_is_reported_as_visible_error(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def fake_empty_stream(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
+        assert model_id == "jarvis:chat8b"
+        yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_empty_stream)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис, привет", session_id="test"))
+    done = events[-1]
+
+    assert done["event"] == "done"
+    assert done["stream_chunk_count"] == 0
+    assert done["error_kind"] == "ollama_empty_response"
+    assert done["error_message"] == "ollama_empty_response model=jarvis:chat8b"
+    assert done["selected_model_id"] == "jarvis:chat8b"
+    assert done["pc_control_allowed"] is False
+
+
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 

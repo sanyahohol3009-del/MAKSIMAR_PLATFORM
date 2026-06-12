@@ -80,6 +80,16 @@ def _print_command_response(text: str) -> None:
     result = response.get("result") if isinstance(response.get("result"), dict) else {}
     llm_response = response.get("llm_response") or result.get("llm_response") or ""
     print(str(llm_response))
+    error_kind = response.get("error_kind") or result.get("error_kind") or ""
+    if error_kind:
+        _print_stream_error(
+            {
+                "error_kind": error_kind,
+                "error_message": response.get("error_message") or result.get("error_message") or "",
+                "selected_model_id": response.get("selected_model_id") or result.get("selected_model_id", ""),
+                "ollama_model_used": response.get("ollama_model_used") or result.get("ollama_model_used", ""),
+            }
+        )
     print(f"selected_model_id={response.get('selected_model_id') or result.get('selected_model_id', '')}")
     print(f"selected_model_role={response.get('selected_model_role') or result.get('selected_model_role', '')}")
     print(f"retrieved_snippet_count={response.get('retrieved_snippet_count') or result.get('retrieved_snippet_count', 0)}")
@@ -253,6 +263,9 @@ def _print_stream_event(line: str) -> dict[str, Any]:
     if event_type == "route_selected":
         _print_stream_route_trace(event)
         return event
+    if event_type == "error":
+        _print_stream_error(event)
+        return event
     chunk = event.get("chunk") or event.get("text") or event.get("llm_response") or ""
     if chunk:
         print(str(chunk), end="", flush=True)
@@ -264,6 +277,8 @@ def _print_stream_event(line: str) -> dict[str, Any]:
 
 def _print_stream_metadata(event: dict[str, Any]) -> None:
     print()
+    if int(event.get("stream_chunk_count", 0) or 0) == 0 and event.get("error_kind"):
+        _print_stream_error(event)
     print(
         "[trace] "
         f"first_token={_seconds(event.get('first_chunk_elapsed_seconds', ''))} "
@@ -281,6 +296,21 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
         "canonical_memory_write_allowed="
         f"{str(bool(event.get('canonical_memory_write_allowed', False))).lower()}"
     )
+
+
+def _print_stream_error(event: dict[str, Any]) -> None:
+    error_kind = str(event.get("error_kind") or "ollama_stream_error")
+    model_id = str(
+        event.get("ollama_model_used")
+        or event.get("selected_model_id")
+        or ""
+    )
+    elapsed = event.get("ollama_elapsed_seconds", "")
+    if error_kind == "ollama_empty_response":
+        print(f"[error] ollama_empty_response model={model_id} elapsed={_seconds(elapsed)}")
+        return
+    message = str(event.get("error_message") or "")
+    print(f"[error] {error_kind} model={model_id} {message}".rstrip())
 
 
 def _print_stream_start_trace(event: dict[str, Any]) -> None:

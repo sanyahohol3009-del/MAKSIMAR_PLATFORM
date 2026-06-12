@@ -154,6 +154,24 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     assert "stream_event=start" not in output
 
 
+def test_terminal_chat_prints_empty_ollama_response_error(capsys) -> None:
+    module = _module()
+
+    module._print_stream_metadata(
+        {
+            "error_kind": "ollama_empty_response",
+            "selected_model_id": "jarvis:chat8b",
+            "ollama_elapsed_seconds": 57.798,
+            "total_elapsed_seconds": 57.807,
+            "stream_chunk_count": 0,
+        }
+    )
+
+    output = capsys.readouterr().out
+    assert "[error] ollama_empty_response model=jarvis:chat8b elapsed=57.798s" in output
+    assert "[trace] first_token= ollama=57.798s total=57.807s chunks=0" in output
+
+
 def test_terminal_chat_command_timeout_does_not_claim_api_is_down(monkeypatch, capsys) -> None:
     module = _module()
 
