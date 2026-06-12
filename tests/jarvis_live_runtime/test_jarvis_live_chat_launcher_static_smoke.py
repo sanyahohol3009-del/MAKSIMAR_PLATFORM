@@ -28,8 +28,7 @@ def test_chat_launcher_waits_for_api_before_opening_chat() -> None:
     assert "HEALTH_URL" in source
     assert "def _wait_until_api_ready()" in source
     assert "if not _wait_until_api_ready():" in source
-    assert "print(\"[launcher] api ready\")" in source
-    assert "print(\"[launcher] opening JARVIS terminal chat\")" in source
+    assert "JARVIS API failed to start. log=" in source
     assert "return _run_terminal_chat(env)" in source
 
 
@@ -54,6 +53,20 @@ def test_chat_launcher_sets_fast_local_env_defaults() -> None:
     assert '"OLLAMA_KEEP_ALIVE", "30m"' in source
     assert '"OLLAMA_NUM_PARALLEL", "1"' in source
     assert '"OLLAMA_MAX_LOADED_MODELS", "1"' in source
+
+
+def test_chat_launcher_uses_quiet_uvicorn_and_runtime_log_file() -> None:
+    source = _source()
+
+    assert '".runtime" / "jarvis_live"' in source
+    assert 'API_LOG_FILE = RUNTIME_LOG_DIR / "api.log"' in source
+    assert '"--log-level"' in source
+    assert '"warning"' in source
+    assert '"--no-access-log"' in source
+    assert "stdout=log_handle" in source
+    assert "stderr=log_handle" in source
+    assert "[launcher] api ready" not in source
+    assert "[launcher] opening JARVIS terminal chat" not in source
 
 
 def test_chat_launcher_does_not_import_voice_or_runtime_supervisor_surfaces() -> None:

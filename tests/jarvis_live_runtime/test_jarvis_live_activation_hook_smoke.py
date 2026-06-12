@@ -29,22 +29,20 @@ def test_activation_hook_idempotency_and_remove_logic() -> None:
     assert removed == original
 
 
-def test_activation_hook_snippet_has_opt_out_and_project_guard() -> None:
+def test_activation_hook_snippet_exposes_only_manual_chat_launcher() -> None:
     from pathlib import Path
 
     text = Path("tools/jarvis_live_runtime/activate_hook_snippet.sh").read_text(
         encoding="utf-8"
     )
 
-    assert "JARVIS_LIVE_AUTO_START" in text
-    assert "JARVIS_LIVE_AUTO_START:-0" in text
-    assert '!= "1"' in text
-    assert "jarvis_live_start.py --background" in text
-    assert "JARVIS_LIVE_ALWAYS_LISTEN" in text
-    assert "JARVIS_LIVE_ALWAYS_LISTEN:-0" in text
-    assert "JARVIS_LIVE_LISTEN_SECONDS" in text
-    assert "JARVIS_LIVE_LISTEN_INTERVAL_SECONDS" in text
-    assert "not inside MAKSIMAR_PLATFORM root" in text
+    assert "chat()" in text
+    assert "jarvis_live_chat_launcher.py" in text
+    assert "JARVIS_LIVE_AUTO_START" not in text
+    assert "jarvis_live_start.py --background" not in text
+    assert "JARVIS_LIVE_ALWAYS_LISTEN" not in text
+    assert "JARVIS_LIVE_LISTEN_SECONDS" not in text
+    assert "JARVIS_LIVE_LISTEN_INTERVAL_SECONDS" not in text
 
 
 def test_activate_cleanup_uses_fake_activate_content_not_local_venv() -> None:
@@ -64,15 +62,13 @@ def test_activate_cleanup_uses_fake_activate_content_not_local_venv() -> None:
     assert "jarvis_live_start.py --background" not in cleaned
 
 
-def test_activation_hook_snippet_default_is_silent_and_opt_in_only() -> None:
+def test_activation_hook_snippet_has_no_autostart_branch() -> None:
     from pathlib import Path
 
     text = Path("tools/jarvis_live_runtime/activate_hook_snippet.sh").read_text(
         encoding="utf-8"
     )
-    default_branch = text.split('if [ ! -f "tools/jarvis_live_runtime/jarvis_live_start.py" ]; then')[0]
 
-    assert 'JARVIS_LIVE_AUTO_START:-0' in default_branch
-    assert 'jarvis_live_start.py --background' not in default_branch
-    assert 'starting/background/status' not in default_branch
-    assert 'echo "JARVIS Live: auto-start disabled' not in default_branch
+    assert 'JARVIS_LIVE_AUTO_START:-0' not in text
+    assert 'jarvis_live_start.py --background' not in text
+    assert 'starting/background/status' not in text

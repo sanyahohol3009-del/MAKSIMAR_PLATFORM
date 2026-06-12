@@ -8,7 +8,7 @@ def test_identity_prompt_keeps_jarvis_identity_and_platform_capability_style() -
     prompt = build_jarvis_live_identity_prompt("Кто ты?")
     lowered = prompt.lower()
 
-    assert prompt.startswith("JARVIS IDENTITY PROMPT v2")
+    assert prompt.startswith("JARVIS IDENTITY PROMPT v3")
     assert JARVIS_IDENTITY_FIRST_SENTENCE in prompt
     assert "ты jarvis." in lowered
     assert "ты не jarvis-live, не qwen, не chatgpt, не alibaba" in lowered
@@ -18,6 +18,9 @@ def test_identity_prompt_keeps_jarvis_identity_and_platform_capability_style() -
     assert "жена александра: юля" in lowered
     assert "старший сын александра: максим" in lowered
     assert "младший сын александра: макар" in lowered
+    assert "кибер-синдиката maksimar/jarvis" in lowered
+    assert "без пустых приветствий" in lowered
+    assert "без заготовок" in lowered
     assert "быстро отвечать владельцу и семье" in lowered
     assert "maksimar/jarvis" in lowered
     assert "кода" in lowered
@@ -30,9 +33,14 @@ def test_identity_prompt_keeps_jarvis_identity_and_platform_capability_style() -
     assert "доступные capabilities платформы" in lowered
     assert "control-plane" in lowered
     assert "параллельный brain/router/server/runtime" in lowered
+    assert "не отвечай шаблонно" in lowered
+    assert "с характером, но без клоунады и пафоса" in lowered
+    assert "можно обращаться по-братски" in lowered
     assert "быстрый режим" in lowered
     assert "маленькую модель" in lowered
+    assert "одно живое предложение" in lowered
     assert "operator trace" in lowered
+    assert "отделять рабочий код от экспериментов" in lowered
     assert "voice identity layer" in lowered
     assert "не должен сам выполнять распознавание голоса" in lowered
     assert "pc control currently disabled" not in lowered

@@ -4,9 +4,12 @@ import json
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+API_LOG_FILE = PROJECT_ROOT / ".runtime" / "jarvis_live" / "api.log"
 API_BASE_URL = "http://127.0.0.1:8765"
 COMMAND_URL = f"{API_BASE_URL}/jarvis-live/command"
 STREAM_URL = f"{API_BASE_URL}/jarvis-live/chat/stream"
@@ -17,15 +20,13 @@ HEALTH_TIMEOUT_SECONDS = 10
 COMMAND_TIMEOUT_SECONDS = 240
 _LAST_API_ERROR = ""
 _THINKING_ACTIVE = False
+_TRACE_ENABLED = False
+_DEBUG_ENABLED = False
 
 
 def main() -> int:
     _configure_utf8_stdio()
-    print(
-        "JARVIS terminal chat ready. API: http://127.0.0.1:8765  "
-        "Commands: /ping /status /memory /models /stream /command /exit"
-    )
-    _print_ping(startup=True)
+    print("JARVIS terminal ready")
     while True:
         try:
             user_text = _sanitize_text(input("JARVIS> ")).strip()
@@ -37,7 +38,7 @@ def main() -> int:
         try:
             should_exit = _dispatch_user_text(user_text)
         except KeyboardInterrupt:
-            print("\nrequest_interrupted=true")
+            print()
             continue
         if should_exit:
             return 0
@@ -57,6 +58,21 @@ def _dispatch_user_text(user_text: str) -> bool:
         return False
     if user_text == "/models":
         _print_models()
+        return False
+    if user_text == "/logs":
+        _print_logs()
+        return False
+    if user_text == "/trace on":
+        _set_trace(True)
+        return False
+    if user_text == "/trace off":
+        _set_trace(False)
+        return False
+    if user_text == "/debug on":
+        _set_debug(True)
+        return False
+    if user_text == "/debug off":
+        _set_debug(False)
         return False
     if user_text.startswith("/command "):
         _print_command_response(user_text[len("/command ") :].strip())
@@ -91,16 +107,17 @@ def _print_command_response(text: str) -> None:
                 "ollama_model_used": response.get("ollama_model_used") or result.get("ollama_model_used", ""),
             }
         )
-    print(f"selected_model_id={response.get('selected_model_id') or result.get('selected_model_id', '')}")
-    print(f"selected_model_role={response.get('selected_model_role') or result.get('selected_model_role', '')}")
-    print(f"retrieved_snippet_count={response.get('retrieved_snippet_count') or result.get('retrieved_snippet_count', 0)}")
-    print(f"retrieval_surfaces_used={_csv(response.get('retrieval_surfaces_used') or result.get('retrieval_surfaces_used', ())) }")
-    print(f"mempalace_status={response.get('mempalace_status') or result.get('mempalace_status', '')}")
-    print(f"pc_control_allowed={str(bool(response.get('pc_control_allowed', False))).lower()}")
-    print(
-        "canonical_memory_write_allowed="
-        f"{str(bool(response.get('canonical_memory_write_allowed', False))).lower()}"
-    )
+    if _trace_enabled():
+        print(f"selected_model_id={response.get('selected_model_id') or result.get('selected_model_id', '')}")
+        print(f"selected_model_role={response.get('selected_model_role') or result.get('selected_model_role', '')}")
+        print(f"retrieved_snippet_count={response.get('retrieved_snippet_count') or result.get('retrieved_snippet_count', 0)}")
+        print(f"retrieval_surfaces_used={_csv(response.get('retrieval_surfaces_used') or result.get('retrieval_surfaces_used', ())) }")
+        print(f"mempalace_status={response.get('mempalace_status') or result.get('mempalace_status', '')}")
+        print(f"pc_control_allowed={str(bool(response.get('pc_control_allowed', False))).lower()}")
+        print(
+            "canonical_memory_write_allowed="
+            f"{str(bool(response.get('canonical_memory_write_allowed', False))).lower()}"
+        )
 
 
 def _print_stream_response(text: str) -> None:
@@ -152,6 +169,26 @@ def _print_models() -> None:
     print("jarvis:helper3b = classifier/summary/router helper")
     print("jarvis:coder7b = daily/simple coder")
     print("jarvis:coder14b = heavy coder/architecture/traceback")
+
+
+def _print_logs() -> None:
+    print(f"api_log={API_LOG_FILE}")
+
+
+def _set_trace(enabled: bool) -> None:
+    global _TRACE_ENABLED
+    _TRACE_ENABLED = enabled
+    print(f"trace={str(enabled).lower()}")
+
+
+def _set_debug(enabled: bool) -> None:
+    global _DEBUG_ENABLED
+    _DEBUG_ENABLED = enabled
+    print(f"debug={str(enabled).lower()}")
+
+
+def _trace_enabled() -> bool:
+    return _TRACE_ENABLED or _DEBUG_ENABLED
 
 
 def _print_ping(startup: bool = False) -> None:
@@ -260,10 +297,12 @@ def _print_stream_event(line: str) -> dict[str, Any]:
         return {}
     event_type = str(event.get("event") or event.get("type") or "")
     if event_type == "start":
-        _print_stream_start_trace(event)
+        if _trace_enabled():
+            _print_stream_start_trace(event)
         return event
     if event_type == "route_selected":
-        _print_stream_route_trace(event)
+        if _trace_enabled():
+            _print_stream_route_trace(event)
         return event
     if event_type == "thinking":
         _print_thinking_event(event)
@@ -277,7 +316,8 @@ def _print_stream_event(line: str) -> dict[str, Any]:
         print(str(chunk), end="", flush=True)
         return event
     if event_type and event_type != "done":
-        print(f"\nstream_event={event_type}")
+        if _trace_enabled():
+            print(f"\nstream_event={event_type}")
     return event
 
 
@@ -286,23 +326,24 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
     print()
     if event.get("error_kind"):
         _print_stream_error(event)
-    print(
-        "[trace] "
-        f"first_token={_seconds(event.get('first_chunk_elapsed_seconds', ''))} "
-        f"ollama={_seconds(event.get('ollama_elapsed_seconds', ''))} "
-        f"total={_seconds(event.get('total_elapsed_seconds', ''))} "
-        f"chunks={event.get('stream_chunk_count', 0)}"
-    )
-    print(f"selected_model_id={event.get('selected_model_id', '')}")
-    print(f"selected_model_role={event.get('selected_model_role', '')}")
-    print(f"retrieved_snippet_count={event.get('retrieved_snippet_count', 0)}")
-    print(f"retrieval_surfaces_used={_csv(event.get('retrieval_surfaces_used', ())) }")
-    print(f"mempalace_status={event.get('mempalace_status', '')}")
-    print(f"pc_control_allowed={str(bool(event.get('pc_control_allowed', False))).lower()}")
-    print(
-        "canonical_memory_write_allowed="
-        f"{str(bool(event.get('canonical_memory_write_allowed', False))).lower()}"
-    )
+    if _trace_enabled():
+        print(
+            "[trace] "
+            f"first_token={_seconds(event.get('first_chunk_elapsed_seconds', ''))} "
+            f"ollama={_seconds(event.get('ollama_elapsed_seconds', ''))} "
+            f"total={_seconds(event.get('total_elapsed_seconds', ''))} "
+            f"chunks={event.get('stream_chunk_count', 0)}"
+        )
+        print(f"selected_model_id={event.get('selected_model_id', '')}")
+        print(f"selected_model_role={event.get('selected_model_role', '')}")
+        print(f"retrieved_snippet_count={event.get('retrieved_snippet_count', 0)}")
+        print(f"retrieval_surfaces_used={_csv(event.get('retrieval_surfaces_used', ())) }")
+        print(f"mempalace_status={event.get('mempalace_status', '')}")
+        print(f"pc_control_allowed={str(bool(event.get('pc_control_allowed', False))).lower()}")
+        print(
+            "canonical_memory_write_allowed="
+            f"{str(bool(event.get('canonical_memory_write_allowed', False))).lower()}"
+        )
 
 
 def _print_stream_error(event: dict[str, Any]) -> None:
@@ -318,6 +359,7 @@ def _print_stream_error(event: dict[str, Any]) -> None:
         return
     if error_kind == "ollama_thinking_without_final_response":
         print(f"[error] ollama_thinking_without_final_response model={model_id} elapsed={_seconds(elapsed)}")
+        print("Модель показала thinking, но не дала финальный ответ. Повтори короче или отключи thinking для FAST.")
         return
     message = str(event.get("error_message") or "")
     print(f"[error] {error_kind} model={model_id} {message}".rstrip())

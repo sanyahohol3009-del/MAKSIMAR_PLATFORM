@@ -86,6 +86,7 @@ class JarvisBrainContext:
                 for part in (
                     _system_rules(short=True),
                     build_jarvis_live_identity_prompt(self.user_text),
+                    _fast_final_answer_rules(),
                     _format_turns(self.recent_turns[-4:]),
                     f"USER_MESSAGE: {self.user_text}",
                 )
@@ -517,8 +518,6 @@ def _stream_ollama_model(
 ) -> Iterator[dict[str, Any]]:
     response_mode = classify_response_mode(response_mode_text or prompt)
     options = build_ollama_options(response_mode)
-    if route_mode == "FAST":
-        options = {**options, "num_predict": min(int(options.get("num_predict", 120)), 120)}
     request_payload: dict[str, Any] = {
         "model": model_id,
         "prompt": prompt,
@@ -1192,6 +1191,15 @@ def _system_rules(short: bool = False) -> str:
         "- Не записывай в canonical/global project memory из live chat.\n"
         "- PC control disabled: pc_control_allowed=false.\n"
         "- Для погоды, поиска и текущих фактов нужен tool; если tool недоступен, скажи это."
+    )
+
+
+def _fast_final_answer_rules() -> str:
+    return (
+        "FAST_RESPONSE_RULES:\n"
+        "- Если backend-модель использует thinking, thinking должен быть коротким.\n"
+        "- После thinking всегда выдай финальный видимый ответ.\n"
+        "- Финальный ответ не должен быть пустым."
     )
 
 

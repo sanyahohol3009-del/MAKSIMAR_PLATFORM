@@ -47,6 +47,10 @@ def test_fast_conversation_uses_session_memory_without_deep_retrieval() -> None:
     assert read_model["retrieval_surfaces_used"] == ("session_memory",)
     assert read_model["retrieved_snippet_count"] == 0
     assert "RECENT_SESSION_TURNS" in prompt
+    assert "FAST_RESPONSE_RULES" in prompt
+    assert "thinking должен быть коротким" in prompt
+    assert "всегда выдай финальный видимый ответ" in prompt
+    assert "Финальный ответ не должен быть пустым" in prompt
     assert "owner prefers calm conversation" not in prompt
     assert "RETRIEVED_LONG_TERM_MEMORY" not in prompt
     assert read_model["pc_control_allowed"] is False

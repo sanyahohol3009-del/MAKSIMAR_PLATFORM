@@ -49,11 +49,16 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/status" in source
     assert "/memory" in source
     assert "/models" in source
+    assert "/logs" in source
+    assert "/trace on" in source
+    assert "/trace off" in source
+    assert "/debug on" in source
+    assert "/debug off" in source
     assert "/stream" in source
     assert "/command" in source
     assert "/exit" in source
     assert "JARVIS>" in source
-    assert "JARVIS terminal chat ready" in source
+    assert "JARVIS terminal ready" in source
 
 
 def test_terminal_chat_does_not_start_server_or_execute_local_control() -> None:
@@ -128,6 +133,7 @@ def test_terminal_chat_has_long_command_timeout_and_stream_route() -> None:
 def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     module = _module()
 
+    module._set_trace(True)
     module._print_stream_event(
         '{"event":"start","request_route":"conversation","route_mode":"FAST",'
         '"retrieval_mode":"session_only","selected_model_id":"jarvis:chat8b",'
@@ -154,6 +160,34 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     assert "stream_event=start" not in output
 
 
+def test_terminal_chat_suppresses_trace_metadata_by_default(capsys) -> None:
+    module = _module()
+
+    module._print_stream_event(
+        '{"event":"start","request_route":"conversation","route_mode":"FAST",'
+        '"retrieval_mode":"session_only","selected_model_id":"jarvis:chat8b",'
+        '"selected_model_status":"installed"}'
+    )
+    module._print_stream_event(
+        '{"event":"route_selected","context_elapsed_seconds":0.018,'
+        '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"]}'
+    )
+    module._print_stream_metadata(
+        {
+            "first_chunk_elapsed_seconds": 0.72,
+            "ollama_elapsed_seconds": 2.14,
+            "total_elapsed_seconds": 2.19,
+            "stream_chunk_count": 34,
+            "selected_model_id": "jarvis:chat8b",
+        }
+    )
+
+    output = capsys.readouterr().out
+    assert "[trace]" not in output
+    assert "selected_model_id=" not in output
+    assert "retrieved_snippet_count=" not in output
+
+
 def test_terminal_chat_prints_empty_ollama_response_error(capsys) -> None:
     module = _module()
 
@@ -169,7 +203,7 @@ def test_terminal_chat_prints_empty_ollama_response_error(capsys) -> None:
 
     output = capsys.readouterr().out
     assert "[error] ollama_empty_response model=jarvis:chat8b elapsed=57.798s" in output
-    assert "[trace] first_token= ollama=57.798s total=57.807s chunks=0" in output
+    assert "[trace]" not in output
 
 
 def test_terminal_chat_prints_thinking_then_answer(capsys) -> None:
@@ -213,6 +247,7 @@ def test_terminal_chat_prints_thinking_without_final_response_error(capsys) -> N
     assert "Думаю без ответа." in output
     assert "...done thinking." in output
     assert "[error] ollama_thinking_without_final_response model=jarvis:chat8b elapsed=1.700s" in output
+    assert "Модель показала thinking, но не дала финальный ответ. Повтори короче или отключи thinking для FAST." in output
 
 
 def test_terminal_chat_command_timeout_does_not_claim_api_is_down(monkeypatch, capsys) -> None:
@@ -253,6 +288,25 @@ def test_terminal_chat_dispatches_explicit_command_and_stream(monkeypatch) -> No
     assert calls == [("command", "Джарвис привет"), ("stream", "Джарвис привет")]
 
 
+def test_terminal_chat_dispatches_trace_debug_and_logs_commands(monkeypatch, capsys) -> None:
+    module = _module()
+    calls: list[str] = []
+
+    monkeypatch.setattr(module, "_print_logs", lambda: calls.append("logs"))
+
+    assert module._dispatch_user_text("/trace on") is False
+    assert module._TRACE_ENABLED is True
+    assert module._dispatch_user_text("/trace off") is False
+    assert module._TRACE_ENABLED is False
+    assert module._dispatch_user_text("/debug on") is False
+    assert module._DEBUG_ENABLED is True
+    assert module._dispatch_user_text("/debug off") is False
+    assert module._DEBUG_ENABLED is False
+    assert module._dispatch_user_text("/logs") is False
+    assert calls == ["logs"]
+    capsys.readouterr()
+
+
 def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, capsys) -> None:
     module = _module()
     inputs = iter(["Джарвис привет", "/exit"])
@@ -269,5 +323,5 @@ def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, ca
 
     assert module.main() == 0
     output = capsys.readouterr().out
-    assert "request_interrupted=true" in output
+    assert "request_interrupted=true" not in output
     assert "Traceback" not in output

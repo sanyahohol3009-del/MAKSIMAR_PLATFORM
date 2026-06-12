@@ -14,6 +14,8 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RUNTIME_LOG_DIR = PROJECT_ROOT / ".runtime" / "jarvis_live"
+API_LOG_FILE = RUNTIME_LOG_DIR / "api.log"
 API_HOST = "127.0.0.1"
 API_PORT = "8765"
 API_BASE_URL = f"http://{API_HOST}:{API_PORT}"
@@ -27,6 +29,9 @@ UVICORN_COMMAND = (
     API_HOST,
     "--port",
     API_PORT,
+    "--log-level",
+    "warning",
+    "--no-access-log",
 )
 TERMINAL_CHAT_COMMAND = (
     sys.executable,
@@ -47,29 +52,28 @@ def main(argv: list[str] | None = None) -> int:
         if args.restart:
             _stop_matching_project_api_processes()
         else:
-            print("[launcher] api ready")
-            print("[launcher] opening JARVIS terminal chat")
             return _run_terminal_chat(env)
     else:
         _stop_matching_project_api_processes()
 
-    print("[launcher] starting CONTROL_PLANE api on 127.0.0.1:8765")
-    started_process = subprocess.Popen(  # noqa: S603 - controlled canonical local API.
-        list(UVICORN_COMMAND),
-        cwd=str(PROJECT_ROOT),
-        env=env,
-        start_new_session=False,
-    )
-    try:
-        if not _wait_until_api_ready():
-            print("[launcher] api failed to become ready")
-            return 1
-        print("[launcher] api ready")
-        print("[launcher] opening JARVIS terminal chat")
-        return _run_terminal_chat(env)
-    finally:
-        if started_process is not None:
-            _stop_started_process(started_process)
+    RUNTIME_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    with API_LOG_FILE.open("a", encoding="utf-8") as log_handle:
+        started_process = subprocess.Popen(  # noqa: S603 - controlled canonical local API.
+            list(UVICORN_COMMAND),
+            cwd=str(PROJECT_ROOT),
+            env=env,
+            start_new_session=False,
+            stdout=log_handle,
+            stderr=log_handle,
+        )
+        try:
+            if not _wait_until_api_ready():
+                print(f"JARVIS API failed to start. log={API_LOG_FILE}")
+                return 1
+            return _run_terminal_chat(env)
+        finally:
+            if started_process is not None:
+                _stop_started_process(started_process)
 
 
 def _launcher_env() -> dict[str, str]:
@@ -113,7 +117,6 @@ def _stop_matching_project_api_processes() -> None:
     pids = tuple(_matching_project_api_pids())
     if not pids:
         return
-    print("[launcher] stopping stale jarvis api...")
     for pid in pids:
         _terminate_pid(pid)
 

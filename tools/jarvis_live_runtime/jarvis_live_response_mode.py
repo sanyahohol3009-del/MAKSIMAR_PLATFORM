@@ -30,7 +30,7 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
     if _contains_any(lowered, DETAILED_TRIGGERS):
         return JarvisLiveResponseMode(
             response_mode="detailed_mode",
-            ollama_num_predict=420,
+            ollama_num_predict=640,
             ollama_temperature=0.25,
             instruction=(
                 "Режим detailed_mode: дай более длинный структурированный ответ. "
@@ -40,7 +40,7 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
     if _contains_any(lowered, COMMAND_TRIGGERS):
         return JarvisLiveResponseMode(
             response_mode="command_mode",
-            ollama_num_predict=120,
+            ollama_num_predict=256,
             ollama_temperature=0.2,
             instruction=(
                 "Режим command_mode: дай короткое подтверждение или preview. "
@@ -50,7 +50,7 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
     if _contains_any(lowered, CODE_TRIGGERS):
         return JarvisLiveResponseMode(
             response_mode="code_mode",
-            ollama_num_predict=260,
+            ollama_num_predict=384,
             ollama_temperature=0.2,
             instruction=(
                 "Режим code_mode: дай структурированный ответ с командами или проверками, "
@@ -59,7 +59,7 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
         )
     return JarvisLiveResponseMode(
         response_mode="voice_mode",
-        ollama_num_predict=160,
+        ollama_num_predict=512,
         ollama_temperature=0.35,
         instruction=(
             "Answer in 1-2 short spoken Russian sentences. Do not repeat full identity "
