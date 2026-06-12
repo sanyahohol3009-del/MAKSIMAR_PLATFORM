@@ -1,3 +1,9 @@
+if [ -f "tools/jarvis_live_runtime/jarvis_live_chat_launcher.py" ]; then
+  chat() {
+    python tools/jarvis_live_runtime/jarvis_live_chat_launcher.py "$@"
+  }
+fi
+
 if [ "${JARVIS_LIVE_AUTO_START:-0}" != "1" ]; then
   return 0 2>/dev/null || exit 0
 fi
