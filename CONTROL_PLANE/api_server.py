@@ -12,14 +12,9 @@ import time
 from CONTROL_PLANE.health.monitor import take_snapshot
 from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_brain_loop_server_adapter import (
     build_jarvis_live_brain_health,
-    build_jarvis_live_session_status,
-    run_jarvis_live_brain_once,
-    stream_jarvis_live_brain_response,
-    write_stream_event_safely,
-)
-from tools.jarvis_live_runtime.jarvis_live_brain_loop import (
-    build_jarvis_live_tool_catalog_read_model,
     build_jarvis_live_project_status_read_model,
+    build_jarvis_live_session_status,
+    build_jarvis_live_tool_catalog_read_model,
     build_project_workspace_read_model,
     model_runtime_status,
     read_file_outline,
@@ -29,7 +24,10 @@ from tools.jarvis_live_runtime.jarvis_live_brain_loop import (
     repo_import_graph,
     repo_search,
     repo_tree,
+    run_jarvis_live_brain_once,
+    stream_jarvis_live_brain_response,
     status_tools,
+    write_stream_event_safely,
 )
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     select_jarvis_live_model_role,

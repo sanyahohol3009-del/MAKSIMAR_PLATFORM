@@ -56,7 +56,7 @@ def test_control_plane_exposes_jarvis_live_brain_routes_without_new_server() -> 
     source = Path("CONTROL_PLANE/api_server.py").read_text(encoding="utf-8")
     assert "FastAPI(title=\"MAKSIMAR Control Plane\")" in source
     assert "MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_brain_loop_server_adapter" in source
-    assert "from tools.jarvis_live_runtime.jarvis_live_brain_loop import" in source
+    assert "from tools.jarvis_live_runtime.jarvis_live_brain_loop import" not in source
     assert "write_stream_event_safely" in source
     assert "brain_bridge" not in source
     assert "second server" not in source.lower()
