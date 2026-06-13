@@ -15,6 +15,7 @@ COMMAND_URL = f"{API_BASE_URL}/jarvis-live/command"
 STREAM_URL = f"{API_BASE_URL}/jarvis-live/chat/stream"
 HEALTH_URL = f"{API_BASE_URL}/jarvis-live/health"
 STATUS_URL = f"{API_BASE_URL}/jarvis-live/status"
+MODELS_URL = f"{API_BASE_URL}/jarvis-live/models"
 SESSION_ID = "terminal_chat"
 HEALTH_TIMEOUT_SECONDS = 10
 COMMAND_TIMEOUT_SECONDS = 240
@@ -85,6 +86,9 @@ def _dispatch_user_text(user_text: str) -> bool:
         return False
     if user_text == "/models":
         _print_models()
+        return False
+    if user_text == "/debug ollama":
+        _print_models(verbose=True)
         return False
     if user_text == "/project" or user_text.startswith("/project "):
         _print_stream_response(user_text)
@@ -244,15 +248,25 @@ def _print_memory_sources() -> None:
     print(f"mempalace_status={payload.get('mempalace_status', '')}")
 
 
-def _print_models() -> None:
-    payload = _get_json(HEALTH_URL)
+def _print_models(verbose: bool = False) -> None:
+    payload = _get_json(MODELS_URL) or _get_json(HEALTH_URL)
     if payload is None:
         _print_api_not_running()
         return
-    print("jarvis:chat8b = primary conversation")
-    print("jarvis:helper3b = classifier/summary/router helper")
-    print("jarvis:coder7b = daily/simple coder")
-    print("jarvis:coder14b = heavy coder/architecture/traceback")
+    models = payload.get("models") if isinstance(payload.get("models"), dict) else payload
+    print(f"ollama_version={models.get('ollama_version', 'unavailable')}")
+    print(f"ollama_tags={models.get('ollama_tags', 'unavailable')}")
+    print(f"ollama_ps={models.get('ollama_ps', 'unavailable')}")
+    print(f"ollama_show_primary_model={models.get('ollama_show_primary_model', 'unavailable')}")
+    print(f"ollama_is_local_model_engine={models.get('ollama_is_local_model_engine', 'true')}")
+    print(f"pc_control_allowed={str(bool(models.get('pc_control_allowed', False))).lower()}")
+    print(
+        "canonical_memory_write_allowed="
+        f"{str(bool(payload.get('canonical_memory_write_allowed', False))).lower()}"
+    )
+    if verbose:
+        print("debug_mode=ollama")
+        print(f"api_log={API_LOG_FILE}")
 
 
 def _print_logs() -> None:
@@ -416,6 +430,27 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
             f"total={_seconds(event.get('total_elapsed_seconds', ''))} "
             f"chunks={event.get('stream_chunk_count', 0)}"
         )
+        print(
+            "[trace] "
+            f"endpoint={event.get('ollama_endpoint', '')} "
+            f"primary={event.get('primary_endpoint', '')} "
+            f"fallback={event.get('fallback_endpoint', '')} "
+            f"fallback_used={str(bool(event.get('ollama_endpoint_fallback_used', False))).lower()} "
+            f"think_mode={event.get('think_mode', '')} "
+            f"num_predict={event.get('ollama_num_predict', '')} "
+            f"temperature={event.get('ollama_temperature', '')}"
+        )
+        if event.get("primary_error_kind"):
+            print(f"[trace] primary_error_kind={event.get('primary_error_kind', '')}")
+        if event.get("tool_call_detected"):
+            print(
+                "[trace] "
+                f"tool_call_detected={str(bool(event.get('tool_call_detected', False))).lower()} "
+                f"tool_call_count={event.get('tool_call_count', 0)} "
+                f"execution_allowed={str(bool(event.get('execution_allowed', False))).lower()} "
+                f"approval_required={str(bool(event.get('approval_required', False))).lower()} "
+                f"proposal_only={str(bool(event.get('proposal_only', False))).lower()}"
+            )
         print(f"selected_model_id={event.get('selected_model_id', '')}")
         print(f"selected_model_role={event.get('selected_model_role', '')}")
         print(f"retrieved_snippet_count={event.get('retrieved_snippet_count', 0)}")
@@ -483,7 +518,11 @@ def _print_stream_route_trace(event: dict[str, Any]) -> None:
         f"context={_seconds(event.get('context_elapsed_seconds', ''))} "
         f"snippets={event.get('retrieved_snippet_count', 0)} "
         f"surfaces={_csv(event.get('retrieval_surfaces_used', ())) } "
-        f"local_memory={event.get('local_chat_memory_snippet_count', 0)}"
+        f"local_memory={event.get('local_chat_memory_snippet_count', 0)} "
+        f"endpoint={event.get('ollama_endpoint', '')} "
+        f"think_mode={event.get('think_mode', '')} "
+        f"fallback_used={str(bool(event.get('ollama_endpoint_fallback_used', False))).lower()} "
+        f"num_predict={event.get('ollama_num_predict', '')}"
     )
 
 

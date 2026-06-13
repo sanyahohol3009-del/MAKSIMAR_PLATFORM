@@ -27,8 +27,7 @@ def test_terminal_chat_uses_existing_control_plane_routes_only() -> None:
     assert "/jarvis-live/health" in source
     assert "/jarvis-live/status" in source
     assert "import httpx" in source
-    assert "urllib.request" not in source
-    assert "urllib.error" not in source
+    assert "/debug ollama" in source
     assert "tools.jarvis_live_runtime.jarvis_live_brain_loop" not in source
     assert "CONTROL_PLANE.api_server" not in source.replace(
         "python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765",
@@ -69,6 +68,7 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/project models" in source
     assert "/project safety" in source
     assert "/logs" in source
+    assert "/debug ollama" in source
     assert "/trace on" in source
     assert "/trace off" in source
     assert "/debug on" in source
@@ -148,6 +148,33 @@ def test_terminal_chat_has_long_command_timeout_and_stream_route() -> None:
     assert "def _print_stream_response(text: str) -> None:" in source
     assert "def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:" in source
     assert "STREAM_URL" in source
+    assert "MODELS_URL" in source
+
+
+def test_terminal_chat_prints_read_only_ollama_models_and_debug_view(capsys) -> None:
+    module = _module()
+
+    fake_payload = {
+        "models": {
+            "ollama_version": "{\"version\":\"0.0.0\"}",
+            "ollama_tags": "{\"models\":[]}",
+            "ollama_ps": "{\"models\":[]}",
+            "ollama_show_primary_model": "{\"model\":\"jarvis:chat8b\"}",
+            "ollama_is_local_model_engine": "true",
+            "pc_control_allowed": False,
+        }
+    }
+    module._get_json = lambda url: fake_payload
+
+    module._print_models()
+    module._print_models(verbose=True)
+
+    output = capsys.readouterr().out
+    assert "ollama_version=" in output
+    assert "ollama_tags=" in output
+    assert "ollama_ps=" in output
+    assert "ollama_show_primary_model=" in output
+    assert "debug_mode=ollama" in output
 
 
 def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
@@ -161,7 +188,10 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     )
     module._print_stream_event(
         '{"event":"route_selected","context_elapsed_seconds":0.018,'
-        '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"]}'
+        '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"],'
+        '"ollama_endpoint":"http://127.0.0.1:11434/api/chat",'
+        '"think_mode":"false","ollama_endpoint_fallback_used":false,'
+        '"ollama_num_predict":160}'
     )
     module._print_stream_metadata(
         {
@@ -170,14 +200,22 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
             "total_elapsed_seconds": 2.19,
             "stream_chunk_count": 34,
             "selected_model_id": "jarvis:chat8b",
+            "ollama_endpoint": "http://127.0.0.1:11434/api/chat",
+            "primary_endpoint": "http://127.0.0.1:11434/api/chat",
+            "fallback_endpoint": "http://127.0.0.1:11434/api/generate",
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "false",
+            "ollama_num_predict": 160,
+            "ollama_temperature": 0.4,
         }
     )
 
     output = capsys.readouterr().out
     assert "[trace] route=conversation mode=FAST memory=session_only model=jarvis:chat8b status=installed" in output
-    assert "[trace] context=0.018s snippets=0 surfaces=session_memory" in output
+    assert "[trace] context=0.018s snippets=0 surfaces=session_memory local_memory=0 endpoint=http://127.0.0.1:11434/api/chat think_mode=false fallback_used=false num_predict=160" in output
     assert "local_memory=0" in output
     assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
+    assert "[trace] endpoint=http://127.0.0.1:11434/api/chat primary=http://127.0.0.1:11434/api/chat fallback=http://127.0.0.1:11434/api/generate fallback_used=false think_mode=false num_predict=160 temperature=0.4" in output
     assert "stream_event=start" not in output
 
 

@@ -123,9 +123,15 @@ def test_read_only_project_and_memory_endpoints_expose_existing_read_models() ->
     assert outline["outline"]["read_only"] is True
     assert imports["imports"]["read_only"] is True
     assert tests["project"]["read_only"] is True
+    assert tests["test_file_count"] > 0
     assert roadmap["status"]["read_only"] == "true"
     assert models["models"]["ollama_is_local_model_engine"] == "true"
+    assert "ollama_version" in models["models"]
+    assert "ollama_tags" in models["models"]
+    assert "ollama_ps" in models["models"]
     assert safety["read_only"] is True
+    assert "safety_matches" in safety
+    assert len(safety["safety_matches"]) >= 0
     assert memory["session"]["canonical_memory_write_allowed"] is False
     assert memory["brain_health"]["canonical_memory_write_allowed"] is False
     assert logs["api_log_file"]

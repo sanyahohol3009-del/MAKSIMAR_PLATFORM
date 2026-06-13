@@ -232,6 +232,286 @@ def test_thinking_without_final_response_is_reported(monkeypatch) -> None:
     assert "increase num_predict or disable thinking" in done["error_message"]
 
 
+def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    captured: dict[str, object] = {}
+
+    def fake_chat(
+        model_id: str,
+        prompt: str,
+        timeout_seconds: float | None = None,
+        response_mode: object | None = None,
+        response_mode_text: str | None = None,
+    ):
+        captured["model_id"] = model_id
+        captured["prompt"] = prompt
+        captured["timeout_seconds"] = timeout_seconds
+        captured["response_mode_text"] = response_mode_text
+        yield {
+            "event": "chunk",
+            "text": "Привет.",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "false",
+            "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
+            "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "pc_control_allowed": False,
+        }
+        yield {
+            "event": "done",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "false",
+            "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
+            "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "pc_control_allowed": False,
+        }
+
+    def forbidden_generate(*args, **kwargs):
+        raise AssertionError("FAST path should use api/chat first")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", forbidden_generate)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис привет", session_id="test"))
+    done = events[-1]
+
+    assert captured["model_id"] == "jarvis:chat8b"
+    assert captured["response_mode_text"] == "Джарвис привет"
+    assert done["ollama_endpoint"] == brain_loop.OLLAMA_CHAT_URL
+    assert done["ollama_endpoint_fallback_used"] is False
+    assert done["think_mode"] == "false"
+    assert done["ollama_num_predict"] == brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT
+    assert done["ollama_temperature"] == brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE
+
+
+def test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only() -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    payload = {
+        "message": {
+            "thinking": "Сначала думаю.",
+            "content": "Готов.",
+            "tool_calls": [
+                {
+                    "function": {
+                        "name": "run_shell",
+                        "arguments": {"command": "rm -rf /"},
+                    }
+                }
+            ],
+        },
+        "done": True,
+    }
+
+    events = brain_loop._parse_ollama_chat_stream_event(payload, "jarvis:chat8b")
+
+    assert [event["event"] for event in events] == ["thinking", "tool_call", "chunk", "done"]
+    tool_call_event = events[1]
+    assert tool_call_event["tool_call_detected"] is True
+    assert tool_call_event["tool_call_count"] == 1
+    assert tool_call_event["execution_allowed"] is False
+    assert tool_call_event["approval_required"] is True
+    assert tool_call_event["proposal_only"] is True
+
+
+def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def fake_chat(
+        model_id: str,
+        prompt: str,
+        timeout_seconds: float | None = None,
+        response_mode: object | None = None,
+        response_mode_text: str | None = None,
+    ):
+        yield {
+            "event": "tool_call",
+            "tool_call_detected": True,
+            "tool_call_count": 1,
+            "tool_calls": ({"function": {"name": "search_repo"}},),
+            "execution_allowed": False,
+            "approval_required": True,
+            "proposal_only": True,
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "false",
+            "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
+            "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "pc_control_allowed": False,
+        }
+        yield {
+            "event": "done",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "false",
+            "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
+            "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "pc_control_allowed": False,
+            "tool_call_count": 1,
+            "tool_call_detected": True,
+        }
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", lambda *args, **kwargs: (_ for _ in ()))
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис, расскажи про новый режим", session_id="test"))
+    tool_event = next(event for event in events if event["event"] == "tool_call")
+    done = events[-1]
+
+    assert tool_event["execution_allowed"] is False
+    assert tool_event["approval_required"] is True
+    assert tool_event["proposal_only"] is True
+    assert "tool_call proposal" in done["response_text"]
+    assert done["tool_call_detected"] is True
+    assert done["tool_call_count"] == 1
+
+
+def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def fake_chat(
+        model_id: str,
+        prompt: str,
+        timeout_seconds: float | None = None,
+        response_mode: object | None = None,
+        response_mode_text: str | None = None,
+    ):
+        yield {
+            "event": "error",
+            "ollama_model_used": model_id,
+            "error_message": "chat endpoint rejected",
+            "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "pc_control_allowed": False,
+        }
+
+    def fake_generate(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
+        yield {
+            "event": "chunk",
+            "text": "Резервный ответ.",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": True,
+            "primary_error_kind": "ollama_chat_stream_error",
+            "primary_error_message": "chat endpoint rejected",
+            "think_mode": "generate",
+            "ollama_num_predict": 512,
+            "ollama_temperature": 0.35,
+            "pc_control_allowed": False,
+        }
+        yield {
+            "event": "done",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_URL,
+            "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
+            "fallback_endpoint": brain_loop.OLLAMA_URL,
+            "ollama_endpoint_fallback_used": True,
+            "primary_error_kind": "ollama_chat_stream_error",
+            "primary_error_message": "chat endpoint rejected",
+            "think_mode": "generate",
+            "ollama_num_predict": 512,
+            "ollama_temperature": 0.35,
+            "pc_control_allowed": False,
+        }
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", fake_generate)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Джарвис привет", session_id="test"))
+    done = events[-1]
+
+    assert done["ollama_endpoint"] == brain_loop.OLLAMA_URL
+    assert done["ollama_endpoint_fallback_used"] is True
+    assert done["primary_endpoint"] == brain_loop.OLLAMA_CHAT_URL
+    assert done["fallback_endpoint"] == brain_loop.OLLAMA_URL
+    assert done["primary_error_kind"] == "ollama_chat_stream_error"
+    assert done["primary_error_message"] == "chat endpoint rejected"
+
+
+def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    def forbidden_chat(*args, **kwargs):
+        raise AssertionError("deep route should keep existing generate path")
+
+    def fake_generate(
+        model_id: str,
+        prompt: str,
+        route_mode: str,
+        timeout_seconds: float | None = None,
+        response_mode_text: str | None = None,
+    ):
+        yield {
+            "event": "chunk",
+            "text": "По суверенному ИИ есть business memory context.",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_URL,
+            "primary_endpoint": brain_loop.OLLAMA_URL,
+            "fallback_endpoint": "",
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "generate",
+            "ollama_num_predict": 640,
+            "ollama_temperature": 0.25,
+            "pc_control_allowed": False,
+        }
+        yield {
+            "event": "done",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": brain_loop.OLLAMA_URL,
+            "primary_endpoint": brain_loop.OLLAMA_URL,
+            "fallback_endpoint": "",
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": "generate",
+            "ollama_num_predict": 640,
+            "ollama_temperature": 0.25,
+            "pc_control_allowed": False,
+        }
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", forbidden_chat)
+    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", fake_generate)
+    monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+
+    events = list(stream_jarvis_live_brain_response("Что у нас есть по продаже суверенного ИИ?", session_id="test"))
+    done = events[-1]
+
+    assert done["route_mode"] == "DEEP"
+    assert done["ollama_endpoint"] == brain_loop.OLLAMA_URL
+    assert done["think_mode"] == "generate"
+    assert done["ollama_endpoint_fallback_used"] is False
+
+
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 

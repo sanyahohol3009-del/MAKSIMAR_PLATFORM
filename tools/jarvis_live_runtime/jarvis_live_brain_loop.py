@@ -56,6 +56,11 @@ OLLAMA_URL = os.environ.get(
     "JARVIS_LIVE_OLLAMA_URL",
     "http://127.0.0.1:11434/api/generate",
 )
+OLLAMA_CHAT_URL = os.environ.get(
+    "JARVIS_LIVE_OLLAMA_CHAT_URL",
+    OLLAMA_URL.replace("/api/generate", "/api/chat"),
+)
+OLLAMA_BASE_URL = OLLAMA_URL.rsplit("/api/", 1)[0] if "/api/" in OLLAMA_URL else OLLAMA_URL.rstrip("/")
 PRIMARY_CONVERSATION_MODEL_ID = "jarvis:chat8b"
 DEFAULT_OLLAMA_MODEL_ID = os.environ.get("JARVIS_LIVE_OLLAMA_MODEL", PRIMARY_CONVERSATION_MODEL_ID)
 FALLBACK_OLLAMA_MODEL_ID = "jarvis-live:qwen14b"
@@ -73,6 +78,10 @@ PROJECT_FILE_MAX_BYTES = 12000
 PROJECT_SEARCH_MAX_RESULTS = 40
 PROJECT_SEARCH_CONTEXT_LINES = 2
 PROJECT_IMPORT_MAX_EDGES = 80
+OLLAMA_FAST_CHAT_NUM_PREDICT = 160
+OLLAMA_FAST_CHAT_TEMPERATURE = 0.4
+OLLAMA_FAST_CHAT_KEEP_ALIVE = "30m"
+OLLAMA_FAST_CHAT_THINK = False
 
 
 PROJECT_VISIBILITY_EXCLUDED_DIRS = {
@@ -158,24 +167,24 @@ class JarvisBrainContext:
     pc_control_allowed: bool = False
     canonical_memory_write_allowed: bool = False
 
-    def to_prompt(self) -> str:
-        if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
-            return "\n".join(
-                part
-                for part in (
-                    _system_rules(short=True),
-                    build_jarvis_live_identity_prompt(self.user_text),
-                    _fast_final_answer_rules(),
-                    _format_style_profile(self.stable_style_profile),
-                    _format_style_memory_answer_rules(),
-                    _format_memory_truth_split(),
-                    _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
-                    _format_turns(self.recent_turns[-4:]),
-                    _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
-                    f"USER_MESSAGE: {self.user_text}",
-                )
-                if part
+    def to_fast_system_prompt(self) -> str:
+        return "\n".join(
+            part
+            for part in (
+                _system_rules(short=True),
+                build_jarvis_live_identity_prompt(self.user_text),
+                _fast_final_answer_rules(),
+                _format_style_profile(self.stable_style_profile),
+                _format_style_memory_answer_rules(),
+                _format_memory_truth_split(),
+                _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
+                _format_turns(self.recent_turns[-4:]),
+                _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
             )
+            if part
+        )
+
+    def to_deep_system_prompt(self) -> str:
         return "\n".join(
             part
             for part in (
@@ -195,10 +204,14 @@ class JarvisBrainContext:
                 _format_list("RETRIEVAL_SURFACES_USED", self.retrieval_surfaces_used),
                 _format_list("RETRIEVED_LONG_TERM_MEMORY", self.retrieved_snippets),
                 _format_section("PROJECT_STATUS_READ_ONLY", self.project_status),
-                f"USER_MESSAGE: {self.user_text}",
             )
             if part
         )
+
+    def to_prompt(self) -> str:
+        if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
+            return "\n".join(part for part in (self.to_fast_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
+        return "\n".join(part for part in (self.to_deep_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
 
     def to_read_model(self) -> dict[str, Any]:
         return {
@@ -349,6 +362,7 @@ def stream_jarvis_live_brain_response(
         request_plan=request_plan,
         session_id=session_id,
     )
+    transport_plan = _ollama_transport_plan(context.route_mode, context.to_prompt(), clean_text)
     _save_session_state(state)
     context_elapsed_seconds = round(time.monotonic() - context_started_at, 4)
 
@@ -373,6 +387,13 @@ def stream_jarvis_live_brain_response(
         "mempalace_status": context.memory_federation_status["mempalace_status"],
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+        "ollama_endpoint": transport_plan["primary_endpoint"],
+        "primary_endpoint": transport_plan["primary_endpoint"],
+        "fallback_endpoint": transport_plan["fallback_endpoint"],
+        "ollama_endpoint_fallback_used": False,
+        "think_mode": transport_plan["think_mode"],
+        "ollama_num_predict": transport_plan["ollama_num_predict"],
+        "ollama_temperature": transport_plan["ollama_temperature"],
         "context_elapsed_seconds": context_elapsed_seconds,
     }
 
@@ -419,6 +440,7 @@ def stream_jarvis_live_brain_response(
     errors: list[dict[str, Any]] = []
     model_used = ""
     empty_model_id = ""
+    completion_event: dict[str, Any] = {}
     first_chunk_elapsed_seconds = 0.0
     ollama_started_at = time.monotonic()
     for model_id in _candidate_model_ids_for_context(context):
@@ -444,7 +466,10 @@ def stream_jarvis_live_brain_response(
                         first_chunk_elapsed_seconds = round(time.monotonic() - stream_started_at, 4)
                     chunks.append(visible_text)
                     yield {**event, "text": visible_text}
+            elif event["event"] == "tool_call":
+                yield event
             elif event["event"] == "done":
+                completion_event = dict(event)
                 model_used = model_id
                 if not chunks:
                     empty_model_id = model_id
@@ -468,6 +493,8 @@ def stream_jarvis_live_brain_response(
         error_kind = str(errors[-1].get("error_kind", "ollama_stream_error"))
         error_message = str(errors[-1].get("error_message", "ollama stream returned an error"))
         response_text = "Модельный runtime сейчас не вернул ответ. Проверь Ollama статус и выбранный wrapper."
+    elif not response_text and int(completion_event.get("tool_call_count", 0)) > 0:
+        response_text = "Модель вернула tool_call proposal; execution_allowed=false; approval_required=true."
     elif not response_text and thinking_chunks:
         error_kind = "ollama_thinking_without_final_response"
         error_message = "model produced thinking but no final response; increase num_predict or disable thinking."
@@ -478,18 +505,29 @@ def stream_jarvis_live_brain_response(
     _append_assistant_and_summarize(state, response_text, context)
     yield {
         **_event("done", response_text=response_text, route_mode=context.route_mode),
+        **completion_event,
         "request_route": context.request_route,
         "retrieval_mode": context.retrieval_mode,
         "ollama_model_used": model_used,
         "thinking_chunk_count": len(thinking_chunks),
         "answer_chunk_count": len(chunks),
-        "stream_chunk_count": len(thinking_chunks) + len(chunks),
+        "stream_chunk_count": len(thinking_chunks) + len(chunks) + int(completion_event.get("tool_call_count", 0)),
         "had_thinking": bool(thinking_chunks),
+        "tool_call_detected": bool(completion_event.get("tool_call_detected", False)),
+        "tool_call_count": int(completion_event.get("tool_call_count", 0)),
+        "had_tool_call": bool(completion_event.get("tool_call_count", 0)),
         "retrieved_snippet_count": len(context.retrieved_snippets),
         "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
         "retrieval_surfaces_used": context.retrieval_surfaces_used,
         "memory_federation_available": context.memory_federation_status["memory_federation_available"],
         "mempalace_status": context.memory_federation_status["mempalace_status"],
+        "ollama_endpoint": str(completion_event.get("ollama_endpoint", "")),
+        "primary_endpoint": str(completion_event.get("primary_endpoint", "")),
+        "fallback_endpoint": str(completion_event.get("fallback_endpoint", "")),
+        "ollama_endpoint_fallback_used": bool(completion_event.get("ollama_endpoint_fallback_used", False)),
+        "think_mode": str(completion_event.get("think_mode", "")),
+        "ollama_num_predict": completion_event.get("ollama_num_predict", 0),
+        "ollama_temperature": completion_event.get("ollama_temperature", 0.0),
         "selected_model_role": context.selected_model_role["selected_model_role"],
         "selected_model_id": context.selected_model_role["model_id"],
         "selected_model_status": context.selected_model_role["status"],
@@ -811,9 +849,49 @@ def status_tools() -> dict[str, str]:
     }
 
 
+def _ollama_get_json(path: str) -> dict[str, Any] | None:
+    url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
+    try:
+        timeout = httpx.Timeout(5.0, connect=2.0)
+        with httpx.Client(timeout=timeout) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            payload = response.json()
+    except (httpx.HTTPError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _ollama_post_json(path: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+    url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
+    try:
+        timeout = httpx.Timeout(5.0, connect=2.0)
+        with httpx.Client(timeout=timeout) as client:
+            response = client.post(url, json=payload)
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _compact_json(value: Any) -> str:
+    try:
+        return json.dumps(value, ensure_ascii=False, sort_keys=True)
+    except TypeError:
+        return str(value)
+
+
 def model_runtime_status() -> dict[str, str]:
+    version = _ollama_get_json("/api/version")
+    tags = _ollama_get_json("/api/tags")
+    ps = _ollama_get_json("/api/ps")
+    show_primary = _ollama_post_json("/api/show", {"model": PRIMARY_CONVERSATION_MODEL_ID})
     return {
-        "ollama_ps": _run_optional_read_only_command(("ollama", "ps")),
+        "ollama_version": _compact_json(version) if version else "unavailable",
+        "ollama_tags": _compact_json(tags) if tags else "unavailable",
+        "ollama_ps": _compact_json(ps) if ps else "unavailable",
+        "ollama_show_primary_model": _compact_json(show_primary) if show_primary else "unavailable",
         "nvidia_smi": _run_optional_read_only_command(("nvidia-smi",)),
         "free_h": _run_optional_read_only_command(("free", "-h")),
         "ollama_is_local_model_engine": "true",
@@ -852,6 +930,251 @@ def _stream_ollama_model(
     timeout_seconds: float | None = None,
     response_mode_text: str | None = None,
 ) -> Iterator[dict[str, Any]]:
+    transport_plan = _ollama_transport_plan(route_mode, prompt, response_mode_text or prompt)
+    if route_mode != "FAST":
+        yield from _stream_ollama_generate_model(
+            model_id,
+            prompt,
+            route_mode,
+            timeout_seconds=timeout_seconds,
+            response_mode_text=response_mode_text,
+        )
+        return
+
+    primary_endpoint = transport_plan["primary_endpoint"]
+    fallback_endpoint = transport_plan["fallback_endpoint"]
+    primary_error_reason: dict[str, Any] | None = None
+    thinking_chunk_count = 0
+    answer_chunk_count = 0
+    tool_call_count = 0
+    primary_done_event: dict[str, Any] = {}
+    for event in _stream_ollama_chat_model(
+        model_id,
+        prompt,
+        timeout_seconds=timeout_seconds,
+        response_mode=transport_plan["response_mode"],
+        response_mode_text=response_mode_text or prompt,
+    ):
+        event_type = str(event.get("event", ""))
+        if event_type == "thinking":
+            thinking_chunk_count += 1
+            yield event
+            continue
+        if event_type == "tool_call":
+            tool_call_count += int(event.get("tool_call_count", 0))
+            yield event
+            continue
+        if event_type == "chunk":
+            answer_chunk_count += 1
+            yield event
+            continue
+        if event_type == "done":
+            primary_done_event = event
+            break
+        if event_type == "error":
+            primary_error_reason = {
+                "error_kind": "ollama_chat_stream_error",
+                "error_message": str(event.get("error_message", "ollama chat returned an error")),
+                "ollama_model_used": model_id,
+                "ollama_endpoint": primary_endpoint,
+            }
+            break
+
+    if answer_chunk_count > 0 or tool_call_count > 0:
+        primary_done_event = {
+            **primary_done_event,
+            "tool_call_count": tool_call_count,
+            "tool_call_detected": bool(tool_call_count),
+        }
+        done_event = {
+            **primary_done_event,
+            "event": "done",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": primary_endpoint,
+            "primary_endpoint": primary_endpoint,
+            "fallback_endpoint": fallback_endpoint,
+            "ollama_endpoint_fallback_used": False,
+            "think_mode": transport_plan["think_mode"],
+            "ollama_num_predict": transport_plan["ollama_num_predict"],
+            "ollama_temperature": transport_plan["ollama_temperature"],
+        }
+        yield done_event
+        return
+
+    fallback_reason = primary_error_reason
+    if fallback_reason is None and thinking_chunk_count > 0:
+        fallback_reason = {
+            "error_kind": "ollama_thinking_without_final_response",
+            "error_message": "model produced thinking but no final response; increase num_predict or disable thinking.",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": primary_endpoint,
+        }
+    if fallback_reason is None and primary_done_event:
+        fallback_reason = {
+            "error_kind": "ollama_chat_empty_response",
+            "error_message": "chat endpoint returned done without content",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": primary_endpoint,
+        }
+    if fallback_reason is None:
+        fallback_reason = {
+            "error_kind": "ollama_chat_unavailable",
+            "error_message": "chat endpoint unavailable",
+            "ollama_model_used": model_id,
+            "ollama_endpoint": primary_endpoint,
+        }
+    yield from _collect_generate_stream_events(
+        model_id=model_id,
+        prompt=prompt,
+        route_mode=route_mode,
+        timeout_seconds=timeout_seconds,
+        response_mode_text=response_mode_text,
+        fallback_reason=fallback_reason,
+        primary_endpoint=primary_endpoint,
+        fallback_endpoint=fallback_endpoint,
+    )
+
+
+def _build_ollama_chat_payload(
+    model_id: str,
+    system_prompt: str,
+    user_text: str,
+    think_mode: bool | str = OLLAMA_FAST_CHAT_THINK,
+    num_predict: int = OLLAMA_FAST_CHAT_NUM_PREDICT,
+    temperature: float = OLLAMA_FAST_CHAT_TEMPERATURE,
+    keep_alive: str = OLLAMA_FAST_CHAT_KEEP_ALIVE,
+    tools: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "model": model_id,
+        "stream": True,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text},
+        ],
+        "think": think_mode,
+        "keep_alive": keep_alive,
+        "options": {
+            "num_predict": num_predict,
+            "temperature": temperature,
+        },
+    }
+    if tools:
+        payload["tools"] = tools
+    return payload
+
+
+def _parse_ollama_chat_stream_event(payload: dict[str, Any], model_id: str) -> tuple[dict[str, Any], ...]:
+    events: list[dict[str, Any]] = []
+    if payload.get("error"):
+        events.append(
+            _event(
+                "error",
+                ollama_model_used=model_id,
+                error_message=str(payload.get("error", "")),
+            )
+        )
+        return tuple(events)
+    message = payload.get("message") if isinstance(payload.get("message"), dict) else {}
+    thinking = str(message.get("thinking", "") or payload.get("thinking", ""))
+    content = str(message.get("content", "") or payload.get("response", "") or payload.get("content", ""))
+    tool_calls = message.get("tool_calls") if isinstance(message, dict) else None
+    if not isinstance(tool_calls, list):
+        tool_calls = payload.get("tool_calls") if isinstance(payload.get("tool_calls"), list) else []
+    if thinking:
+        events.append(_event("thinking", text=thinking, ollama_model_used=model_id))
+    if tool_calls:
+        events.append(
+            _event(
+                "tool_call",
+                ollama_model_used=model_id,
+                tool_call_detected=True,
+                tool_call_count=len(tool_calls),
+                tool_calls=tuple(tool_calls),
+                execution_allowed=False,
+                approval_required=True,
+                proposal_only=True,
+            )
+        )
+    if content:
+        events.append(_event("chunk", text=content, ollama_model_used=model_id))
+    if payload.get("done") is True:
+        events.append(_event("done", ollama_model_used=model_id))
+    return tuple(events)
+
+
+def _stream_ollama_chat_model(
+    model_id: str,
+    prompt: str,
+    timeout_seconds: float | None = None,
+    response_mode: Any | None = None,
+    response_mode_text: str | None = None,
+) -> Iterator[dict[str, Any]]:
+    system_prompt, user_text = _split_chat_prompt(prompt, response_mode_text or prompt)
+    payload = _build_ollama_chat_payload(
+        model_id,
+        system_prompt=system_prompt,
+        user_text=user_text,
+        think_mode=OLLAMA_FAST_CHAT_THINK,
+        num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
+        temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+        keep_alive=OLLAMA_FAST_CHAT_KEEP_ALIVE,
+    )
+    timeout = httpx.Timeout(timeout_seconds or 120.0, connect=min(10.0, timeout_seconds or 120.0))
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            with client.stream("POST", OLLAMA_CHAT_URL, json=payload) as response:
+                response.raise_for_status()
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    try:
+                        chat_payload = json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        yield _event(
+                            "error",
+                            ollama_model_used=model_id,
+                            error_message=f"json_decode_error: {exc}",
+                            ollama_endpoint=OLLAMA_CHAT_URL,
+                            primary_endpoint=OLLAMA_CHAT_URL,
+                            fallback_endpoint=OLLAMA_URL,
+                            ollama_endpoint_fallback_used=False,
+                            think_mode="false",
+                            ollama_num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
+                            ollama_temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+                        )
+                        return
+                    for event in _parse_ollama_chat_stream_event(chat_payload, model_id):
+                        event.setdefault("ollama_endpoint", OLLAMA_CHAT_URL)
+                        event.setdefault("primary_endpoint", OLLAMA_CHAT_URL)
+                        event.setdefault("fallback_endpoint", OLLAMA_URL)
+                        event.setdefault("ollama_endpoint_fallback_used", False)
+                        event.setdefault("think_mode", "false")
+                        event.setdefault("ollama_num_predict", OLLAMA_FAST_CHAT_NUM_PREDICT)
+                        event.setdefault("ollama_temperature", OLLAMA_FAST_CHAT_TEMPERATURE)
+                        yield event
+    except (httpx.HTTPError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
+        yield _event(
+            "error",
+            ollama_model_used=model_id,
+            error_message=f"{exc.__class__.__name__}: {exc}",
+            ollama_endpoint=OLLAMA_CHAT_URL,
+            primary_endpoint=OLLAMA_CHAT_URL,
+            fallback_endpoint=OLLAMA_URL,
+            ollama_endpoint_fallback_used=False,
+            think_mode="false",
+            ollama_num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
+            ollama_temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+        )
+
+
+def _stream_ollama_generate_model(
+    model_id: str,
+    prompt: str,
+    route_mode: str,
+    timeout_seconds: float | None = None,
+    response_mode_text: str | None = None,
+) -> Iterator[dict[str, Any]]:
     response_mode = classify_response_mode(response_mode_text or prompt)
     options = build_ollama_options(response_mode)
     request_payload: dict[str, Any] = {
@@ -878,23 +1201,185 @@ def _stream_ollama_model(
                             "error",
                             ollama_model_used=model_id,
                             error_message=str(payload.get("error", "")),
+                            ollama_endpoint=OLLAMA_URL,
+                            primary_endpoint=OLLAMA_URL,
+                            fallback_endpoint="",
+                            ollama_endpoint_fallback_used=False,
+                            think_mode="generate",
+                            ollama_num_predict=options.get("num_predict", 0),
+                            ollama_temperature=options.get("temperature", 0.0),
                         )
                         return
                     thinking = str(payload.get("thinking", ""))
                     if thinking:
-                        yield _event("thinking", text=thinking, ollama_model_used=model_id)
+                        yield _event("thinking", text=thinking, ollama_model_used=model_id, ollama_endpoint=OLLAMA_URL)
                     chunk = str(payload.get("response", ""))
                     if chunk:
-                        yield _event("chunk", text=chunk, ollama_model_used=model_id)
+                        yield _event("chunk", text=chunk, ollama_model_used=model_id, ollama_endpoint=OLLAMA_URL)
                     if payload.get("done") is True:
-                        yield _event("done", ollama_model_used=model_id)
+                        yield _event(
+                            "done",
+                            ollama_model_used=model_id,
+                            ollama_endpoint=OLLAMA_URL,
+                            primary_endpoint=OLLAMA_URL,
+                            fallback_endpoint="",
+                            ollama_endpoint_fallback_used=False,
+                            think_mode="generate",
+                            ollama_num_predict=options.get("num_predict", 0),
+                            ollama_temperature=options.get("temperature", 0.0),
+                        )
                         return
     except (httpx.HTTPError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
         yield _event(
             "error",
             ollama_model_used=model_id,
             error_message=f"{exc.__class__.__name__}: {exc}",
+            ollama_endpoint=OLLAMA_URL,
+            primary_endpoint=OLLAMA_URL,
+            fallback_endpoint="",
+            ollama_endpoint_fallback_used=False,
+            think_mode="generate",
+            ollama_num_predict=options.get("num_predict", 0),
+            ollama_temperature=options.get("temperature", 0.0),
         )
+
+
+def _ollama_transport_plan(
+    route_mode: str,
+    prompt: str,
+    response_mode_text: str,
+) -> dict[str, Any]:
+    response_mode = classify_response_mode(response_mode_text or prompt)
+    if route_mode == "FAST":
+        return {
+            "response_mode": response_mode,
+            "primary_endpoint": OLLAMA_CHAT_URL,
+            "fallback_endpoint": OLLAMA_URL,
+            "think_mode": "false",
+            "ollama_num_predict": OLLAMA_FAST_CHAT_NUM_PREDICT,
+            "ollama_temperature": OLLAMA_FAST_CHAT_TEMPERATURE,
+            "keep_alive": OLLAMA_FAST_CHAT_KEEP_ALIVE,
+        }
+    options = build_ollama_options(response_mode)
+    return {
+        "response_mode": response_mode,
+        "primary_endpoint": OLLAMA_URL,
+        "fallback_endpoint": "",
+        "think_mode": "generate",
+        "ollama_num_predict": int(options.get("num_predict", 0)),
+        "ollama_temperature": float(options.get("temperature", 0.0)),
+        "keep_alive": os.environ.get("JARVIS_LIVE_OLLAMA_KEEP_ALIVE", "30m"),
+    }
+
+
+def _split_chat_prompt(prompt: str, fallback_user_text: str) -> tuple[str, str]:
+    marker = "\nUSER_MESSAGE: "
+    if marker in prompt:
+        system_prompt, user_text = prompt.rsplit(marker, 1)
+        user_text = user_text.strip() or fallback_user_text
+        return system_prompt.strip(), user_text
+    return prompt.strip(), fallback_user_text
+
+
+def _collect_chat_stream_events(
+    model_id: str,
+    prompt: str,
+    timeout_seconds: float | None,
+    response_mode: Any | None,
+    response_mode_text: str,
+) -> dict[str, Any]:
+    events: list[dict[str, Any]] = []
+    thinking_chunk_count = 0
+    answer_chunk_count = 0
+    tool_call_count = 0
+    primary_error_event: dict[str, Any] | None = None
+    done_event: dict[str, Any] = {}
+    for event in _stream_ollama_chat_model(
+        model_id,
+        prompt,
+        timeout_seconds=timeout_seconds,
+        response_mode=response_mode,
+        response_mode_text=response_mode_text,
+    ):
+        event_type = str(event.get("event", ""))
+        if event_type == "thinking":
+            thinking_chunk_count += 1
+            events.append(event)
+            continue
+        if event_type == "tool_call":
+            tool_call_count += int(event.get("tool_call_count", 0))
+            events.append(event)
+            continue
+        if event_type == "chunk":
+            answer_chunk_count += 1
+            events.append(event)
+            continue
+        if event_type == "error":
+            primary_error_event = {
+                "error_kind": "ollama_chat_stream_error",
+                "error_message": str(event.get("error_message", "ollama chat returned an error")),
+                "ollama_model_used": model_id,
+                "ollama_endpoint": OLLAMA_CHAT_URL,
+            }
+            break
+        if event_type == "done":
+            done_event = event
+            break
+    return {
+        "events": tuple(events),
+        "done_event": done_event,
+        "thinking_chunk_count": thinking_chunk_count,
+        "answer_chunk_count": answer_chunk_count,
+        "tool_call_count": tool_call_count,
+        "primary_error_event": primary_error_event,
+        "ollama_endpoint": OLLAMA_CHAT_URL,
+        "primary_endpoint": OLLAMA_CHAT_URL,
+        "fallback_endpoint": OLLAMA_URL,
+        "think_mode": "false",
+        "ollama_num_predict": OLLAMA_FAST_CHAT_NUM_PREDICT,
+        "ollama_temperature": OLLAMA_FAST_CHAT_TEMPERATURE,
+        "ollama_endpoint_fallback_used": False,
+    }
+
+
+def _collect_generate_stream_events(
+    model_id: str,
+    prompt: str,
+    route_mode: str,
+    timeout_seconds: float | None,
+    response_mode_text: str | None,
+    fallback_reason: dict[str, Any] | None,
+    primary_endpoint: str,
+    fallback_endpoint: str,
+) -> Iterator[dict[str, Any]]:
+    response_mode = classify_response_mode(response_mode_text or prompt)
+    options = build_ollama_options(response_mode)
+    for event in _stream_ollama_generate_model(
+        model_id,
+        prompt,
+        route_mode,
+        timeout_seconds=timeout_seconds,
+        response_mode_text=response_mode_text,
+    ):
+        if fallback_reason:
+            enriched = {
+                **event,
+                "primary_endpoint": primary_endpoint,
+                "fallback_endpoint": fallback_endpoint,
+                "ollama_endpoint_fallback_used": True,
+                "primary_error_kind": str(fallback_reason.get("error_kind", "")),
+                "primary_error_message": str(fallback_reason.get("error_message", "")),
+                "think_mode": "generate",
+                "ollama_num_predict": options.get("num_predict", 0),
+                "ollama_temperature": options.get("temperature", 0.0),
+            }
+            if event.get("event") == "error":
+                enriched.setdefault("error_kind", str(fallback_reason.get("error_kind", "ollama_stream_error")))
+            if event.get("event") == "done" and not enriched.get("error_kind"):
+                enriched["error_kind"] = ""
+            yield enriched
+        else:
+            yield event
 
 
 def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:
@@ -1206,7 +1691,10 @@ def _format_project_models_answer() -> str:
         "Ollama is local model engine on localhost:11434, not a second JARVIS server.\n"
         "tool_calls are proposals/requests only; actual execution must go through CONTROL_PLANE capability/approval/action adapter/audit.\n"
         "future_adapter_scope=/api/chat, think control, tool_calls, structured JSON, /api/ps, /api/tags, /api/show, keep_alive, embeddings later\n"
+        f"ollama_version={status.get('ollama_version') or 'unavailable'}\n"
+        f"ollama_tags={status.get('ollama_tags') or 'unavailable'}\n"
         f"ollama_ps={status.get('ollama_ps') or 'unavailable'}\n"
+        f"ollama_show_primary_model={status.get('ollama_show_primary_model') or 'unavailable'}\n"
         f"nvidia_smi={status.get('nvidia_smi') or 'unavailable'}\n"
         f"free_h={status.get('free_h') or 'unavailable'}\n"
         "pc_control_allowed=false direct_execution_allowed=false model_download_allowed=false_from_chat"
