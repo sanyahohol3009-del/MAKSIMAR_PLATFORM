@@ -22,6 +22,21 @@ _LAST_API_ERROR = ""
 _THINKING_ACTIVE = False
 _TRACE_ENABLED = False
 _DEBUG_ENABLED = False
+PROJECT_COMMANDS = (
+    "/project",
+    "/project status",
+    "/project tree",
+    "/project files",
+    "/project dirty",
+    "/project search",
+    "/project file",
+    "/project outline",
+    "/project imports",
+    "/project tests",
+    "/project roadmap",
+    "/project models",
+    "/project safety",
+)
 
 
 def main() -> int:
@@ -40,6 +55,9 @@ def main() -> int:
         except KeyboardInterrupt:
             print()
             continue
+        except Exception as exc:
+            _print_terminal_runtime_error(user_text, exc)
+            continue
         if should_exit:
             return 0
 
@@ -56,8 +74,20 @@ def _dispatch_user_text(user_text: str) -> bool:
     if user_text == "/memory":
         _print_memory()
         return False
+    if user_text == "/memory recent":
+        _print_memory_recent()
+        return False
+    if user_text == "/memory style":
+        _print_memory_style()
+        return False
+    if user_text == "/memory sources":
+        _print_memory_sources()
+        return False
     if user_text == "/models":
         _print_models()
+        return False
+    if user_text == "/project" or user_text.startswith("/project "):
+        _print_stream_response(user_text)
         return False
     if user_text == "/logs":
         _print_logs()
@@ -129,8 +159,11 @@ def _print_stream_response(text: str) -> None:
         "session_id": SESSION_ID,
         "pc_control_allowed": False,
     }
-    if _stream_json_lines(STREAM_URL, payload) is None:
-        _print_command_unavailable()
+    try:
+        if _stream_json_lines(STREAM_URL, payload) is None:
+            _print_command_unavailable()
+    except Exception as exc:
+        _print_terminal_runtime_error(text, exc)
 
 
 def _print_status() -> None:
@@ -150,6 +183,57 @@ def _print_status() -> None:
 
 
 def _print_memory() -> None:
+    payload = _get_json(STATUS_URL) or _get_json(HEALTH_URL)
+    if payload is None:
+        _print_api_not_running()
+        return
+    session = payload.get("session") if isinstance(payload.get("session"), dict) else payload
+    print(f"recent_turn_count={session.get('recent_turn_count', payload.get('recent_turn_count', 0))}")
+    print(f"rolling_summary={session.get('rolling_summary', '')}")
+    print(f"active_topics={_csv(session.get('active_topics', ())) }")
+    print(f"session_memory_path={session.get('session_memory_path', payload.get('session_memory_path', ''))}")
+    print(f"local_chat_memory_path={session.get('local_chat_memory_path', payload.get('local_chat_memory_path', ''))}")
+
+
+def _print_memory_recent() -> None:
+    payload = _get_json(STATUS_URL) or _get_json(HEALTH_URL)
+    if payload is None:
+        _print_api_not_running()
+        return
+    session = payload.get("session") if isinstance(payload.get("session"), dict) else payload
+    path = Path(str(session.get("session_memory_path", "")))
+    if not path.exists():
+        print("recent_turns=none")
+        return
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        print("recent_turns=unavailable")
+        return
+    turns = state.get("recent_turns", [])
+    if not isinstance(turns, list) or not turns:
+        print("recent_turns=none")
+        return
+    for turn in turns[-6:]:
+        if isinstance(turn, dict):
+            print(f"{turn.get('role', '')}: {turn.get('text', '')}")
+
+
+def _print_memory_style() -> None:
+    payload = _get_json(STATUS_URL) or _get_json(HEALTH_URL)
+    if payload is None:
+        _print_api_not_running()
+        return
+    session = payload.get("session") if isinstance(payload.get("session"), dict) else payload
+    profile = session.get("stable_style_profile", {})
+    if not isinstance(profile, dict):
+        print("stable_style_profile=unavailable")
+        return
+    for key, value in profile.items():
+        print(f"{key}={value}")
+
+
+def _print_memory_sources() -> None:
     payload = _get_json(HEALTH_URL)
     if payload is None:
         _print_api_not_running()
@@ -400,7 +484,8 @@ def _print_stream_route_trace(event: dict[str, Any]) -> None:
         "[trace] "
         f"context={_seconds(event.get('context_elapsed_seconds', ''))} "
         f"snippets={event.get('retrieved_snippet_count', 0)} "
-        f"surfaces={_csv(event.get('retrieval_surfaces_used', ())) }"
+        f"surfaces={_csv(event.get('retrieval_surfaces_used', ())) } "
+        f"local_memory={event.get('local_chat_memory_snippet_count', 0)}"
     )
 
 
@@ -417,6 +502,13 @@ def _print_command_unavailable() -> None:
         return
     _LAST_API_ERROR = command_error or _LAST_API_ERROR
     _print_api_not_running()
+
+
+def _print_terminal_runtime_error(user_text: str, exc: Exception) -> None:
+    print(f"[error] terminal_runtime_error command={user_text!r} type={exc.__class__.__name__}: {exc}")
+    if _LAST_API_ERROR:
+        print(f"api_error={_LAST_API_ERROR}")
+    print(f"api_log={API_LOG_FILE}")
 
 
 def _api_is_available() -> bool:

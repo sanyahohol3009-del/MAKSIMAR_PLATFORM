@@ -48,7 +48,23 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/ping" in source
     assert "/status" in source
     assert "/memory" in source
+    assert "/memory recent" in source
+    assert "/memory style" in source
+    assert "/memory sources" in source
     assert "/models" in source
+    assert "/project" in source
+    assert "/project status" in source
+    assert "/project tree" in source
+    assert "/project files" in source
+    assert "/project dirty" in source
+    assert "/project search" in source
+    assert "/project file" in source
+    assert "/project outline" in source
+    assert "/project imports" in source
+    assert "/project tests" in source
+    assert "/project roadmap" in source
+    assert "/project models" in source
+    assert "/project safety" in source
     assert "/logs" in source
     assert "/trace on" in source
     assert "/trace off" in source
@@ -156,6 +172,7 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     output = capsys.readouterr().out
     assert "[trace] route=conversation mode=FAST memory=session_only model=jarvis:chat8b status=installed" in output
     assert "[trace] context=0.018s snippets=0 surfaces=session_memory" in output
+    assert "local_memory=0" in output
     assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
     assert "stream_event=start" not in output
 
@@ -307,6 +324,95 @@ def test_terminal_chat_dispatches_trace_debug_and_logs_commands(monkeypatch, cap
     capsys.readouterr()
 
 
+def test_terminal_chat_dispatches_memory_subcommands(monkeypatch) -> None:
+    module = _module()
+    calls: list[str] = []
+
+    monkeypatch.setattr(module, "_print_memory", lambda: calls.append("memory"))
+    monkeypatch.setattr(module, "_print_memory_recent", lambda: calls.append("recent"))
+    monkeypatch.setattr(module, "_print_memory_style", lambda: calls.append("style"))
+    monkeypatch.setattr(module, "_print_memory_sources", lambda: calls.append("sources"))
+
+    assert module._dispatch_user_text("/memory") is False
+    assert module._dispatch_user_text("/memory recent") is False
+    assert module._dispatch_user_text("/memory style") is False
+    assert module._dispatch_user_text("/memory sources") is False
+    assert calls == ["memory", "recent", "style", "sources"]
+
+
+def test_terminal_chat_dispatches_project_commands_to_stream(monkeypatch) -> None:
+    module = _module()
+    calls: list[str] = []
+
+    monkeypatch.setattr(module, "_print_stream_response", lambda text: calls.append(text))
+
+    assert module._dispatch_user_text("/project") is False
+    assert module._dispatch_user_text("/project status") is False
+    assert module._dispatch_user_text("/project file tools/jarvis_live_runtime/jarvis_live_brain_loop.py 1") is False
+    assert calls == [
+        "/project",
+        "/project status",
+        "/project file tools/jarvis_live_runtime/jarvis_live_brain_loop.py 1",
+    ]
+
+
+def test_terminal_chat_memory_style_command_prints_stable_profile(monkeypatch, capsys) -> None:
+    module = _module()
+
+    monkeypatch.setattr(
+        module,
+        "_get_json",
+        lambda url: {
+            "ok": True,
+            "session": {
+                "stable_style_profile": {
+                    "user_name": "Александр",
+                    "assistant_identity": "JARVIS",
+                    "relation_style": "брат / напарник по гаражу",
+                }
+            },
+        },
+    )
+
+    module._print_memory_style()
+    output = capsys.readouterr().out
+
+    assert "user_name=Александр" in output
+    assert "assistant_identity=JARVIS" in output
+    assert "relation_style=брат / напарник по гаражу" in output
+
+
+def test_terminal_chat_memory_recent_reads_existing_session_file(monkeypatch, capsys) -> None:
+    module = _module()
+
+    class FakePath:
+        def __init__(self, value):
+            self.value = value
+
+        def exists(self):
+            return True
+
+        def read_text(self, encoding="utf-8"):
+            return '{"recent_turns":[{"role":"user","text":"Привет"},{"role":"assistant","text":"На связи."}]}'
+
+    monkeypatch.setattr(
+        module,
+        "Path",
+        FakePath,
+    )
+    monkeypatch.setattr(
+        module,
+        "_get_json",
+        lambda url: {"ok": True, "session": {"session_memory_path": "/runtime/jarvis_live_session_state.json"}},
+    )
+
+    module._print_memory_recent()
+    output = capsys.readouterr().out
+
+    assert "user: Привет" in output
+    assert "assistant: На связи." in output
+
+
 def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, capsys) -> None:
     module = _module()
     inputs = iter(["Джарвис привет", "/exit"])
@@ -324,4 +430,27 @@ def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, ca
     assert module.main() == 0
     output = capsys.readouterr().out
     assert "request_interrupted=true" not in output
+    assert "Traceback" not in output
+
+
+def test_terminal_chat_survives_runtime_exception_and_keeps_loop_alive(monkeypatch, capsys) -> None:
+    module = _module()
+    inputs = iter(["/project status", "/exit"])
+    calls = {"count": 0}
+
+    monkeypatch.setattr(module, "_print_ping", lambda startup=False: None)
+    monkeypatch.setattr("builtins.input", lambda prompt: next(inputs))
+
+    def fail_once(text: str) -> bool:
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise RuntimeError("boom")
+        return text == "/exit"
+
+    monkeypatch.setattr(module, "_dispatch_user_text", fail_once)
+
+    assert module.main() == 0
+    output = capsys.readouterr().out
+    assert "[error] terminal_runtime_error" in output
+    assert "api_log=" in output
     assert "Traceback" not in output
