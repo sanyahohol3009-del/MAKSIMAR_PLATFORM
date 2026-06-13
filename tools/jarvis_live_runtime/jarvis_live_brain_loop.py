@@ -363,6 +363,7 @@ def stream_jarvis_live_brain_response(
         session_id=session_id,
     )
     transport_plan = _ollama_transport_plan(context.route_mode, context.to_prompt(), clean_text)
+    read_only_tool_plan = _build_read_only_tool_plan(clean_text, context)
     _save_session_state(state)
     context_elapsed_seconds = round(time.monotonic() - context_started_at, 4)
 
@@ -395,9 +396,30 @@ def stream_jarvis_live_brain_response(
         "ollama_num_predict": transport_plan["ollama_num_predict"],
         "ollama_temperature": transport_plan["ollama_temperature"],
         "context_elapsed_seconds": context_elapsed_seconds,
+        "intent_family": read_only_tool_plan["intent_family"],
+        "selected_tools": read_only_tool_plan["selected_tools"],
+        "read_only": read_only_tool_plan["read_only"],
+        "execution_allowed": read_only_tool_plan["execution_allowed"],
+        "evidence_required": read_only_tool_plan["evidence_required"],
+        "grounded_answer": False,
+        "ollama_called": False,
+        "evidence_count": 0,
     }
+    if read_only_tool_plan["intent_family"] != "CONVERSATION":
+        yield {
+            **_event("operator_trace"),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "reason": read_only_tool_plan["reason"],
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "ollama_called": False,
+            "pc_control_allowed": False,
+            "canonical_memory_write_allowed": False,
+        }
 
-    guarded_response = _guarded_local_response(clean_text, context)
+    guarded_response = _guarded_local_response(clean_text, context, read_only_tool_plan)
     if guarded_response is not None:
         sanitized_guarded_response = _sanitize_model_output(guarded_response)
         for chunk in _sentence_chunks(sanitized_guarded_response):
@@ -432,6 +454,14 @@ def stream_jarvis_live_brain_response(
             "pc_control_allowed": False,
             "context_elapsed_seconds": context_elapsed_seconds,
             "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+            "grounded_answer": True,
+            "ollama_called": False,
         }
         return
 
@@ -547,6 +577,14 @@ def stream_jarvis_live_brain_response(
         "ollama_elapsed_seconds": round(time.monotonic() - ollama_started_at, 4),
         "first_chunk_elapsed_seconds": first_chunk_elapsed_seconds,
         "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+        "intent_family": read_only_tool_plan["intent_family"],
+        "selected_tools": read_only_tool_plan["selected_tools"],
+        "read_only": read_only_tool_plan["read_only"],
+        "execution_allowed": read_only_tool_plan["execution_allowed"],
+        "evidence_required": read_only_tool_plan["evidence_required"],
+        "evidence_count": read_only_tool_plan.get("evidence_count", len(context.retrieved_snippets)),
+        "grounded_answer": False,
+        "ollama_called": True,
     }
 
 
@@ -920,6 +958,63 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
         "surfaces": surfaces,
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+    }
+
+
+def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
+    memory = build_jarvis_live_memory_federation_status()
+    read_tools = (
+        "repo_git_status",
+        "build_project_workspace_read_model",
+        "repo_tree",
+        "repo_files",
+        "repo_search",
+        "read_file_snippet",
+        "read_file_outline",
+        "repo_import_graph",
+        "status_tools",
+        "model_runtime_status",
+        "stable_style_profile",
+        "session_memory",
+        "local_chat_memory",
+        "runtime_history_store",
+        "history_query",
+        "memory_engine_registry",
+        "enterprise_business_memory",
+        "regulatory_memory_foundation",
+        "vector_runtime_indexes",
+        "mempalace_read_only_sandbox",
+    )
+    proposal_tools = (
+        "operator_proposal",
+        "approval_boundary_read",
+        "capability_registry_read",
+        "pytest_run_proposal",
+        "git_commit_proposal",
+        "download_install_proposal",
+        "n8n_adapter_proposal",
+        "pc_action_proposal",
+        "tool_call_proposal",
+    )
+    return {
+        "catalog_id": "jarvis_live_existing_tool_catalog_v1",
+        "read_only": True,
+        "all_existing_read_tools_connected": True,
+        "all_existing_memory_surfaces_connected": True,
+        "read_tools": read_tools,
+        "proposal_tools": proposal_tools,
+        "memory_surfaces": tuple(surface["surface_id"] for surface in memory["surfaces"]),
+        "active_retrieval_surfaces": memory["active_retrieval_surfaces"],
+        "sandbox_only_memory_surfaces": memory["sandbox_only_memory_surfaces"],
+        "disabled_memory_surfaces": memory["disabled_memory_surfaces"],
+        "execution_allowed": False,
+        "approval_required_for_actions": True,
+        "pc_control_allowed": False,
+        "shell_execution_enabled": False,
+        "direct_execution_allowed": False,
+        "canonical_write_allowed": False,
+        "runtime_mutation_allowed": False,
+        "deployment_allowed_now": False,
     }
 
 
@@ -1466,7 +1561,112 @@ def _build_admission_status(selected_model_role: dict[str, Any]) -> dict[str, An
     }
 
 
-def _guarded_local_response(user_text: str, context: JarvisBrainContext) -> str | None:
+def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> dict[str, Any]:
+    lowered = user_text.casefold()
+    intent_family = "CONVERSATION"
+    selected_tools: tuple[str, ...] = ()
+    confidence = 0.0
+    reason = "ordinary conversation"
+    needs_ollama = True
+    evidence_required = False
+
+    if _asks_action_request(lowered):
+        intent_family = "ACTION_REQUEST"
+        selected_tools = ("capability_registry_read", "approval_boundary_read", "operator_proposal")
+        confidence = 0.92
+        reason = "action verb requires proposal boundary"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_tool_catalog_question(lowered):
+        intent_family = "TOOL_CATALOG"
+        selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
+        confidence = 0.9
+        reason = "tool/capability catalog question"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_memory_history_question(lowered):
+        intent_family = "MEMORY_RECALL"
+        selected_tools = (
+            "stable_style_profile",
+            "session_memory",
+            "local_chat_memory",
+            "memory_engine_registry",
+            "runtime_history_store",
+            "history_query",
+            "mempalace_read_only_sandbox",
+        )
+        confidence = 0.9
+        reason = "history or memory question must be retrieval-first"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_model_status_question(lowered):
+        intent_family = "MODEL_STATUS"
+        selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
+        confidence = 0.9
+        reason = "model/runtime status question"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_roadmap_status_question(lowered):
+        intent_family = "ROADMAP_STATUS"
+        selected_tools = ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status", "repo_search")
+        confidence = 0.88
+        reason = "roadmap/status question"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_safety_status_question(lowered):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        confidence = 0.88
+        reason = "safety/capability boundary question"
+        needs_ollama = False
+        evidence_required = True
+    elif _extract_requested_file_path(user_text):
+        intent_family = "PROJECT_FILE"
+        selected_tools = ("read_file_snippet", "read_file_outline")
+        confidence = 0.88
+        reason = "file content request"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_project_status_question(lowered):
+        intent_family = "PROJECT_STATUS"
+        selected_tools = ("repo_git_status", "build_project_workspace_read_model")
+        confidence = 0.9
+        reason = "workspace/git status question"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_project_structure_question(lowered):
+        intent_family = "PROJECT_STRUCTURE"
+        selected_tools = ("build_project_workspace_read_model", "repo_tree", "repo_files")
+        confidence = 0.86
+        reason = "project structure question"
+        needs_ollama = False
+        evidence_required = True
+    elif _asks_project_search_question(lowered):
+        intent_family = "PROJECT_SEARCH"
+        selected_tools = ("repo_search", "read_file_snippet", "read_file_outline")
+        confidence = 0.82
+        reason = "semantic project search question"
+        needs_ollama = False
+        evidence_required = True
+
+    return {
+        "intent_family": intent_family,
+        "confidence": confidence,
+        "selected_tools": selected_tools,
+        "reason": reason,
+        "read_only": True,
+        "execution_allowed": False,
+        "needs_ollama": needs_ollama,
+        "evidence_required": evidence_required,
+        "evidence_count": 0,
+    }
+
+
+def _guarded_local_response(
+    user_text: str,
+    context: JarvisBrainContext,
+    read_only_tool_plan: dict[str, Any] | None = None,
+) -> str | None:
     lowered = user_text.casefold()
     project_tool_answer = _answer_project_read_tool_request(user_text)
     if project_tool_answer:
@@ -1474,6 +1674,13 @@ def _guarded_local_response(user_text: str, context: JarvisBrainContext) -> str 
     style_memory_answer = _answer_style_memory_recall_if_grounded(context)
     if style_memory_answer:
         return style_memory_answer
+    grounded_tool_answer = _answer_with_read_only_tools_if_grounded(
+        user_text,
+        context,
+        read_only_tool_plan or _build_read_only_tool_plan(user_text, context),
+    )
+    if grounded_tool_answer:
+        return grounded_tool_answer
     project_workspace_answer = _answer_project_workspace_summary_if_grounded(context)
     if project_workspace_answer:
         return project_workspace_answer
@@ -1520,6 +1727,56 @@ def _guarded_local_response(user_text: str, context: JarvisBrainContext) -> str 
             "canonical write и runtime mutation запрещены."
         )
     return None
+
+
+def _answer_with_read_only_tools_if_grounded(
+    user_text: str,
+    context: JarvisBrainContext,
+    plan: dict[str, Any],
+) -> str:
+    intent = str(plan.get("intent_family", "CONVERSATION"))
+    if intent == "CONVERSATION":
+        return ""
+    if intent == "PROJECT_STATUS":
+        plan["evidence_count"] = 1
+        return _format_project_status_answer()
+    if intent == "PROJECT_STRUCTURE":
+        plan["evidence_count"] = 3
+        return _format_project_structure_grounded_answer()
+    if intent == "PROJECT_SEARCH":
+        answer, evidence_count = _format_project_semantic_search_answer(user_text)
+        plan["evidence_count"] = evidence_count
+        return answer
+    if intent == "PROJECT_FILE":
+        path = _extract_requested_file_path(user_text)
+        if not path:
+            plan["evidence_count"] = 0
+            return "Не нашёл подтверждение в текущих read-only источниках: путь файла не распознан."
+        snippet = _format_file_answer(path, page=1)
+        outline = _format_outline_answer(path)
+        plan["evidence_count"] = 2 if "denied" not in snippet.casefold() else 0
+        return snippet + "\n\n" + outline
+    if intent == "MEMORY_RECALL":
+        answer, evidence_count = _format_memory_history_grounded_answer(user_text, context)
+        plan["evidence_count"] = evidence_count
+        return answer
+    if intent == "MODEL_STATUS":
+        plan["evidence_count"] = 1
+        return _format_project_models_answer()
+    if intent == "ROADMAP_STATUS":
+        plan["evidence_count"] = 1
+        return _format_roadmap_answer()
+    if intent == "SAFETY_STATUS":
+        plan["evidence_count"] = 1
+        return _format_safety_answer()
+    if intent == "ACTION_REQUEST":
+        plan["evidence_count"] = 1
+        return _format_action_request_proposal_answer(user_text)
+    if intent == "TOOL_CATALOG":
+        catalog = build_jarvis_live_tool_catalog_read_model()
+        plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
+        return _format_tool_catalog_answer(catalog)
+    return ""
 
 
 def _answer_project_read_tool_request(user_text: str) -> str:
@@ -1602,6 +1859,28 @@ def _format_project_status_answer() -> str:
     )
 
 
+def _format_project_structure_grounded_answer() -> str:
+    model = build_project_workspace_read_model()
+    tree_entries = model["top_level_tree"]["entries"][:35]
+    canonical_chain = (
+        "tools/jarvis_live_runtime/jarvis_live_chat_launcher.py -> "
+        "CONTROL_PLANE/api_server.py -> "
+        "MAKSIMAR_SERVER/AI_ORCHESTRATION/jarvis_live_brain_loop_server_adapter.py -> "
+        "tools/jarvis_live_runtime/jarvis_live_brain_loop.py -> Ollama"
+    )
+    return (
+        "Да, брат, проверил workspace read-only.\n"
+        f"project_root={model['project_root']}\n"
+        f"branch={model['git_branch']} head={str(model['git_head'])[:12]}\n"
+        f"tracked_file_count={model['tracked_file_count']}\n"
+        f"dirty={len(model['dirty_files'])} untracked={len(model['untracked_files'])} staged={len(model['staged_files'])}\n"
+        f"top_level={', '.join(tree_entries)}\n"
+        f"terminal chat canonical chain={canonical_chain}\n"
+        "next_inspect=/project files 1 | /project search <term> | /project file <path> 1\n"
+        "read_only=true direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+
+
 def _format_tree_answer() -> str:
     tree = repo_tree()
     return "Project tree page read-only:\n" + "\n".join(f"- {entry}" for entry in tree["entries"][:PROJECT_TREE_MAX_ENTRIES])
@@ -1632,6 +1911,54 @@ def _format_search_answer(query: str) -> str:
     for result in payload["results"]:
         lines.append(f"- {result['path']}:{result['line_number']}: {result['line']}")
     return "\n".join(lines)
+
+
+def _format_project_semantic_search_answer(user_text: str) -> tuple[str, int]:
+    query = _semantic_search_query(user_text)
+    payload = repo_search(query)
+    if not payload["results"] and query != user_text.strip():
+        payload = repo_search(user_text.strip())
+    path_hits = _project_path_matches(query)
+    if not payload["results"]:
+        if path_hits:
+            lines = [f"Нашёл по именам файлов read-only: query={query}; path_results={len(path_hits)}"]
+            lines.extend(f"- {path}" for path in path_hits[:20])
+            for path in path_hits[:2]:
+                outline = read_file_outline(path)
+                if outline.get("allowed"):
+                    lines.append(
+                        f"outline {path}: imports={_csv(outline['imports']) or 'none'}; "
+                        f"classes={_csv(outline['classes']) or 'none'}; "
+                        f"functions={_csv(outline['functions'][:12]) or 'none'}"
+                    )
+            lines.append("read_only=true direct_execution_allowed=false")
+            return "\n".join(lines), len(path_hits)
+        return (
+            "Не нашёл подтверждение в текущих read-only источниках.\n"
+            f"checked_tools=repo_search, read_file_snippet, read_file_outline\nquery={query}",
+            0,
+        )
+    lines = [f"Нашёл по проекту read-only: query={query}; results={payload['result_count']}"]
+    paths: list[str] = []
+    for result in payload["results"][:12]:
+        path = str(result["path"])
+        if path not in paths:
+            paths.append(path)
+        lines.append(f"- {path}:{result['line_number']}: {result['line']}")
+    for path in path_hits[:8]:
+        if path not in paths:
+            paths.append(path)
+            lines.append(f"- {path}: path_match")
+    for path in paths[:2]:
+        outline = read_file_outline(path)
+        if outline.get("allowed"):
+            lines.append(
+                f"outline {path}: imports={_csv(outline['imports']) or 'none'}; "
+                f"classes={_csv(outline['classes']) or 'none'}; "
+                f"functions={_csv(outline['functions'][:12]) or 'none'}"
+            )
+    lines.append("read_only=true direct_execution_allowed=false")
+    return "\n".join(lines), int(payload["result_count"]) + len(path_hits)
 
 
 def _format_file_answer(path: str, page: int) -> str:
@@ -1701,6 +2028,49 @@ def _format_project_models_answer() -> str:
     )
 
 
+def _format_memory_history_grounded_answer(user_text: str, context: JarvisBrainContext) -> tuple[str, int]:
+    checked = [
+        "stable_style_profile",
+        "session_memory",
+        "local_chat_memory",
+        "memory_engine_registry",
+        "runtime_history_store",
+        "history_query",
+        "mempalace_read_only_sandbox",
+    ]
+    evidence: list[str] = []
+    query_terms = _memory_query_terms(user_text)
+    if context.rolling_summary.strip():
+        evidence.append(f"session_summary: {context.rolling_summary.strip()}")
+    for turn in context.recent_turns[-6:]:
+        text = str(turn.get("text", "")).strip()
+        if text and text != context.user_text.strip():
+            evidence.append(f"session_turn/{turn.get('role', '')}: {text[:260]}")
+    evidence.extend(context.local_chat_memory_snippets[:4])
+    evidence.extend(context.retrieved_snippets[:6])
+    if not evidence:
+        history_snippets = _retrieve_history_snippets(user_text, deep=True)
+        evidence.extend(history_snippets[:6])
+    if query_terms:
+        evidence = [item for item in evidence if any(term in item.casefold() for term in query_terms)]
+    if not evidence:
+        return (
+            "Не нашёл подтверждение в текущих read-only источниках.\n"
+            f"checked_sources={', '.join(checked)}\n"
+            "imported_gpt_history=unavailable_or_no_match\n"
+            "canonical_memory_write_allowed=false",
+            0,
+        )
+    lines = [
+        "Проверил память/историю read-only.",
+        f"checked_sources={', '.join(checked)}",
+        f"evidence_count={len(evidence)}",
+    ]
+    lines.extend(f"- {item}" for item in evidence[:8])
+    lines.append("canonical_memory_write_allowed=false direct_global_memory_write=false")
+    return "\n".join(lines), len(evidence)
+
+
 def _format_safety_answer() -> str:
     terms = ("runtime_mutation_allowed", "direct_execution_allowed", "approval", "pc_control_allowed", "watchdog", "core guard", "OOB", "safety", "security")
     results: list[dict[str, Any]] = []
@@ -1723,6 +2093,45 @@ def _format_safety_answer() -> str:
         lines.append("- no direct matches found in bounded search")
     lines.append("direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false")
     return "\n".join(lines)
+
+
+def _format_action_request_proposal_answer(user_text: str) -> str:
+    lowered = user_text.casefold()
+    action_family = "generic_action"
+    if any(marker in lowered for marker in ("коммит", "commit", "git commit")):
+        action_family = "git_commit"
+    elif any(marker in lowered for marker in ("тест", "pytest", "провер")):
+        action_family = "test_run"
+    elif any(marker in lowered for marker in ("скачай", "установ", "install", "download", "n8n", "модель")):
+        action_family = "download_or_install"
+    elif _asks_pc_action(lowered):
+        action_family = "pc_control"
+    return (
+        "Operator proposal only. Я не буду утверждать, что действие выполнено, пока нет tool_result.\n"
+        f"requested_action={user_text.strip()[:240]}\n"
+        f"action_family={action_family}\n"
+        "execution_allowed=false approval_required=true proposal_only=true\n"
+        "allowed_next_step=подготовить patch/plan через существующий capability/approval/action adapter\n"
+        "pc_control_allowed=false shell_execution_enabled=false direct_execution_allowed=false "
+        "canonical_write_allowed=false deployment_allowed_now=false"
+    )
+
+
+def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
+    read_tools = tuple(str(tool) for tool in catalog.get("read_tools", ()))
+    proposal_tools = tuple(str(tool) for tool in catalog.get("proposal_tools", ()))
+    return (
+        "JARVIS tool catalog подключен как read/proposal layer.\n"
+        f"read_tools={', '.join(read_tools)}\n"
+        f"proposal_tools={', '.join(proposal_tools)}\n"
+        f"memory_surfaces={_csv(catalog.get('memory_surfaces', ())) or 'none'}\n"
+        f"active_retrieval_surfaces={_csv(catalog.get('active_retrieval_surfaces', ())) or 'none'}\n"
+        f"sandbox_only_memory_surfaces={_csv(catalog.get('sandbox_only_memory_surfaces', ())) or 'none'}\n"
+        f"disabled_memory_surfaces={_csv(catalog.get('disabled_memory_surfaces', ())) or 'none'}\n"
+        "all_existing_read_tools_connected=true all_existing_memory_surfaces_connected=true\n"
+        "execution_allowed=false approval_required_for_actions=true pc_control_allowed=false "
+        "shell_execution_enabled=false direct_execution_allowed=false canonical_write_allowed=false"
+    )
 
 
 def _format_project_atlas_answer() -> str:
@@ -1808,6 +2217,271 @@ def _asks_project_workspace_summary(lowered: str) -> bool:
         "структура ядра",
     )
     return any(marker in lowered for marker in project_markers)
+
+
+def _asks_project_status_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "что изменено",
+            "что поменялось",
+            "какие изменения",
+            "dirty files",
+            "dirty",
+            "untracked",
+            "git status",
+            "статус git",
+            "что в git",
+            "что сейчас в проекте поменялось",
+        )
+    )
+
+
+def _asks_project_structure_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "структура проекта",
+            "структуре проекта",
+            "дерево проекта",
+            "покажи проект",
+            "что ты видишь по проекту",
+            "что у нас по ядру",
+            "структура ядра",
+            "project workspace",
+            "project tree",
+        )
+    )
+
+
+def _asks_project_search_question(lowered: str) -> bool:
+    search_markers = (
+        "где",
+        "найди",
+        "найти",
+        "поищи",
+        "поиск",
+        "что по",
+        "что у нас по",
+        "где у нас",
+        "логика",
+        "лежит",
+        "подключен",
+        "подключено",
+        "скачан",
+        "установлен",
+        "есть доступ",
+    )
+    domain_markers = (
+        "terminal chat",
+        "brain_loop",
+        "jarvis",
+        "n8n",
+        "голос",
+        "voice",
+        "memory",
+        "памят",
+        "roadmap",
+        "роадмап",
+        "core guard",
+        "watchdog",
+        "ollama",
+        "qwen",
+        "tool",
+        "adapter",
+        "адаптер",
+        "автоматизац",
+    )
+    return any(marker in lowered for marker in search_markers) and any(
+        marker in lowered for marker in domain_markers
+    )
+
+
+def _asks_memory_history_question(lowered: str) -> bool:
+    memory_markers = (
+        "что мы обсуждали",
+        "что обсуждали",
+        "что я говорил",
+        "что я просил",
+        "что было в переписке",
+        "переписке с gpt",
+        "gpt",
+        "история",
+        "history",
+        "помнишь",
+        "что ты помнишь",
+        "загружен",
+        "загрузили",
+    )
+    topic_markers = ("голос", "voice", "проект", "n8n", "roadmap", "роадмап", "gpt")
+    return any(marker in lowered for marker in memory_markers) and (
+        any(marker in lowered for marker in topic_markers) or "что я" in lowered
+    )
+
+
+def _asks_model_status_question(lowered: str) -> bool:
+    return any(marker in lowered for marker in ("модел", "ollama", "qwen", "gpu", "загружено")) and any(
+        marker in lowered
+        for marker in (
+            "какие",
+            "что по",
+            "статус",
+            "подключ",
+            "отвечает",
+            "есть",
+            "видишь",
+            "runtime",
+        )
+    )
+
+
+def _asks_roadmap_status_question(lowered: str) -> bool:
+    return any(marker in lowered for marker in ("roadmap", "роадмап", "фаза", "batch", "батч")) and any(
+        marker in lowered for marker in ("что дальше", "следующ", "сейчас", "статус", "какая", "какой")
+    )
+
+
+def _asks_safety_status_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "можешь управлять",
+            "управлять пк",
+            "можешь выполнить команду",
+            "можешь выполнять команду",
+            "выполнять команды",
+            "выполнить команду",
+            "команду на пк",
+            "какие ограничения",
+            "pc-control",
+            "pc control",
+            "shell",
+            "безопас",
+            "approval",
+            "direct_execution",
+            "execution_allowed",
+        )
+    )
+
+
+def _asks_action_request(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "сделай коммит",
+            "commit",
+            "git commit",
+            "запусти тест",
+            "запусти pytest",
+            "удали файл",
+            "скачай",
+            "установи",
+            "install",
+            "download",
+            "запусти n8n",
+            "настрой n8n",
+            "управляй пк",
+            "выполни команду",
+            "запусти команду",
+        )
+    )
+
+
+def _asks_tool_catalog_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "какие tools",
+            "какие tool",
+            "какие инструменты",
+            "что ты умеешь",
+            "какие capability",
+            "capabilities",
+            "tool catalog",
+            "tool-каталог",
+            "все tools",
+            "все инструменты",
+            "подключенные tools",
+            "подключенные инструменты",
+        )
+    )
+
+
+def _extract_requested_file_path(user_text: str) -> str:
+    lowered = user_text.casefold()
+    if not any(marker in lowered for marker in ("покажи файл", "что внутри", "открой файл", "read file", "file ")):
+        return ""
+    for token in user_text.replace("`", " ").replace("'", " ").replace('"', " ").split():
+        candidate = token.strip(" ,.;:()[]{}")
+        if "/" in candidate or candidate.endswith((".py", ".md", ".yaml", ".yml", ".json", ".txt", ".sh")):
+            if _safe_project_path(candidate):
+                return candidate
+    return ""
+
+
+def _semantic_search_query(user_text: str) -> str:
+    lowered = user_text.casefold()
+    known_queries = (
+        ("terminal chat", "terminal_chat jarvis_live_terminal_chat"),
+        ("brain_loop", "jarvis_live_brain_loop"),
+        ("n8n", "n8n adapter vendor gate sandbox"),
+        ("голос", "voice jarvis live voice"),
+        ("voice", "voice jarvis live voice"),
+        ("памят", "memory local_chat runtime_history_store"),
+        ("memory", "memory local_chat runtime_history_store"),
+        ("core guard", "core guard watchdog safety"),
+        ("watchdog", "watchdog core guard safety"),
+        ("ollama", "ollama qwen model runtime"),
+        ("qwen", "ollama qwen model runtime"),
+        ("tool", "tool adapter capability approval"),
+        ("adapter", "adapter capability approval"),
+        ("адаптер", "adapter capability approval"),
+        ("автоматизац", "workflow automation n8n adapter"),
+    )
+    for marker, query in known_queries:
+        if marker in lowered:
+            return query
+    cleaned = user_text.strip()
+    return cleaned[:120] if cleaned else "jarvis"
+
+
+def _project_path_matches(query: str, max_results: int = 20) -> tuple[str, ...]:
+    terms = tuple(term for term in _query_tokens(query) if term not in {"где", "найди", "поиск"})
+    if not terms:
+        return ()
+    matches: list[str] = []
+    for path in _tracked_project_files():
+        lowered = path.casefold()
+        if any(term in lowered for term in terms):
+            matches.append(path)
+        if len(matches) >= max_results:
+            break
+    return tuple(matches)
+
+
+def _memory_query_terms(user_text: str) -> tuple[str, ...]:
+    ignored = {
+        "джарвис",
+        "jarvis",
+        "помнишь",
+        "обсуждали",
+        "переписке",
+        "переписка",
+        "говорил",
+        "просил",
+        "было",
+        "были",
+        "что",
+        "про",
+        "мой",
+        "моя",
+    }
+    terms = [term for term in _query_tokens(user_text) if term not in ignored]
+    if "голос" in terms and "voice" not in terms:
+        terms.append("voice")
+    if "gpt" in user_text.casefold() and "gpt" not in terms:
+        terms.append("gpt")
+    return tuple(dict.fromkeys(terms))
 
 
 def _answer_style_memory_recall_if_grounded(context: JarvisBrainContext) -> str:
@@ -2706,6 +3380,16 @@ def _needs_deep_memory(lowered: str) -> bool:
         "mempalace",
         "vector",
         "embedding",
+        "обсуждали",
+        "переписк",
+        "gpt",
+        "голос",
+        "voice",
+        "n8n",
+        "tool",
+        "adapter",
+        "адаптер",
+        "автоматизац",
     )
     return any(marker in lowered for marker in deep_markers)
 

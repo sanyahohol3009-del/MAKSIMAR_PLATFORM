@@ -9,6 +9,7 @@ from CONTROL_PLANE.api_server import (
     jarvis_live_logs,
     jarvis_live_memory,
     jarvis_live_models,
+    jarvis_live_tools,
     jarvis_live_project,
     jarvis_live_project_dirty,
     jarvis_live_project_files,
@@ -47,6 +48,7 @@ def test_control_plane_exposes_jarvis_live_brain_routes_without_new_server() -> 
     assert "/jarvis-live/project/safety" in routes
     assert "/jarvis-live/memory" in routes
     assert "/jarvis-live/models" in routes
+    assert "/jarvis-live/tools" in routes
     assert "/jarvis-live/logs" in routes
     assert "/jarvis-live/command" in routes
     assert "/jarvis-live/chat/stream" in routes
@@ -107,6 +109,7 @@ def test_read_only_project_and_memory_endpoints_expose_existing_read_models() ->
     tests = jarvis_live_project_tests()
     roadmap = jarvis_live_project_roadmap()
     models = jarvis_live_project_models()
+    tools = jarvis_live_tools()
     safety = jarvis_live_project_safety()
     memory = jarvis_live_memory()
     logs = jarvis_live_logs()
@@ -129,6 +132,10 @@ def test_read_only_project_and_memory_endpoints_expose_existing_read_models() ->
     assert "ollama_version" in models["models"]
     assert "ollama_tags" in models["models"]
     assert "ollama_ps" in models["models"]
+    assert tools["tools"]["all_existing_read_tools_connected"] is True
+    assert "repo_search" in tools["tools"]["read_tools"]
+    assert "pytest_run_proposal" in tools["tools"]["proposal_tools"]
+    assert tools["tools"]["execution_allowed"] is False
     assert safety["read_only"] is True
     assert "safety_matches" in safety
     assert len(safety["safety_matches"]) >= 0

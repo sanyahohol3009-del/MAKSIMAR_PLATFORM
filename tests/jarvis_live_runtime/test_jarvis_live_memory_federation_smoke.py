@@ -1,6 +1,7 @@
 from tools.jarvis_live_runtime.jarvis_live_brain_loop import (
     build_jarvis_live_brain_context,
     build_jarvis_live_memory_federation_status,
+    build_jarvis_live_tool_catalog_read_model,
     run_jarvis_live_brain_once,
     stream_jarvis_live_brain_response,
 )
@@ -25,6 +26,24 @@ def test_memory_federation_inventory_reports_existing_surfaces() -> None:
     }
     assert status["canonical_memory_write_allowed"] is False
     assert status["pc_control_allowed"] is False
+
+
+def test_tool_catalog_exposes_existing_tools_and_memory_surfaces() -> None:
+    catalog = build_jarvis_live_tool_catalog_read_model()
+
+    assert catalog["all_existing_read_tools_connected"] is True
+    assert catalog["all_existing_memory_surfaces_connected"] is True
+    assert "repo_search" in catalog["read_tools"]
+    assert "read_file_snippet" in catalog["read_tools"]
+    assert "status_tools" in catalog["read_tools"]
+    assert "model_runtime_status" in catalog["read_tools"]
+    assert "runtime_history_store" in catalog["read_tools"]
+    assert "mempalace_read_only_sandbox" in catalog["read_tools"]
+    assert "pytest_run_proposal" in catalog["proposal_tools"]
+    assert "n8n_adapter_proposal" in catalog["proposal_tools"]
+    assert catalog["execution_allowed"] is False
+    assert catalog["pc_control_allowed"] is False
+    assert catalog["direct_execution_allowed"] is False
 
 
 def test_context_assembly_includes_mocked_multiple_memory_surfaces(monkeypatch) -> None:
@@ -266,6 +285,91 @@ def test_natural_project_read_questions_use_dynamic_tools_without_ollama(monkeyp
     assert "pc_control_allowed=false" in models
 
 
+def test_natural_language_tool_router_grounds_project_search_models_and_actions(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+
+    def fail_stream(*args, **kwargs):
+        raise AssertionError("read-only tool routed questions must not call Ollama")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+
+    terminal = list(stream_jarvis_live_brain_response("где у нас terminal chat?", session_id="tool_router"))[-1]
+    models = list(stream_jarvis_live_brain_response("какие модели у тебя есть?", session_id="tool_router"))[-1]
+    action = list(stream_jarvis_live_brain_response("сделай коммит", session_id="tool_router"))[-1]
+    tools = list(stream_jarvis_live_brain_response("какие tools подключены?", session_id="tool_router"))[-1]
+
+    assert terminal["intent_family"] == "PROJECT_SEARCH"
+    assert "repo_search" in terminal["selected_tools"]
+    assert "jarvis_live_terminal_chat" in terminal["response_text"]
+    assert terminal["grounded_answer"] is True
+    assert terminal["ollama_called"] is False
+    assert models["intent_family"] == "MODEL_STATUS"
+    assert "model_runtime_status" in models["selected_tools"]
+    assert "Ollama/model runtime read-only" in models["response_text"]
+    assert action["intent_family"] == "ACTION_REQUEST"
+    assert "execution_allowed=false" in action["response_text"]
+    assert "approval_required=true" in action["response_text"]
+    assert action["pc_control_allowed"] is False
+    assert tools["intent_family"] == "TOOL_CATALOG"
+    assert "build_jarvis_live_tool_catalog_read_model" in tools["selected_tools"]
+    assert "repo_search" in tools["response_text"]
+    assert "n8n_adapter_proposal" in tools["response_text"]
+
+
+def test_memory_history_question_checks_history_before_ollama(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+    monkeypatch.setattr(
+        brain_loop,
+        "_retrieve_history_snippets",
+        lambda text, deep: ["runtime_history_store: Windows Voice Edge обсуждали как voice layer."],
+    )
+
+    def fail_stream(*args, **kwargs):
+        raise AssertionError("memory/history questions must be retrieval-first")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+
+    done = list(stream_jarvis_live_brain_response("что мы обсуждали про голос?", session_id="history"))[-1]
+
+    assert done["intent_family"] == "MEMORY_RECALL"
+    assert "runtime_history_store" in done["selected_tools"]
+    assert "Windows Voice Edge" in done["response_text"]
+    assert "checked_sources=" in done["response_text"]
+    assert done["ollama_called"] is False
+    assert done["canonical_memory_write_allowed"] is False
+
+
+def test_memory_history_question_reports_checked_sources_without_match(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+    monkeypatch.setattr(brain_loop, "_retrieve_history_snippets", lambda text, deep: [])
+
+    def fail_stream(*args, **kwargs):
+        raise AssertionError("missing history must be reported, not hallucinated")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+
+    done = list(stream_jarvis_live_brain_response("что было в переписке с GPT про неизвестную штуку?", session_id="history_empty"))[-1]
+
+    assert done["intent_family"] == "MEMORY_RECALL"
+    assert "Не нашёл подтверждение" in done["response_text"]
+    assert "checked_sources=" in done["response_text"]
+    assert "imported_gpt_history=unavailable_or_no_match" in done["response_text"]
+    assert done["ollama_called"] is False
+
+
 def test_imported_project_history_is_read_only_not_written_to_local_chat(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
@@ -279,10 +383,8 @@ def test_imported_project_history_is_read_only_not_written_to_local_chat(monkeyp
     )
     monkeypatch.setattr(brain_loop, "_retrieve_history_snippets", lambda text, deep: ["history_query_match: imported GPT project history"])
 
-    def fake_stream(model_id, prompt, route_mode, timeout_seconds=None, response_mode_text=None):
-        assert "imported GPT project history" in prompt
-        yield {"event": "chunk", "text": "История прочитана как read-only.", "ollama_model_used": model_id, "pc_control_allowed": False}
-        yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
+    def fake_stream(*args, **kwargs):
+        raise AssertionError("project history questions must be retrieval-first, not free Ollama")
 
     monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
 
@@ -290,7 +392,8 @@ def test_imported_project_history_is_read_only_not_written_to_local_chat(monkeyp
 
     assert captured
     response, snippets = captured[0]
-    assert response == "История прочитана как read-only."
+    assert "Проверил память/историю read-only" in response
+    assert "imported GPT project history" in response
     assert "history_query_match: imported GPT project history" in snippets
     assert any("project_workspace_read_model" in snippet for snippet in snippets)
 

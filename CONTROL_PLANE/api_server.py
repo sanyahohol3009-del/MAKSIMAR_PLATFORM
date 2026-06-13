@@ -18,6 +18,7 @@ from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_brain_loop_server_adapter impo
     write_stream_event_safely,
 )
 from tools.jarvis_live_runtime.jarvis_live_brain_loop import (
+    build_jarvis_live_tool_catalog_read_model,
     build_jarvis_live_project_status_read_model,
     build_project_workspace_read_model,
     model_runtime_status,
@@ -293,6 +294,16 @@ def jarvis_live_models() -> dict[str, Any]:
         "ok": True,
         "surface": "CONTROL_PLANE/api_server.py",
         "models": model_runtime_status(),
+        "read_only": True,
+    }
+
+
+@app.get("/jarvis-live/tools")
+def jarvis_live_tools() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "surface": "CONTROL_PLANE/api_server.py",
+        "tools": build_jarvis_live_tool_catalog_read_model(),
         "read_only": True,
     }
 

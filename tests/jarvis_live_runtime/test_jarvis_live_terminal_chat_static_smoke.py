@@ -54,6 +54,7 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/memory style" in source
     assert "/memory sources" in source
     assert "/models" in source
+    assert "/tools" in source
     assert "/project" in source
     assert "/project status" in source
     assert "/project tree" in source
@@ -177,6 +178,35 @@ def test_terminal_chat_prints_read_only_ollama_models_and_debug_view(capsys) -> 
     assert "debug_mode=ollama" in output
 
 
+def test_terminal_chat_prints_tool_catalog_and_operator_work_trace(capsys) -> None:
+    module = _module()
+
+    fake_payload = {
+        "tools": {
+            "read_tools": ("repo_search", "read_file_snippet"),
+            "proposal_tools": ("pytest_run_proposal", "n8n_adapter_proposal"),
+            "memory_surfaces": ("runtime_history_store", "mempalace_read_only_sandbox"),
+            "active_retrieval_surfaces": ("runtime_history_store",),
+            "execution_allowed": False,
+            "approval_required_for_actions": True,
+            "pc_control_allowed": False,
+        }
+    }
+    module._get_json = lambda url: fake_payload
+
+    module._print_tools()
+    module._print_stream_event(
+        '{"event":"operator_trace","intent_family":"PROJECT_SEARCH",'
+        '"selected_tools":["repo_search","read_file_snippet"],'
+        '"read_only":true,"execution_allowed":false}'
+    )
+
+    output = capsys.readouterr().out
+    assert "read_tools=repo_search,read_file_snippet" in output
+    assert "proposal_tools=pytest_run_proposal,n8n_adapter_proposal" in output
+    assert "[work] intent=PROJECT_SEARCH tools=repo_search,read_file_snippet read_only=true execution_allowed=false" in output
+
+
 def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     module = _module()
 
@@ -191,7 +221,9 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
         '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"],'
         '"ollama_endpoint":"http://127.0.0.1:11434/api/chat",'
         '"think_mode":"false","ollama_endpoint_fallback_used":false,'
-        '"ollama_num_predict":160}'
+        '"ollama_num_predict":160,'
+        '"intent_family":"PROJECT_SEARCH","selected_tools":["repo_search","read_file_snippet"],'
+        '"read_only":true,"execution_allowed":false,"evidence_required":true}'
     )
     module._print_stream_metadata(
         {
@@ -207,6 +239,13 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
             "think_mode": "false",
             "ollama_num_predict": 160,
             "ollama_temperature": 0.4,
+            "intent_family": "PROJECT_SEARCH",
+            "selected_tools": ("repo_search", "read_file_snippet"),
+            "read_only": True,
+            "execution_allowed": False,
+            "evidence_count": 2,
+            "grounded_answer": True,
+            "ollama_called": False,
         }
     )
 
@@ -216,6 +255,8 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     assert "local_memory=0" in output
     assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
     assert "[trace] endpoint=http://127.0.0.1:11434/api/chat primary=http://127.0.0.1:11434/api/chat fallback=http://127.0.0.1:11434/api/generate fallback_used=false think_mode=false num_predict=160 temperature=0.4" in output
+    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_required=true" in output
+    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_count=2 grounded_answer=true ollama_called=false" in output
     assert "stream_event=start" not in output
 
 
@@ -380,6 +421,16 @@ def test_terminal_chat_dispatches_memory_subcommands(monkeypatch) -> None:
     assert module._dispatch_user_text("/memory style") is False
     assert module._dispatch_user_text("/memory sources") is False
     assert calls == ["memory", "recent", "style", "sources"]
+
+
+def test_terminal_chat_dispatches_tools_command(monkeypatch) -> None:
+    module = _module()
+    calls: list[str] = []
+
+    monkeypatch.setattr(module, "_print_tools", lambda: calls.append("tools"))
+
+    assert module._dispatch_user_text("/tools") is False
+    assert calls == ["tools"]
 
 
 def test_terminal_chat_dispatches_project_commands_to_stream(monkeypatch) -> None:

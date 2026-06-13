@@ -16,6 +16,7 @@ STREAM_URL = f"{API_BASE_URL}/jarvis-live/chat/stream"
 HEALTH_URL = f"{API_BASE_URL}/jarvis-live/health"
 STATUS_URL = f"{API_BASE_URL}/jarvis-live/status"
 MODELS_URL = f"{API_BASE_URL}/jarvis-live/models"
+TOOLS_URL = f"{API_BASE_URL}/jarvis-live/tools"
 SESSION_ID = "terminal_chat"
 HEALTH_TIMEOUT_SECONDS = 10
 COMMAND_TIMEOUT_SECONDS = 240
@@ -86,6 +87,9 @@ def _dispatch_user_text(user_text: str) -> bool:
         return False
     if user_text == "/models":
         _print_models()
+        return False
+    if user_text == "/tools":
+        _print_tools()
         return False
     if user_text == "/debug ollama":
         _print_models(verbose=True)
@@ -269,6 +273,21 @@ def _print_models(verbose: bool = False) -> None:
         print(f"api_log={API_LOG_FILE}")
 
 
+def _print_tools() -> None:
+    payload = _get_json(TOOLS_URL) or _get_json(STATUS_URL) or _get_json(HEALTH_URL)
+    if payload is None:
+        _print_api_not_running()
+        return
+    tools = payload.get("tools") if isinstance(payload.get("tools"), dict) else payload
+    print(f"read_tools={_csv(tools.get('read_tools', ())) }")
+    print(f"proposal_tools={_csv(tools.get('proposal_tools', ())) }")
+    print(f"memory_surfaces={_csv(tools.get('memory_surfaces', ())) }")
+    print(f"active_retrieval_surfaces={_csv(tools.get('active_retrieval_surfaces', ())) }")
+    print(f"execution_allowed={str(bool(tools.get('execution_allowed', False))).lower()}")
+    print(f"approval_required_for_actions={str(bool(tools.get('approval_required_for_actions', True))).lower()}")
+    print(f"pc_control_allowed={str(bool(tools.get('pc_control_allowed', False))).lower()}")
+
+
 def _print_logs() -> None:
     print(f"api_log={API_LOG_FILE}")
 
@@ -400,6 +419,9 @@ def _print_stream_event(line: str) -> dict[str, Any]:
         if _trace_enabled():
             _print_stream_route_trace(event)
         return event
+    if event_type == "operator_trace":
+        _print_operator_trace_event(event)
+        return event
     if event_type == "thinking":
         _print_thinking_event(event)
         return event
@@ -440,6 +462,17 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
             f"num_predict={event.get('ollama_num_predict', '')} "
             f"temperature={event.get('ollama_temperature', '')}"
         )
+        if event.get("intent_family"):
+            print(
+                "[trace] "
+                f"intent_family={event.get('intent_family', '')} "
+                f"selected_tools={_csv(event.get('selected_tools', ())) } "
+                f"read_only={str(bool(event.get('read_only', True))).lower()} "
+                f"execution_allowed={str(bool(event.get('execution_allowed', False))).lower()} "
+                f"evidence_count={event.get('evidence_count', 0)} "
+                f"grounded_answer={str(bool(event.get('grounded_answer', False))).lower()} "
+                f"ollama_called={str(bool(event.get('ollama_called', False))).lower()}"
+            )
         if event.get("primary_error_kind"):
             print(f"[trace] primary_error_kind={event.get('primary_error_kind', '')}")
         if event.get("tool_call_detected"):
@@ -480,6 +513,16 @@ def _print_stream_error(event: dict[str, Any]) -> None:
         return
     message = str(event.get("error_message") or "")
     print(f"[error] {error_kind} model={model_id} {message}".rstrip())
+
+
+def _print_operator_trace_event(event: dict[str, Any]) -> None:
+    print(
+        "[work] "
+        f"intent={event.get('intent_family', '')} "
+        f"tools={_csv(event.get('selected_tools', ())) } "
+        f"read_only={str(bool(event.get('read_only', True))).lower()} "
+        f"execution_allowed={str(bool(event.get('execution_allowed', False))).lower()}"
+    )
 
 
 def _print_thinking_event(event: dict[str, Any]) -> None:
@@ -524,6 +567,15 @@ def _print_stream_route_trace(event: dict[str, Any]) -> None:
         f"fallback_used={str(bool(event.get('ollama_endpoint_fallback_used', False))).lower()} "
         f"num_predict={event.get('ollama_num_predict', '')}"
     )
+    if event.get("intent_family"):
+        print(
+            "[trace] "
+            f"intent_family={event.get('intent_family', '')} "
+            f"selected_tools={_csv(event.get('selected_tools', ())) } "
+            f"read_only={str(bool(event.get('read_only', True))).lower()} "
+            f"execution_allowed={str(bool(event.get('execution_allowed', False))).lower()} "
+            f"evidence_required={str(bool(event.get('evidence_required', False))).lower()}"
+        )
 
 
 def _print_command_unavailable() -> None:
