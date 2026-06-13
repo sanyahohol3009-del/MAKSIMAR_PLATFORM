@@ -6,6 +6,22 @@ from CONTROL_PLANE.api_server import (
     app,
     jarvis_live_command,
     jarvis_live_health,
+    jarvis_live_logs,
+    jarvis_live_memory,
+    jarvis_live_models,
+    jarvis_live_project,
+    jarvis_live_project_dirty,
+    jarvis_live_project_files,
+    jarvis_live_project_file,
+    jarvis_live_project_imports,
+    jarvis_live_project_outline,
+    jarvis_live_project_roadmap,
+    jarvis_live_project_models,
+    jarvis_live_project_search,
+    jarvis_live_project_safety,
+    jarvis_live_project_status,
+    jarvis_live_project_tests,
+    jarvis_live_project_tree,
     jarvis_live_status,
     write_jarvis_live_stream_to_callable,
 )
@@ -16,15 +32,32 @@ def test_control_plane_exposes_jarvis_live_brain_routes_without_new_server() -> 
 
     assert "/jarvis-live/health" in routes
     assert "/jarvis-live/status" in routes
+    assert "/jarvis-live/project" in routes
+    assert "/jarvis-live/project/status" in routes
+    assert "/jarvis-live/project/tree" in routes
+    assert "/jarvis-live/project/files" in routes
+    assert "/jarvis-live/project/dirty" in routes
+    assert "/jarvis-live/project/search" in routes
+    assert "/jarvis-live/project/file" in routes
+    assert "/jarvis-live/project/outline" in routes
+    assert "/jarvis-live/project/imports" in routes
+    assert "/jarvis-live/project/tests" in routes
+    assert "/jarvis-live/project/roadmap" in routes
+    assert "/jarvis-live/project/models" in routes
+    assert "/jarvis-live/project/safety" in routes
+    assert "/jarvis-live/memory" in routes
+    assert "/jarvis-live/models" in routes
+    assert "/jarvis-live/logs" in routes
     assert "/jarvis-live/command" in routes
     assert "/jarvis-live/chat/stream" in routes
 
     source = Path("CONTROL_PLANE/api_server.py").read_text(encoding="utf-8")
     assert "FastAPI(title=\"MAKSIMAR Control Plane\")" in source
     assert "MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_brain_loop_server_adapter" in source
-    assert "from tools.jarvis_live_runtime" not in source
+    assert "from tools.jarvis_live_runtime.jarvis_live_brain_loop import" in source
     assert "write_stream_event_safely" in source
     assert "brain_bridge" not in source
+    assert "second server" not in source.lower()
 
     adapter_source = Path(
         "MAKSIMAR_SERVER/AI_ORCHESTRATION/jarvis_live_brain_loop_server_adapter.py"
@@ -59,6 +92,43 @@ def test_jarvis_live_health_and_status_are_pc_control_safe() -> None:
     assert "sandbox_only_memory_surfaces" in status
     assert status["canonical_memory_write_allowed"] is False
     assert status["session"]["pc_control_allowed"] is False
+
+
+def test_read_only_project_and_memory_endpoints_expose_existing_read_models() -> None:
+    project = jarvis_live_project()
+    project_status = jarvis_live_project_status()
+    tree = jarvis_live_project_tree()
+    files = jarvis_live_project_files()
+    dirty = jarvis_live_project_dirty()
+    search = jarvis_live_project_search(q="memory")
+    file_payload = jarvis_live_project_file(path="tools/jarvis_live_runtime/jarvis_live_brain_loop.py")
+    outline = jarvis_live_project_outline(path="tools/jarvis_live_runtime/jarvis_live_brain_loop.py")
+    imports = jarvis_live_project_imports(path="tools/jarvis_live_runtime/jarvis_live_brain_loop.py")
+    tests = jarvis_live_project_tests()
+    roadmap = jarvis_live_project_roadmap()
+    models = jarvis_live_project_models()
+    safety = jarvis_live_project_safety()
+    memory = jarvis_live_memory()
+    logs = jarvis_live_logs()
+
+    assert project["ok"] is True
+    assert project["read_only"] is True
+    assert project["project"]["read_only"] is True
+    assert project_status["project_status"]["read_only"] is True
+    assert tree["tree"]["read_only"] is True
+    assert files["files"]["read_only"] is True
+    assert dirty["read_only"] is True
+    assert search["search"]["read_only"] is True
+    assert file_payload["file"]["read_only"] is True
+    assert outline["outline"]["read_only"] is True
+    assert imports["imports"]["read_only"] is True
+    assert tests["project"]["read_only"] is True
+    assert roadmap["status"]["read_only"] == "true"
+    assert models["models"]["ollama_is_local_model_engine"] == "true"
+    assert safety["read_only"] is True
+    assert memory["session"]["canonical_memory_write_allowed"] is False
+    assert memory["brain_health"]["canonical_memory_write_allowed"] is False
+    assert logs["api_log_file"]
 
 
 def test_stream_writer_emits_chunks_and_handles_pc_control_refusal() -> None:

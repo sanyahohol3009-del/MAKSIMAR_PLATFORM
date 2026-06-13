@@ -14,6 +14,10 @@ def test_brain_loop_reuses_existing_runtime_and_memory_surfaces() -> None:
     assert "canonical_memory_write_allowed" in source
     assert "pc_control_allowed" in source
     assert "build_jarvis_live_identity_prompt" in source
+    assert "import httpx" in source
+    assert "httpx.Client" in source
+    assert "urllib.request" not in source
+    assert "urllib.error" not in source
     assert "http://127.0.0.1:11434/api/generate" in source
     assert "jarvis-live:qwen14b" in source
 
@@ -26,7 +30,7 @@ def test_brain_loop_streaming_uses_ollama_stream_true_and_chunk_events() -> None
     assert "stream_jarvis_live_brain_response" in source
     assert '"stream": True' in source
     assert 'yield _event("chunk"' in source
-    assert "for raw_line in response" in source
+    assert "iter_lines" in source
     assert "stream_chunk_count" in source
     assert "run_jarvis_live_brain_once" in source
 

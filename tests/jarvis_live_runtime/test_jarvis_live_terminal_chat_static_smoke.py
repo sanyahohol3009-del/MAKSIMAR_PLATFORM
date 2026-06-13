@@ -26,6 +26,9 @@ def test_terminal_chat_uses_existing_control_plane_routes_only() -> None:
     assert "/jarvis-live/chat/stream" in source
     assert "/jarvis-live/health" in source
     assert "/jarvis-live/status" in source
+    assert "import httpx" in source
+    assert "urllib.request" not in source
+    assert "urllib.error" not in source
     assert "tools.jarvis_live_runtime.jarvis_live_brain_loop" not in source
     assert "CONTROL_PLANE.api_server" not in source.replace(
         "python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765",
@@ -105,8 +108,9 @@ def test_terminal_chat_does_not_start_server_or_execute_local_control() -> None:
 def test_terminal_chat_preserves_utf8_and_russian_output_path() -> None:
     source = _source()
 
-    assert "ensure_ascii=False" in source
-    assert "decode(\"utf-8\"" in source
+    assert "response.iter_lines()" in source
+    assert "response.json()" in source
+    assert "httpx.Timeout(COMMAND_TIMEOUT_SECONDS" in source
     assert "reconfigure(encoding=\"utf-8\"" in source
     assert "errors=\"replace\"" in source
 
@@ -140,7 +144,7 @@ def test_terminal_chat_has_long_command_timeout_and_stream_route() -> None:
     source = _source()
 
     assert module.COMMAND_TIMEOUT_SECONDS >= 180
-    assert "timeout=COMMAND_TIMEOUT_SECONDS" in source
+    assert "httpx.Client(timeout=timeout)" in source
     assert "def _print_stream_response(text: str) -> None:" in source
     assert "def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:" in source
     assert "STREAM_URL" in source

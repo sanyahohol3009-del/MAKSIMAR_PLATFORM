@@ -4,14 +4,14 @@ import json
 import os
 import subprocess
 import time
-import urllib.error
-import urllib.request
 import asyncio
 import ast
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
+
+import httpx
 
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     build_jarvis_live_runtime_model_role_read_model,
@@ -861,39 +861,35 @@ def _stream_ollama_model(
         "options": options,
         "keep_alive": os.environ.get("JARVIS_LIVE_OLLAMA_KEEP_ALIVE", "30m"),
     }
-    request = urllib.request.Request(
-        OLLAMA_URL,
-        data=json.dumps(request_payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
     try:
-        with urllib.request.urlopen(request, timeout=timeout_seconds or 120) as response:
-            for raw_line in response:
-                line = raw_line.decode("utf-8", errors="replace").strip()
-                if not line:
-                    continue
-                try:
-                    payload = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                if payload.get("error"):
-                    yield _event(
-                        "error",
-                        ollama_model_used=model_id,
-                        error_message=str(payload.get("error", "")),
-                    )
-                    return
-                thinking = str(payload.get("thinking", ""))
-                if thinking:
-                    yield _event("thinking", text=thinking, ollama_model_used=model_id)
-                chunk = str(payload.get("response", ""))
-                if chunk:
-                    yield _event("chunk", text=chunk, ollama_model_used=model_id)
-                if payload.get("done") is True:
-                    yield _event("done", ollama_model_used=model_id)
-                    return
-    except (urllib.error.URLError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
+        timeout = httpx.Timeout(timeout_seconds or 120.0, connect=min(10.0, timeout_seconds or 120.0))
+        with httpx.Client(timeout=timeout) as client:
+            with client.stream("POST", OLLAMA_URL, json=request_payload) as response:
+                response.raise_for_status()
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if payload.get("error"):
+                        yield _event(
+                            "error",
+                            ollama_model_used=model_id,
+                            error_message=str(payload.get("error", "")),
+                        )
+                        return
+                    thinking = str(payload.get("thinking", ""))
+                    if thinking:
+                        yield _event("thinking", text=thinking, ollama_model_used=model_id)
+                    chunk = str(payload.get("response", ""))
+                    if chunk:
+                        yield _event("chunk", text=chunk, ollama_model_used=model_id)
+                    if payload.get("done") is True:
+                        yield _event("done", ollama_model_used=model_id)
+                        return
+    except (httpx.HTTPError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
         yield _event(
             "error",
             ollama_model_used=model_id,

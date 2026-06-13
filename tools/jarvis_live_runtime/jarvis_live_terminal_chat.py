@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
+
+import httpx
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -293,42 +293,47 @@ def _print_ping(startup: bool = False) -> None:
 
 
 def _post_json(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json; charset=utf-8"},
-        method="POST",
-    )
-    return _request_json(request, timeout=COMMAND_TIMEOUT_SECONDS)
+    timeout = httpx.Timeout(COMMAND_TIMEOUT_SECONDS, connect=min(10.0, COMMAND_TIMEOUT_SECONDS))
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            response = client.post(url, json=payload)
+            response.raise_for_status()
+            payload_json = response.json()
+            return payload_json if isinstance(payload_json, dict) else None
+    except httpx.HTTPStatusError as exc:
+        _set_last_api_error(f"http_error status={exc.response.status_code} url={url}")
+        return None
+    except httpx.TimeoutException:
+        _set_last_api_error(f"timeout url={url}")
+        return None
+    except httpx.RequestError as exc:
+        _set_last_api_error(_describe_httpx_error(exc, url))
+        return None
+    except ValueError:
+        _set_last_api_error(f"invalid_json url={url}")
+        return None
 
 
 def _get_json(url: str) -> dict[str, Any] | None:
-    request = urllib.request.Request(url, method="GET")
-    return _request_json(request, timeout=HEALTH_TIMEOUT_SECONDS)
-
-
-def _request_json(request: urllib.request.Request, timeout: int) -> dict[str, Any] | None:
     global _LAST_API_ERROR
     _LAST_API_ERROR = ""
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            raw = response.read().decode("utf-8", errors="replace")
-    except urllib.error.HTTPError as exc:
-        _LAST_API_ERROR = f"http_error status={exc.code} url={request.full_url}"
+        timeout = httpx.Timeout(HEALTH_TIMEOUT_SECONDS, connect=min(10.0, HEALTH_TIMEOUT_SECONDS))
+        with httpx.Client(timeout=timeout) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            payload = response.json()
+    except httpx.HTTPStatusError as exc:
+        _LAST_API_ERROR = f"http_error status={exc.response.status_code} url={url}"
         return None
-    except urllib.error.URLError as exc:
-        _LAST_API_ERROR = _describe_url_error(exc, request.full_url)
+    except httpx.TimeoutException:
+        _LAST_API_ERROR = f"timeout url={url}"
         return None
-    except TimeoutError:
-        _LAST_API_ERROR = f"timeout url={request.full_url}"
+    except httpx.RequestError as exc:
+        _LAST_API_ERROR = _describe_httpx_error(exc, url)
         return None
-    except OSError as exc:
-        _LAST_API_ERROR = f"os_error {exc.__class__.__name__}: {exc} url={request.full_url}"
-        return None
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError:
-        _LAST_API_ERROR = f"invalid_json url={request.full_url}"
+    except ValueError:
+        _LAST_API_ERROR = f"invalid_json url={url}"
         return None
     return payload if isinstance(payload, dict) else None
 
@@ -338,32 +343,25 @@ def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | No
     _LAST_API_ERROR = ""
     _THINKING_ACTIVE = False
     done_event: dict[str, Any] = {}
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json; charset=utf-8"},
-        method="POST",
-    )
     try:
-        with urllib.request.urlopen(request, timeout=COMMAND_TIMEOUT_SECONDS) as response:
-            for raw_line in response:
-                line = raw_line.decode("utf-8", errors="replace").strip()
-                if not line:
-                    continue
-                event = _print_stream_event(line)
-                if isinstance(event, dict) and str(event.get("event") or event.get("type") or "") == "done":
-                    done_event = event
-    except urllib.error.HTTPError as exc:
-        _LAST_API_ERROR = f"http_error status={exc.code} url={url}"
+        timeout = httpx.Timeout(COMMAND_TIMEOUT_SECONDS, connect=min(10.0, COMMAND_TIMEOUT_SECONDS))
+        with httpx.Client(timeout=timeout) as client:
+            with client.stream("POST", url, json=payload) as response:
+                response.raise_for_status()
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    event = _print_stream_event(line)
+                    if isinstance(event, dict) and str(event.get("event") or event.get("type") or "") == "done":
+                        done_event = event
+    except httpx.HTTPStatusError as exc:
+        _LAST_API_ERROR = f"http_error status={exc.response.status_code} url={url}"
         return None
-    except urllib.error.URLError as exc:
-        _LAST_API_ERROR = _describe_url_error(exc, url)
-        return None
-    except TimeoutError:
+    except httpx.TimeoutException:
         _LAST_API_ERROR = f"timeout url={url}"
         return None
-    except OSError as exc:
-        _LAST_API_ERROR = f"os_error {exc.__class__.__name__}: {exc} url={url}"
+    except httpx.RequestError as exc:
+        _LAST_API_ERROR = _describe_httpx_error(exc, url)
         return None
     if done_event:
         _print_stream_metadata(done_event)
@@ -533,13 +531,14 @@ def _print_api_not_running() -> None:
         print(f"api_error={_LAST_API_ERROR}")
 
 
-def _describe_url_error(exc: urllib.error.URLError, url: str) -> str:
-    reason = getattr(exc, "reason", exc)
-    if isinstance(reason, ConnectionRefusedError):
+def _describe_httpx_error(exc: httpx.RequestError, url: str) -> str:
+    if isinstance(exc, httpx.ConnectError):
         return f"connection_refused url={url}"
-    if isinstance(reason, TimeoutError):
+    if isinstance(exc, httpx.ReadTimeout):
         return f"timeout url={url}"
-    return f"url_error {reason.__class__.__name__}: {reason} url={url}"
+    reason = getattr(exc, "args", (exc,))
+    detail = reason[0] if reason else exc
+    return f"url_error {detail.__class__.__name__}: {detail} url={url}"
 
 
 def _csv(value: Any) -> str:
