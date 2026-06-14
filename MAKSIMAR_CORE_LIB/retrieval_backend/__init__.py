@@ -61,7 +61,9 @@ from MAKSIMAR_CORE_LIB.retrieval_backend.retrieval_tool_result_contract import (
 )
 from MAKSIMAR_CORE_LIB.retrieval_backend.retrieval_runtime_readonly_tools import (
     RETRIEVAL_VENDOR_ROOT,
+    RetrievalReadonlyToolRoute,
     RetrievalRuntimeReadonlyBackendAvailability,
+    build_retrieval_readonly_tool_route,
     build_retrieval_runtime_readonly_availability,
     inspect_mgrep_readonly_availability,
     inspect_qdrant_readonly_availability,
@@ -115,6 +117,7 @@ __all__ = [
     "RetrievalToolEnablementPolicy",
     "RetrievalToolKind",
     "RetrievalToolRegistryContract",
+    "RetrievalReadonlyToolRoute",
     "RetrievalRuntimeReadonlyBackendAvailability",
     "RetrievalToolResultContract",
     "RetrievalTruthStatus",
@@ -151,6 +154,7 @@ __all__ = [
     "build_retrieval_tool_contracts",
     "build_retrieval_tool_enablement_policy",
     "build_retrieval_tool_registry_contract",
+    "build_retrieval_readonly_tool_route",
     "build_retrieval_runtime_readonly_availability",
     "build_retrieval_vendor_gate_contract",
     "build_retrieval_vendor_source_contracts",

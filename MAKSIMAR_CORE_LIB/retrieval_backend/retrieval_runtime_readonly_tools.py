@@ -96,6 +96,89 @@ class RetrievalRuntimeReadonlyBackendAvailability:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class RetrievalReadonlyToolRoute:
+    route_key: str
+    requested_tools: tuple[str, ...]
+    selected_tool_chain: tuple[str, ...]
+    primary_tool: str
+    effective_tool: str
+    fallback_tool: str
+    fallback_reason: str
+    read_only: bool = True
+    source_ref_required: bool = True
+    evidence_binding_required: bool = True
+    direct_execution_allowed: bool = False
+    canonical_write_allowed: bool = False
+    runtime_mutation_allowed: bool = False
+    network_allowed_by_default: bool = False
+
+    def __post_init__(self) -> None:
+        route_key = _require_text(self.route_key, "route_key")
+        if not isinstance(self.requested_tools, tuple) or not self.requested_tools:
+            raise ValueError("requested_tools must be a non-empty tuple")
+        if not isinstance(self.selected_tool_chain, tuple) or not self.selected_tool_chain:
+            raise ValueError("selected_tool_chain must be a non-empty tuple")
+        normalized_requested = tuple(_require_text(tool, "requested_tools") for tool in self.requested_tools)
+        normalized_chain = tuple(_require_text(tool, "selected_tool_chain") for tool in self.selected_tool_chain)
+        primary_tool = _require_text(self.primary_tool, "primary_tool")
+        effective_tool = _require_text(self.effective_tool, "effective_tool")
+        fallback_tool = _require_text(self.fallback_tool, "fallback_tool")
+        fallback_reason = _require_text(self.fallback_reason, "fallback_reason")
+        if primary_tool not in normalized_chain:
+            raise ValueError("primary_tool must be present in selected_tool_chain")
+        if effective_tool not in normalized_chain:
+            raise ValueError("effective_tool must be present in selected_tool_chain")
+        if fallback_tool not in normalized_chain:
+            raise ValueError("fallback_tool must be present in selected_tool_chain")
+        for field_name in (
+            "read_only",
+            "source_ref_required",
+            "evidence_binding_required",
+            "direct_execution_allowed",
+            "canonical_write_allowed",
+            "runtime_mutation_allowed",
+            "network_allowed_by_default",
+        ):
+            _require_bool(getattr(self, field_name), field_name)
+        for field_name in ("read_only", "source_ref_required", "evidence_binding_required"):
+            if not getattr(self, field_name):
+                raise ValueError(f"{field_name} must be True")
+        for field_name in (
+            "direct_execution_allowed",
+            "canonical_write_allowed",
+            "runtime_mutation_allowed",
+            "network_allowed_by_default",
+        ):
+            if getattr(self, field_name):
+                raise ValueError(f"{field_name} must be False")
+        object.__setattr__(self, "route_key", route_key)
+        object.__setattr__(self, "requested_tools", normalized_requested)
+        object.__setattr__(self, "selected_tool_chain", normalized_chain)
+        object.__setattr__(self, "primary_tool", primary_tool)
+        object.__setattr__(self, "effective_tool", effective_tool)
+        object.__setattr__(self, "fallback_tool", fallback_tool)
+        object.__setattr__(self, "fallback_reason", fallback_reason)
+
+    def to_read_model(self) -> dict[str, object]:
+        return {
+            "route_key": self.route_key,
+            "requested_tools": self.requested_tools,
+            "selected_tool_chain": self.selected_tool_chain,
+            "primary_tool": self.primary_tool,
+            "effective_tool": self.effective_tool,
+            "fallback_tool": self.fallback_tool,
+            "fallback_reason": self.fallback_reason,
+            "read_only": self.read_only,
+            "source_ref_required": self.source_ref_required,
+            "evidence_binding_required": self.evidence_binding_required,
+            "direct_execution_allowed": self.direct_execution_allowed,
+            "canonical_write_allowed": self.canonical_write_allowed,
+            "runtime_mutation_allowed": self.runtime_mutation_allowed,
+            "network_allowed_by_default": self.network_allowed_by_default,
+        }
+
+
 def _vendor_path(project_root: Path, backend_dir: str) -> Path:
     return project_root / RETRIEVAL_VENDOR_ROOT / backend_dir
 
@@ -160,9 +243,73 @@ def build_retrieval_runtime_readonly_availability(project_root: Path) -> tuple[R
     )
 
 
+def build_retrieval_readonly_tool_route(
+    route_key: str,
+    requested_tools: tuple[str, ...],
+    project_root: Path,
+) -> RetrievalReadonlyToolRoute:
+    route_key = _require_text(route_key, "route_key")
+    if not isinstance(requested_tools, tuple) or not requested_tools:
+        raise ValueError("requested_tools must be a non-empty tuple")
+    normalized_requested = tuple(_require_text(tool, "requested_tools") for tool in requested_tools)
+
+    if route_key == "PROJECT_SEARCH" or "mgrep_readonly" in normalized_requested:
+        mgrep = inspect_mgrep_readonly_availability(project_root)
+        chain = tuple(dict.fromkeys(("mgrep_readonly", mgrep.fallback_tool, *normalized_requested)))
+        effective_tool = "mgrep_readonly" if mgrep.usable_now else mgrep.fallback_tool
+        return RetrievalReadonlyToolRoute(
+            route_key=route_key,
+            requested_tools=normalized_requested,
+            selected_tool_chain=chain,
+            primary_tool="mgrep_readonly",
+            effective_tool=effective_tool,
+            fallback_tool=mgrep.fallback_tool,
+            fallback_reason=mgrep.unavailable_reason,
+        )
+
+    if route_key == "SEMANTIC_SIMILARITY" or "sqlite_vec_readonly" in normalized_requested:
+        sqlite_vec = inspect_sqlite_vec_readonly_availability(project_root)
+        chain = tuple(dict.fromkeys(("sqlite_vec_readonly", sqlite_vec.fallback_tool, *normalized_requested)))
+        effective_tool = "sqlite_vec_readonly" if sqlite_vec.usable_now else sqlite_vec.fallback_tool
+        return RetrievalReadonlyToolRoute(
+            route_key=route_key,
+            requested_tools=normalized_requested,
+            selected_tool_chain=chain,
+            primary_tool="sqlite_vec_readonly",
+            effective_tool=effective_tool,
+            fallback_tool=sqlite_vec.fallback_tool,
+            fallback_reason=sqlite_vec.unavailable_reason,
+        )
+
+    if route_key == "RETRIEVAL_BACKEND_STATUS" or "qdrant_readonly_status" in normalized_requested:
+        qdrant = inspect_qdrant_readonly_availability(project_root)
+        chain = tuple(dict.fromkeys(("qdrant_readonly_status", qdrant.fallback_tool, *normalized_requested)))
+        return RetrievalReadonlyToolRoute(
+            route_key=route_key,
+            requested_tools=normalized_requested,
+            selected_tool_chain=chain,
+            primary_tool="qdrant_readonly_status",
+            effective_tool="qdrant_readonly_status",
+            fallback_tool=qdrant.fallback_tool,
+            fallback_reason=qdrant.unavailable_reason,
+        )
+
+    return RetrievalReadonlyToolRoute(
+        route_key=route_key,
+        requested_tools=normalized_requested,
+        selected_tool_chain=normalized_requested,
+        primary_tool=normalized_requested[0],
+        effective_tool=normalized_requested[0],
+        fallback_tool=normalized_requested[-1],
+        fallback_reason="primary read-only tool is available through existing local router",
+    )
+
+
 __all__ = [
     "RETRIEVAL_VENDOR_ROOT",
     "RetrievalRuntimeReadonlyBackendAvailability",
+    "RetrievalReadonlyToolRoute",
+    "build_retrieval_readonly_tool_route",
     "build_retrieval_runtime_readonly_availability",
     "inspect_mgrep_readonly_availability",
     "inspect_qdrant_readonly_availability",

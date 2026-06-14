@@ -20,7 +20,10 @@ def test_retrieval_tool_enablement_policy_records_semantic_groups_and_blocks_run
     assert "backend_status" in read_model["semantic_intent_groups"]
     assert "autonomous_read_only_tool_use" in read_model["semantic_intent_groups"]
     assert read_model["read_only_tool_contracts_allowed"] is True
+    assert read_model["read_only_tool_routing_enabled"] is True
+    assert read_model["auto_routing_readonly_enabled"] is True
     assert read_model["auto_routing_contract_allowed"] is True
+    assert read_model["backend_runtime_enabled"] is False
     assert read_model["runtime_tool_execution_enabled"] is False
     assert read_model["auto_routing_runtime_enabled"] is False
     assert read_model["source_ref_required"] is True

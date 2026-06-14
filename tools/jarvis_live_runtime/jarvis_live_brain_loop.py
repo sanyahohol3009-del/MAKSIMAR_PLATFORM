@@ -29,6 +29,7 @@ from MAKSIMAR_CORE_LIB.enterprise_memory_domains.enterprise_memory_preview_build
 )
 from MAKSIMAR_CORE_LIB.retrieval_backend import (
     build_retrieval_backend_status_read_model,
+    build_retrieval_readonly_tool_route,
     build_retrieval_runtime_readonly_availability,
     build_retrieval_tool_enablement_policy,
     build_retrieval_tool_registry_contract,
@@ -1634,11 +1635,20 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         semantic_classification = classify_retrieval_semantic_intent(user_text)
         if semantic_classification.matched:
             intent_family = semantic_classification.route_key
-            selected_tools = semantic_classification.read_only_tools
+            tool_route = build_retrieval_readonly_tool_route(
+                semantic_classification.route_key,
+                semantic_classification.read_only_tools,
+                PROJECT_ROOT,
+            )
+            selected_tools = tool_route.selected_tool_chain
             confidence = min(0.98, max(0.72, semantic_classification.score / 120.0))
             reason = f"retrieval semantic intent: {semantic_classification.intent_group}"
             needs_ollama = False
             evidence_required = True
+        else:
+            tool_route = None
+    else:
+        tool_route = None
     if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
         intent_family = "TOOL_CATALOG"
         selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
@@ -1721,6 +1731,7 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         "needs_ollama": needs_ollama,
         "evidence_required": evidence_required,
         "evidence_count": 0,
+        "tool_route": tool_route.to_read_model() if tool_route is not None else {},
     }
 
 
@@ -1884,11 +1895,11 @@ def _answer_with_read_only_tools_if_grounded(
         plan["evidence_count"] = 3
         return _format_project_structure_grounded_answer()
     if intent == "PROJECT_SEARCH":
-        answer, evidence_count = _format_project_semantic_search_answer(user_text)
+        answer, evidence_count = _format_project_semantic_search_answer(user_text, _plan_tool_route(plan))
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "SEMANTIC_SIMILARITY":
-        answer, evidence_count = _format_semantic_similarity_answer(user_text)
+        answer, evidence_count = _format_semantic_similarity_answer(user_text, _plan_tool_route(plan))
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "RETRIEVAL_BACKEND_STATUS":
@@ -1908,7 +1919,7 @@ def _answer_with_read_only_tools_if_grounded(
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "DOCS_CONTRACTS":
-        answer, evidence_count = _format_project_semantic_search_answer(user_text)
+        answer, evidence_count = _format_project_semantic_search_answer(user_text, _plan_tool_route(plan))
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "AUTO_TOOL_USE":
@@ -1944,6 +1955,11 @@ def _answer_with_read_only_tools_if_grounded(
         plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
         return _format_tool_catalog_answer(catalog)
     return ""
+
+
+def _plan_tool_route(plan: dict[str, Any]) -> dict[str, Any]:
+    route = plan.get("tool_route")
+    return route if isinstance(route, dict) else {}
 
 
 def _answer_project_read_tool_request(user_text: str) -> str:
@@ -2080,7 +2096,8 @@ def _format_search_answer(query: str) -> str:
     return "\n".join(lines)
 
 
-def _format_project_semantic_search_answer(user_text: str) -> tuple[str, int]:
+def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str, Any] | None = None) -> tuple[str, int]:
+    route = tool_route or build_retrieval_readonly_tool_route("PROJECT_SEARCH", ("mgrep_readonly", "repo_search"), PROJECT_ROOT).to_read_model()
     mgrep = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
     query = _semantic_search_query(user_text)
     payload = repo_search(query)
@@ -2090,11 +2107,13 @@ def _format_project_semantic_search_answer(user_text: str) -> tuple[str, int]:
     if not payload["results"]:
         if path_hits:
             lines = [
-                f"selected_tool={mgrep['selected_tool']}",
-                f"fallback_tool={mgrep['fallback_tool']}",
+                f"primary_tool={route['primary_tool']}",
+                f"effective_tool={route['effective_tool']}",
+                f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
+                f"fallback_tool={route['fallback_tool']}",
+                f"fallback_reason={route['fallback_reason']}",
                 f"mgrep_source_present={str(mgrep['source_present']).lower()}",
                 f"mgrep_usable_now={str(mgrep['usable_now']).lower()}",
-                f"mgrep_unavailable_reason={mgrep['unavailable_reason']}",
                 f"Нашёл по именам файлов read-only: query={query}; path_results={len(path_hits)}",
             ]
             lines.extend(f"- {path}" for path in path_hits[:20])
@@ -2110,21 +2129,25 @@ def _format_project_semantic_search_answer(user_text: str) -> tuple[str, int]:
             return "\n".join(lines), len(path_hits)
         return (
             "Не нашёл подтверждение в текущих read-only источниках.\n"
-            f"selected_tool={mgrep['selected_tool']}\n"
-            f"fallback_tool={mgrep['fallback_tool']}\n"
+            f"primary_tool={route['primary_tool']}\n"
+            f"effective_tool={route['effective_tool']}\n"
+            f"selected_tool_chain={_csv(route['selected_tool_chain'])}\n"
+            f"fallback_tool={route['fallback_tool']}\n"
+            f"fallback_reason={route['fallback_reason']}\n"
             f"mgrep_source_present={str(mgrep['source_present']).lower()}\n"
             f"mgrep_usable_now={str(mgrep['usable_now']).lower()}\n"
-            f"mgrep_unavailable_reason={mgrep['unavailable_reason']}\n"
             "checked_tools=mgrep_readonly, repo_search, read_file_snippet, read_file_outline\n"
             f"query={query}",
             0,
         )
     lines = [
-        f"selected_tool={mgrep['selected_tool']}",
-        f"fallback_tool={mgrep['fallback_tool']}",
+        f"primary_tool={route['primary_tool']}",
+        f"effective_tool={route['effective_tool']}",
+        f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
+        f"fallback_tool={route['fallback_tool']}",
+        f"fallback_reason={route['fallback_reason']}",
         f"mgrep_source_present={str(mgrep['source_present']).lower()}",
         f"mgrep_usable_now={str(mgrep['usable_now']).lower()}",
-        f"mgrep_unavailable_reason={mgrep['unavailable_reason']}",
         f"Нашёл по проекту read-only: query={query}; results={payload['result_count']}",
     ]
     paths: list[str] = []
@@ -2149,7 +2172,12 @@ def _format_project_semantic_search_answer(user_text: str) -> tuple[str, int]:
     return "\n".join(lines), int(payload["result_count"]) + len(path_hits)
 
 
-def _format_semantic_similarity_answer(user_text: str) -> tuple[str, int]:
+def _format_semantic_similarity_answer(user_text: str, tool_route: dict[str, Any] | None = None) -> tuple[str, int]:
+    route = tool_route or build_retrieval_readonly_tool_route(
+        "SEMANTIC_SIMILARITY",
+        ("sqlite_vec_readonly", "repo_search", "qdrant_readonly"),
+        PROJECT_ROOT,
+    ).to_read_model()
     sqlite_vec = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
     answer, evidence_count = _format_project_semantic_search_answer(user_text)
     recommendation = (
@@ -2157,11 +2185,13 @@ def _format_semantic_similarity_answer(user_text: str) -> tuple[str, int]:
         "otherwise create only a contract/adapter after source review."
     )
     return (
-        f"selected_tool={sqlite_vec['selected_tool']}\n"
-        f"fallback_tool={sqlite_vec['fallback_tool']}\n"
+        f"primary_tool={route['primary_tool']}\n"
+        f"effective_tool={route['effective_tool']}\n"
+        f"selected_tool_chain={_csv(route['selected_tool_chain'])}\n"
+        f"fallback_tool={route['fallback_tool']}\n"
+        f"fallback_reason={route['fallback_reason']}\n"
         f"sqlite_vec_source_present={str(sqlite_vec['source_present']).lower()}\n"
         f"sqlite_vec_usable_now={str(sqlite_vec['usable_now']).lower()}\n"
-        f"sqlite_vec_unavailable_reason={sqlite_vec['unavailable_reason']}\n"
         + answer
         + "\nsemantic_duplicate_policy=read_only_repo_search_before_vector_runtime\n"
         + "sqlite_vec_readonly_runtime_enabled=false qdrant_readonly_runtime_enabled=false\n"
@@ -2183,8 +2213,12 @@ def _format_retrieval_backend_status_answer() -> str:
         "vendor_acquired=true",
         "scan_passed=false",
         f"runtime_enabled={str(status['execution_allowed_now']).lower()}",
+        f"read_only_tool_routing_enabled={str(policy['read_only_tool_routing_enabled']).lower()}",
+        f"auto_routing_readonly_enabled={str(policy['auto_routing_readonly_enabled']).lower()}",
         f"tool_registered={str(registry['runtime_registration_enabled']).lower()}",
-        f"auto_routing_enabled={str(policy['auto_routing_runtime_enabled']).lower()}",
+        f"readonly_router_registered={str(registry['readonly_router_registration_enabled']).lower()}",
+        f"backend_runtime_enabled={str(policy['backend_runtime_enabled']).lower()}",
+        f"auto_routing_runtime_enabled={str(policy['auto_routing_runtime_enabled']).lower()}",
     ]
     for adapter in status["adapter_statuses"]:
         lines.append(

@@ -38,7 +38,9 @@ class RetrievalToolContract:
     direct_execution_allowed: bool = False
     network_allowed_by_default: bool = False
     approval_required_before_runtime: bool = True
+    backend_runtime_enabled: bool = False
     runtime_enabled: bool = False
+    registered_with_jarvis_readonly_router: bool = True
     registered_with_jarvis_runtime: bool = False
 
     def __post_init__(self) -> None:
@@ -67,7 +69,9 @@ class RetrievalToolContract:
             "direct_execution_allowed",
             "network_allowed_by_default",
             "approval_required_before_runtime",
+            "backend_runtime_enabled",
             "runtime_enabled",
+            "registered_with_jarvis_readonly_router",
             "registered_with_jarvis_runtime",
         ):
             _require_bool(getattr(self, field_name), field_name)
@@ -79,6 +83,7 @@ class RetrievalToolContract:
             "evidence_binding_required",
             "output_requires_normalization",
             "approval_required_before_runtime",
+            "registered_with_jarvis_readonly_router",
         ):
             if not getattr(self, field_name):
                 raise ValueError(f"{field_name} must be True")
@@ -88,6 +93,7 @@ class RetrievalToolContract:
             "runtime_mutation_allowed",
             "direct_execution_allowed",
             "network_allowed_by_default",
+            "backend_runtime_enabled",
             "runtime_enabled",
             "registered_with_jarvis_runtime",
         ):
@@ -118,7 +124,9 @@ class RetrievalToolContract:
             "direct_execution_allowed": self.direct_execution_allowed,
             "network_allowed_by_default": self.network_allowed_by_default,
             "approval_required_before_runtime": self.approval_required_before_runtime,
+            "backend_runtime_enabled": self.backend_runtime_enabled,
             "runtime_enabled": self.runtime_enabled,
+            "registered_with_jarvis_readonly_router": self.registered_with_jarvis_readonly_router,
             "registered_with_jarvis_runtime": self.registered_with_jarvis_runtime,
         }
 

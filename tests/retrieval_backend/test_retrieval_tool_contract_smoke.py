@@ -8,7 +8,7 @@ from MAKSIMAR_CORE_LIB.retrieval_backend import (
 )
 
 
-def test_retrieval_tool_contracts_are_read_only_and_not_registered_runtime() -> None:
+def test_retrieval_tool_contracts_are_read_only_router_registered_without_backend_runtime() -> None:
     tools = build_retrieval_tool_contracts()
     assert tuple(tool.tool_kind for tool in tools) == ("mgrep_readonly", "sqlite_vec_readonly", "qdrant_readonly")
 
@@ -25,7 +25,9 @@ def test_retrieval_tool_contracts_are_read_only_and_not_registered_runtime() -> 
         assert read_model["direct_execution_allowed"] is False
         assert read_model["network_allowed_by_default"] is False
         assert read_model["approval_required_before_runtime"] is True
+        assert read_model["backend_runtime_enabled"] is False
         assert read_model["runtime_enabled"] is False
+        assert read_model["registered_with_jarvis_readonly_router"] is True
         assert read_model["registered_with_jarvis_runtime"] is False
 
 

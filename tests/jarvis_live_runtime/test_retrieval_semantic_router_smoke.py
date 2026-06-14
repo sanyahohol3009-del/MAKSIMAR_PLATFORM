@@ -32,6 +32,9 @@ def test_retrieval_backend_status_routes_by_typo_without_ollama(monkeypatch) -> 
     assert done["ollama_called"] is False
     assert "Retrieval backend status read-only" in response
     assert "vendor_acquired=true" in response
+    assert "read_only_tool_routing_enabled=true" in response
+    assert "auto_routing_readonly_enabled=true" in response
+    assert "backend_runtime_enabled=false" in response
     assert "qdrant_network_service_adapter_candidate=true" in response
     assert "qdrant_runtime_readonly: source_present=true usable_now=false selected_tool=qdrant_readonly_status" in response
     assert "runtime_enabled=false" in response
@@ -57,7 +60,8 @@ def test_retrieval_similarity_route_returns_create_extend_adapter_recommendation
     assert done["intent_family"] == "SEMANTIC_SIMILARITY"
     assert done["selected_tools"][0] == "sqlite_vec_readonly"
     assert done["ollama_called"] is False
-    assert "selected_tool=repo_search" in response or "selected_tool=sqlite_vec_readonly" in response
+    assert "primary_tool=sqlite_vec_readonly" in response
+    assert "effective_tool=repo_search" in response or "effective_tool=sqlite_vec_readonly" in response
     assert "sqlite_vec_source_present=true" in response
     assert "CREATE_EXTEND_ADAPTER_RECOMMENDATION=" in response
     assert "direct_execution_allowed=false" in response
@@ -70,7 +74,8 @@ def test_retrieval_project_search_uses_mgrep_or_repo_search_fallback(monkeypatch
     assert done["intent_family"] == "PROJECT_SEARCH"
     assert done["selected_tools"][0] == "mgrep_readonly"
     assert done["ollama_called"] is False
-    assert "selected_tool=repo_search" in response or "selected_tool=mgrep_readonly" in response
+    assert "primary_tool=mgrep_readonly" in response
+    assert "effective_tool=repo_search" in response or "effective_tool=mgrep_readonly" in response
     assert "mgrep_source_present=true" in response
     assert "source_ref" in response
     assert done["canonical_memory_write_allowed"] is False

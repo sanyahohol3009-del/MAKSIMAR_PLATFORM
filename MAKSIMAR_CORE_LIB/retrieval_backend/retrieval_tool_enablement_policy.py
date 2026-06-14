@@ -632,6 +632,9 @@ class RetrievalToolEnablementPolicy:
     semantic_intent_groups: tuple[str, ...] = SEMANTIC_INTENT_GROUPS
     semantic_intent_rules: tuple[RetrievalSemanticIntentRule, ...] = ()
     read_only_tool_contracts_allowed: bool = True
+    read_only_tool_routing_enabled: bool = True
+    auto_routing_readonly_enabled: bool = True
+    backend_runtime_enabled: bool = False
     runtime_tool_execution_enabled: bool = False
     auto_routing_contract_allowed: bool = True
     auto_routing_runtime_enabled: bool = False
@@ -663,6 +666,9 @@ class RetrievalToolEnablementPolicy:
 
         for field_name in (
             "read_only_tool_contracts_allowed",
+            "read_only_tool_routing_enabled",
+            "auto_routing_readonly_enabled",
+            "backend_runtime_enabled",
             "runtime_tool_execution_enabled",
             "auto_routing_contract_allowed",
             "auto_routing_runtime_enabled",
@@ -680,6 +686,8 @@ class RetrievalToolEnablementPolicy:
 
         for field_name in (
             "read_only_tool_contracts_allowed",
+            "read_only_tool_routing_enabled",
+            "auto_routing_readonly_enabled",
             "auto_routing_contract_allowed",
             "source_ref_required",
             "evidence_binding_required",
@@ -689,6 +697,7 @@ class RetrievalToolEnablementPolicy:
                 raise ValueError(f"{field_name} must be True")
         for field_name in (
             "runtime_tool_execution_enabled",
+            "backend_runtime_enabled",
             "auto_routing_runtime_enabled",
             "source_of_truth",
             "canonical_write_allowed",
@@ -711,6 +720,9 @@ class RetrievalToolEnablementPolicy:
             "semantic_intent_groups": self.semantic_intent_groups,
             "semantic_intent_rules": tuple(rule.to_read_model() for rule in self.semantic_intent_rules),
             "read_only_tool_contracts_allowed": self.read_only_tool_contracts_allowed,
+            "read_only_tool_routing_enabled": self.read_only_tool_routing_enabled,
+            "auto_routing_readonly_enabled": self.auto_routing_readonly_enabled,
+            "backend_runtime_enabled": self.backend_runtime_enabled,
             "runtime_tool_execution_enabled": self.runtime_tool_execution_enabled,
             "auto_routing_contract_allowed": self.auto_routing_contract_allowed,
             "auto_routing_runtime_enabled": self.auto_routing_runtime_enabled,
