@@ -1206,6 +1206,21 @@ ROADMAP_EXPECTED_BATCHES: tuple[RoadmapExpectedBatch, ...] = (
    ExpectedProjectFile(path="tests/retrieval_backend/test_adapter_result_requires_evidence_binding_smoke.py", role="test", description="Adapter result evidence binding requirement smoke test."),
   ),
  ),
+ RoadmapExpectedBatch(
+  batch_id="7.2",
+  title="Retrieval Adapter Contracts",
+  expected_files=(
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_policy_gate_contract.py", role="source", description="Retrieval backend policy gate contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/mgrep_adapter_contract.py", role="source", description="mgrep adapter-only contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/sqlite_vec_adapter_contract.py", role="source", description="sqlite-vec adapter-only contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/qdrant_adapter_contract.py", role="source", description="Qdrant adapter-only contract."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_mgrep_adapter_contract_smoke.py", role="test", description="mgrep adapter contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_sqlite_vec_adapter_contract_smoke.py", role="test", description="sqlite-vec adapter contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_qdrant_adapter_contract_smoke.py", role="test", description="Qdrant adapter contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_backend_is_not_source_of_truth_smoke.py", role="test", description="Retrieval backends cannot claim source-of-truth status."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_adapter_cannot_be_evidence_source_of_truth_smoke.py", role="test", description="Retrieval adapters cannot become evidence source of truth."),
+  ),
+ ),
 
 )
 
