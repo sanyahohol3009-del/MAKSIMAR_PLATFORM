@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import time
 import asyncio
@@ -1619,6 +1620,7 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
     lowered = user_text.casefold()
     intent_family = "CONVERSATION"
     selected_tools: tuple[str, ...] = ()
+    tool_route = None
     confidence = 0.0
     reason = "ordinary conversation"
     needs_ollama = True
@@ -1629,6 +1631,37 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         selected_tools = ("capability_registry_read", "approval_boundary_read", "operator_proposal")
         confidence = 0.92
         reason = "action verb requires proposal boundary"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _has_filename_lookup_guard(user_text):
+        intent_family = "PROJECT_FILE"
+        selected_tools = ("read_file_snippet", "read_file_outline", "repo_files")
+        confidence = 0.96
+        reason = "direct filename lookup guard"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _has_backend_status_guard(lowered):
+        intent_family = "RETRIEVAL_BACKEND_STATUS"
+        tool_route = build_retrieval_readonly_tool_route(
+            "RETRIEVAL_BACKEND_STATUS",
+            ("qdrant_readonly_status", "retrieval_backend_status_read_model", "retrieval_tool_registry_contract"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.97
+        reason = "direct retrieval backend status guard"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _has_project_symbol_search_guard(lowered):
+        intent_family = "PROJECT_SEARCH"
+        tool_route = build_retrieval_readonly_tool_route(
+            "PROJECT_SEARCH",
+            ("mgrep_readonly", "repo_search", "read_file_snippet", "read_file_outline"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.97
+        reason = "direct project symbol search guard"
         needs_ollama = False
         evidence_required = True
     if intent_family == "CONVERSATION":
@@ -1645,10 +1678,6 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
             reason = f"retrieval semantic intent: {semantic_classification.intent_group}"
             needs_ollama = False
             evidence_required = True
-        else:
-            tool_route = None
-    else:
-        tool_route = None
     if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
         intent_family = "TOOL_CATALOG"
         selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
@@ -1744,9 +1773,6 @@ def _guarded_local_response(
     conversation_style_answer = _answer_conversation_style_complaint_if_grounded(context)
     if conversation_style_answer:
         return conversation_style_answer
-    project_tool_answer = _answer_project_read_tool_request(user_text)
-    if project_tool_answer:
-        return project_tool_answer
     style_memory_answer = _answer_style_memory_recall_if_grounded(context)
     if style_memory_answer:
         return style_memory_answer
@@ -1757,6 +1783,9 @@ def _guarded_local_response(
     )
     if grounded_tool_answer:
         return grounded_tool_answer
+    project_tool_answer = _answer_project_read_tool_request(user_text)
+    if project_tool_answer:
+        return project_tool_answer
     project_workspace_answer = _answer_project_workspace_summary_if_grounded(context)
     if project_workspace_answer:
         return project_workspace_answer
@@ -1930,7 +1959,7 @@ def _answer_with_read_only_tools_if_grounded(
         if not path:
             plan["evidence_count"] = 0
             return "Не нашёл подтверждение в текущих read-only источниках: путь файла не распознан."
-        snippet = _format_file_answer(path, page=1)
+        snippet = _format_file_answer(path, page=1, intent="PROJECT_FILE")
         outline = _format_outline_answer(path)
         plan["evidence_count"] = 2 if "denied" not in snippet.casefold() else 0
         return snippet + "\n\n" + outline
@@ -1998,7 +2027,7 @@ def _answer_project_command(text: str) -> str:
         return _format_search_answer(" ".join(parts[2:]))
     if command == "file" and len(parts) > 2:
         page = _parse_int(parts[3], default=1) if len(parts) > 3 else 1
-        return _format_file_answer(parts[2], page)
+        return _format_file_answer(parts[2], page, intent="PROJECT_FILE")
     if command == "outline" and len(parts) > 2:
         return _format_outline_answer(parts[2])
     if command == "imports":
@@ -2107,6 +2136,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
     if not payload["results"]:
         if path_hits:
             lines = [
+                "[work] intent=PROJECT_SEARCH",
                 f"primary_tool={route['primary_tool']}",
                 f"effective_tool={route['effective_tool']}",
                 f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
@@ -2125,9 +2155,10 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
                         f"classes={_csv(outline['classes']) or 'none'}; "
                         f"functions={_csv(outline['functions'][:12]) or 'none'}"
                     )
-            lines.append("read_only=true direct_execution_allowed=false")
+            lines.append("read_only=true execution_allowed=false direct_execution_allowed=false")
             return "\n".join(lines), len(path_hits)
         return (
+            "[work] intent=PROJECT_SEARCH\n"
             "Не нашёл подтверждение в текущих read-only источниках.\n"
             f"primary_tool={route['primary_tool']}\n"
             f"effective_tool={route['effective_tool']}\n"
@@ -2141,6 +2172,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
             0,
         )
     lines = [
+        "[work] intent=PROJECT_SEARCH",
         f"primary_tool={route['primary_tool']}",
         f"effective_tool={route['effective_tool']}",
         f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
@@ -2168,7 +2200,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
                 f"classes={_csv(outline['classes']) or 'none'}; "
                 f"functions={_csv(outline['functions'][:12]) or 'none'}"
             )
-    lines.append("read_only=true direct_execution_allowed=false")
+    lines.append("read_only=true execution_allowed=false direct_execution_allowed=false")
     return "\n".join(lines), int(payload["result_count"]) + len(path_hits)
 
 
@@ -2208,6 +2240,11 @@ def _format_retrieval_backend_status_answer() -> str:
         for item in build_retrieval_runtime_readonly_availability(PROJECT_ROOT)
     }
     lines = [
+        "[work] intent=RETRIEVAL_BACKEND_STATUS",
+        "primary_tool=qdrant_readonly_status",
+        "effective_tool=qdrant_readonly_status",
+        "selected_tool_chain=qdrant_readonly_status,retrieval_backend_status_read_model,retrieval_tool_registry_contract",
+        "fallback_reason=qdrant source is present but server/container runtime is intentionally disabled",
         "Retrieval backend status read-only:",
         "contract_ready=true",
         "vendor_acquired=true",
@@ -2238,7 +2275,7 @@ def _format_retrieval_backend_status_answer() -> str:
             f"fallback_tool={backend['fallback_tool']} unavailable_reason={backend['unavailable_reason']}"
         )
     lines.append("qdrant_network_service_adapter_candidate=true qdrant_server_required_now=false qdrant_container_enabled=false")
-    lines.append("read_only=true direct_execution_allowed=false canonical_write_allowed=false")
+    lines.append("read_only=true execution_allowed=false direct_execution_allowed=false canonical_write_allowed=false")
     lines.append("source_ref=MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_backend_status_read_model.py")
     return "\n".join(lines)
 
@@ -2308,12 +2345,28 @@ def _format_auto_tool_use_status_answer() -> str:
     )
 
 
-def _format_file_answer(path: str, page: int) -> str:
+def _format_file_answer(path: str, page: int, intent: str = "PROJECT_FILE") -> str:
     payload = read_file_snippet(path, page=page)
     if not payload.get("allowed"):
-        return f"File snippet denied: path={path}; error={payload.get('error', 'unknown')}; read_only=true."
-    lines = [f"File snippet read-only: {path} page={payload['page']} lines={payload['start_line']}-{payload['end_line']}"]
+        return (
+            f"[work] intent={intent}\n"
+            "primary_tool=read_file_snippet\n"
+            "effective_tool=read_file_snippet\n"
+            "selected_tool_chain=read_file_snippet,read_file_outline,repo_files\n"
+            f"fallback_reason={payload.get('error', 'unknown')}\n"
+            f"File snippet denied: path={path}; error={payload.get('error', 'unknown')}; "
+            "read_only=true execution_allowed=false"
+        )
+    lines = [
+        f"[work] intent={intent}",
+        "primary_tool=read_file_snippet",
+        "effective_tool=read_file_snippet",
+        "selected_tool_chain=read_file_snippet,read_file_outline,repo_files",
+        "fallback_reason=exact filename resolved before Ollama fallback",
+        f"File snippet read-only: {path} page={payload['page']} lines={payload['start_line']}-{payload['end_line']}",
+    ]
     lines.extend(payload["snippet"])
+    lines.append("read_only=true execution_allowed=false")
     return "\n".join(lines)
 
 
@@ -2644,6 +2697,41 @@ def _asks_project_search_question(lowered: str) -> bool:
     )
 
 
+def _has_project_symbol_search_guard(lowered: str) -> bool:
+    guarded_symbols = (
+        "source_ref",
+        "source-ref",
+        "source ref",
+        "evidence_binding",
+        "evidence-binding",
+        "evidence binding",
+        "source_of_truth",
+        "network_allowed_by_default",
+        "runtime_mutation_allowed",
+        "direct_execution_allowed",
+        "vendor_gate_required",
+    )
+    return any(symbol in lowered for symbol in guarded_symbols)
+
+
+def _has_backend_status_guard(lowered: str) -> bool:
+    boundary_markers = ("docker", "докер", "container", "контейнер", "порт", "port", "server", "сервер")
+    if any(marker in lowered for marker in boundary_markers):
+        return False
+    backend_markers = ("qdrant", "qdrnt", "qdran", "qudrant", "sqlite", "sqlite-vec", "sqlite_vec", "sqlite vec", "mgrep", "mgreo", "mgreep")
+    status_markers = ("status", "статус", "что по", "включен", "включён", "готов", "ready")
+    return any(marker in lowered for marker in backend_markers) and any(marker in lowered for marker in status_markers)
+
+
+def _has_filename_lookup_guard(user_text: str) -> bool:
+    return bool(_extract_filename_token(user_text))
+
+
+def _extract_filename_token(user_text: str) -> str:
+    match = re.search(r"(?P<filename>[\w.\-]+(?:\.py|\.yaml|\.yml|\.md|\.json|\.toml))", user_text, flags=re.IGNORECASE)
+    return match.group("filename") if match else ""
+
+
 def _asks_memory_history_question(lowered: str) -> bool:
     memory_markers = (
         "что мы обсуждали",
@@ -2756,6 +2844,13 @@ def _asks_tool_catalog_question(lowered: str) -> bool:
 
 def _extract_requested_file_path(user_text: str) -> str:
     lowered = user_text.casefold()
+    filename = _extract_filename_token(user_text)
+    if filename:
+        for path in _tracked_project_files():
+            if Path(path).name.casefold() == filename.casefold():
+                return path
+        if _safe_project_path(filename):
+            return filename
     if not any(marker in lowered for marker in ("покажи файл", "что внутри", "открой файл", "read file", "file ")):
         return ""
     for token in user_text.replace("`", " ").replace("'", " ").replace('"', " ").split():
@@ -2768,6 +2863,25 @@ def _extract_requested_file_path(user_text: str) -> str:
 
 def _semantic_search_query(user_text: str) -> str:
     lowered = user_text.casefold()
+    filename = _extract_filename_token(user_text)
+    if filename:
+        return filename
+    direct_queries = (
+        ("source_ref", "source_ref"),
+        ("source-ref", "source_ref"),
+        ("source ref", "source_ref"),
+        ("evidence_binding", "evidence_binding"),
+        ("evidence-binding", "evidence_binding"),
+        ("evidence binding", "evidence_binding"),
+        ("source_of_truth", "source_of_truth"),
+        ("network_allowed_by_default", "network_allowed_by_default"),
+        ("runtime_mutation_allowed", "runtime_mutation_allowed"),
+        ("direct_execution_allowed", "direct_execution_allowed"),
+        ("vendor_gate_required", "vendor_gate_required"),
+    )
+    for marker, query in direct_queries:
+        if marker in lowered:
+            return query
     known_queries = (
         ("terminal chat", "terminal_chat jarvis_live_terminal_chat"),
         ("brain_loop", "jarvis_live_brain_loop"),
