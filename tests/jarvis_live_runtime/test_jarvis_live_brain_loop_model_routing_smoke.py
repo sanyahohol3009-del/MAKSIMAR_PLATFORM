@@ -259,6 +259,7 @@ def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> N
             "think_mode": "false",
             "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
             "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "ollama_top_p": brain_loop.OLLAMA_FAST_CHAT_TOP_P,
             "pc_control_allowed": False,
         }
         yield {
@@ -271,6 +272,7 @@ def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> N
             "think_mode": "false",
             "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
             "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "ollama_top_p": brain_loop.OLLAMA_FAST_CHAT_TOP_P,
             "pc_control_allowed": False,
         }
 
@@ -293,6 +295,7 @@ def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> N
     assert done["think_mode"] == "false"
     assert done["ollama_num_predict"] == brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT
     assert done["ollama_temperature"] == brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE
+    assert done["ollama_top_p"] == brain_loop.OLLAMA_FAST_CHAT_TOP_P
 
 
 def test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only() -> None:
@@ -351,6 +354,7 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
             "think_mode": "false",
             "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
             "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "ollama_top_p": brain_loop.OLLAMA_FAST_CHAT_TOP_P,
             "pc_control_allowed": False,
         }
         yield {
@@ -363,6 +367,7 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
             "think_mode": "false",
             "ollama_num_predict": brain_loop.OLLAMA_FAST_CHAT_NUM_PREDICT,
             "ollama_temperature": brain_loop.OLLAMA_FAST_CHAT_TEMPERATURE,
+            "ollama_top_p": brain_loop.OLLAMA_FAST_CHAT_TOP_P,
             "pc_control_allowed": False,
             "tool_call_count": 1,
             "tool_call_detected": True,
@@ -423,7 +428,8 @@ def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
             "primary_error_message": "chat endpoint rejected",
             "think_mode": "generate",
             "ollama_num_predict": 512,
-            "ollama_temperature": 0.35,
+            "ollama_temperature": 0.8,
+            "ollama_top_p": 0.95,
             "pc_control_allowed": False,
         }
         yield {
@@ -437,7 +443,8 @@ def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
             "primary_error_message": "chat endpoint rejected",
             "think_mode": "generate",
             "ollama_num_predict": 512,
-            "ollama_temperature": 0.35,
+            "ollama_temperature": 0.8,
+            "ollama_top_p": 0.95,
             "pc_control_allowed": False,
         }
 
@@ -481,7 +488,8 @@ def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
             "ollama_endpoint_fallback_used": False,
             "think_mode": "generate",
             "ollama_num_predict": 640,
-            "ollama_temperature": 0.25,
+            "ollama_temperature": 0.8,
+            "ollama_top_p": 0.95,
             "pc_control_allowed": False,
         }
         yield {
@@ -493,7 +501,8 @@ def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
             "ollama_endpoint_fallback_used": False,
             "think_mode": "generate",
             "ollama_num_predict": 640,
-            "ollama_temperature": 0.25,
+            "ollama_temperature": 0.8,
+            "ollama_top_p": 0.95,
             "pc_control_allowed": False,
         }
 

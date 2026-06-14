@@ -14,10 +14,10 @@ def test_response_modes_and_num_predict_are_deterministic() -> None:
     assert detailed_mode.response_mode == "detailed_mode"
     assert command_mode.response_mode == "command_mode"
     assert code_mode.response_mode == "code_mode"
-    assert build_ollama_options(voice_mode) == {"num_predict": 512, "temperature": 0.35}
-    assert build_ollama_options(detailed_mode) == {"num_predict": 640, "temperature": 0.25}
-    assert build_ollama_options(command_mode) == {"num_predict": 256, "temperature": 0.2}
-    assert build_ollama_options(code_mode) == {"num_predict": 384, "temperature": 0.2}
+    assert build_ollama_options(voice_mode) == {"num_predict": 512, "temperature": 0.8, "top_p": 0.95}
+    assert build_ollama_options(detailed_mode) == {"num_predict": 640, "temperature": 0.8, "top_p": 0.95}
+    assert build_ollama_options(command_mode) == {"num_predict": 256, "temperature": 0.8, "top_p": 0.95}
+    assert build_ollama_options(code_mode) == {"num_predict": 384, "temperature": 0.8, "top_p": 0.95}
     assert build_ollama_options(voice_mode)["num_predict"] > 160
     assert "1-2 short spoken Russian sentences" in voice_mode.instruction
     assert "Do not repeat full identity every time" in voice_mode.instruction

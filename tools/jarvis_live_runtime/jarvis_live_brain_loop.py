@@ -79,7 +79,8 @@ PROJECT_SEARCH_MAX_RESULTS = 40
 PROJECT_SEARCH_CONTEXT_LINES = 2
 PROJECT_IMPORT_MAX_EDGES = 80
 OLLAMA_FAST_CHAT_NUM_PREDICT = 160
-OLLAMA_FAST_CHAT_TEMPERATURE = 0.4
+OLLAMA_FAST_CHAT_TEMPERATURE = 0.8
+OLLAMA_FAST_CHAT_TOP_P = 0.95
 OLLAMA_FAST_CHAT_KEEP_ALIVE = "30m"
 OLLAMA_FAST_CHAT_THINK = False
 
@@ -117,6 +118,16 @@ STABLE_STYLE_PROFILE = {
     "avoid": "не повторять 'Нужна помощь?' после каждого ответа; не начинать отношения заново в новой сессии",
     "concise_rule": "быть коротким только когда владелец просит коротко; иначе отвечать достаточно полно для задачи",
 }
+
+FORBIDDEN_CHAT_TEMPLATE_MARKERS = (
+    "долго не общались",
+    "голова немного затуманилась",
+    "что нужно сделать",
+    "чем могу помочь",
+    "нужна помощь",
+    "готов помочь",
+    "скажи, что нужно",
+)
 
 
 DANGEROUS_MEMORY_FLAGS = {
@@ -395,6 +406,7 @@ def stream_jarvis_live_brain_response(
         "think_mode": transport_plan["think_mode"],
         "ollama_num_predict": transport_plan["ollama_num_predict"],
         "ollama_temperature": transport_plan["ollama_temperature"],
+        "ollama_top_p": transport_plan["ollama_top_p"],
         "context_elapsed_seconds": context_elapsed_seconds,
         "intent_family": read_only_tool_plan["intent_family"],
         "selected_tools": read_only_tool_plan["selected_tools"],
@@ -532,6 +544,10 @@ def stream_jarvis_live_brain_response(
         error_kind = "ollama_empty_response"
         model_for_error = empty_model_id or model_used or context.selected_model_role["model_id"]
         error_message = f"ollama_empty_response model={model_for_error}"
+    if _is_forbidden_chat_template_response(response_text):
+        response_text = _repair_forbidden_chat_template_response(context)
+        error_kind = "template_response_filtered"
+        error_message = "model returned a repeated generic chat template; local guard replaced it"
     _append_assistant_and_summarize(state, response_text, context)
     yield {
         **_event("done", response_text=response_text, route_mode=context.route_mode),
@@ -558,11 +574,13 @@ def stream_jarvis_live_brain_response(
         "think_mode": str(completion_event.get("think_mode", "")),
         "ollama_num_predict": completion_event.get("ollama_num_predict", 0),
         "ollama_temperature": completion_event.get("ollama_temperature", 0.0),
+        "ollama_top_p": completion_event.get("ollama_top_p", 0.0),
         "selected_model_role": context.selected_model_role["selected_model_role"],
         "selected_model_id": context.selected_model_role["model_id"],
         "selected_model_status": context.selected_model_role["status"],
         "error_kind": error_kind,
         "error_message": error_message,
+        "template_guard_triggered": error_kind == "template_response_filtered",
         "admission_allowed": context.admission_status["admission_allowed"],
         "resource_gate_surface": context.admission_status["resource_gate_surface"],
         "session_memory_path": str(SESSION_STATE_PATH),
@@ -1092,6 +1110,7 @@ def _stream_ollama_model(
             "think_mode": transport_plan["think_mode"],
             "ollama_num_predict": transport_plan["ollama_num_predict"],
             "ollama_temperature": transport_plan["ollama_temperature"],
+            "ollama_top_p": transport_plan["ollama_top_p"],
         }
         yield done_event
         return
@@ -1137,6 +1156,7 @@ def _build_ollama_chat_payload(
     think_mode: bool | str = OLLAMA_FAST_CHAT_THINK,
     num_predict: int = OLLAMA_FAST_CHAT_NUM_PREDICT,
     temperature: float = OLLAMA_FAST_CHAT_TEMPERATURE,
+    top_p: float = OLLAMA_FAST_CHAT_TOP_P,
     keep_alive: str = OLLAMA_FAST_CHAT_KEEP_ALIVE,
     tools: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -1152,6 +1172,7 @@ def _build_ollama_chat_payload(
         "options": {
             "num_predict": num_predict,
             "temperature": temperature,
+            "top_p": top_p,
         },
     }
     if tools:
@@ -1213,6 +1234,7 @@ def _stream_ollama_chat_model(
         think_mode=OLLAMA_FAST_CHAT_THINK,
         num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
         temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+        top_p=OLLAMA_FAST_CHAT_TOP_P,
         keep_alive=OLLAMA_FAST_CHAT_KEEP_ALIVE,
     )
     timeout = httpx.Timeout(timeout_seconds or 120.0, connect=min(10.0, timeout_seconds or 120.0))
@@ -1237,6 +1259,7 @@ def _stream_ollama_chat_model(
                             think_mode="false",
                             ollama_num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
                             ollama_temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+                            ollama_top_p=OLLAMA_FAST_CHAT_TOP_P,
                         )
                         return
                     for event in _parse_ollama_chat_stream_event(chat_payload, model_id):
@@ -1247,6 +1270,7 @@ def _stream_ollama_chat_model(
                         event.setdefault("think_mode", "false")
                         event.setdefault("ollama_num_predict", OLLAMA_FAST_CHAT_NUM_PREDICT)
                         event.setdefault("ollama_temperature", OLLAMA_FAST_CHAT_TEMPERATURE)
+                        event.setdefault("ollama_top_p", OLLAMA_FAST_CHAT_TOP_P)
                         yield event
     except (httpx.HTTPError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
         yield _event(
@@ -1260,6 +1284,7 @@ def _stream_ollama_chat_model(
             think_mode="false",
             ollama_num_predict=OLLAMA_FAST_CHAT_NUM_PREDICT,
             ollama_temperature=OLLAMA_FAST_CHAT_TEMPERATURE,
+            ollama_top_p=OLLAMA_FAST_CHAT_TOP_P,
         )
 
 
@@ -1303,6 +1328,7 @@ def _stream_ollama_generate_model(
                             think_mode="generate",
                             ollama_num_predict=options.get("num_predict", 0),
                             ollama_temperature=options.get("temperature", 0.0),
+                            ollama_top_p=options.get("top_p", 0.0),
                         )
                         return
                     thinking = str(payload.get("thinking", ""))
@@ -1322,6 +1348,7 @@ def _stream_ollama_generate_model(
                             think_mode="generate",
                             ollama_num_predict=options.get("num_predict", 0),
                             ollama_temperature=options.get("temperature", 0.0),
+                            ollama_top_p=options.get("top_p", 0.0),
                         )
                         return
     except (httpx.HTTPError, TimeoutError, BrokenPipeError, ConnectionResetError, ConnectionAbortedError) as exc:
@@ -1336,6 +1363,7 @@ def _stream_ollama_generate_model(
             think_mode="generate",
             ollama_num_predict=options.get("num_predict", 0),
             ollama_temperature=options.get("temperature", 0.0),
+            ollama_top_p=options.get("top_p", 0.0),
         )
 
 
@@ -1353,6 +1381,7 @@ def _ollama_transport_plan(
             "think_mode": "false",
             "ollama_num_predict": OLLAMA_FAST_CHAT_NUM_PREDICT,
             "ollama_temperature": OLLAMA_FAST_CHAT_TEMPERATURE,
+            "ollama_top_p": OLLAMA_FAST_CHAT_TOP_P,
             "keep_alive": OLLAMA_FAST_CHAT_KEEP_ALIVE,
         }
     options = build_ollama_options(response_mode)
@@ -1363,6 +1392,7 @@ def _ollama_transport_plan(
         "think_mode": "generate",
         "ollama_num_predict": int(options.get("num_predict", 0)),
         "ollama_temperature": float(options.get("temperature", 0.0)),
+        "ollama_top_p": float(options.get("top_p", 0.0)),
         "keep_alive": os.environ.get("JARVIS_LIVE_OLLAMA_KEEP_ALIVE", "30m"),
     }
 
@@ -1433,6 +1463,7 @@ def _collect_chat_stream_events(
         "think_mode": "false",
         "ollama_num_predict": OLLAMA_FAST_CHAT_NUM_PREDICT,
         "ollama_temperature": OLLAMA_FAST_CHAT_TEMPERATURE,
+        "ollama_top_p": OLLAMA_FAST_CHAT_TOP_P,
         "ollama_endpoint_fallback_used": False,
     }
 
@@ -1467,6 +1498,7 @@ def _collect_generate_stream_events(
                 "think_mode": "generate",
                 "ollama_num_predict": options.get("num_predict", 0),
                 "ollama_temperature": options.get("temperature", 0.0),
+                "ollama_top_p": options.get("top_p", 0.0),
             }
             if event.get("event") == "error":
                 enriched.setdefault("error_kind", str(fallback_reason.get("error_kind", "ollama_stream_error")))
@@ -1668,6 +1700,9 @@ def _guarded_local_response(
     read_only_tool_plan: dict[str, Any] | None = None,
 ) -> str | None:
     lowered = user_text.casefold()
+    conversation_style_answer = _answer_conversation_style_complaint_if_grounded(context)
+    if conversation_style_answer:
+        return conversation_style_answer
     project_tool_answer = _answer_project_read_tool_request(user_text)
     if project_tool_answer:
         return project_tool_answer
@@ -1727,6 +1762,81 @@ def _guarded_local_response(
             "canonical write и runtime mutation запрещены."
         )
     return None
+
+
+def _answer_conversation_style_complaint_if_grounded(context: JarvisBrainContext) -> str:
+    lowered = context.user_text.casefold()
+    if _looks_like_keyboard_layout_noise(context.user_text):
+        return (
+            "Похоже, раскладка поехала. Я не буду лепить заготовку вместо смысла: "
+            "повтори фразу нормальной раскладкой, и я разберу её по делу."
+        )
+    if _asks_template_style_complaint(lowered):
+        return (
+            "Да, брат, вижу петлю: я начал повторять canned-ответ вместо реакции на смысл. "
+            "Это не нормальный разговор. Чинить надо в двух местах: fast-chat guard не должен пропускать "
+            "заготовки, а session memory не должна кормить их обратно в следующий ответ. "
+            "Для обычного общения держу живой стиль: прямо, по делу, но не сухим шаблоном."
+        )
+    if _asks_casual_state_question(lowered):
+        return (
+            "На связи, брат. По состоянию честно: чат работает, но я вижу риск шаблонной петли, "
+            "поэтому обычный разговор надо держать живым guard'ом и памятью последних реплик, "
+            "а не одной дежурной фразой."
+        )
+    return ""
+
+
+def _asks_template_style_complaint(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "шаблон",
+            "заготов",
+            "одно и то же",
+            "один и тот же ответ",
+            "перестань шаблон",
+            "почему ты мне шаблон",
+            "отвечаешь шаблон",
+            "не живой",
+            "живее",
+        )
+    )
+
+
+def _asks_casual_state_question(lowered: str) -> bool:
+    cleaned = lowered.strip(" ?!.,")
+    return cleaned in {"как дела", "как ты", "ты как", "как состояние", "ты на связи"}
+
+
+def _looks_like_keyboard_layout_noise(text: str) -> bool:
+    stripped = text.strip()
+    if len(stripped) < 10:
+        return False
+    letters = [char for char in stripped if char.isalpha()]
+    if not letters:
+        return False
+    latin_letters = [char for char in letters if "a" <= char.casefold() <= "z"]
+    cyrillic_letters = [char for char in letters if "а" <= char.casefold() <= "я" or char.casefold() == "ё"]
+    punctuation_noise = sum(1 for char in stripped if char in "&;,./[]{}")
+    return len(latin_letters) >= max(8, len(letters) * 3 // 4) and not cyrillic_letters and punctuation_noise > 0
+
+
+def _is_forbidden_chat_template_response(response_text: str) -> bool:
+    lowered = response_text.casefold()
+    if not lowered.strip():
+        return False
+    return any(marker in lowered for marker in FORBIDDEN_CHAT_TEMPLATE_MARKERS)
+
+
+def _repair_forbidden_chat_template_response(context: JarvisBrainContext) -> str:
+    if _asks_template_style_complaint(context.user_text.casefold()):
+        return _answer_conversation_style_complaint_if_grounded(context)
+    return (
+        "Сбил шаблонный ответ и не сохраняю его как нормальную память. "
+        "По смыслу текущего запроса отвечаю заново: мне нужно держаться фактов из контекста, "
+        "а если фактов не хватает — прямо сказать, что нужна проверка."
+    )
 
 
 def _answer_with_read_only_tools_if_grounded(

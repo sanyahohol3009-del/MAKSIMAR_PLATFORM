@@ -13,6 +13,7 @@ class JarvisLiveResponseMode:
     response_mode: str
     ollama_num_predict: int
     ollama_temperature: float
+    ollama_top_p: float
     instruction: str
 
     def to_read_model(self) -> dict[str, object]:
@@ -20,6 +21,7 @@ class JarvisLiveResponseMode:
             "response_mode": self.response_mode,
             "ollama_num_predict": self.ollama_num_predict,
             "ollama_temperature": self.ollama_temperature,
+            "ollama_top_p": self.ollama_top_p,
             "instruction": self.instruction,
             "pc_control_allowed": False,
         }
@@ -31,7 +33,8 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
         return JarvisLiveResponseMode(
             response_mode="detailed_mode",
             ollama_num_predict=640,
-            ollama_temperature=0.25,
+            ollama_temperature=0.8,
+            ollama_top_p=0.95,
             instruction=(
                 "Режим detailed_mode: дай более длинный структурированный ответ. "
                 "PC control disabled."
@@ -41,7 +44,8 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
         return JarvisLiveResponseMode(
             response_mode="command_mode",
             ollama_num_predict=256,
-            ollama_temperature=0.2,
+            ollama_temperature=0.8,
+            ollama_top_p=0.95,
             instruction=(
                 "Режим command_mode: дай короткое подтверждение или preview. "
                 "Не выполняй действия, PC control disabled."
@@ -51,7 +55,8 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
         return JarvisLiveResponseMode(
             response_mode="code_mode",
             ollama_num_predict=384,
-            ollama_temperature=0.2,
+            ollama_temperature=0.8,
+            ollama_top_p=0.95,
             instruction=(
                 "Режим code_mode: дай структурированный ответ с командами или проверками, "
                 "кратко, но не чрезмерно коротко. PC control disabled."
@@ -60,7 +65,8 @@ def classify_response_mode(transcript: str) -> JarvisLiveResponseMode:
     return JarvisLiveResponseMode(
         response_mode="voice_mode",
         ollama_num_predict=512,
-        ollama_temperature=0.35,
+        ollama_temperature=0.8,
+        ollama_top_p=0.95,
         instruction=(
             "Answer in 1-2 short spoken Russian sentences. Do not repeat full identity "
             "every time. Do not give long intro. Sound alive and direct. PC control disabled."
@@ -72,6 +78,7 @@ def build_ollama_options(response_mode: JarvisLiveResponseMode) -> dict[str, obj
     return {
         "num_predict": response_mode.ollama_num_predict,
         "temperature": response_mode.ollama_temperature,
+        "top_p": response_mode.ollama_top_p,
     }
 
 

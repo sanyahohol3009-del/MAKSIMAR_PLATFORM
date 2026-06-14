@@ -460,7 +460,8 @@ def _print_stream_metadata(event: dict[str, Any]) -> None:
             f"fallback_used={str(bool(event.get('ollama_endpoint_fallback_used', False))).lower()} "
             f"think_mode={event.get('think_mode', '')} "
             f"num_predict={event.get('ollama_num_predict', '')} "
-            f"temperature={event.get('ollama_temperature', '')}"
+            f"temperature={event.get('ollama_temperature', '')} "
+            f"top_p={event.get('ollama_top_p', '')}"
         )
         if event.get("intent_family"):
             print(
