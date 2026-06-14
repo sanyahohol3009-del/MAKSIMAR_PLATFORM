@@ -53,15 +53,17 @@ def test_retrieval_container_boundary_routes_without_ollama(monkeypatch) -> None
     assert "qdrant_container_enabled=false" in response
 
 
-def test_retrieval_similarity_route_returns_create_extend_adapter_recommendation(monkeypatch) -> None:
-    done = _done_for("проверь semantic duplicate risk для retrieval adapter, CREATE или EXTEND?", monkeypatch)
+def test_retrieval_similarity_route_extracts_query_and_uses_sqlite_vec_guard(monkeypatch) -> None:
+    done = _done_for("найди похожее на retrieval adapter contract", monkeypatch)
     response = str(done["response_text"])
 
     assert done["intent_family"] == "SEMANTIC_SIMILARITY"
     assert done["selected_tools"][0] == "sqlite_vec_readonly"
     assert done["ollama_called"] is False
+    assert "[work] intent=SEMANTIC_SIMILARITY" in response
     assert "primary_tool=sqlite_vec_readonly" in response
-    assert "effective_tool=repo_search" in response or "effective_tool=sqlite_vec_readonly" in response
+    assert "effective_tool=sqlite_vec_readonly" in response
+    assert "query=retrieval adapter contract" in response
     assert "sqlite_vec_source_present=true" in response
     assert "CREATE_EXTEND_ADAPTER_RECOMMENDATION=" in response
     assert "direct_execution_allowed=false" in response

@@ -1652,6 +1652,18 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "direct retrieval backend status guard"
         needs_ollama = False
         evidence_required = True
+    if intent_family == "CONVERSATION" and _has_semantic_similarity_guard(lowered):
+        intent_family = "SEMANTIC_SIMILARITY"
+        tool_route = build_retrieval_readonly_tool_route(
+            "SEMANTIC_SIMILARITY",
+            ("sqlite_vec_readonly", "repo_search", "qdrant_readonly"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.97
+        reason = "direct semantic similarity guard"
+        needs_ollama = False
+        evidence_required = True
     if intent_family == "CONVERSATION" and _has_project_symbol_search_guard(lowered):
         intent_family = "PROJECT_SEARCH"
         tool_route = build_retrieval_readonly_tool_route(
@@ -1685,7 +1697,7 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "tool/capability catalog question"
         needs_ollama = False
         evidence_required = True
-    elif _asks_memory_history_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
         intent_family = "MEMORY_RECALL"
         selected_tools = (
             "stable_style_profile",
@@ -1700,49 +1712,49 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "history or memory question must be retrieval-first"
         needs_ollama = False
         evidence_required = True
-    elif _asks_model_status_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_model_status_question(lowered):
         intent_family = "MODEL_STATUS"
         selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
         confidence = 0.9
         reason = "model/runtime status question"
         needs_ollama = False
         evidence_required = True
-    elif _asks_roadmap_status_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_roadmap_status_question(lowered):
         intent_family = "ROADMAP_STATUS"
         selected_tools = ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status", "repo_search")
         confidence = 0.88
         reason = "roadmap/status question"
         needs_ollama = False
         evidence_required = True
-    elif _asks_safety_status_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_safety_status_question(lowered):
         intent_family = "SAFETY_STATUS"
         selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
         confidence = 0.88
         reason = "safety/capability boundary question"
         needs_ollama = False
         evidence_required = True
-    elif _extract_requested_file_path(user_text):
+    elif intent_family == "CONVERSATION" and _extract_requested_file_path(user_text):
         intent_family = "PROJECT_FILE"
         selected_tools = ("read_file_snippet", "read_file_outline")
         confidence = 0.88
         reason = "file content request"
         needs_ollama = False
         evidence_required = True
-    elif _asks_project_status_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_project_status_question(lowered):
         intent_family = "PROJECT_STATUS"
         selected_tools = ("repo_git_status", "build_project_workspace_read_model")
         confidence = 0.9
         reason = "workspace/git status question"
         needs_ollama = False
         evidence_required = True
-    elif _asks_project_structure_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_project_structure_question(lowered):
         intent_family = "PROJECT_STRUCTURE"
         selected_tools = ("build_project_workspace_read_model", "repo_tree", "repo_files")
         confidence = 0.86
         reason = "project structure question"
         needs_ollama = False
         evidence_required = True
-    elif _asks_project_search_question(lowered):
+    elif intent_family == "CONVERSATION" and _asks_project_search_question(lowered):
         intent_family = "PROJECT_SEARCH"
         selected_tools = ("repo_search", "read_file_snippet", "read_file_outline")
         confidence = 0.82
@@ -1928,7 +1940,11 @@ def _answer_with_read_only_tools_if_grounded(
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "SEMANTIC_SIMILARITY":
-        answer, evidence_count = _format_semantic_similarity_answer(user_text, _plan_tool_route(plan))
+        answer, evidence_count = _format_semantic_similarity_answer(
+            user_text,
+            _plan_tool_route(plan),
+            _extract_semantic_similarity_query(user_text),
+        )
         plan["evidence_count"] = evidence_count
         return answer
     if intent == "RETRIEVAL_BACKEND_STATUS":
@@ -2125,10 +2141,15 @@ def _format_search_answer(query: str) -> str:
     return "\n".join(lines)
 
 
-def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str, Any] | None = None) -> tuple[str, int]:
+def _format_project_semantic_search_answer(
+    user_text: str,
+    tool_route: dict[str, Any] | None = None,
+    semantic_query: str | None = None,
+    intent_label: str = "PROJECT_SEARCH",
+) -> tuple[str, int]:
     route = tool_route or build_retrieval_readonly_tool_route("PROJECT_SEARCH", ("mgrep_readonly", "repo_search"), PROJECT_ROOT).to_read_model()
     mgrep = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
-    query = _semantic_search_query(user_text)
+    query = semantic_query.strip() if semantic_query and semantic_query.strip() else _semantic_search_query(user_text)
     payload = repo_search(query)
     if not payload["results"] and query != user_text.strip():
         payload = repo_search(user_text.strip())
@@ -2136,7 +2157,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
     if not payload["results"]:
         if path_hits:
             lines = [
-                "[work] intent=PROJECT_SEARCH",
+                f"[work] intent={intent_label}",
                 f"primary_tool={route['primary_tool']}",
                 f"effective_tool={route['effective_tool']}",
                 f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
@@ -2158,7 +2179,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
             lines.append("read_only=true execution_allowed=false direct_execution_allowed=false")
             return "\n".join(lines), len(path_hits)
         return (
-            "[work] intent=PROJECT_SEARCH\n"
+            f"[work] intent={intent_label}\n"
             "Не нашёл подтверждение в текущих read-only источниках.\n"
             f"primary_tool={route['primary_tool']}\n"
             f"effective_tool={route['effective_tool']}\n"
@@ -2172,7 +2193,7 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
             0,
         )
     lines = [
-        "[work] intent=PROJECT_SEARCH",
+        f"[work] intent={intent_label}",
         f"primary_tool={route['primary_tool']}",
         f"effective_tool={route['effective_tool']}",
         f"selected_tool_chain={_csv(route['selected_tool_chain'])}",
@@ -2204,14 +2225,19 @@ def _format_project_semantic_search_answer(user_text: str, tool_route: dict[str,
     return "\n".join(lines), int(payload["result_count"]) + len(path_hits)
 
 
-def _format_semantic_similarity_answer(user_text: str, tool_route: dict[str, Any] | None = None) -> tuple[str, int]:
+def _format_semantic_similarity_answer(
+    user_text: str,
+    tool_route: dict[str, Any] | None = None,
+    semantic_query: str | None = None,
+) -> tuple[str, int]:
     route = tool_route or build_retrieval_readonly_tool_route(
         "SEMANTIC_SIMILARITY",
         ("sqlite_vec_readonly", "repo_search", "qdrant_readonly"),
         PROJECT_ROOT,
     ).to_read_model()
     sqlite_vec = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
-    answer, evidence_count = _format_project_semantic_search_answer(user_text)
+    query = semantic_query.strip() if semantic_query and semantic_query.strip() else _extract_semantic_similarity_query(user_text)
+    answer, evidence_count = _format_project_semantic_search_answer(user_text, route, query, "SEMANTIC_SIMILARITY")
     recommendation = (
         "EXTEND existing surface when evidence paths match the requested domain; "
         "otherwise create only a contract/adapter after source review."
@@ -2714,6 +2740,25 @@ def _has_project_symbol_search_guard(lowered: str) -> bool:
     return any(symbol in lowered for symbol in guarded_symbols)
 
 
+def _has_semantic_similarity_guard(lowered: str) -> bool:
+    if "semantic similarity" in lowered or "similar to" in lowered or "related to" in lowered:
+        return True
+    if "семантически" in lowered or "по смыслу" in lowered:
+        return True
+    return any(
+        marker in lowered
+        for marker in (
+            "найди похожее на",
+            "похожее на",
+            "похожие на",
+            "найди похожее",
+            "похожие",
+            "похожее",
+            "semantic",
+        )
+    )
+
+
 def _has_backend_status_guard(lowered: str) -> bool:
     boundary_markers = ("docker", "докер", "container", "контейнер", "порт", "port", "server", "сервер")
     if any(marker in lowered for marker in boundary_markers):
@@ -2730,6 +2775,32 @@ def _has_filename_lookup_guard(user_text: str) -> bool:
 def _extract_filename_token(user_text: str) -> str:
     match = re.search(r"(?P<filename>[\w.\-]+(?:\.py|\.yaml|\.yml|\.md|\.json|\.toml))", user_text, flags=re.IGNORECASE)
     return match.group("filename") if match else ""
+
+
+def _extract_semantic_similarity_query(user_text: str) -> str:
+    text = user_text.strip()
+    lowered = text.casefold()
+    patterns = (
+        r"^(?:найди\s+)?похож[еаы]?[йя]?\s+на\s+",
+        r"^семантически\s+",
+        r"^по\s+смыслу\s+",
+        r"^semantic\s+similarity\s+",
+        r"^semantic\s+",
+        r"^similar\s+to\s+",
+        r"^related\s+to\s+",
+        r"^similar\s+",
+    )
+    for pattern in patterns:
+        candidate = re.sub(pattern, "", text, flags=re.IGNORECASE).strip(" ,.;:!?-")
+        if candidate != text and candidate:
+            return candidate
+    for trigger in ("найди похожее на", "похожее на", "похожие на"):
+        if trigger in lowered:
+            index = lowered.index(trigger) + len(trigger)
+            candidate = text[index:].strip(" ,.;:!?-")
+            if candidate:
+                return candidate
+    return _semantic_search_query(user_text)
 
 
 def _asks_memory_history_question(lowered: str) -> bool:
