@@ -1,0 +1,25 @@
+cube_id: retrieval_backend
+contract_id: retrieval_backend.container_contract.v1
+contract_type: container_readiness_contract
+owner_layer: PHASE_7_RETRIEVAL_BACKEND
+status: declarative_contract_only
+container_ready: true
+runtime_enabled: false
+docker_required_now: false
+network_allowed_by_default: false
+source_of_truth: false
+direct_canonical_write_allowed: false
+runtime_mutation_allowed: false
+execution_allowed_now: false
+direct_execution_allowed: false
+approval_required_before_runtime: true
+vendor_gate_required_before_real_backend: true
+evidence_binding_required: true
+source_ref_required: true
+output_requires_normalization: true
+read_model_source: MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_backend_status_read_model.py
+preview_tool: tools/retrieval_backend_status_preview.py
+adapter_contracts:
+  - MAKSIMAR_CORE_LIB/retrieval_backend/mgrep_adapter_contract.py
+  - MAKSIMAR_CORE_LIB/retrieval_backend/sqlite_vec_adapter_contract.py
+  - MAKSIMAR_CORE_LIB/retrieval_backend/qdrant_adapter_contract.py

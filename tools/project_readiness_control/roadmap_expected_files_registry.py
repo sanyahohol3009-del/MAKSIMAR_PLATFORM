@@ -1221,6 +1221,19 @@ ROADMAP_EXPECTED_BATCHES: tuple[RoadmapExpectedBatch, ...] = (
    ExpectedProjectFile(path="tests/retrieval_backend/test_adapter_cannot_be_evidence_source_of_truth_smoke.py", role="test", description="Retrieval adapters cannot become evidence source of truth."),
   ),
  ),
+ RoadmapExpectedBatch(
+  batch_id="7.3",
+  title="Retrieval Read Model / Container",
+  expected_files=(
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_backend_status_read_model.py", role="source", description="Retrieval backend adapter status read model."),
+   ExpectedProjectFile(path="tools/retrieval_backend_status_preview.py", role="tool", description="Read-only retrieval backend status preview."),
+   ExpectedProjectFile(path="CONTAINER_DEPLOYMENT/cubes/retrieval_backend/container_contract.yaml", role="config", description="Retrieval backend declarative container contract."),
+   ExpectedProjectFile(path="CONTAINER_DEPLOYMENT/cubes/retrieval_backend/runtime_profile.yaml", role="config", description="Retrieval backend disabled runtime profile."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_backend_output_requires_normalization_smoke.py", role="test", description="Retrieval backend normalization requirement smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_retrieval_backend_status_read_model_smoke.py", role="test", description="Retrieval backend status read model smoke test."),
+   ExpectedProjectFile(path="tests/container_readiness/test_retrieval_backend_container_contract_smoke.py", role="test", description="Retrieval backend container readiness smoke test."),
+  ),
+ ),
 
 )
 

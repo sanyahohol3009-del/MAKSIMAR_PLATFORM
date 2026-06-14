@@ -26,6 +26,15 @@ from MAKSIMAR_CORE_LIB.retrieval_backend.retrieval_policy_gate_contract import (
     RetrievalPolicyGateContract,
     build_default_retrieval_policy_gate_contract,
 )
+from MAKSIMAR_CORE_LIB.retrieval_backend.retrieval_backend_status_read_model import (
+    RETRIEVAL_BACKEND_STATUS_MODE,
+    RETRIEVAL_BACKEND_STATUS_MODEL_ID,
+    SUPPORTED_RETRIEVAL_BACKEND_KINDS,
+    RetrievalBackendAdapterStatus,
+    RetrievalBackendStatusReadModel,
+    build_retrieval_backend_status_read_model,
+    build_retrieval_backend_status_read_model_json,
+)
 from MAKSIMAR_CORE_LIB.retrieval_backend.semantic_search_contract import (
     SemanticSearchContract,
     build_default_semantic_search_contract,
@@ -50,12 +59,17 @@ __all__ = [
     "QdrantAdapterContract",
     "RETRIEVAL_POLICY_MODE",
     "RetrievalAdapterMode",
+    "RetrievalBackendAdapterStatus",
     "RetrievalBackendAdapterContract",
     "RetrievalBackendCandidate",
+    "RetrievalBackendStatusReadModel",
     "RetrievalPolicyGateContract",
     "RetrievalTruthStatus",
+    "RETRIEVAL_BACKEND_STATUS_MODE",
+    "RETRIEVAL_BACKEND_STATUS_MODEL_ID",
     "SemanticSearchContract",
     "SqliteVecAdapterContract",
+    "SUPPORTED_RETRIEVAL_BACKEND_KINDS",
     "VectorBackendContract",
     "VectorBackendKind",
     "build_default_evidence_binding_contract",
@@ -66,5 +80,7 @@ __all__ = [
     "build_default_vector_backend_contract",
     "build_mgrep_adapter_contract",
     "build_qdrant_adapter_contract",
+    "build_retrieval_backend_status_read_model",
+    "build_retrieval_backend_status_read_model_json",
     "build_sqlite_vec_adapter_contract",
 ]
