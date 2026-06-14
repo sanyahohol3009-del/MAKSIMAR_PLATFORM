@@ -1234,6 +1234,14 @@ ROADMAP_EXPECTED_BATCHES: tuple[RoadmapExpectedBatch, ...] = (
    ExpectedProjectFile(path="tests/container_readiness/test_retrieval_backend_container_contract_smoke.py", role="test", description="Retrieval backend container readiness smoke test."),
   ),
  ),
+ RoadmapExpectedBatch(
+  batch_id="7.4",
+  title="Retrieval Backend Acceptance",
+  expected_files=(
+   ExpectedProjectFile(path="docs/architecture/retrieval_backend/phase_7_retrieval_backend_acceptance_v1.md", role="doc", description="PHASE 7 retrieval backend final acceptance document."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_phase_7_acceptance_smoke.py", role="test", description="PHASE 7 retrieval backend acceptance smoke test."),
+  ),
+ ),
 
 )
 
