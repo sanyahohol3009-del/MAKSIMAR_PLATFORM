@@ -993,6 +993,13 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
 
 def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
     memory = build_jarvis_live_memory_federation_status()
+    mgrep = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
+    sqlite_vec = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
+    qdrant = inspect_qdrant_readonly_availability(PROJECT_ROOT).to_read_model()
+    memory_definitions = list_memory_definitions()
+    enterprise_preview = build_enterprise_memory_preview()
+    regulatory_preview = build_regulatory_routing_preview()
+    mempalace_preview = build_mempalace_read_only_routing_integration_preview()
     read_tools = (
         "repo_git_status",
         "build_project_workspace_read_model",
@@ -1056,6 +1063,57 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "retrieval_tool_runtime_enabled": True,
         "retrieval_auto_routing_contract_enabled": True,
         "retrieval_auto_routing_runtime_enabled": True,
+        "project_repo_read_only_tools": (
+            "repo_git_status",
+            "build_project_workspace_read_model",
+            "repo_tree",
+            "repo_files",
+            "repo_search",
+            "read_file_snippet",
+            "read_file_outline",
+        ),
+        "retrieval_read_only_tools": (
+            "mgrep_readonly",
+            "sqlite_vec_readonly",
+            "qdrant_readonly_status",
+            "retrieval_backend_status_read_model",
+            "retrieval_tool_registry_contract",
+        ),
+        "memory_history_read_only_tools": (
+            "session_memory",
+            "local_chat_memory",
+            "runtime_history_store",
+            "history_query",
+            "memory_engine_registry",
+            "enterprise_business_memory",
+            "regulatory_memory_foundation",
+            "mempalace_read_only_sandbox",
+        ),
+        "model_status_read_only_tools": (
+            "model_runtime_status",
+            "build_jarvis_live_session_status",
+            "build_jarvis_live_brain_health",
+            "model_registry_status",
+        ),
+        "roadmap_safety_read_only_tools": (
+            "status_tools",
+            "roadmap_post_step_drift_check",
+            "jarvis_live_ci_status",
+            "project_safety_formatter",
+        ),
+        "action_proposal_only_tools": proposal_tools,
+        "mgrep_status": mgrep,
+        "sqlite_vec_status": sqlite_vec,
+        "qdrant_status": qdrant,
+        "memory_definition_count": len(memory_definitions),
+        "memory_definition_ids": tuple(definition.entity_id for definition in memory_definitions[:24]),
+        "enterprise_memory_preview_ready": bool(enterprise_preview.get("preview_ready", False)),
+        "regulatory_routing_preview_ready": bool(regulatory_preview.get("preview_ready", False)),
+        "mempalace_routing_ready": bool(mempalace_preview.get("routing_integration_ready", False)),
+        "qdrant_server_runtime_enabled": False,
+        "direct_execution_allowed": False,
+        "canonical_write_allowed": False,
+        "pc_control_allowed": False,
     }
 
 
@@ -1633,6 +1691,13 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "action verb requires proposal boundary"
         needs_ollama = False
         evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
+        intent_family = "TOOL_CATALOG"
+        selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
+        confidence = 0.95
+        reason = "tool/capability catalog question"
+        needs_ollama = False
+        evidence_required = True
     if intent_family == "CONVERSATION" and _has_filename_lookup_guard(user_text):
         intent_family = "PROJECT_FILE"
         selected_tools = ("read_file_snippet", "read_file_outline", "repo_files")
@@ -1690,14 +1755,7 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
             reason = f"retrieval semantic intent: {semantic_classification.intent_group}"
             needs_ollama = False
             evidence_required = True
-    if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
-        intent_family = "TOOL_CATALOG"
-        selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
-        confidence = 0.9
-        reason = "tool/capability catalog question"
-        needs_ollama = False
-        evidence_required = True
-    elif intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
+    if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
         intent_family = "MEMORY_RECALL"
         selected_tools = (
             "stable_style_profile",
@@ -2544,20 +2602,82 @@ def _format_action_request_proposal_answer(user_text: str) -> str:
 
 
 def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
-    read_tools = tuple(str(tool) for tool in catalog.get("read_tools", ()))
-    proposal_tools = tuple(str(tool) for tool in catalog.get("proposal_tools", ()))
-    return (
-        "JARVIS tool catalog подключен как read/proposal layer.\n"
-        f"read_tools={', '.join(read_tools)}\n"
-        f"proposal_tools={', '.join(proposal_tools)}\n"
-        f"memory_surfaces={_csv(catalog.get('memory_surfaces', ())) or 'none'}\n"
-        f"active_retrieval_surfaces={_csv(catalog.get('active_retrieval_surfaces', ())) or 'none'}\n"
-        f"sandbox_only_memory_surfaces={_csv(catalog.get('sandbox_only_memory_surfaces', ())) or 'none'}\n"
-        f"disabled_memory_surfaces={_csv(catalog.get('disabled_memory_surfaces', ())) or 'none'}\n"
-        "all_existing_read_tools_connected=true all_existing_memory_surfaces_connected=true\n"
-        "execution_allowed=false approval_required_for_actions=true pc_control_allowed=false "
-        "shell_execution_enabled=false direct_execution_allowed=false canonical_write_allowed=false"
+    read_only = str(bool(catalog.get("read_only", True))).lower()
+    execution_allowed = str(bool(catalog.get("execution_allowed", False))).lower()
+    mgrep = catalog.get("mgrep_status", {})
+    sqlite_vec = catalog.get("sqlite_vec_status", {})
+    qdrant = catalog.get("qdrant_status", {})
+    lines = [
+        "[work] intent=TOOL_CATALOG "
+        "tools=build_jarvis_live_tool_catalog_read_model,inspect_mgrep_readonly_availability,"
+        "inspect_sqlite_vec_readonly_availability,inspect_qdrant_readonly_availability "
+        f"read_only={read_only} execution_allowed={execution_allowed}",
+        "Project / repo read-only:",
+    ]
+    for tool in catalog.get("project_repo_read_only_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.extend(
+        (
+            "Retrieval read-only:",
+            f"- mgrep_readonly status=read_only usable_now={str(bool(mgrep.get('usable_now', False))).lower()} "
+            f"source_present={str(bool(mgrep.get('source_present', False))).lower()} "
+            f"effective_status={mgrep.get('selected_tool', 'repo_search')}",
+            f"- sqlite_vec_readonly status=read_only usable_now={str(bool(sqlite_vec.get('usable_now', False))).lower()} "
+            f"source_present={str(bool(sqlite_vec.get('source_present', False))).lower()} "
+            f"effective_status={sqlite_vec.get('selected_tool', 'repo_search')}",
+            f"- qdrant_readonly_status status=read_only usable_now={str(bool(qdrant.get('usable_now', False))).lower()} "
+            f"source_present={str(bool(qdrant.get('source_present', False))).lower()} "
+            f"effective_status={qdrant.get('selected_tool', 'qdrant_readonly_status')}",
+            "- retrieval_backend_status_read_model status=available read_only",
+            "- retrieval_tool_registry_contract status=available read_only",
+            "Memory / history read-only:",
+        )
     )
+    for tool in catalog.get("memory_history_read_only_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.extend(
+        (
+            f"- memory_engine_registry status=available read_only definitions={catalog.get('memory_definition_count', 0)}",
+            "Model/status read-only:",
+        )
+    )
+    for tool in catalog.get("model_status_read_only_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.extend(
+        (
+            "Roadmap / safety read-only:",
+        )
+    )
+    for tool in catalog.get("roadmap_safety_read_only_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.extend(
+        (
+            f"- roadmap_status status=available read_only drift_check_wired={str(bool(catalog.get('all_existing_read_tools_connected', True))).lower()}",
+            "Action tools:",
+        )
+    )
+    for tool in catalog.get("action_proposal_only_tools", ()):
+        lines.append(f"- {tool} status=proposal_only disabled")
+    lines.extend(
+        (
+            f"mgrep_usable_now={str(bool(mgrep.get('usable_now', False))).lower()}",
+            f"sqlite_vec_usable_now={str(bool(sqlite_vec.get('usable_now', False))).lower()}",
+            f"qdrant_server_runtime_enabled={str(bool(catalog.get('qdrant_server_runtime_enabled', False))).lower()}",
+            f"active_retrieval_surfaces={_csv(catalog.get('active_retrieval_surfaces', ())) or 'none'}",
+            f"sandbox_only_memory_surfaces={_csv(catalog.get('sandbox_only_memory_surfaces', ())) or 'none'}",
+            f"disabled_memory_surfaces={_csv(catalog.get('disabled_memory_surfaces', ())) or 'none'}",
+            f"enterprise_memory_preview_ready={str(bool(catalog.get('enterprise_memory_preview_ready', False))).lower()}",
+            f"regulatory_routing_preview_ready={str(bool(catalog.get('regulatory_routing_preview_ready', False))).lower()}",
+            f"mempalace_routing_ready={str(bool(catalog.get('mempalace_routing_ready', False))).lower()}",
+            "direct_execution_allowed=false",
+            "canonical_write_allowed=false",
+            "pc_control_allowed=false",
+            "shell_execution_enabled=false",
+            "direct_execution_allowed=false",
+            "execution_allowed=false",
+        )
+    )
+    return "\n".join(lines)
 
 
 def _format_project_atlas_answer() -> str:
@@ -2900,11 +3020,17 @@ def _asks_tool_catalog_question(lowered: str) -> bool:
             "какие tools",
             "какие tool",
             "какие инструменты",
+            "какие инструменты тебе доступны",
+            "какие tools тебе доступны",
             "что ты умеешь",
+            "что ты можешь",
             "какие capability",
             "capabilities",
             "tool catalog",
+            "available tools",
             "tool-каталог",
+            "покажи доступные tools",
+            "список инструментов",
             "все tools",
             "все инструменты",
             "подключенные tools",

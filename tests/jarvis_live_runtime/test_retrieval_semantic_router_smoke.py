@@ -81,3 +81,35 @@ def test_retrieval_project_search_uses_mgrep_or_repo_search_fallback(monkeypatch
     assert "mgrep_source_present=true" in response
     assert "source_ref" in response
     assert done["canonical_memory_write_allowed"] is False
+
+
+def test_tool_catalog_question_routes_before_ollama(monkeypatch) -> None:
+    done = _done_for("какие tools тебе доступны", monkeypatch)
+    response = str(done["response_text"])
+
+    assert done["intent_family"] == "TOOL_CATALOG"
+    assert done["ollama_called"] is False
+    assert done["execution_allowed"] is False
+    assert "[work] intent=TOOL_CATALOG" in response
+    assert "mgrep_readonly status=read_only" in response
+    assert "sqlite_vec_readonly status=read_only" in response
+    assert "qdrant_readonly_status status=read_only" in response
+    assert "mgrep_usable_now=" in response
+    assert "sqlite_vec_usable_now=" in response
+    assert "qdrant_server_runtime_enabled=false" in response
+    assert "pc_control_allowed=false" in response
+    assert "execution_allowed=false" in response
+
+
+def test_capabilities_question_routes_to_tool_catalog_without_ollama(monkeypatch) -> None:
+    done = _done_for("что ты умеешь", monkeypatch)
+    response = str(done["response_text"])
+
+    assert done["intent_family"] == "TOOL_CATALOG"
+    assert done["ollama_called"] is False
+    assert done["execution_allowed"] is False
+    assert "Project / repo read-only:" in response
+    assert "Retrieval read-only:" in response
+    assert "Memory / history read-only:" in response
+    assert "Action tools:" in response
+    assert "direct_execution_allowed=false" in response
