@@ -1190,6 +1190,22 @@ ROADMAP_EXPECTED_BATCHES: tuple[RoadmapExpectedBatch, ...] = (
    ExpectedProjectFile(path="tests/workflow_engine/test_phase_6_n8n_adapter_boundary_acceptance_smoke.py", role="test", description="PHASE 6 n8n adapter boundary acceptance smoke test."),
   ),
  ),
+ RoadmapExpectedBatch(
+  batch_id="7.1",
+  title="Retrieval Core Contracts",
+  expected_files=(
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/__init__.py", role="source", description="Retrieval backend package exports."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_backend_adapter_contract.py", role="source", description="Adapter-only retrieval backend contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/vector_backend_contract.py", role="source", description="Vector backend metadata-only contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/semantic_search_contract.py", role="source", description="Semantic search normalized request contract."),
+   ExpectedProjectFile(path="MAKSIMAR_CORE_LIB/retrieval_backend/evidence_binding_contract.py", role="source", description="Evidence-bound retrieval result contract."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_retrieval_backend_adapter_contract_smoke.py", role="test", description="Retrieval backend adapter contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_vector_backend_contract_smoke.py", role="test", description="Vector backend contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_semantic_search_contract_smoke.py", role="test", description="Semantic search contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_evidence_binding_contract_smoke.py", role="test", description="Evidence binding contract smoke test."),
+   ExpectedProjectFile(path="tests/retrieval_backend/test_adapter_result_requires_evidence_binding_smoke.py", role="test", description="Adapter result evidence binding requirement smoke test."),
+  ),
+ ),
 
 )
 
