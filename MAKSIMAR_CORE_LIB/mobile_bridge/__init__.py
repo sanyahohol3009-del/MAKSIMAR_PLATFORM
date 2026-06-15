@@ -26,6 +26,14 @@ from MAKSIMAR_CORE_LIB.mobile_bridge.bridge_shell_contract import (
 from MAKSIMAR_CORE_LIB.mobile_bridge.bridge_shell_models import (
     MobileBridgeShellContract,
 )
+from MAKSIMAR_CORE_LIB.mobile_bridge.core_sync_protocol_contract import (
+    CoreSyncProtocolContract,
+    build_core_sync_protocol_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.mobile_core_mirror_contract import (
+    MobileCoreMirrorContract,
+    build_mobile_core_mirror_contract,
+)
 
 __all__ = [
     "MobileRequest",
@@ -39,4 +47,8 @@ __all__ = [
     "MobileBridgeShellContract",
     "build_mobile_request_contract",
     "build_mobile_bridge_shell_contract",
+    "MobileCoreMirrorContract",
+    "build_mobile_core_mirror_contract",
+    "CoreSyncProtocolContract",
+    "build_core_sync_protocol_contract",
 ]
