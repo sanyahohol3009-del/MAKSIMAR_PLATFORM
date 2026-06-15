@@ -30,6 +30,18 @@ from MAKSIMAR_CORE_LIB.mobile_bridge.core_sync_protocol_contract import (
     CoreSyncProtocolContract,
     build_core_sync_protocol_contract,
 )
+from MAKSIMAR_CORE_LIB.mobile_bridge.junior_model_eval_contract import (
+    JuniorModelEvalContract,
+    build_junior_model_eval_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.junior_model_policy_contract import (
+    JuniorModelPolicyContract,
+    build_junior_model_policy_contract,
+)
+from MAKSIMAR_CORE_LIB.mobile_bridge.mirror_drift_detection_contract import (
+    MirrorDriftDetectionContract,
+    build_mirror_drift_detection_contract,
+)
 from MAKSIMAR_CORE_LIB.mobile_bridge.mobile_core_mirror_contract import (
     MobileCoreMirrorContract,
     build_mobile_core_mirror_contract,
@@ -51,4 +63,10 @@ __all__ = [
     "build_mobile_core_mirror_contract",
     "CoreSyncProtocolContract",
     "build_core_sync_protocol_contract",
+    "MirrorDriftDetectionContract",
+    "build_mirror_drift_detection_contract",
+    "JuniorModelPolicyContract",
+    "build_junior_model_policy_contract",
+    "JuniorModelEvalContract",
+    "build_junior_model_eval_contract",
 ]
