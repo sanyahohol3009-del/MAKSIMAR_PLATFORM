@@ -28,6 +28,10 @@ from MAKSIMAR_CORE_LIB.memory_engine.memory_accessor import list_memory_definiti
 from MAKSIMAR_CORE_LIB.enterprise_memory_domains.enterprise_memory_preview_builder import (
     build_enterprise_memory_preview,
 )
+from MAKSIMAR_CORE_LIB.runtime_activation import (
+    build_default_capability_activation_matrix,
+)
+
 from MAKSIMAR_CORE_LIB.retrieval_backend import (
     build_retrieval_backend_status_read_model,
     build_retrieval_readonly_tool_route,
@@ -336,6 +340,13 @@ def run_jarvis_live_brain_once(
         "error_message": str(final_payload.get("error_message", "")),
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+        "intent_family": final_payload.get("intent_family"),
+        "selected_tools": tuple(final_payload.get("selected_tools", ())),
+        "read_only": bool(final_payload.get("read_only", False)),
+        "execution_allowed": bool(final_payload.get("execution_allowed", False)),
+        "evidence_required": bool(final_payload.get("evidence_required", False)),
+        "evidence_count": int(final_payload.get("evidence_count", 0)),
+        "ollama_called": final_payload.get("ollama_called"),
     }
 
 
@@ -1739,6 +1750,14 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "tool/capability catalog question"
         needs_ollama = False
         evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_activation_matrix_question(lowered):
+        intent_family = "ACTIVATION_MATRIX"
+        selected_tools = ("build_default_capability_activation_matrix", "runtime_activation_matrix_preview")
+        confidence = 0.96
+        reason = "capability/readiness/activation matrix question"
+        needs_ollama = False
+        evidence_required = True
+
     # EXPLICIT_READ_ONLY_INTENT_PRIORITY_BEGIN
     # Specific read-only intents must be resolved before semantic/project search fallback.
     if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
@@ -1874,6 +1893,94 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         "evidence_count": 0,
         "tool_route": tool_route.to_read_model() if tool_route is not None else {},
     }
+
+
+def _asks_activation_matrix_question(lowered: str) -> bool:
+    if _asks_action_request(lowered):
+        return False
+    if _asks_memory_history_question(lowered):
+        return False
+    if _asks_safety_status_question(lowered):
+        return False
+    if _asks_model_status_question(lowered):
+        return False
+    if _asks_roadmap_status_question(lowered):
+        return False
+
+    activation_markers = (
+        "activation matrix",
+        "activation",
+        "capability",
+        "capabilities",
+        "readiness",
+        "готовность",
+        "матрица",
+        "матрица активации",
+        "активац",
+        "возможност",
+        "что можешь",
+        "что умеешь",
+        "windows voice edge",
+        "voice edge",
+        "push-to-talk",
+        "ptt",
+        "младш",
+        "android junior",
+        "ios junior",
+        "андроид младш",
+        "айос младш",
+    )
+    return any(marker in lowered for marker in activation_markers)
+
+
+def _format_activation_matrix_answer() -> str:
+    matrix = build_default_capability_activation_matrix().to_read_model()
+    entries = matrix["entries"]
+    by_id = {str(entry["capability_id"]): entry for entry in entries}
+
+    important_ids = (
+        "voice_perception",
+        "windows_voice_edge_runtime",
+        "push_to_talk_stt_live",
+        "mobile_on_device_ai",
+        "android_junior_model",
+        "ios_junior_model",
+        "runtime_history_store",
+        "retrieval_readonly_tools",
+        "mgrep_readonly",
+        "sqlite_vec_readonly",
+        "qdrant_readonly_status",
+        "ollama_local_engine",
+        "approval_gates",
+        "network_sync_gates",
+        "pc_control_candidates",
+    )
+
+    lines = [
+        "Activation Matrix: read_only=true; direct_execution_allowed=false; canonical_write_allowed=false; pc_control_allowed=false; phone_control_allowed=false; deployment_allowed=false.",
+        "JARVIS остаётся senior/canonical authority. Android/iOS junior существуют как subordinate app-safe nodes, не как второй JARVIS.",
+    ]
+
+    for capability_id in important_ids:
+        entry = by_id.get(capability_id)
+        if not entry:
+            continue
+        lines.append(
+            f"- {capability_id}: {entry['activation_level']}; "
+            f"present={str(entry['capability_present']).lower()}; "
+            f"contract_valid={str(entry['contract_valid']).lower()}; "
+            f"dependency_installed={str(entry['dependency_installed']).lower()}; "
+            f"model_present={str(entry['model_present']).lower()}; "
+            f"runtime_configured={str(entry['runtime_configured']).lower()}; "
+            f"smoke_passed={str(entry['smoke_passed']).lower()}; "
+            f"operator_enabled={str(entry['operator_enabled']).lower()}; "
+            f"policy_allowed={str(entry['policy_allowed']).lower()}; "
+            f"runtime_started={str(entry['runtime_started']).lower()}; "
+            f"blocked_reason={entry['blocked_reason']}; "
+            f"next={entry['next_required_action']}"
+        )
+
+    return "\n".join(lines)
 
 
 def _guarded_local_response(
@@ -2029,6 +2136,9 @@ def _answer_with_read_only_tools_if_grounded(
     intent = str(plan.get("intent_family", "CONVERSATION"))
     if intent == "CONVERSATION":
         return ""
+    if intent == "ACTIVATION_MATRIX":
+        plan["evidence_count"] = 1
+        return _format_activation_matrix_answer()
     if intent == "PROJECT_STATUS":
         plan["evidence_count"] = 1
         return _format_project_status_answer()
