@@ -1,0 +1,29 @@
+cube_id: voice_perception
+contract_id: voice_perception.container_contract.v1
+contract_type: container_readiness_contract
+owner_layer: PHASE_8_VOICE_PERCEPTION
+status: declarative_contract_only
+read_only: true
+runtime_start_allowed: false
+microphone_access_allowed: false
+camera_access_allowed: false
+raw_audio_stream_allowed: false
+shell_execution_allowed: false
+canonical_write_allowed: false
+pc_control_allowed: false
+direct_mobile_control_allowed: false
+action_execution_allowed: false
+proposal_only: true
+phase_9_junior_model_parked: true
+windows_voice_edge_parked: true
+push_to_talk_stt_live_parked: true
+read_model_source: MAKSIMAR_CORE_LIB/voice_perception/voice_perception_status_read_model.py
+preview_tool: tools/voice_perception_status_preview.py
+adapter_contracts:
+  - MAKSIMAR_CORE_LIB/voice_perception/asr_backend_adapter_contract.py
+  - MAKSIMAR_CORE_LIB/voice_perception/voice_clone_backend_adapter_contract.py
+  - MAKSIMAR_CORE_LIB/voice_perception/gesture_backend_adapter_contract.py
+  - ANDROID_SHELL/voice_adapter/moonshine_android_adapter_contract.py
+  - ANDROID_SHELL/voice_adapter/mediapipe_android_adapter_contract.py
+  - IOS_SHELL/voice_adapter/moonshine_ios_adapter_contract.py
+  - IOS_SHELL/voice_adapter/mediapipe_ios_adapter_contract.py
