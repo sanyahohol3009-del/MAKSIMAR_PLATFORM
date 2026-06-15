@@ -1691,6 +1691,47 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "action verb requires proposal boundary"
         needs_ollama = False
         evidence_required = True
+    # RETRIEVAL_SEMANTIC_PRIORITY_GUARD_V2
+    # Explicit retrieval/container/project-search questions must be answered by
+    # read-only tools before any Ollama free generation.
+    if intent_family == "CONVERSATION" and (
+        (
+            any(token in lowered for token in ("container", "docker", "контейнер"))
+            and any(token in lowered for token in ("qdrant", "retrieval", "backend", "runtime", "запуск", "включ"))
+        )
+        or "qdrant container" in lowered
+        or "qdrant контейнер" in lowered
+    ):
+        intent_family = "CONTAINER_STATUS"
+        selected_tools = (
+            "retrieval_container_contract",
+            "retrieval_runtime_profile",
+            "qdrant_container_status",
+        )
+        confidence = 0.96
+        reason = "retrieval container/runtime boundary status question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and (
+        lowered.startswith("найди где ")
+        or "найди где " in lowered
+        or lowered.startswith("где ")
+        or lowered.startswith("find where ")
+        or "source_ref" in lowered
+        or "evidence_ref" in lowered
+    ):
+        intent_family = "PROJECT_SEARCH"
+        tool_route = build_retrieval_readonly_tool_route(
+            "PROJECT_SEARCH",
+            ("mgrep_readonly", "repo_search", "read_file_snippet", "read_file_outline"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.94
+        reason = "explicit project search request must use read-only retrieval tools"
+        needs_ollama = False
+        evidence_required = True
+
     if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
         intent_family = "TOOL_CATALOG"
         selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
@@ -1698,6 +1739,69 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "tool/capability catalog question"
         needs_ollama = False
         evidence_required = True
+    # EXPLICIT_READ_ONLY_INTENT_PRIORITY_BEGIN
+    # Specific read-only intents must be resolved before semantic/project search fallback.
+    if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
+        intent_family = "MEMORY_RECALL"
+        selected_tools = (
+            "stable_style_profile",
+            "session_memory",
+            "local_chat_memory",
+            "memory_engine_registry",
+            "runtime_history_store",
+            "history_query",
+            "mempalace_read_only_sandbox",
+        )
+        confidence = 0.9
+        reason = "history or memory question must be retrieval-first"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_safety_status_question(lowered):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        confidence = 0.88
+        reason = "safety/capability boundary question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_model_status_question(lowered):
+        intent_family = "MODEL_STATUS"
+        selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
+        confidence = 0.9
+        reason = "model/runtime status question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_roadmap_status_question(lowered):
+        intent_family = "ROADMAP_STATUS"
+        selected_tools = ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status", "repo_search")
+        confidence = 0.88
+        reason = "roadmap/status question"
+        needs_ollama = False
+        evidence_required = True
+    # EXPLICIT_READ_ONLY_INTENT_PRIORITY_END
+    # SAFETY_STATUS_PRIORITY_GUARD_V2
+    if intent_family == "CONVERSATION" and (
+        _asks_safety_status_question(lowered)
+        or any(
+            marker in lowered
+            for marker in (
+                "core guard",
+                "watchdog",
+                "safety",
+                "security",
+                "approval",
+                "execution control",
+                "direct_execution_allowed",
+                "pc_control_allowed",
+            )
+        )
+    ):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        confidence = 0.94
+        reason = "explicit safety/capability boundary question"
+        needs_ollama = False
+        evidence_required = True
+
     if intent_family == "CONVERSATION" and _has_filename_lookup_guard(user_text):
         intent_family = "PROJECT_FILE"
         selected_tools = ("read_file_snippet", "read_file_outline", "repo_files")
@@ -1729,69 +1833,7 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "direct semantic similarity guard"
         needs_ollama = False
         evidence_required = True
-    if intent_family == "CONVERSATION" and _has_project_symbol_search_guard(lowered):
-        intent_family = "PROJECT_SEARCH"
-        tool_route = build_retrieval_readonly_tool_route(
-            "PROJECT_SEARCH",
-            ("mgrep_readonly", "repo_search", "read_file_snippet", "read_file_outline"),
-            PROJECT_ROOT,
-        )
-        selected_tools = tool_route.selected_tool_chain
-        confidence = 0.97
-        reason = "direct project symbol search guard"
-        needs_ollama = False
-        evidence_required = True
-    if intent_family == "CONVERSATION":
-        semantic_classification = classify_retrieval_semantic_intent(user_text)
-        if semantic_classification.matched:
-            intent_family = semantic_classification.route_key
-            tool_route = build_retrieval_readonly_tool_route(
-                semantic_classification.route_key,
-                semantic_classification.read_only_tools,
-                PROJECT_ROOT,
-            )
-            selected_tools = tool_route.selected_tool_chain
-            confidence = min(0.98, max(0.72, semantic_classification.score / 120.0))
-            reason = f"retrieval semantic intent: {semantic_classification.intent_group}"
-            needs_ollama = False
-            evidence_required = True
-    if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
-        intent_family = "MEMORY_RECALL"
-        selected_tools = (
-            "stable_style_profile",
-            "session_memory",
-            "local_chat_memory",
-            "memory_engine_registry",
-            "runtime_history_store",
-            "history_query",
-            "mempalace_read_only_sandbox",
-        )
-        confidence = 0.9
-        reason = "history or memory question must be retrieval-first"
-        needs_ollama = False
-        evidence_required = True
-    elif intent_family == "CONVERSATION" and _asks_model_status_question(lowered):
-        intent_family = "MODEL_STATUS"
-        selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
-        confidence = 0.9
-        reason = "model/runtime status question"
-        needs_ollama = False
-        evidence_required = True
-    elif intent_family == "CONVERSATION" and _asks_roadmap_status_question(lowered):
-        intent_family = "ROADMAP_STATUS"
-        selected_tools = ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status", "repo_search")
-        confidence = 0.88
-        reason = "roadmap/status question"
-        needs_ollama = False
-        evidence_required = True
-    elif intent_family == "CONVERSATION" and _asks_safety_status_question(lowered):
-        intent_family = "SAFETY_STATUS"
-        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
-        confidence = 0.88
-        reason = "safety/capability boundary question"
-        needs_ollama = False
-        evidence_required = True
-    elif intent_family == "CONVERSATION" and _extract_requested_file_path(user_text):
+    if intent_family == "CONVERSATION" and _extract_requested_file_path(user_text):
         intent_family = "PROJECT_FILE"
         selected_tools = ("read_file_snippet", "read_file_outline")
         confidence = 0.88
@@ -4328,3 +4370,37 @@ def _csv(value: Any) -> str:
     if isinstance(value, (list, tuple)):
         return ", ".join(str(item) for item in value)
     return str(value)
+
+
+def _asks_safety_status_question(lowered: str) -> bool:
+    """Detect explicit safety/security/governance status questions.
+
+    This guard must be broad enough to catch mixed Russian/English operator questions
+    like "что у нас по core guard watchdog safety?" before generic semantic search.
+    """
+    return any(
+        marker in lowered
+        for marker in (
+            "core guard",
+            "watchdog",
+            "safety",
+            "security",
+            "approval",
+            "execution control",
+            "policy",
+            "guard",
+            "защит",
+            "безопасн",
+            "апрув",
+            "разрешен",
+            "разрешён",
+            "контроль действий",
+            "контроль выполнения",
+            "ядро безопасности",
+            "security_layer",
+            "approval_service",
+            "execution_allowed",
+            "direct_execution_allowed",
+            "pc_control_allowed",
+        )
+    )

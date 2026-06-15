@@ -3,12 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from ANDROID_SHELL.voice_adapter.android_voice_state_bridge import (
-    build_android_voice_state_bridge,
-)
-from IOS_SHELL.voice_adapter.ios_voice_state_bridge import (
-    build_ios_voice_state_bridge,
-)
+# CORE_LIB must not import CLIENTS_MOBILE packages.
+# Android/iOS bridge readiness is represented here as boundary metadata;
+# client package contracts/tests validate the concrete mobile bridge surfaces.
 from MAKSIMAR_CORE_LIB.voice_perception.asr_backend_adapter_contract import (
     build_asr_backend_adapter_contract,
 )
@@ -161,13 +158,16 @@ class VoicePerceptionStatusReadModel:
         }
 
 
-def build_voice_perception_status_read_model() -> VoicePerceptionStatusReadModel:
+def build_voice_perception_status_read_model(
+    android_voice_bridge_present: bool = True,
+    ios_voice_bridge_present: bool = True,
+    android_raw_audio_blocked_by_default: bool = True,
+    ios_raw_audio_blocked_by_default: bool = True,
+) -> VoicePerceptionStatusReadModel:
     asr_contract = build_asr_backend_adapter_contract().to_read_model()
     voice_clone_contract = build_voice_clone_backend_adapter_contract().to_read_model()
     gesture_contract = build_gesture_backend_adapter_contract().to_read_model()
     perception_policy = build_perception_policy_contract().to_read_model()
-    android_bridge = build_android_voice_state_bridge().to_read_model()
-    ios_bridge = build_ios_voice_state_bridge().to_read_model()
 
     return VoicePerceptionStatusReadModel(
         phase_id="PHASE_8",
@@ -177,13 +177,13 @@ def build_voice_perception_status_read_model() -> VoicePerceptionStatusReadModel
         voice_clone_contract_present=bool(voice_clone_contract["proposal_only"]),
         gesture_contract_present=bool(gesture_contract["proposal_only"]),
         perception_policy_present=bool(perception_policy["proposal_only"]),
-        android_voice_bridge_present=bool(android_bridge["proposal_only"]),
-        ios_voice_bridge_present=bool(ios_bridge["proposal_only"]),
+        android_voice_bridge_present=android_voice_bridge_present,
+        ios_voice_bridge_present=ios_voice_bridge_present,
         owner_voice_gate_required=bool(perception_policy["owner_voice_gate_required"]),
         raw_audio_blocked_by_default=bool(
             perception_policy["raw_audio_blocked_by_default"]
-            and android_bridge["raw_audio_stream_blocked_by_default"]
-            and ios_bridge["raw_audio_stream_blocked_by_default"]
+            and android_raw_audio_blocked_by_default
+            and ios_raw_audio_blocked_by_default
         ),
         text_intent_only=bool(perception_policy["text_intent_only"]),
         voice_message_allowed_as_chat_attachment=True,
