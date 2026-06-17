@@ -20,9 +20,9 @@ def test_brain_loop_uses_extracted_memory_context_sources() -> None:
     )
 
 
-def test_memory_federation_aggregator_remains_patchable_in_brain_loop() -> None:
+def test_memory_federation_aggregator_moved_to_context_builder() -> None:
     assert inspect.getmodule(jarvis_live_brain_loop._retrieve_memory_federation_snippets).__name__ == (
-        "tools.jarvis_live_runtime.jarvis_live_brain_loop"
+        "tools.jarvis_live_runtime.memory_context_builder"
     )
 
 

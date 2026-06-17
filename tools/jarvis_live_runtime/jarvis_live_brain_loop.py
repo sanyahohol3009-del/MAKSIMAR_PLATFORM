@@ -154,6 +154,11 @@ from tools.jarvis_live_runtime.memory_context_sources import (
     _retrieve_regulatory_memory_snippets,
     _retrieve_vector_memory_snippets,
 )
+from tools.jarvis_live_runtime.memory_context_builder import (
+    JarvisBrainContext,
+    build_jarvis_live_brain_context,
+    _retrieve_memory_federation_snippets,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -251,101 +256,6 @@ DANGEROUS_MEMORY_FLAGS = {
 }
 
 
-@dataclass(frozen=True)
-class JarvisBrainContext:
-    session_id: str
-    user_text: str
-    request_route: str
-    route_mode: str
-    retrieval_mode: str
-    selected_model_role: dict[str, Any]
-    admission_status: dict[str, Any]
-    recent_turns: tuple[dict[str, str], ...]
-    rolling_summary: str
-    active_topics: tuple[str, ...]
-    stable_style_profile: dict[str, str]
-    local_chat_memory_snippets: tuple[str, ...]
-    retrieved_snippets: tuple[str, ...]
-    retrieval_surfaces_used: tuple[str, ...]
-    memory_federation_status: dict[str, Any]
-    project_status: str
-    pc_control_allowed: bool = False
-    canonical_memory_write_allowed: bool = False
-
-    def to_fast_system_prompt(self) -> str:
-        return "\n".join(
-            part
-            for part in (
-                _system_rules(short=True),
-                build_jarvis_live_identity_prompt(self.user_text),
-                _fast_final_answer_rules(),
-                _format_style_profile(self.stable_style_profile),
-                _format_style_memory_answer_rules(),
-                _format_memory_truth_split(),
-                _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
-                _format_turns(self.recent_turns[-4:]),
-                _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
-            )
-            if part
-        )
-
-    def to_deep_system_prompt(self) -> str:
-        return "\n".join(
-            part
-            for part in (
-                _system_rules(short=False),
-                build_jarvis_live_identity_prompt(self.user_text),
-                _format_section("REQUEST_ROUTE", self.request_route),
-                _format_section("RETRIEVAL_MODE", self.retrieval_mode),
-                _format_section("MODEL_ROLE", self.selected_model_role["selected_model_role"]),
-                _format_section("MODEL_ROUTE_REASON", self.selected_model_role["route_reason"]),
-                _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
-                _format_turns(self.recent_turns),
-                _format_style_profile(self.stable_style_profile),
-                _format_style_memory_answer_rules(),
-                _format_memory_truth_split(),
-                _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
-                _format_list("ACTIVE_TOPICS", self.active_topics),
-                _format_list("RETRIEVAL_SURFACES_USED", self.retrieval_surfaces_used),
-                _format_list("RETRIEVED_LONG_TERM_MEMORY", self.retrieved_snippets),
-                _format_section("PROJECT_STATUS_READ_ONLY", self.project_status),
-            )
-            if part
-        )
-
-    def to_prompt(self) -> str:
-        if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
-            return "\n".join(part for part in (self.to_fast_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
-        return "\n".join(part for part in (self.to_deep_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
-
-    def to_read_model(self) -> dict[str, Any]:
-        return {
-            "route_mode": self.route_mode,
-            "session_id": self.session_id,
-            "request_route": self.request_route,
-            "retrieval_mode": self.retrieval_mode,
-            "selected_model_role": self.selected_model_role,
-            "admission_status": self.admission_status,
-            "recent_turn_count": len(self.recent_turns),
-            "rolling_summary": self.rolling_summary,
-            "active_topics": self.active_topics,
-            "stable_style_profile": dict(self.stable_style_profile),
-            "local_chat_memory_snippets": self.local_chat_memory_snippets,
-            "local_chat_memory_snippet_count": len(self.local_chat_memory_snippets),
-            "retrieved_snippets": self.retrieved_snippets,
-            "retrieved_snippet_count": len(self.retrieved_snippets),
-            "retrieval_surfaces_used": self.retrieval_surfaces_used,
-            "memory_federation_status": self.memory_federation_status,
-            "project_status": self.project_status,
-            "pc_control_allowed": self.pc_control_allowed,
-            "canonical_memory_write_allowed": self.canonical_memory_write_allowed,
-            "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
-            "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-            "session_memory_path": str(SESSION_STATE_PATH),
-            "local_chat_memory_path": str(_session_turn_log_path()),
-            "memory_truth_split": _memory_truth_split(),
-            "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
-        }
 
 
 def run_jarvis_live_brain_once(
@@ -707,45 +617,6 @@ def stream_jarvis_live_brain_response(
     }
 
 
-def build_jarvis_live_brain_context(
-    user_text: str,
-    state: dict[str, Any] | None = None,
-    request_plan: dict[str, str] | None = None,
-    session_id: str = "default",
-) -> JarvisBrainContext:
-    state = _load_session_state() if state is None else state
-    request_plan = _plan_jarvis_request(user_text) if request_plan is None else request_plan
-    route_mode = request_plan["route_mode"]
-    selected_model_role = select_jarvis_live_model_role(user_text)
-    admission_status = _build_admission_status(selected_model_role)
-    retrieved_snippets, retrieval_surfaces_used = _retrieve_memory_federation_snippets(
-        user_text,
-        deep=request_plan["retrieval_mode"] == "deep_memory",
-        enabled=request_plan["retrieval_mode"] != "session_only",
-    )
-    local_chat_memory_snippets = _retrieve_local_chat_memory_snippets(user_text, state)
-    if local_chat_memory_snippets:
-        retrieval_surfaces_used = tuple(dict.fromkeys((*retrieval_surfaces_used, "local_chat_memory")))
-    memory_federation_status = build_jarvis_live_memory_federation_status()
-    project_status = _project_status_summary() if _needs_project_status(user_text) else ""
-    return JarvisBrainContext(
-        session_id=session_id,
-        user_text=user_text,
-        request_route=request_plan["request_route"],
-        route_mode=route_mode,
-        retrieval_mode=request_plan["retrieval_mode"],
-        selected_model_role=selected_model_role,
-        admission_status=admission_status,
-        recent_turns=tuple(state.get("recent_turns", [])[-MAX_RECENT_TURNS:]),
-        rolling_summary=str(state.get("rolling_summary", "")),
-        active_topics=tuple(state.get("active_topics", [])),
-        stable_style_profile=_stable_style_profile_from_state(state),
-        local_chat_memory_snippets=local_chat_memory_snippets,
-        retrieved_snippets=retrieved_snippets,
-        retrieval_surfaces_used=retrieval_surfaces_used,
-        memory_federation_status=memory_federation_status,
-        project_status=project_status,
-    )
 
 
 def build_jarvis_live_brain_health() -> dict[str, Any]:
@@ -2762,53 +2633,6 @@ def _answer_style_memory_recall_if_grounded(context: JarvisBrainContext) -> str:
 
 
 
-def _retrieve_memory_federation_snippets(
-    user_text: str,
-    deep: bool,
-    enabled: bool = True,
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    if not enabled:
-        return (), ("session_memory",)
-
-    snippets: list[str] = []
-    surfaces_used: list[str] = []
-
-    history_snippets = _retrieve_history_snippets(user_text, deep=deep)
-    if history_snippets:
-        snippets.extend(history_snippets)
-        surfaces_used.append("runtime_history_store")
-
-    project_snippets = _retrieve_project_workspace_snippets(user_text, deep=deep)
-    if project_snippets:
-        snippets.extend(project_snippets)
-        surfaces_used.append("project_workspace_read_model")
-
-    memory_engine_snippets = _retrieve_memory_engine_snippets(user_text)
-    if memory_engine_snippets:
-        snippets.extend(memory_engine_snippets)
-        surfaces_used.append("memory_engine_registry")
-
-    enterprise_snippets = _retrieve_enterprise_memory_snippets(user_text)
-    if enterprise_snippets:
-        snippets.extend(enterprise_snippets)
-        surfaces_used.append("enterprise_business_memory")
-
-    regulatory_snippets = _retrieve_regulatory_memory_snippets(user_text)
-    if regulatory_snippets:
-        snippets.extend(regulatory_snippets)
-        surfaces_used.append("regulatory_memory_foundation")
-
-    vector_snippets = _retrieve_vector_memory_snippets(user_text)
-    if vector_snippets:
-        snippets.extend(vector_snippets)
-        surfaces_used.append("vector_runtime_indexes")
-
-    mempalace_snippets = _retrieve_mempalace_status_snippets(user_text)
-    if mempalace_snippets:
-        snippets.extend(mempalace_snippets)
-        surfaces_used.append("mempalace_read_only_sandbox")
-
-    return tuple(snippets[:10]), tuple(dict.fromkeys(surfaces_used))
 
 
 

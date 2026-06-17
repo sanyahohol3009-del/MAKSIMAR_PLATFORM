@@ -54,22 +54,22 @@ def test_context_assembly_includes_mocked_multiple_memory_surfaces(monkeypatch) 
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
     monkeypatch.setattr(
-        brain_loop,
+        memory_context_sources,
         "_retrieve_history_snippets",
         lambda text, deep: ["runtime_history_store: MAKSIMAR project history"],
     )
     monkeypatch.setattr(
-        brain_loop,
+        memory_context_sources,
         "_retrieve_enterprise_memory_snippets",
         lambda text: ["enterprise_business_memory: sovereign AI sales memory"],
     )
     monkeypatch.setattr(
-        brain_loop,
+        memory_context_sources,
         "_retrieve_regulatory_memory_snippets",
         lambda text: ["regulatory_memory_foundation: laws memory"],
     )
     monkeypatch.setattr(
-        brain_loop,
+        memory_context_sources,
         "_retrieve_mempalace_status_snippets",
         lambda text: ["mempalace_read_only_sandbox: sandbox only"],
     )
@@ -408,7 +408,7 @@ def test_memory_history_question_checks_history_before_ollama(monkeypatch) -> No
     monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
     monkeypatch.setattr(
-        brain_loop,
+        memory_context_sources,
         "_retrieve_history_snippets",
         lambda text, deep: ["runtime_history_store: Windows Voice Edge обсуждали как voice layer."],
     )
@@ -436,7 +436,7 @@ def test_memory_history_question_reports_checked_sources_without_match(monkeypat
     monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(memory_context_sources, "_read_recent_local_chat_records", lambda limit=8: ())
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
-    monkeypatch.setattr(brain_loop, "_retrieve_history_snippets", lambda text, deep: [])
+    monkeypatch.setattr(memory_context_sources, "_retrieve_history_snippets", lambda text, deep: [])
 
     def fail_stream(*args, **kwargs):
         raise AssertionError("missing history must be reported, not hallucinated")
@@ -465,7 +465,7 @@ def test_imported_project_history_is_read_only_not_written_to_local_chat(monkeyp
         "_append_local_chat_memory_record",
         lambda state, response, context: captured.append((response, context.retrieved_snippets)),
     )
-    monkeypatch.setattr(brain_loop, "_retrieve_history_snippets", lambda text, deep: ["history_query_match: imported GPT project history"])
+    monkeypatch.setattr(memory_context_sources, "_retrieve_history_snippets", lambda text, deep: ["history_query_match: imported GPT project history"])
 
     def fake_stream(*args, **kwargs):
         raise AssertionError("project history questions must be retrieval-first, not free Ollama")
