@@ -57,6 +57,10 @@ from tools.jarvis_live_runtime.jarvis_live_response_mode import (
     build_ollama_options,
     classify_response_mode,
 )
+from tools.jarvis_live_runtime.voice_response_cleaner import (
+    clean_voice_response,
+    contains_forbidden_generic_tail,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -2112,10 +2116,7 @@ def _looks_like_keyboard_layout_noise(text: str) -> bool:
 
 
 def _is_forbidden_chat_template_response(response_text: str) -> bool:
-    lowered = response_text.casefold()
-    if not lowered.strip():
-        return False
-    return any(marker in lowered for marker in FORBIDDEN_CHAT_TEMPLATE_MARKERS)
+    return contains_forbidden_generic_tail(response_text)
 
 
 def _repair_forbidden_chat_template_response(context: JarvisBrainContext) -> str:
@@ -4288,25 +4289,7 @@ def _asks_permanent_memory_write(lowered: str) -> bool:
 
 
 def _sanitize_model_output(text: str) -> str:
-    cleaned = text
-    lowered = cleaned.casefold()
-    for start_marker, end_marker in (
-        ("<think>", "</think>"),
-        ("<thinking>", "</thinking>"),
-        ("thinking:", "\n\n"),
-        ("reasoning:", "\n\n"),
-        ("мысли:", "\n\n"),
-        ("рассуждение:", "\n\n"),
-    ):
-        while start_marker in lowered:
-            start = lowered.find(start_marker)
-            end = lowered.find(end_marker, start + len(start_marker))
-            if end == -1:
-                cleaned = cleaned[:start]
-            else:
-                cleaned = cleaned[:start] + cleaned[end + len(end_marker) :]
-            lowered = cleaned.casefold()
-    return cleaned.strip()
+    return clean_voice_response(text)
 
 
 def _filter_reasoning_chunk(chunk: str, state: dict[str, bool]) -> str:
