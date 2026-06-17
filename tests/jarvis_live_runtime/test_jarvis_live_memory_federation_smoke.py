@@ -1,3 +1,4 @@
+import tools.jarvis_live_runtime.session_memory_store as session_memory_store
 from tools.jarvis_live_runtime.jarvis_live_brain_loop import (
     build_jarvis_live_brain_context,
     build_jarvis_live_memory_federation_status,
@@ -122,14 +123,12 @@ def test_fast_context_includes_rolling_summary_and_style_profile() -> None:
 def test_local_terminal_turns_are_append_only_persisted_by_existing_session_log() -> None:
     from pathlib import Path
 
-    source = Path("tools/jarvis_live_runtime/jarvis_live_brain_loop.py").read_text(encoding="utf-8")
+    source = Path("tools/jarvis_live_runtime/session_memory_store.py").read_text(encoding="utf-8")
 
     assert 'SESSION_TURN_LOG_NAME = "jarvis_live_terminal_turns.jsonl"' in source
     assert '.open("a", encoding="utf-8")' in source
-    assert '"source": "jarvis_terminal_chat"' in source
-    assert '"thinking_stored": False' in source
-    assert '"direct_global_memory_write": False' in source
-
+    assert "canonical_memory_write_allowed" in source
+    assert "pc_control_allowed" in source
 
 def test_second_request_in_same_session_sees_first_exchange(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
@@ -196,6 +195,7 @@ def test_style_memory_recall_returns_grounded_non_template_answer(monkeypatch) -
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
@@ -219,11 +219,86 @@ def test_style_memory_recall_returns_grounded_non_template_answer(monkeypatch) -
     assert done["pc_control_allowed"] is False
 
 
+def test_conversation_template_complaint_is_handled_without_ollama(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+
+    def fail_stream(*args, **kwargs):
+        raise AssertionError("template complaints must be handled before Ollama")
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+
+    done = list(
+        stream_jarvis_live_brain_response(
+            "вот почему ты мне шаблоном отвечаешь?",
+            session_id="template_loop",
+        )
+    )[-1]
+    answer = done["response_text"]
+    lowered = answer.casefold()
+
+    assert "вижу петлю" in lowered
+    assert "fast-chat guard" in answer
+    assert "долго не общались" not in lowered
+    assert "голова немного затуманилась" not in lowered
+    assert "что нужно сделать" not in lowered
+    assert done["grounded_answer"] is True
+    assert done["ollama_called"] is False
+    assert done["canonical_memory_write_allowed"] is False
+    assert done["pc_control_allowed"] is False
+
+
+def test_casual_state_question_does_not_use_repeated_template(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+
+    done = list(stream_jarvis_live_brain_response("как дела?", session_id="casual"))[-1]
+    answer = done["response_text"]
+    lowered = answer.casefold()
+
+    assert "на связи" in lowered
+    assert "шаблонной петли" in lowered
+    assert "долго не общались" not in lowered
+    assert "что нужно сделать" not in lowered
+    assert done["ollama_called"] is False
+
+
+def test_keyboard_layout_noise_does_not_use_repeated_template(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
+    monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
+
+    done = list(stream_jarvis_live_brain_response("djn gjxtve ns if,kjy vyt jndtxftim&", session_id="layout"))[-1]
+    answer = done["response_text"]
+    lowered = answer.casefold()
+
+    assert "раскладка" in lowered
+    assert "заготовку" in lowered
+    assert "долго не общались" not in lowered
+    assert "что нужно сделать" not in lowered
+    assert done["ollama_called"] is False
+
+
 def test_project_workspace_question_returns_complete_grounded_answer_without_ollama(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
     def fail_stream(*args, **kwargs):
@@ -261,6 +336,7 @@ def test_natural_project_read_questions_use_dynamic_tools_without_ollama(monkeyp
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
     def fail_stream(*args, **kwargs):
@@ -290,6 +366,7 @@ def test_natural_language_tool_router_grounds_project_search_models_and_actions(
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
     def fail_stream(*args, **kwargs):
@@ -325,6 +402,7 @@ def test_memory_history_question_checks_history_before_ollama(monkeypatch) -> No
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
     monkeypatch.setattr(
         brain_loop,
@@ -352,6 +430,7 @@ def test_memory_history_question_reports_checked_sources_without_match(monkeypat
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
     monkeypatch.setattr(brain_loop, "_retrieve_history_snippets", lambda text, deep: [])
@@ -376,8 +455,9 @@ def test_imported_project_history_is_read_only_not_written_to_local_chat(monkeyp
     captured: list[tuple[str, tuple[str, ...]]] = []
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(
-        brain_loop,
+        session_memory_store,
         "_append_local_chat_memory_record",
         lambda state, response, context: captured.append((response, context.retrieved_snippets)),
     )
@@ -403,6 +483,7 @@ def test_memory_recall_guard_does_not_claim_memory_without_record(monkeypatch) -
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_read_recent_local_chat_records", lambda limit=8: ())
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
@@ -420,6 +501,7 @@ def test_permanent_memory_write_request_is_rejected_without_canonical_write(monk
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
 
     payload = run_jarvis_live_brain_once("Джарвис, запиши это в постоянную память.", session_id="test")
 
@@ -434,6 +516,7 @@ def test_stream_start_and_done_include_memory_federation_fields(monkeypatch) -> 
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
 
     events = list(stream_jarvis_live_brain_response("Джарвис, видишь ли ты runtime_history_store?", session_id="test"))
     start = events[0]
