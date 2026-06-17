@@ -61,6 +61,23 @@ from tools.jarvis_live_runtime.voice_response_cleaner import (
     clean_voice_response,
     contains_forbidden_generic_tail,
 )
+from tools.jarvis_live_runtime.ollama_transport import (
+    BASE_HEAVY_CODER_MODEL_ID,
+    DEFAULT_OLLAMA_MODEL_ID,
+    FALLBACK_OLLAMA_MODEL_ID,
+    HEAVY_CODER_MODEL_ID,
+    OLLAMA_BASE_URL,
+    OLLAMA_CHAT_URL,
+    OLLAMA_FAST_CHAT_KEEP_ALIVE,
+    OLLAMA_FAST_CHAT_NUM_PREDICT,
+    OLLAMA_FAST_CHAT_TEMPERATURE,
+    OLLAMA_FAST_CHAT_THINK,
+    OLLAMA_FAST_CHAT_TOP_P,
+    OLLAMA_URL,
+    PRIMARY_CONVERSATION_MODEL_ID,
+    ollama_get_json as _ollama_get_json,
+    ollama_post_json as _ollama_post_json,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -72,20 +89,6 @@ RUNTIME_HISTORY_STORE = PROJECT_ROOT / "runtime_history_store"
 RUNTIME_VECTOR_INDEX_ROOT = Path.home() / "MAKSIMAR_RUNTIME" / "runtime_vector_indexes"
 RUNTIME_EMBEDDINGS_ROOT = Path.home() / "MAKSIMAR_RUNTIME" / "runtime_embeddings"
 RUNTIME_RETRIEVAL_ROOT = Path.home() / "MAKSIMAR_RUNTIME" / "runtime_retrieval"
-OLLAMA_URL = os.environ.get(
-    "JARVIS_LIVE_OLLAMA_URL",
-    "http://127.0.0.1:11434/api/generate",
-)
-OLLAMA_CHAT_URL = os.environ.get(
-    "JARVIS_LIVE_OLLAMA_CHAT_URL",
-    OLLAMA_URL.replace("/api/generate", "/api/chat"),
-)
-OLLAMA_BASE_URL = OLLAMA_URL.rsplit("/api/", 1)[0] if "/api/" in OLLAMA_URL else OLLAMA_URL.rstrip("/")
-PRIMARY_CONVERSATION_MODEL_ID = "jarvis:chat8b"
-DEFAULT_OLLAMA_MODEL_ID = os.environ.get("JARVIS_LIVE_OLLAMA_MODEL", PRIMARY_CONVERSATION_MODEL_ID)
-FALLBACK_OLLAMA_MODEL_ID = "jarvis-live:qwen14b"
-HEAVY_CODER_MODEL_ID = "jarvis:coder14b"
-BASE_HEAVY_CODER_MODEL_ID = "qwen2.5-coder:14b"
 MAX_RECENT_TURNS = 4
 MAX_LOCAL_CHAT_MEMORY_SNIPPETS = 4
 MAX_PROJECT_TREE_ENTRIES = 80
@@ -98,11 +101,6 @@ PROJECT_FILE_MAX_BYTES = 12000
 PROJECT_SEARCH_MAX_RESULTS = 40
 PROJECT_SEARCH_CONTEXT_LINES = 2
 PROJECT_IMPORT_MAX_EDGES = 80
-OLLAMA_FAST_CHAT_NUM_PREDICT = 160
-OLLAMA_FAST_CHAT_TEMPERATURE = 0.8
-OLLAMA_FAST_CHAT_TOP_P = 0.95
-OLLAMA_FAST_CHAT_KEEP_ALIVE = "30m"
-OLLAMA_FAST_CHAT_THINK = False
 
 
 PROJECT_VISIBILITY_EXCLUDED_DIRS = {
@@ -932,30 +930,8 @@ def status_tools() -> dict[str, str]:
     }
 
 
-def _ollama_get_json(path: str) -> dict[str, Any] | None:
-    url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
-    try:
-        timeout = httpx.Timeout(5.0, connect=2.0)
-        with httpx.Client(timeout=timeout) as client:
-            response = client.get(url)
-            response.raise_for_status()
-            payload = response.json()
-    except (httpx.HTTPError, ValueError):
-        return None
-    return payload if isinstance(payload, dict) else None
 
 
-def _ollama_post_json(path: str, payload: dict[str, Any]) -> dict[str, Any] | None:
-    url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
-    try:
-        timeout = httpx.Timeout(5.0, connect=2.0)
-        with httpx.Client(timeout=timeout) as client:
-            response = client.post(url, json=payload)
-            response.raise_for_status()
-            data = response.json()
-    except (httpx.HTTPError, ValueError):
-        return None
-    return data if isinstance(data, dict) else None
 
 
 def _compact_json(value: Any) -> str:
