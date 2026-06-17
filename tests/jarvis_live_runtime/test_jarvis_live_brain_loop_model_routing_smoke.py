@@ -40,6 +40,7 @@ def test_broken_pipe_write_path_does_not_crash() -> None:
 
 def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_stream(
         model_id: str,
@@ -74,6 +75,7 @@ def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
 
 def test_stream_emits_accepted_start_before_context_assembly(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def broken_context(*args, **kwargs):
         raise RuntimeError("context should not block first event")
@@ -93,6 +95,7 @@ def test_stream_emits_accepted_start_before_context_assembly(monkeypatch) -> Non
 
 def test_weather_route_uses_current_facts_guard_without_model_hallucination(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def forbidden_model(*args, **kwargs):
         raise AssertionError("weather/current facts must not call offline model without tool")
@@ -114,6 +117,7 @@ def test_weather_route_uses_current_facts_guard_without_model_hallucination(monk
 
 def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_error_stream(
         model_id: str,
@@ -143,6 +147,7 @@ def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monke
 
 def test_empty_ollama_done_is_reported_as_visible_error(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_empty_stream(
         model_id: str,
@@ -172,6 +177,7 @@ def test_empty_ollama_done_is_reported_as_visible_error(monkeypatch) -> None:
 
 def test_thinking_then_final_response_counts_thinking_and_answer(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_thinking_stream(
         model_id: str,
@@ -204,6 +210,7 @@ def test_thinking_then_final_response_counts_thinking_and_answer(monkeypatch) ->
 
 def test_thinking_without_final_response_is_reported(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_thinking_only_stream(
         model_id: str,
@@ -234,6 +241,7 @@ def test_thinking_without_final_response_is_reported(monkeypatch) -> None:
 
 def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     captured: dict[str, object] = {}
 
@@ -279,8 +287,8 @@ def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> N
     def forbidden_generate(*args, **kwargs):
         raise AssertionError("FAST path should use api/chat first")
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
-    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", forbidden_generate)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_generate_model", forbidden_generate)
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
@@ -300,6 +308,7 @@ def test_fast_conversation_routes_to_api_chat_with_think_false(monkeypatch) -> N
 
 def test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only() -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     payload = {
         "message": {
@@ -330,6 +339,7 @@ def test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only() ->
 
 def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_chat(
         model_id: str,
@@ -373,8 +383,8 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
             "tool_call_detected": True,
         }
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
-    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", lambda *args, **kwargs: (_ for _ in ()))
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_generate_model", lambda *args, **kwargs: (_ for _ in ()))
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
@@ -393,6 +403,7 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
 
 def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_chat(
         model_id: str,
@@ -448,8 +459,8 @@ def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
             "pc_control_allowed": False,
         }
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", fake_chat)
-    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", fake_generate)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_chat_model", fake_chat)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_generate_model", fake_generate)
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
@@ -467,6 +478,7 @@ def test_chat_failure_falls_back_to_generate(monkeypatch) -> None:
 
 def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def forbidden_chat(*args, **kwargs):
         raise AssertionError("deep route should keep existing generate path")
@@ -507,7 +519,7 @@ def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
         }
 
     monkeypatch.setattr(brain_loop, "_stream_ollama_chat_model", forbidden_chat)
-    monkeypatch.setattr(brain_loop, "_stream_ollama_generate_model", fake_generate)
+    monkeypatch.setattr(ollama_streaming, "_stream_ollama_generate_model", fake_generate)
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
@@ -523,6 +535,7 @@ def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
 
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_stream(
         model_id: str,
