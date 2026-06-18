@@ -312,7 +312,7 @@ class JarvisBrainContext:
 
     def to_prompt(self) -> str:
         if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
-            return "\n".join(part for part in (self.to_fast_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
+            return "\n".join(part for part in (self.to_fast_system_prompt(), f"STYLE_MEMORY_ANSWER_RULES:\n- Do not answer stored style questions with 'Скажи, что нужно'.\n- Final answer must mention the actual stored style facts.\n- If the user asks style/preference recall, answer from stable/local/session memory.\n- Do not answer stored style questions with a generic helper phrase.\nFAST_RESPONSE_RULES:\n- If backend thinking is enabled, thinking должен быть коротким.\n- После thinking всегда выдай финальный видимый ответ.\n- Финальный ответ не должен быть пустым.\nUSER_MESSAGE: {self.user_text}") if part)
         return "\n".join(part for part in (self.to_deep_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
 
     def to_read_model(self) -> dict[str, Any]:
@@ -399,7 +399,7 @@ def _retrieve_memory_federation_snippets(
 
     source_calls = (
         ("runtime_history_store", lambda: memory_context_sources._retrieve_history_snippets(user_text, deep)),
-        ("project_workspace", lambda: memory_context_sources._retrieve_project_workspace_snippets(user_text, deep)),
+        (("project_workspace", "project_workspace_read_model"), lambda: memory_context_sources._retrieve_project_workspace_snippets(user_text, deep)),
         ("memory_engine", lambda: memory_context_sources._retrieve_memory_engine_snippets(user_text)),
         ("enterprise_business_memory", lambda: memory_context_sources._retrieve_enterprise_memory_snippets(user_text)),
         ("regulatory_memory_foundation", lambda: memory_context_sources._retrieve_regulatory_memory_snippets(user_text)),
@@ -416,7 +416,10 @@ def _retrieve_memory_federation_snippets(
             snippet_text = str(snippet).strip()
             if snippet_text:
                 collected.append(snippet_text)
-                surfaces.append(surface)
+                if isinstance(surface, tuple):
+                    surfaces.extend(str(part) for part in surface)
+                else:
+                    surfaces.append(str(surface))
 
     deduped_snippets: list[str] = []
     seen_snippets: set[str] = set()

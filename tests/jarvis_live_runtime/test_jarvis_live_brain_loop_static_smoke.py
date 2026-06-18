@@ -15,14 +15,15 @@ def test_brain_loop_reuses_existing_runtime_and_memory_surfaces() -> None:
     assert "pc_control_allowed" in source
     assert "build_jarvis_live_identity_prompt" in source
     assert "import httpx" in source
-    assert "httpx.Client" in source
-    assert "/api/chat" in source
-    assert "http://127.0.0.1:11434/api/generate" in source
+    transport_source = Path("tools/jarvis_live_runtime/ollama_transport.py").read_text(encoding="utf-8")
+    assert "import httpx" in transport_source
+    assert "httpx." in transport_source
+    assert "/api/chat" in transport_source
+    assert "http://127.0.0.1:11434/api/generate" in transport_source
     assert "think=false" in source or "OLLAMA_FAST_CHAT_THINK" in source
     assert "OLLAMA_CHAT_URL" in source
-    assert "jarvis-live:qwen14b" in source
-
-
+    profile_source = Path("MAKSIMAR_CORE_LIB/ai_orchestration/model_profile_registry_contract.py").read_text(encoding="utf-8")
+    assert "jarvis:chat8b" in profile_source or "jarvis:chat8b" in source
 def test_brain_loop_streaming_uses_ollama_stream_true_and_chunk_events() -> None:
     source = Path("tools/jarvis_live_runtime/jarvis_live_brain_loop.py").read_text(
         encoding="utf-8"
@@ -31,10 +32,11 @@ def test_brain_loop_streaming_uses_ollama_stream_true_and_chunk_events() -> None
     assert "stream_jarvis_live_brain_response" in source
     assert "_stream_ollama_chat_model" in source
     assert "_stream_ollama_generate_model" in source
-    assert "_build_ollama_chat_payload" in source
+    streaming_source = Path("tools/jarvis_live_runtime/ollama_streaming.py").read_text(encoding="utf-8")
+    assert "_build_ollama_chat_payload" in streaming_source
     assert "_parse_ollama_chat_stream_event" in source
-    assert '"stream": True' in source
-    assert "messages" in source
+    assert '"stream": True' in streaming_source
+    assert "messages" in streaming_source
     assert "tool_call_detected" in source
     assert "fallback_endpoint" in source
     assert "stream_chunk_count" in source

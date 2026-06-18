@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from MAKSIMAR_CORE_LIB.retrieval_backend import (

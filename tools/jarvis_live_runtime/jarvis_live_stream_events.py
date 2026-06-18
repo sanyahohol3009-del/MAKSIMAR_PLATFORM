@@ -6,6 +6,7 @@ from typing import Any, Iterator
 
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     build_jarvis_live_runtime_model_role_read_model,
+    select_jarvis_live_model_role,
 )
 from tools.jarvis_live_runtime.ollama_transport import (
     BASE_HEAVY_CODER_MODEL_ID,
