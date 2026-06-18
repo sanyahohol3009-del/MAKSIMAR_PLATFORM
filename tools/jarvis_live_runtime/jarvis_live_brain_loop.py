@@ -241,6 +241,24 @@ from tools.jarvis_live_runtime.jarvis_live_project_answer_engine import (
     _query_tokens,
     _semantic_search_query,
 )
+from tools.jarvis_live_runtime.jarvis_live_request_planner import (
+    _is_deep_code_request,
+    _is_simple_code_request,
+    _needs_project_status,
+    _plan_jarvis_request,
+    _route_mode,
+)
+from tools.jarvis_live_runtime.jarvis_live_stream_events import (
+    _build_admission_status,
+    _candidate_model_ids_for_context,
+    _command_error_payload,
+    _command_timeout_seconds,
+    _event,
+    _filter_reasoning_chunk,
+    _sanitize_model_output,
+    _sentence_chunks,
+    write_stream_event_safely,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -809,88 +827,14 @@ def reset_jarvis_live_session() -> dict[str, Any]:
 
 
 
-def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:
-    try:
-        write_callable(json.dumps(event, ensure_ascii=False) + "\n")
-    except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-        print("[WARNING] Client disconnected before receiving response")
-        return False
-    return True
 
 
-def _command_timeout_seconds(value: float | None) -> float:
-    if value is not None and value > 0:
-        return float(value)
-    raw = os.environ.get("JARVIS_LIVE_COMMAND_TIMEOUT_SECONDS", "120")
-    try:
-        parsed = float(raw)
-    except ValueError:
-        return 120.0
-    return max(1.0, parsed)
 
 
-def _command_error_payload(user_text: str, error_kind: str) -> dict[str, Any]:
-    selected = select_jarvis_live_model_role(user_text)
-    memory = build_jarvis_live_memory_federation_status()
-    return {
-        "event": "done",
-        "response_text": "JARVIS command runtime не успел вернуть модельный ответ. Запрос не выполнен как действие; можно повторить или проверить Ollama статус.",
-        "ollama_model_used": "",
-        "route_mode": _route_mode(user_text),
-        "stream_chunk_count": 0,
-        "retrieved_snippet_count": 0,
-        "retrieval_surfaces_used": (),
-        "memory_federation_available": memory["memory_federation_available"],
-        "mempalace_status": memory["mempalace_status"],
-        "selected_model_role": selected["selected_model_role"],
-        "selected_model_id": selected["model_id"],
-        "selected_model_status": selected["status"],
-        "admission_allowed": False,
-        "resource_gate_surface": "MAKSIMAR_CORE_LIB/execution_control/admission_contract.py",
-        "session_memory_path": str(SESSION_STATE_PATH),
-        "local_chat_memory_path": str(_session_turn_log_path()),
-        "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
-        "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-        "memory_truth_split": _memory_truth_split(),
-        "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
-        "error_kind": error_kind,
-        "canonical_memory_write_allowed": False,
-        "pc_control_allowed": False,
-    }
 
 
-def _candidate_model_ids_for_context(context: JarvisBrainContext) -> tuple[str, ...]:
-    selected_model_id = str(context.selected_model_role["model_id"])
-    role_id = context.selected_model_role["selected_model_role"]
-    candidates = [selected_model_id]
-    if context.route_mode == "FAST" and os.environ.get("JARVIS_LIVE_FAST_FALLBACK_ENABLED") != "1":
-        return tuple(candidates)
-    if role_id == "heavy_coder_model":
-        candidates.extend((HEAVY_CODER_MODEL_ID, BASE_HEAVY_CODER_MODEL_ID, FALLBACK_OLLAMA_MODEL_ID))
-    elif role_id == "daily_coder_model":
-        candidates.extend(("jarvis:coder7b", FALLBACK_OLLAMA_MODEL_ID))
-    elif role_id == "helper_classifier_model":
-        candidates.extend(("jarvis:helper3b", DEFAULT_OLLAMA_MODEL_ID))
-    else:
-        candidates.extend((DEFAULT_OLLAMA_MODEL_ID, FALLBACK_OLLAMA_MODEL_ID))
-    return tuple(dict.fromkeys(candidates))
 
 
-def _build_admission_status(selected_model_role: dict[str, Any]) -> dict[str, Any]:
-    role_id = str(selected_model_role["selected_model_role"])
-    exclusive_gpu_required = role_id == "heavy_coder_model"
-    return {
-        "admission_allowed": True,
-        "enqueue_required": True,
-        "queue_surface": "MAKSIMAR_CORE_LIB/execution_control",
-        "resource_gate_surface": "MAKSIMAR_CORE_LIB/execution_control/admission_contract.py",
-        "worker_registry_surface": "MAKSIMAR_CORE_LIB/workers_registry",
-        "exclusive_gpu_required": exclusive_gpu_required,
-        "concurrent_heavy_jobs_allowed": False,
-        "agents_enabled": False,
-        "agents_may_call_14b_directly": False,
-        "pc_control_allowed": False,
-    }
 
 
 
@@ -1267,81 +1211,6 @@ def _asks_safety_status_question(lowered: str) -> bool:
 
 
 
-def _route_mode(text: str) -> str:
-    return _plan_jarvis_request(text)["route_mode"]
-
-
-def _plan_jarvis_request(text: str) -> dict[str, str]:
-    lowered = text.casefold()
-    if _asks_pc_action(lowered):
-        return {
-            "request_route": "pc_action_proposal",
-            "route_mode": "FAST",
-            "retrieval_mode": "session_only",
-        }
-    if _asks_weather_or_current_facts(lowered):
-        return {
-            "request_route": "current_facts_tool",
-            "route_mode": "FAST",
-            "retrieval_mode": "session_only",
-        }
-    if _is_deep_code_request(lowered):
-        return {
-            "request_route": "code_deep",
-            "route_mode": "DEEP",
-            "retrieval_mode": "deep_memory",
-        }
-    if _is_simple_code_request(lowered):
-        return {
-            "request_route": "code_simple",
-            "route_mode": "DEEP",
-            "retrieval_mode": "targeted_memory",
-        }
-    if _needs_deep_memory(lowered):
-        return {
-            "request_route": "project_memory",
-            "route_mode": "DEEP",
-            "retrieval_mode": "deep_memory",
-        }
-    return {
-        "request_route": "conversation",
-        "route_mode": "FAST",
-        "retrieval_mode": "session_only",
-    }
-
-
-
-
-
-
-def _is_simple_code_request(lowered: str) -> bool:
-    markers = ("pytest", "brokenpipeerror", "ошибка", "traceback", "код", "тест", "python")
-    return any(marker in lowered for marker in markers)
-
-
-def _is_deep_code_request(lowered: str) -> bool:
-    markers = ("architecture", "архитектур", "сложн", "complex", "approval gate", "patch proposal")
-    return any(marker in lowered for marker in markers) and _is_simple_code_request(lowered)
-
-
-def _needs_project_status(text: str) -> bool:
-    lowered = text.casefold()
-    return any(
-        marker in lowered
-        for marker in (
-            "проект",
-            "статус",
-            "git",
-            "ветка",
-            "runtime_history_store",
-            "структур",
-            "дерево",
-            "файл",
-            "ядро",
-            "repo",
-            "workspace",
-        )
-    )
 
 
 
@@ -1350,47 +1219,20 @@ def _needs_project_status(text: str) -> bool:
 
 
 
-def _sanitize_model_output(text: str) -> str:
-    return clean_voice_response(text)
 
 
-def _filter_reasoning_chunk(chunk: str, state: dict[str, bool]) -> str:
-    text = chunk
-    visible = ""
-    while text:
-        lowered = text.casefold()
-        if state.get("inside_reasoning", False):
-            end_positions = [
-                pos
-                for marker in ("</think>", "</thinking>")
-                if (pos := lowered.find(marker)) != -1
-            ]
-            if not end_positions:
-                return visible
-            end = min(end_positions)
-            marker = "</think>" if lowered.startswith("</think>", end) else "</thinking>"
-            text = text[end + len(marker) :]
-            state["inside_reasoning"] = False
-            continue
-        start_positions = [
-            pos
-            for marker in ("<think>", "<thinking>", "thinking:", "reasoning:", "мысли:", "рассуждение:")
-            if (pos := lowered.find(marker)) != -1
-        ]
-        if not start_positions:
-            visible += text
-            break
-        start = min(start_positions)
-        visible += text[:start]
-        if lowered.startswith("thinking:", start) or lowered.startswith("reasoning:", start) or lowered.startswith("мысли:", start) or lowered.startswith("рассуждение:", start):
-            paragraph_end = text.find("\n\n", start)
-            if paragraph_end == -1:
-                return visible
-            text = text[paragraph_end + 2 :]
-            continue
-        state["inside_reasoning"] = True
-        text = text[start:]
-    return visible
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1441,19 +1283,8 @@ def _fast_final_answer_rules() -> str:
     )
 
 
-def _sentence_chunks(text: str) -> Iterator[str]:
-    buffer = ""
-    for char in text:
-        buffer += char
-        if char in ".!?…":
-            yield buffer
-            buffer = ""
-    if buffer:
-        yield buffer
 
 
-def _event(event: str, **payload: Any) -> dict[str, Any]:
-    return {"event": event, **payload, "pc_control_allowed": False}
 
 
 
