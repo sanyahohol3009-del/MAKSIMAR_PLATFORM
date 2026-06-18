@@ -59,7 +59,8 @@
     "history_track_*",
     "FOUNDATION_REPORT.md",
     "*.bak*",
-    "EXTERNAL_BACKENDS/**/security_reports/*.json"
+    "EXTERNAL_BACKENDS/**/security_reports/*.json",
+    "SHARED_FLUTTER_MOBILE_UI/ios/Flutter/ephemeral/**"
   ],
   "allowed_unmapped_file_globs": [
     "setup.py",
