@@ -1,0 +1,11 @@
+id: action_library_container_contract_v1
+cube_id: action_library
+container_ready: true
+adapter_only: true
+read_model_only: true
+runtime_mutation_allowed: false
+direct_execution_allowed: false
+broad_host_mutation_allowed: false
+network_enabled_by_default: false
+requires_verified_owner_for_safe_direct: true
+risk_gate_enabled: true
