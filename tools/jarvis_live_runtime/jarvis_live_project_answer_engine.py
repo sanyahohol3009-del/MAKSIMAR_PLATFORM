@@ -48,7 +48,7 @@ from tools.jarvis_live_runtime.read_only_tool_router import (
     _extract_filename_token,
     _extract_requested_file_path,
 )
-from tools.jarvis_live_runtime.session_memory_store import _memory_truth_split
+from tools.jarvis_live_runtime.session_memory_store import _memory_truth_contract
 
 def _answer_with_read_only_tools_if_grounded(
     user_text: str,
@@ -807,7 +807,7 @@ def _answer_project_workspace_summary_if_grounded(context: JarvisBrainContext) -
     )
     support_files = (
         "tools/jarvis_live_runtime/jarvis_live_terminal_chat.py, "
-        "tools/jarvis_live_runtime/jarvis_live_identity_prompt.py, "
+        "tools/jarvis_live_runtime/jarvis_personality_policy.py, "
         "tools/jarvis_live_runtime/jarvis_live_response_mode.py"
     )
     tracked_text = f"; tracked_file_count={len(tracked)}" if tracked else ""
@@ -945,26 +945,6 @@ def _format_list(title: str, values: tuple[str, ...]) -> str:
     if not values:
         return ""
     return title + ":\n" + "\n".join(f"- {value}" for value in values)
-
-
-def _format_style_memory_answer_rules() -> str:
-    return (
-        "STYLE_MEMORY_ANSWER_RULES:\n"
-        "- If the user asks how they want you to communicate, answer from STABLE_STYLE_PROFILE/local_chat_memory directly.\n"
-        "- Final answer must mention the actual stored style facts instead of a generic helper phrase.\n"
-        "- Do not answer style/preference recall with 'Скажи, что нужно' or 'Нужна помощь?'.\n"
-        "- If local_chat_memory/session_summary contains the answer, answer from it directly and keep it grounded."
-    )
-
-
-def _format_memory_truth_split() -> str:
-    split = _memory_truth_split()
-    lines = [f"- {key}: {value}" for key, value in split.items()]
-    return (
-        "MEMORY_TRUTH_SPLIT:\n"
-        + "\n".join(lines)
-        + "\n- Never claim 'I remember' unless session/local_chat/project_history context contains a stored record."
-    )
 
 
 def _parse_int(value: Any, default: int) -> int:

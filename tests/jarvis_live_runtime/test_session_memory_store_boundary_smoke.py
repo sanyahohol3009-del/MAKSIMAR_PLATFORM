@@ -14,7 +14,7 @@ def test_brain_loop_uses_extracted_session_memory_store() -> None:
     assert inspect.getmodule(jarvis_live_brain_loop._append_turn).__name__ == (
         "tools.jarvis_live_runtime.session_memory_store"
     )
-    assert inspect.getmodule(jarvis_live_brain_loop._memory_truth_split).__name__ == (
+    assert inspect.getmodule(jarvis_live_brain_loop._memory_truth_contract).__name__ == (
         "tools.jarvis_live_runtime.session_memory_store"
     )
 
@@ -28,7 +28,7 @@ def test_empty_session_state_is_safe_by_default() -> None:
     assert state["memory_enabled"] is True
     assert state["session_memory_write_enabled"] is True
     assert state["runtime_history_append_enabled"] is False
-    assert state["memory_truth_split"]["canonical_truth"] == "read_only_not_written_by_live_chat"
+    assert state["memory_truth_contract"]["canonical_truth"] == "read_only_not_written_by_live_chat"
 
 
 def test_append_turn_keeps_local_only_bounds() -> None:
@@ -74,7 +74,7 @@ def test_session_functions_no_longer_defined_in_brain_loop() -> None:
         "_update_style_preferences",
         "_extract_style_preference",
         "_memory_enablement_flags",
-        "_memory_truth_split",
+        "_memory_truth_contract",
         "_timestamp",
         "_day_bucket",
         "_brief_turn_summary",

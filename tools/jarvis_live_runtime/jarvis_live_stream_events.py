@@ -59,7 +59,7 @@ def _command_error_payload(user_text: str, error_kind: str) -> dict[str, Any]:
         "local_chat_memory_path": str(_session_turn_log_path()),
         "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
         "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-        "memory_truth_split": _memory_truth_split(),
+        "memory_truth_contract": _memory_truth_contract(),
         "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
         "error_kind": error_kind,
         "canonical_memory_write_allowed": False,

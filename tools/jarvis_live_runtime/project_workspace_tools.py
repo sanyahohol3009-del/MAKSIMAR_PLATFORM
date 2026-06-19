@@ -37,7 +37,7 @@ PROJECT_VISIBILITY_KEY_FILES = (
     "tools/jarvis_live_runtime/jarvis_live_chat_launcher.py",
     "tools/jarvis_live_runtime/jarvis_live_terminal_chat.py",
     "tools/jarvis_live_runtime/jarvis_live_brain_loop.py",
-    "tools/jarvis_live_runtime/jarvis_live_identity_prompt.py",
+    "tools/jarvis_live_runtime/jarvis_personality_policy.py",
     "tools/jarvis_live_runtime/jarvis_live_response_mode.py",
     "tools/project_readiness_control/jarvis_live_ci_status.py",
     "tools/roadmap_post_step_drift_check.py",
@@ -255,7 +255,7 @@ def _important_paths_detected(paths: tuple[str, ...]) -> tuple[str, ...]:
         "jarvis_live_terminal_chat.py",
         "jarvis_live_chat_launcher.py",
         "jarvis_live_response_mode.py",
-        "jarvis_live_identity_prompt.py",
+        "jarvis_personality_policy.py",
         "jarvis_live_ci_status.py",
         "roadmap_post_step_drift_check.py",
     )

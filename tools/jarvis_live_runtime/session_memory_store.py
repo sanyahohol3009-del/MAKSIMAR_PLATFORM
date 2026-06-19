@@ -183,7 +183,7 @@ def _normalize_session_state(state: dict[str, Any]) -> dict[str, Any]:
     normalized["canonical_memory_write_allowed"] = False
     normalized["pc_control_allowed"] = False
     normalized["dangerous_mutation_flags"] = dict(DANGEROUS_MEMORY_FLAGS)
-    normalized["memory_truth_split"] = _memory_truth_split()
+    normalized["memory_truth_contract"] = _memory_truth_contract()
     normalized.update(_memory_enablement_flags())
     return normalized
 
@@ -262,7 +262,7 @@ def _memory_enablement_flags() -> dict[str, bool]:
         "context_assembly_enabled": True,
         "retrieval_before_project_answer": True,
         "hallucination_guard_enabled": True,
-        "memory_truth_split_enabled": True,
+        "memory_truth_contract_enabled": True,
         "session_memory_write_enabled": True,
         "runtime_history_append_enabled": False,
         "conversation_history_append_enabled": True,
@@ -271,7 +271,7 @@ def _memory_enablement_flags() -> dict[str, bool]:
     }
 
 
-def _memory_truth_split() -> dict[str, str]:
+def _memory_truth_contract() -> dict[str, str]:
     return {
         "canonical_truth": "read_only_not_written_by_live_chat",
         "project_history": "read_only_imported_history_context",

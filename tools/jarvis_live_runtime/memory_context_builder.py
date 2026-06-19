@@ -2,14 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from tools.jarvis_live_runtime import memory_context_sources
+from tools.jarvis_live_runtime.jarvis_personality_policy import build_jarvis_personality_prompt
 
 # MEMORY_CONTEXT_BUILDER_LOCAL_PROMPT_HELPERS_V1
 
-try:
-    from tools.jarvis_live_runtime.jarvis_live_identity_prompt import build_jarvis_live_identity_prompt
-except Exception:  # pragma: no cover
-    def build_jarvis_live_identity_prompt(user_text: str = "") -> str:
-        return "IDENTITY: You are JARVIS, the owner-bound local assistant."
 
 try:
     from tools.jarvis_live_runtime.memory_context_sources import RUNTIME_HISTORY_STORE
@@ -32,25 +28,21 @@ DANGEROUS_MEMORY_FLAGS = {
 }
 
 
-def _system_rules(short: bool) -> str:
-    base = (
-        "SYSTEM_RULES: JARVIS must answer as the same local owner-bound assistant. "
-        "Use only grounded memory/context when claiming remembered facts. "
-        "Do not invent personal preferences. "
-        "Do not execute shell, PC-control, deployment, network actions, or canonical memory writes. "
-        "canonical_memory_write_allowed=false; direct_global_memory_write=false; "
-        "pc_control_allowed=false; shell_execution_allowed=false."
-    )
-    if short:
-        return base + " Keep the final answer direct and non-template."
-    return base + " For deep/project answers, bind claims to retrieved read-only context."
-
-
-def _fast_final_answer_rules() -> str:
-    return (
-        "FAST_FINAL_ANSWER_RULES: answer directly; no hidden reasoning; "
-        "no repeated generic template tail; if memory is missing, say it is not confirmed."
-    )
+def _memory_truth_contract() -> dict[str, object]:
+    return {
+        "session_memory": "rolling_session_context",
+        "local_chat_memory": "append_only_terminal_chat_memory",
+        "imported_gpt_history": "read_only_retrieval_surface",
+        "runtime_history_store": "read_only_project_history",
+        "project_workspace": "read_only_workspace_surface",
+        "canonical_memory": "canonical_write_blocked",
+        "session_memory_read_allowed": True,
+        "local_chat_memory_read_allowed": True,
+        "runtime_history_read_allowed": True,
+        "canonical_memory_write_allowed": False,
+        "direct_global_memory_write": False,
+        "runtime_mutation_allowed": False,
+    }
 
 
 def _format_section(title: str, value: object) -> str:
@@ -101,38 +93,6 @@ def _format_style_profile(profile: object) -> str:
         if text:
             parts.append(f"{key}={text}")
     return _format_list("STABLE_STYLE_PROFILE", parts)
-
-
-def _format_style_memory_answer_rules() -> str:
-    return (
-        "STYLE_MEMORY_RULES: Never claim 'I remember' unless the answer is grounded in stored memory. "
-        "If memory is missing, say it is not confirmed. "
-        "User prefers direct practical partner style. "
-        "Do not claim a single favorite color unless stored evidence says so. "
-        "If color preference is discussed, preserve exact wording: user prefers color combinations."
-    )
-
-
-def _memory_truth_split() -> dict[str, object]:
-    return {
-        "session_memory": "rolling_session_context",
-        "local_chat_memory": "append_only_terminal_chat_memory",
-        "imported_gpt_history": "read_only_retrieval_surface",
-        "runtime_history_store": "read_only_project_history",
-        "project_workspace": "read_only_workspace_surface",
-        "canonical_memory": "canonical_write_blocked",
-        "session_memory_read_allowed": True,
-        "local_chat_memory_read_allowed": True,
-        "runtime_history_read_allowed": True,
-        "canonical_memory_write_allowed": False,
-        "direct_global_memory_write": False,
-        "runtime_mutation_allowed": False,
-    }
-
-
-def _format_memory_truth_split() -> str:
-    truth = _memory_truth_split()
-    return _format_list("MEMORY_TRUTH_SPLIT", (f"{key}={str(value).lower()}" for key, value in truth.items()))
 
 
 from dataclasses import dataclass
@@ -270,50 +230,27 @@ class JarvisBrainContext:
     canonical_memory_write_allowed: bool = False
 
     def to_fast_system_prompt(self) -> str:
-        return "\n".join(
-            part
-            for part in (
-                _system_rules(short=True),
-                build_jarvis_live_identity_prompt(self.user_text),
-                _fast_final_answer_rules(),
-                _format_style_profile(self.stable_style_profile),
-                _format_style_memory_answer_rules(),
-                _format_memory_truth_split(),
-                _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
-                _format_turns(self.recent_turns[-4:]),
-                _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
-            )
-            if part
-        )
+        return self.to_prompt()
 
     def to_deep_system_prompt(self) -> str:
-        return "\n".join(
-            part
-            for part in (
-                _system_rules(short=False),
-                build_jarvis_live_identity_prompt(self.user_text),
-                _format_section("REQUEST_ROUTE", self.request_route),
-                _format_section("RETRIEVAL_MODE", self.retrieval_mode),
-                _format_section("MODEL_ROLE", self.selected_model_role["selected_model_role"]),
-                _format_section("MODEL_ROUTE_REASON", self.selected_model_role["route_reason"]),
-                _format_section("ROLLING_SESSION_SUMMARY", self.rolling_summary),
-                _format_turns(self.recent_turns),
-                _format_style_profile(self.stable_style_profile),
-                _format_style_memory_answer_rules(),
-                _format_memory_truth_split(),
-                _format_list("LOCAL_CHAT_MEMORY", self.local_chat_memory_snippets),
-                _format_list("ACTIVE_TOPICS", self.active_topics),
-                _format_list("RETRIEVAL_SURFACES_USED", self.retrieval_surfaces_used),
-                _format_list("RETRIEVED_LONG_TERM_MEMORY", self.retrieved_snippets),
-                _format_section("PROJECT_STATUS_READ_ONLY", self.project_status),
-            )
-            if part
-        )
+        return self.to_prompt()
 
     def to_prompt(self) -> str:
-        if self.route_mode == "FAST" and self.retrieval_mode == "session_only":
-            return "\n".join(part for part in (self.to_fast_system_prompt(), f"STYLE_MEMORY_ANSWER_RULES:\n- Do not answer stored style questions with 'Скажи, что нужно'.\n- Final answer must mention the actual stored style facts.\n- If the user asks style/preference recall, answer from stable/local/session memory.\n- Do not answer stored style questions with a generic helper phrase.\nFAST_RESPONSE_RULES:\n- If backend thinking is enabled, thinking должен быть коротким.\n- После thinking всегда выдай финальный видимый ответ.\n- Финальный ответ не должен быть пустым.\nUSER_MESSAGE: {self.user_text}") if part)
-        return "\n".join(part for part in (self.to_deep_system_prompt(), f"USER_MESSAGE: {self.user_text}") if part)
+        return build_jarvis_personality_prompt(
+            user_text=self.user_text,
+            request_route=self.request_route,
+            route_mode=self.route_mode,
+            retrieval_mode=self.retrieval_mode,
+            selected_model_role=self.selected_model_role,
+            rolling_summary=self.rolling_summary,
+            recent_turns=self.recent_turns,
+            active_topics=self.active_topics,
+            stable_style_profile=self.stable_style_profile,
+            local_chat_memory_snippets=self.local_chat_memory_snippets,
+            retrieval_surfaces_used=self.retrieval_surfaces_used,
+            retrieved_snippets=self.retrieved_snippets,
+            project_status=self.project_status,
+        )
 
     def to_read_model(self) -> dict[str, Any]:
         return {
@@ -340,7 +277,7 @@ class JarvisBrainContext:
             "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
             "session_memory_path": str(SESSION_STATE_PATH),
             "local_chat_memory_path": str(_session_turn_log_path()),
-            "memory_truth_split": _memory_truth_split(),
+            "memory_truth_contract": _memory_truth_contract(),
             "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
         }
 

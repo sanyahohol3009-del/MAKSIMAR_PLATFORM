@@ -101,7 +101,7 @@ def test_new_chat_context_loads_stable_style_profile() -> None:
     assert profile["assistant_identity"] == "JARVIS"
     assert "брат" in profile["relation_style"]
     assert "not template-like" in profile["communication_style"]
-    assert read_model["memory_truth_split"]["local_chat_memory"] == "append_only_terminal_chat_memory"
+    assert read_model["memory_truth_contract"]["local_chat_memory"] == "append_only_terminal_chat_memory"
     assert read_model["dangerous_mutation_flags"]["direct_core_write_allowed"] is False
     assert read_model["dangerous_mutation_flags"]["pc_control_enabled"] is False
 
@@ -119,8 +119,7 @@ def test_fast_context_includes_rolling_summary_and_style_profile() -> None:
 
     assert "STABLE_STYLE_PROFILE" in prompt
     assert "owner prefers direct garage partner style" in prompt
-    assert "MEMORY_TRUTH_SPLIT" in prompt
-    assert "Never claim 'I remember'" in prompt
+    assert "MEMORY_TRUTH_CONTRACT" not in prompt
 
 
 def test_local_terminal_turns_are_append_only_persisted_by_existing_session_log() -> None:

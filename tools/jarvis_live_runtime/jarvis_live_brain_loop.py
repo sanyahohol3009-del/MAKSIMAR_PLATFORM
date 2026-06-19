@@ -50,9 +50,6 @@ from MAKSIMAR_SERVER.CONTROL_PLANE.memory_routing.adapters.mempalace_read_only_r
     build_mempalace_read_only_routing_integration_preview,
 )
 
-from tools.jarvis_live_runtime.jarvis_live_identity_prompt import (
-    build_jarvis_live_identity_prompt,
-)
 from tools.jarvis_live_runtime.jarvis_live_response_mode import (
     build_ollama_options,
     classify_response_mode,
@@ -127,7 +124,7 @@ from tools.jarvis_live_runtime.session_memory_store import (
     _format_turns,
     _load_session_state,
     _memory_enablement_flags,
-    _memory_truth_split,
+    _memory_truth_contract,
     _normalize_session_state,
     _read_recent_local_chat_records,
     _save_session_state,
@@ -215,7 +212,6 @@ from tools.jarvis_live_runtime.jarvis_live_project_answer_engine import (
     _format_imports_answer,
     _format_list,
     _format_memory_history_grounded_answer,
-    _format_memory_truth_split,
     _format_outline_answer,
     _format_project_atlas_answer,
     _format_project_models_answer,
@@ -231,7 +227,6 @@ from tools.jarvis_live_runtime.jarvis_live_project_answer_engine import (
     _format_section,
     _format_semantic_similarity_answer,
     _format_source_evidence_answer,
-    _format_style_memory_answer_rules,
     _format_tests_answer,
     _format_tool_catalog_answer,
     _format_tree_answer,
@@ -302,7 +297,7 @@ PROJECT_VISIBILITY_KEY_FILES = (
     "tools/jarvis_live_runtime/jarvis_live_chat_launcher.py",
     "tools/jarvis_live_runtime/jarvis_live_terminal_chat.py",
     "tools/jarvis_live_runtime/jarvis_live_brain_loop.py",
-    "tools/jarvis_live_runtime/jarvis_live_identity_prompt.py",
+    "tools/jarvis_live_runtime/jarvis_personality_policy.py",
     "tools/jarvis_live_runtime/jarvis_live_response_mode.py",
     "tools/project_readiness_control/jarvis_live_ci_status.py",
     "tools/roadmap_post_step_drift_check.py",
@@ -420,7 +415,7 @@ def run_jarvis_live_brain_once(
         "retrieved_snippet_count": int(final_payload.get("retrieved_snippet_count", 0)),
         "local_chat_memory_snippet_count": int(final_payload.get("local_chat_memory_snippet_count", 0)),
         "retrieval_surfaces_used": tuple(final_payload.get("retrieval_surfaces_used", ())),
-        "memory_truth_split": dict(final_payload.get("memory_truth_split", _memory_truth_split())),
+        "memory_truth_contract": dict(final_payload.get("memory_truth_contract", _memory_truth_contract())),
         "dangerous_mutation_flags": dict(final_payload.get("dangerous_mutation_flags", DANGEROUS_MEMORY_FLAGS)),
         "memory_federation_available": bool(final_payload.get("memory_federation_available", False)),
         "mempalace_status": str(final_payload.get("mempalace_status", "not_detected")),
@@ -571,7 +566,7 @@ def stream_jarvis_live_brain_response(
             "local_chat_memory_path": str(_session_turn_log_path()),
             "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
             "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-            "memory_truth_split": _memory_truth_split(),
+            "memory_truth_contract": _memory_truth_contract(),
             "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
             "canonical_memory_write_allowed": False,
             "pc_control_allowed": False,
@@ -698,7 +693,7 @@ def stream_jarvis_live_brain_response(
         "local_chat_memory_path": str(_session_turn_log_path()),
         "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
         "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-        "memory_truth_split": _memory_truth_split(),
+        "memory_truth_contract": _memory_truth_contract(),
         "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
@@ -733,7 +728,7 @@ def build_jarvis_live_brain_health() -> dict[str, Any]:
         "local_chat_memory_path": str(_session_turn_log_path()),
         "local_chat_memory_exists": _session_turn_log_path().exists(),
         "stable_style_profile": _stable_style_profile_from_state(state),
-        "memory_truth_split": _memory_truth_split(),
+        "memory_truth_contract": _memory_truth_contract(),
         "append_only_local_chat_write_enabled": True,
         "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
         "recent_turn_count": len(state.get("recent_turns", [])),
@@ -760,7 +755,7 @@ def build_jarvis_live_session_status() -> dict[str, Any]:
         "local_chat_memory_path": str(_session_turn_log_path()),
         "local_chat_memory_exists": _session_turn_log_path().exists(),
         "stable_style_profile": _stable_style_profile_from_state(state),
-        "memory_truth_split": _memory_truth_split(),
+        "memory_truth_contract": _memory_truth_contract(),
         "append_only_local_chat_write_enabled": True,
         "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
         "local_session_persistence": bool(state.get("local_session_persistence", True)),
@@ -1240,47 +1235,6 @@ def _asks_safety_status_question(lowered: str) -> bool:
 def _compact_text(text: str, source: Path) -> str:
     single_line = " ".join(text.split())
     return f"{source}: {single_line[:700]}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _system_rules(short: bool = False) -> str:
-    if short:
-        return (
-            "SYSTEM_RULES:\n"
-            "- Ты JARVIS, локальный помощник Александра.\n"
-            "- Отвечай коротко по-русски.\n"
-            "- Не называй себя Qwen, Alibaba, ChatGPT или облачной моделью.\n"
-            "- PC control disabled: pc_control_allowed=false."
-        )
-    return (
-        "SYSTEM_RULES:\n"
-        "- Ты JARVIS, локальный помощник Александра для MAKSIMAR/JARVIS.\n"
-        "- Не называй себя Qwen, Alibaba, ChatGPT или облачной моделью.\n"
-        "- Используй session memory и runtime_history_store как контекст, не как абсолютную истину.\n"
-        "- Не записывай в canonical/global project memory из live chat.\n"
-        "- PC control disabled: pc_control_allowed=false.\n"
-        "- Для погоды, поиска и текущих фактов нужен tool; если tool недоступен, скажи это."
-    )
-
-
-def _fast_final_answer_rules() -> str:
-    return (
-        "FAST_RESPONSE_RULES:\n"
-        "- Если backend-модель использует thinking, thinking должен быть коротким.\n"
-        "- После thinking всегда выдай финальный видимый ответ.\n"
-        "- Финальный ответ не должен быть пустым."
-    )
 
 
 

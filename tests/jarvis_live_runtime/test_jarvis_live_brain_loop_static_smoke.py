@@ -13,7 +13,8 @@ def test_brain_loop_reuses_existing_runtime_and_memory_surfaces() -> None:
     assert "SESSION_STATE_PATH" in source
     assert "canonical_memory_write_allowed" in source
     assert "pc_control_allowed" in source
-    assert "build_jarvis_live_identity_prompt" in source
+    assert "jarvis_personality_policy" in source
+    assert "build_jarvis_personality_prompt" in Path("tools/jarvis_live_runtime/memory_context_builder.py").read_text(encoding="utf-8")
     assert "import httpx" in source
     transport_source = Path("tools/jarvis_live_runtime/ollama_transport.py").read_text(encoding="utf-8")
     assert "import httpx" in transport_source

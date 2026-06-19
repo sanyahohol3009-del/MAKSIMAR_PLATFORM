@@ -29,6 +29,12 @@ def test_brain_context_includes_session_history_project_boundaries() -> None:
     assert read_model["pc_control_allowed"] is False
     assert read_model["canonical_memory_write_allowed"] is False
     assert "RECENT_SESSION_TURNS" in prompt
+    assert "JARVIS_PERSONALITY_CANONICAL_POLICY_V1" in prompt
+    assert "RESPONSE_MODE: conversation" in prompt
+    assert "THINKING_FREEDOM" in prompt
+    assert "ACTION_SAFETY" in prompt
+    assert "ANTI_TEMPLATE_RULES" in prompt
+    assert "Скажи, что нужно" not in prompt
     assert "ROLLING_SESSION_SUMMARY" in prompt
     assert "RETRIEVED_LONG_TERM_MEMORY" not in prompt
 
@@ -55,14 +61,15 @@ def test_fast_conversation_uses_session_memory_without_deep_retrieval() -> None:
     assert "local_chat_memory" in read_model["retrieval_surfaces_used"]
     assert read_model["retrieved_snippet_count"] == 0
     assert "RECENT_SESSION_TURNS" in prompt
-    assert "FAST_RESPONSE_RULES" in prompt
-    assert "thinking должен быть коротким" in prompt
-    assert "всегда выдай финальный видимый ответ" in prompt
-    assert "Финальный ответ не должен быть пустым" in prompt
+    assert "JARVIS_PERSONALITY_CANONICAL_POLICY_V1" in prompt
+    assert "RESPONSE_MODE: conversation" in prompt
+    assert "THINKING_FREEDOM" in prompt
+    assert "ACTION_SAFETY" in prompt
+    assert "ANTI_TEMPLATE_RULES" in prompt
+    assert "Скажи, что нужно" not in prompt
+    assert "FAST_RESPONSE_RULES" not in prompt
     assert "owner prefers calm conversation" in prompt
-    assert "STYLE_MEMORY_ANSWER_RULES" in prompt
-    assert "Final answer must mention the actual stored style facts" in prompt
-    assert "Скажи, что нужно" in prompt
+    assert "STYLE_MEMORY_ANSWER_RULES" not in prompt
     assert "RETRIEVED_LONG_TERM_MEMORY" not in prompt
     assert read_model["pc_control_allowed"] is False
 
@@ -90,7 +97,7 @@ def test_project_visibility_reads_tree_and_bounded_file_snippets() -> None:
     assert read_model["route_mode"] == "DEEP"
     assert read_model["retrieval_mode"] == "deep_memory"
     assert "project_workspace_read_model" in read_model["retrieval_surfaces_used"]
-    assert "project_workspace_read_enabled" in str(read_model["dangerous_mutation_flags"]) or "project_workspace" in read_model["memory_truth_split"]
+    assert "project_workspace_read_enabled" in str(read_model["dangerous_mutation_flags"]) or "project_workspace" in read_model["memory_truth_contract"]
     assert "project_workspace_read_model" in prompt
     assert "project_file_snippet:" in prompt
     assert "tools/jarvis_live_runtime/jarvis_live_brain_loop.py" in prompt
