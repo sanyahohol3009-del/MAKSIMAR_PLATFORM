@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from tools.jarvis_live_runtime import memory_context_sources
 from tools.jarvis_live_runtime.jarvis_personality_policy import build_jarvis_personality_prompt
+from tools.jarvis_live_runtime.autonomous_tool_model_router import build_autonomous_tool_model_decision
+from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim, build_owner_identity_claim_for_terminal
 
 # MEMORY_CONTEXT_BUILDER_LOCAL_PROMPT_HELPERS_V1
 
@@ -98,9 +100,6 @@ def _format_style_profile(profile: object) -> str:
 from dataclasses import dataclass
 from typing import Any
 
-from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
-    select_jarvis_live_model_role,
-)
 from tools.jarvis_live_runtime.memory_context_sources import (
     _retrieve_enterprise_memory_snippets,
     _retrieve_history_snippets,
@@ -216,6 +215,7 @@ class JarvisBrainContext:
     route_mode: str
     retrieval_mode: str
     selected_model_role: dict[str, Any]
+    orchestration_decision: dict[str, Any]
     admission_status: dict[str, Any]
     recent_turns: tuple[dict[str, str], ...]
     rolling_summary: str
@@ -259,6 +259,7 @@ class JarvisBrainContext:
             "request_route": self.request_route,
             "retrieval_mode": self.retrieval_mode,
             "selected_model_role": self.selected_model_role,
+            "orchestration_decision": self.orchestration_decision,
             "admission_status": self.admission_status,
             "recent_turn_count": len(self.recent_turns),
             "rolling_summary": self.rolling_summary,
@@ -287,11 +288,19 @@ def build_jarvis_live_brain_context(
     state: dict[str, Any] | None = None,
     request_plan: dict[str, str] | None = None,
     session_id: str = "default",
+    input_channel: str = "text",
+    owner_identity_claim: OwnerIdentityClaim | None = None,
 ) -> JarvisBrainContext:
     state = _load_session_state() if state is None else state
     request_plan = _plan_jarvis_request(user_text) if request_plan is None else request_plan
     route_mode = request_plan["route_mode"]
-    selected_model_role = select_jarvis_live_model_role(user_text)
+    claim = owner_identity_claim if owner_identity_claim is not None else build_owner_identity_claim_for_terminal()
+    orchestration_decision = build_autonomous_tool_model_decision(
+        user_text,
+        input_channel=input_channel,
+        owner_identity_claim=claim,
+    )
+    selected_model_role = dict(orchestration_decision["selected_model_role"])
     admission_status = _build_admission_status(selected_model_role)
     retrieved_snippets, retrieval_surfaces_used = _retrieve_memory_federation_snippets(
         user_text,
@@ -310,6 +319,7 @@ def build_jarvis_live_brain_context(
         route_mode=route_mode,
         retrieval_mode=request_plan["retrieval_mode"],
         selected_model_role=selected_model_role,
+        orchestration_decision=orchestration_decision,
         admission_status=admission_status,
         recent_turns=tuple(state.get("recent_turns", [])[-MAX_RECENT_TURNS:]),
         rolling_summary=str(state.get("rolling_summary", "")),
