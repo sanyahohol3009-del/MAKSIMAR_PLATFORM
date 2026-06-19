@@ -149,16 +149,19 @@ def _load_session_state() -> dict[str, Any]:
 
 
 def _save_session_state(state: dict[str, Any]) -> None:
-    SESSION_MEMORY_ROOT.mkdir(parents=True, exist_ok=True)
     state.update(_memory_enablement_flags())
     state["session_memory_path"] = str(SESSION_STATE_PATH)
     state["local_chat_memory_path"] = str(_session_turn_log_path())
     state["canonical_memory_write_allowed"] = False
     state["pc_control_allowed"] = False
-    SESSION_STATE_PATH.write_text(
-        json.dumps(state, ensure_ascii=False, sort_keys=True, indent=2),
-        encoding="utf-8",
-    )
+    try:
+        SESSION_MEMORY_ROOT.mkdir(parents=True, exist_ok=True)
+        SESSION_STATE_PATH.write_text(
+            json.dumps(state, ensure_ascii=False, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+    except OSError:
+        return
 
 
 def _empty_session_state() -> dict[str, Any]:

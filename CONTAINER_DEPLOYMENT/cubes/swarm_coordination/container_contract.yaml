@@ -1,0 +1,13 @@
+id: swarm_coordination_container_contract_v1
+cube_id: swarm_coordination
+container_ready: true
+adapter_only: true
+read_model_only: true
+runtime_mutation_allowed: false
+direct_execution_allowed: false
+dashboard_execution_allowed: false
+network_enabled_by_default: false
+socket_enabled_by_default: false
+opens_ports: false
+safe_action_delegated_to: action_library
+heavy_gpu_lock_runtime: true
