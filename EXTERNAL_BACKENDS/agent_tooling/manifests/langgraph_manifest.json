@@ -1,0 +1,43 @@
+{
+  "tool_id": "external_adapter:langgraph",
+  "source_library": "LangGraph",
+  "capability_id": "external_agent_provider",
+  "description": "External adapter capability for LangGraph stateful graph orchestration.",
+  "aliases": [
+    "langgraph",
+    "graph agent",
+    "lang graph"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "graph_result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "external_agent_planning"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "langgraph_agent_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "agent_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "langgraph",
+  "package_name": "langgraph"
+}

@@ -1,0 +1,43 @@
+{
+  "tool_id": "external_adapter:openai_agents_sdk",
+  "source_library": "OpenAI Agents SDK",
+  "capability_id": "external_agent_provider",
+  "description": "External adapter capability for OpenAI Agents SDK planning and agent execution graphs.",
+  "aliases": [
+    "openai agents",
+    "agents sdk",
+    "openai agent"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "external_agent_planning"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "openai_agents_sdk_agent_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "agent_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "agents",
+  "package_name": "openai-agents-python"
+}

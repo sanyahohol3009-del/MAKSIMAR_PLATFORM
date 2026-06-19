@@ -1,0 +1,43 @@
+{
+  "tool_id": "external_adapter:mcp_python_sdk",
+  "source_library": "MCP Python SDK",
+  "capability_id": "external_tool_provider",
+  "description": "External adapter capability for MCP Python SDK tool client and server bindings.",
+  "aliases": [
+    "mcp",
+    "model context protocol",
+    "mcp sdk"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "intent": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "intent"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "tools": {
+        "type": "array"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "external_tool_dispatch"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "mcp_python_sdk_tool_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "tool_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "mcp",
+  "package_name": "mcp"
+}
