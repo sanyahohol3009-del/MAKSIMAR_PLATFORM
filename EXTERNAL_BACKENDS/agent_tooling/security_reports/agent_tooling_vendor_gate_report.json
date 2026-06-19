@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "vendor_group": "agent_tooling",
+  "adapter_only": true,
+  "hard_gate_passed": true,
+  "manual_security_review_required": true,
+  "canonical_truth_allowed": false,
+  "direct_execution_allowed": false,
+  "owner_identity_gate_required": true,
+  "risk_gate_required": true,
+  "libraries": [
+    "OpenAI Agents SDK",
+    "MCP Python SDK",
+    "AutoGen",
+    "LangGraph"
+  ]
+}
