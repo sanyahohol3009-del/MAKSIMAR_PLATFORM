@@ -13,8 +13,10 @@ def test_agent_tooling_adapters_visible_to_jarvis_smoke() -> None:
     )
     tool_ids = tuple(tool.tool_id for tool in selected)
 
-    assert len(payload["registry"]["tools"]) == 4
+    assert len(payload["registry"]["tools"]) == 6
     assert "external_adapter:langgraph" in tool_ids
     assert "external_adapter:autogen" in tool_ids
+    assert "external_adapter:autogen_agentchat" in tuple(tool["tool_id"] for tool in payload["registry"]["tools"])
+    assert "external_adapter:autogen_ext" in tuple(tool["tool_id"] for tool in payload["registry"]["tools"])
     assert "external_adapter:mcp_python_sdk" in tool_ids
     assert all(adapter["visible_to_jarvis"] is True for adapter in payload["adapters"])

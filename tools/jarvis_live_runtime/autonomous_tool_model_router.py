@@ -6,6 +6,9 @@ from typing import Any
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     build_jarvis_live_runtime_model_role_profiles,
 )
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    select_external_adapter_tools_for_text,
+)
 from tools.jarvis_live_runtime.helper_model_decision_parser import (
     HelperModelDecision,
     parse_helper_model_decision_payload,
@@ -114,7 +117,7 @@ def build_autonomous_tool_model_decision(
     else:
         intent = _classify_intent(lowered)
         complexity = _classify_complexity(lowered, intent)
-        tools, tool_reason = _select_tools(intent)
+        tools, tool_reason = _select_tools(intent, lowered)
         role_id, model_reason = _select_model_role(intent, complexity)
         profile = _profile_by_role_id(role_id)
         selected_agent_roles = _select_agent_roles(intent)
@@ -265,9 +268,30 @@ def _classify_intent(lowered: str) -> str:
         return "screen_observer"
     if any(
         marker in lowered
-        for marker in ("агентные движки", "agent engines", "langgraph", "autogen", "agents sdk", "mcp sdk")
+        for marker in (
+            "агентные движки",
+            "agent engines",
+            "langgraph",
+            "autogen",
+            "agents sdk",
+            "mcp sdk",
+        )
     ):
         return "agent_engine_comparison"
+    if any(
+        marker in lowered
+        for marker in (
+            "агентный workflow",
+            "agent workflow",
+            "workflow with agents",
+            "построй агентный",
+            "нужен mcp tool",
+            "mcp tool",
+            "mcp tools",
+            "external adapter",
+        )
+    ):
+        return "external_agent_tooling"
     if any(marker in lowered for marker in ("структура проекта", "дерево проекта", "git status", "статус git", "проект", "repo")):
         return "project_workspace"
     if any(marker in lowered for marker in ("traceback", "architecture", "архитектур", "регресс", "сложн")):
@@ -317,7 +341,7 @@ def _select_model_role(intent: str, complexity: str) -> tuple[str, str]:
     return "jarvis_chat_model", "conversation_or_safe_tool_call"
 
 
-def _select_tools(intent: str) -> tuple[tuple[str, ...], str]:
+def _select_tools(intent: str, lowered: str) -> tuple[tuple[str, ...], str]:
     if intent == "safe_pc_open_browser":
         return ("pc_open_browser",), "safe owner browser command"
     if intent == "safe_pc_open_app":
@@ -333,10 +357,24 @@ def _select_tools(intent: str) -> tuple[tuple[str, ...], str]:
     if intent == "agent_engine_comparison":
         return (
             "external_adapter:openai_agents_sdk",
+            "external_adapter:autogen_agentchat",
             "external_adapter:autogen",
+            "external_adapter:autogen_ext",
             "external_adapter:langgraph",
             "external_adapter:mcp_python_sdk",
         ), "agent engine comparison request"
+    if intent == "external_agent_tooling":
+        selected = tuple(tool.tool_id for tool in select_external_adapter_tools_for_text(lowered))
+        if selected:
+            return selected, "external agent/tooling request"
+        return (
+            "external_adapter:openai_agents_sdk",
+            "external_adapter:autogen_agentchat",
+            "external_adapter:autogen",
+            "external_adapter:autogen_ext",
+            "external_adapter:langgraph",
+            "external_adapter:mcp_python_sdk",
+        ), "external agent/tooling request"
     if intent == "project_workspace":
         return ("repo_git_status", "repo_tree", "repo_files", "read_file_snippet"), "project workspace request"
     if intent == "complex_code_analysis":
@@ -396,7 +434,14 @@ def _requires_owner_risk_gate(
 
 
 def _select_agent_roles(intent: str) -> tuple[str, ...]:
-    if intent in {"weather_lookup", "calendar_lookup", "mail_lookup", "screen_observer", "agent_engine_comparison"}:
+    if intent in {
+        "weather_lookup",
+        "calendar_lookup",
+        "mail_lookup",
+        "screen_observer",
+        "agent_engine_comparison",
+        "external_agent_tooling",
+    }:
         return ("tool_selector_agent",)
     if intent in {"code_debug", "project_workspace"}:
         return ("project_coder_agent",)
@@ -457,4 +502,6 @@ def _build_workflow_steps(intent: str, lowered: str, tools: tuple[str, ...]) -> 
         return ("classify_risk", "route_to_risk_gate", "prepare_operator_proposal")
     if intent == "agent_engine_comparison":
         return ("load_external_adapter_registry", "compare_agent_providers", "recommend_adapter")
+    if intent == "external_agent_tooling":
+        return ("load_external_adapter_registry", "select_external_adapter", "prepare_risk_gated_adapter_plan")
     return ("classify_request", "answer_conversation")

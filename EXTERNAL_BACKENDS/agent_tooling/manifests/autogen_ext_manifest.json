@@ -1,0 +1,43 @@
+{
+  "tool_id": "external_adapter:autogen_ext",
+  "source_library": "AutoGen Ext",
+  "capability_id": "external_tool_provider",
+  "description": "External adapter capability for AutoGen Ext tool/runtime extensions.",
+  "aliases": [
+    "autogen ext",
+    "autogen extension",
+    "autogen extensions"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "intent": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "intent"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "tools": {
+        "type": "array"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "external_tool_dispatch"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "autogen_ext_tool_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "tool_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "autogen_ext",
+  "package_name": "autogen-ext"
+}

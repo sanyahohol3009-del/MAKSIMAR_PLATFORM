@@ -10,6 +10,8 @@ def test_jarvis_skill_visibility_smoke() -> None:
     assert "repo_search" in payload["visible_tools"]
     assert "browser_worker" in payload["visible_tools"]
     assert "external_adapter:langgraph" in payload["external_adapter_tools"]
+    assert "external_adapter:autogen_agentchat" in payload["external_adapter_tools"]
+    assert "external_adapter:autogen_ext" in payload["external_adapter_tools"]
     assert "tool_selector_agent" in payload["visible_agents"]
     assert any(path.endswith("tools/jarvis_live_runtime/read_only_tool_router.py") for path in payload["visible_skills"])
     assert payload["duplicate_tools"]

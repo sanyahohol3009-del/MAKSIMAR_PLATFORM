@@ -45,7 +45,8 @@ def _helper_system_prompt() -> str:
         "Allowed tools include: weather_lookup, calendar_lookup, mail_lookup, screen_observer_read, repo_git_status, "
         "repo_tree, repo_files, repo_search, read_file_snippet, read_file_outline, pytest_report_read, session_memory, "
         "local_chat_memory, pc_open_browser, pc_open_app, risk_gate, operator_proposal, external_adapter:openai_agents_sdk, "
-        "external_adapter:mcp_python_sdk, external_adapter:autogen, external_adapter:langgraph. "
+        "external_adapter:mcp_python_sdk, external_adapter:autogen_agentchat, external_adapter:autogen, "
+        "external_adapter:autogen_ext, external_adapter:langgraph. "
         "Use safe_direct only for verified owner browser/app open requests; otherwise use risk_gate or read_only."
     )
 
