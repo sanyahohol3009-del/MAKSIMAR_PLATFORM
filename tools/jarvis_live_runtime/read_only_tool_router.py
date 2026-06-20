@@ -4,6 +4,9 @@ import re
 from pathlib import Path
 from typing import Any
 
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    build_external_adapter_semantic_route,
+)
 from MAKSIMAR_CORE_LIB.retrieval_backend import build_retrieval_readonly_tool_route
 
 from tools.jarvis_live_runtime.project_workspace_tools import (
@@ -17,11 +20,15 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
     lowered = user_text.casefold()
     intent_family = "CONVERSATION"
     selected_tools: tuple[str, ...] = ()
+    selected_agent_roles: tuple[str, ...] = ()
     tool_route = None
     confidence = 0.0
     reason = "ordinary conversation"
     needs_ollama = True
     evidence_required = False
+    risk_class = "read_only"
+    proposal_only = True
+    semantic_candidates: tuple[dict[str, Any], ...] = ()
 
     if _asks_action_request(lowered):
         intent_family = "ACTION_REQUEST"
@@ -99,7 +106,6 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "capability/readiness/activation matrix question"
         needs_ollama = False
         evidence_required = True
-
     # EXPLICIT_READ_ONLY_INTENT_PRIORITY_BEGIN
     # Specific read-only intents must be resolved before semantic/project search fallback.
     if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
@@ -222,19 +228,59 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "semantic project search question"
         needs_ollama = False
         evidence_required = True
+    external_route = _semantic_external_adapter_route(user_text, context)
+    if intent_family == "CONVERSATION" and external_route is not None:
+        intent_family = str(external_route["intent_family"])
+        selected_tools = tuple(external_route["selected_tools"])
+        selected_agent_roles = tuple(external_route["selected_agent_roles"])
+        confidence = float(external_route["confidence"])
+        reason = str(external_route["reason"])
+        needs_ollama = False
+        evidence_required = True
+        risk_class = str(external_route["risk_class"])
+        proposal_only = bool(external_route["proposal_only"])
+        semantic_candidates = tuple(external_route["candidate_matches"])
 
     return {
         "intent_family": intent_family,
         "confidence": confidence,
         "selected_tools": selected_tools,
+        "selected_agent_roles": selected_agent_roles,
         "reason": reason,
         "read_only": True,
         "execution_allowed": False,
         "needs_ollama": needs_ollama,
         "evidence_required": evidence_required,
         "evidence_count": 0,
+        "risk_class": risk_class,
+        "proposal_only": proposal_only,
+        "semantic_candidates": semantic_candidates,
         "tool_route": tool_route.to_read_model() if tool_route is not None else {},
     }
+
+
+def _semantic_external_adapter_route(user_text: str, context: Any) -> dict[str, Any] | None:
+    route = build_external_adapter_semantic_route(user_text)
+    orchestration_decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    selected_tools = tuple(orchestration_decision.get("selected_tools", ())) if isinstance(orchestration_decision, dict) else ()
+    selected_intent = str(orchestration_decision.get("normalized_intent", "")) if isinstance(orchestration_decision, dict) else ""
+    if route["matched"]:
+        return route
+    if any(str(tool).startswith("external_adapter:") for tool in selected_tools):
+        intent_family = "AGENT_ENGINE_COMPARISON" if selected_intent == "agent_engine_comparison" else "EXTERNAL_ADAPTER_SELECTION"
+        return {
+            "matched": True,
+            "intent_family": intent_family,
+            "selected_tools": selected_tools,
+            "selected_agent_roles": tuple(orchestration_decision.get("selected_agent_roles", ("tool_selector_agent",))),
+            "risk_class": "risk_gate",
+            "proposal_only": True,
+            "execution_allowed": False,
+            "confidence": 0.78,
+            "reason": "existing orchestration decision selected external adapters",
+            "candidate_matches": (),
+        }
+    return None
 
 
 def _asks_activation_matrix_question(lowered: str) -> bool:

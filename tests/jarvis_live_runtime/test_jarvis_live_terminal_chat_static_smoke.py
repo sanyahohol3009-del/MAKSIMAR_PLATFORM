@@ -221,7 +221,7 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
         '"retrieved_snippet_count":0,"retrieval_surfaces_used":["session_memory"],'
         '"ollama_endpoint":"http://127.0.0.1:11434/api/chat",'
         '"think_mode":"false","ollama_endpoint_fallback_used":false,'
-        '"ollama_num_predict":160,'
+        '"ollama_num_predict":1024,'
         '"intent_family":"PROJECT_SEARCH","selected_tools":["repo_search","read_file_snippet"],'
         '"read_only":true,"execution_allowed":false,"evidence_required":true}'
     )
@@ -237,7 +237,7 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
             "fallback_endpoint": "http://127.0.0.1:11434/api/generate",
             "ollama_endpoint_fallback_used": False,
             "think_mode": "false",
-            "ollama_num_predict": 160,
+            "ollama_num_predict": 1024,
             "ollama_temperature": 0.8,
             "ollama_top_p": 0.95,
             "intent_family": "PROJECT_SEARCH",
@@ -252,10 +252,10 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
 
     output = capsys.readouterr().out
     assert "[trace] route=conversation mode=FAST memory=session_only model=jarvis:chat8b status=installed" in output
-    assert "[trace] context=0.018s snippets=0 surfaces=session_memory local_memory=0 endpoint=http://127.0.0.1:11434/api/chat think_mode=false fallback_used=false num_predict=160" in output
+    assert "[trace] context=0.018s snippets=0 surfaces=session_memory local_memory=0 endpoint=http://127.0.0.1:11434/api/chat think_mode=false fallback_used=false num_predict=1024" in output
     assert "local_memory=0" in output
     assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
-    assert "[trace] endpoint=http://127.0.0.1:11434/api/chat primary=http://127.0.0.1:11434/api/chat fallback=http://127.0.0.1:11434/api/generate fallback_used=false think_mode=false num_predict=160 temperature=0.8 top_p=0.95" in output
+    assert "[trace] endpoint=http://127.0.0.1:11434/api/chat primary=http://127.0.0.1:11434/api/chat fallback=http://127.0.0.1:11434/api/generate fallback_used=false think_mode=false num_predict=1024 temperature=0.8 top_p=0.95" in output
     assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_required=true" in output
     assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_count=2 grounded_answer=true ollama_called=false" in output
     assert "stream_event=start" not in output

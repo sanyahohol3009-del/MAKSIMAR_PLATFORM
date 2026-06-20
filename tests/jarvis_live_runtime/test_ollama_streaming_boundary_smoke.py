@@ -37,7 +37,7 @@ def test_ollama_chat_payload_keeps_fast_policy() -> None:
     assert payload["stream"] is True
     assert payload["messages"][0]["role"] == "system"
     assert payload["messages"][1]["role"] == "user"
-    assert payload["options"]["num_predict"] == 160
+    assert payload["options"]["num_predict"] == 1024
 
 
 def test_ollama_transport_plan_fast_uses_chat_endpoint() -> None:
@@ -45,4 +45,4 @@ def test_ollama_transport_plan_fast_uses_chat_endpoint() -> None:
 
     assert plan["primary_endpoint"].endswith("/api/chat")
     assert plan["fallback_endpoint"].endswith("/api/generate")
-    assert plan["ollama_num_predict"] == 160
+    assert plan["ollama_num_predict"] == 1024

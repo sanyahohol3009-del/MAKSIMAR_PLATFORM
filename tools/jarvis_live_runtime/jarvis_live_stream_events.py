@@ -19,6 +19,7 @@ from tools.jarvis_live_runtime.ollama_transport import (
     DEFAULT_OLLAMA_MODEL_ID,
     FALLBACK_OLLAMA_MODEL_ID,
     HEAVY_CODER_MODEL_ID,
+    timeout_policy_for_model_role,
 )
 from tools.jarvis_live_runtime.session_memory_store import (
     DANGEROUS_MEMORY_FLAGS,
@@ -38,14 +39,17 @@ def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> boo
     return True
 
 
-def _command_timeout_seconds(value: float | None) -> float:
+def _command_timeout_seconds(value: float | None, selected_model_role_id: str = "jarvis_chat_model") -> float:
     if value is not None and value > 0:
         return float(value)
-    raw = os.environ.get("JARVIS_LIVE_COMMAND_TIMEOUT_SECONDS", "120")
+    raw = os.environ.get(
+        "JARVIS_LIVE_COMMAND_TIMEOUT_SECONDS",
+        str(timeout_policy_for_model_role(selected_model_role_id)["total_request_timeout_seconds"]),
+    )
     try:
         parsed = float(raw)
     except ValueError:
-        return 120.0
+        return float(timeout_policy_for_model_role(selected_model_role_id)["total_request_timeout_seconds"])
     return max(1.0, parsed)
 
 

@@ -11,6 +11,7 @@ from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter imp
 
 
 EXTERNAL_RUNTIME_PYTHON = Path.home() / "MAKSIMAR_RUNTIME/venvs/agent_tooling/bin/python"
+EXTERNAL_IMPORT_PROBE_TIMEOUT_SECONDS = 60
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,7 +86,7 @@ print(json.dumps(result, ensure_ascii=False))
         check=False,
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=EXTERNAL_IMPORT_PROBE_TIMEOUT_SECONDS,
     )
     if completed.returncode != 0 and not completed.stdout.strip():
         return AgentToolingRuntimeProbeResult(

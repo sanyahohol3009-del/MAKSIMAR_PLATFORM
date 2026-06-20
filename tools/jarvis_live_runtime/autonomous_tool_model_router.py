@@ -7,6 +7,7 @@ from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     build_jarvis_live_runtime_model_role_profiles,
 )
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    build_external_adapter_semantic_route,
     list_active_external_adapter_tool_ids,
     normalize_external_adapter_tool_ids,
     select_external_adapter_tools_for_text,
@@ -270,6 +271,11 @@ def _classify_intent(lowered: str) -> str:
         for marker in ("экран", "screen", "что на экране", "видишь экран", "чтения экрана", "read the screen")
     ):
         return "screen_observer"
+    external_route = build_external_adapter_semantic_route(lowered)
+    if external_route["matched"]:
+        if external_route["intent_family"] == "AGENT_ENGINE_COMPARISON":
+            return "agent_engine_comparison"
+        return "external_agent_tooling"
     if any(
         marker in lowered
         for marker in (
@@ -359,8 +365,16 @@ def _select_tools(intent: str, lowered: str) -> tuple[tuple[str, ...], str]:
     if intent == "screen_observer":
         return ("screen_observer_read",), "screen read request"
     if intent == "agent_engine_comparison":
+        semantic_route = build_external_adapter_semantic_route(lowered)
+        selected_tools = tuple(semantic_route.get("selected_tools", ()))
+        if selected_tools:
+            return selected_tools, str(semantic_route.get("reason", "agent engine comparison request"))
         return list_active_external_adapter_tool_ids(), "agent engine comparison request"
     if intent == "external_agent_tooling":
+        semantic_route = build_external_adapter_semantic_route(lowered)
+        selected = tuple(semantic_route.get("selected_tools", ()))
+        if selected:
+            return selected, str(semantic_route.get("reason", "external agent/tooling request"))
         selected = tuple(tool.tool_id for tool in select_external_adapter_tools_for_text(lowered))
         if selected:
             return selected, "external agent/tooling request"

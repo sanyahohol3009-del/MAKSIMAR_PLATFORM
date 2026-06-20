@@ -40,7 +40,7 @@ def test_agent_tooling_runtime_probe_smoke(monkeypatch) -> None:
     result = probe_module._probe_import_in_external_runtime("openai-agents-python", "agents")
 
     assert captured["command"][0] == str(fake_runtime_python)
-    assert captured["timeout"] == 30
+    assert captured["timeout"] == 60
     assert result.installed is True
     assert result.import_probe_passed is True
     assert result.package_name == "openai-agents-python"

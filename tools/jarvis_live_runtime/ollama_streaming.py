@@ -18,11 +18,30 @@ from tools.jarvis_live_runtime.ollama_transport import (
     OLLAMA_FAST_CHAT_THINK,
     OLLAMA_FAST_CHAT_TOP_P,
     OLLAMA_URL,
+    timeout_policy_for_model_id,
 )
 
 
 def _event(event: str, **payload: Any) -> dict[str, Any]:
     return {"event": event, **payload, "pc_control_allowed": False}
+
+
+def _effective_timeout_seconds(model_id: str, timeout_seconds: float | None) -> float:
+    if timeout_seconds is not None and timeout_seconds > 0:
+        return float(timeout_seconds)
+    return float(timeout_policy_for_model_id(model_id)["total_request_timeout_seconds"])
+
+
+def _httpx_timeout_for_model(model_id: str, timeout_seconds: float | None) -> httpx.Timeout:
+    policy = timeout_policy_for_model_id(model_id)
+    total = _effective_timeout_seconds(model_id, timeout_seconds)
+    return httpx.Timeout(
+        total,
+        connect=min(float(policy["model_load_timeout_seconds"]), total),
+        read=min(float(policy["stream_idle_timeout_seconds"]), total),
+        write=min(float(policy["model_load_timeout_seconds"]), total),
+        pool=min(float(policy["model_load_timeout_seconds"]), total),
+    )
 
 
 def _stream_ollama_model(
@@ -226,7 +245,7 @@ def _stream_ollama_chat_model(
         top_p=OLLAMA_FAST_CHAT_TOP_P,
         keep_alive=OLLAMA_FAST_CHAT_KEEP_ALIVE,
     )
-    timeout = httpx.Timeout(timeout_seconds or 120.0, connect=min(10.0, timeout_seconds or 120.0))
+    timeout = _httpx_timeout_for_model(model_id, timeout_seconds)
     try:
         with httpx.Client(timeout=timeout) as client:
             with client.stream("POST", OLLAMA_CHAT_URL, json=payload) as response:
@@ -294,7 +313,7 @@ def _stream_ollama_generate_model(
         "keep_alive": os.environ.get("JARVIS_LIVE_OLLAMA_KEEP_ALIVE", "30m"),
     }
     try:
-        timeout = httpx.Timeout(timeout_seconds or 120.0, connect=min(10.0, timeout_seconds or 120.0))
+        timeout = _httpx_timeout_for_model(model_id, timeout_seconds)
         with httpx.Client(timeout=timeout) as client:
             with client.stream("POST", OLLAMA_URL, json=request_payload) as response:
                 response.raise_for_status()

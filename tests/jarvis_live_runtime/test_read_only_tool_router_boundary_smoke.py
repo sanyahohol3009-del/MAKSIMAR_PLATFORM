@@ -37,3 +37,23 @@ def test_model_status_routes_to_read_only_model_tools() -> None:
     assert plan["execution_allowed"] is False
     assert plan["needs_ollama"] is False
     assert "model_runtime_status" in plan["selected_tools"]
+
+
+def test_external_adapter_semantic_request_routes_before_free_chat(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter._load_agent_tooling_runtime_probe_read_model",
+        lambda: {
+            "runtime_python": "/tmp/agent_tooling_python",
+            "probe_results": (
+                {"package_name": "mcp", "import_name": "mcp", "installed": True, "import_probe_passed": True, "runtime_python": "/tmp/agent_tooling_python", "version_if_available": "1.0.0", "errors": ()},
+            ),
+            "installed": ("mcp",),
+            "import_probe_passed": ("mcp",),
+            "errors": (),
+        },
+    )
+    plan = read_only_tool_router._build_read_only_tool_plan("подключи протокол инструментов", object())
+
+    assert plan["intent_family"] == "EXTERNAL_ADAPTER_SELECTION"
+    assert plan["needs_ollama"] is False
+    assert plan["selected_tools"] == ("external_adapter:mcp_python_sdk",)

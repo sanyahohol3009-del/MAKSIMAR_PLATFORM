@@ -3,6 +3,12 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from MAKSIMAR_CORE_LIB.action_library_adapters.agent_tooling_runtime_adapter import (
+    build_agent_tooling_runtime_adapter_read_model,
+)
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    build_jarvis_external_adapter_visibility_read_model,
+)
 from MAKSIMAR_CORE_LIB.retrieval_backend import (
     build_retrieval_backend_status_read_model,
     build_retrieval_readonly_tool_route,
@@ -143,6 +149,11 @@ def _answer_with_read_only_tools_if_grounded(
         visibility = build_jarvis_skill_visibility_read_model()
         plan["evidence_count"] = len(visibility["visible_tools"]) + len(visibility["visible_agents"])
         return _format_skill_visibility_answer(visibility)
+    if intent in {"EXTERNAL_ADAPTER_SELECTION", "EXTERNAL_AGENT_WORKFLOW_PLAN", "AGENT_ENGINE_COMPARISON"}:
+        adapter_runtime = build_agent_tooling_runtime_adapter_read_model()
+        adapter_visibility = build_jarvis_external_adapter_visibility_read_model()
+        plan["evidence_count"] = len(plan.get("semantic_candidates", ())) or len(plan.get("selected_tools", ()))
+        return _format_external_adapter_grounded_answer(plan, adapter_runtime, adapter_visibility)
     return ""
 
 
@@ -852,6 +863,90 @@ def _format_skill_visibility_answer(visibility: dict[str, Any]) -> str:
             f"- pc_control_allowed={str(bool(visibility.get('pc_control_allowed', False))).lower()}",
             "direct_execution_allowed=false",
             "canonical_write_allowed=false",
+        )
+    )
+    return "\n".join(lines)
+
+
+def _format_external_adapter_grounded_answer(
+    plan: dict[str, Any],
+    adapter_runtime: dict[str, Any],
+    adapter_visibility: dict[str, Any],
+) -> str:
+    registry = adapter_runtime.get("registry", {}) if isinstance(adapter_runtime.get("registry"), dict) else {}
+    tools = registry.get("tools", ()) if isinstance(registry, dict) else ()
+    manifest_by_id = {
+        str(tool.get("tool_id", "")): tool
+        for tool in tools
+        if isinstance(tool, dict) and str(tool.get("tool_id", "")).strip()
+    }
+    status_by_id = {
+        str(item.get("tool_id", "")): item
+        for item in adapter_visibility.get("adapters", ())
+        if isinstance(item, dict) and str(item.get("tool_id", "")).strip()
+    }
+    probe = adapter_runtime.get("probe", {}) if isinstance(adapter_runtime.get("probe"), dict) else {}
+    probe_results = probe.get("probe_results", ()) if isinstance(probe, dict) else ()
+    probe_by_import = {
+        str(item.get("import_name", "")): item
+        for item in probe_results
+        if isinstance(item, dict) and str(item.get("import_name", "")).strip()
+    }
+    selected_tools = tuple(plan.get("selected_tools", ()))
+    selected_agent_roles = tuple(plan.get("selected_agent_roles", ())) or ("tool_selector_agent",)
+    semantic_candidates = tuple(plan.get("semantic_candidates", ()))
+
+    lines = [
+        f"[work] intent={plan.get('intent_family', 'EXTERNAL_ADAPTER_SELECTION')} "
+        "tools=build_jarvis_external_adapter_visibility_read_model,build_agent_tooling_runtime_adapter_read_model,build_agent_tooling_runtime_probe_read_model "
+        "read_only=true execution_allowed=false",
+        f"selected_agent_roles={_csv(selected_agent_roles) or 'tool_selector_agent'}",
+        f"risk_class={plan.get('risk_class', 'risk_gate')}",
+        f"proposal_only={str(bool(plan.get('proposal_only', True))).lower()}",
+        f"execution_allowed={str(bool(plan.get('execution_allowed', False))).lower()}",
+        f"reason={plan.get('reason', '')}",
+        "Selected external adapters:",
+    ]
+    for tool_id in selected_tools:
+        tool = manifest_by_id.get(tool_id, {})
+        status = status_by_id.get(tool_id, {})
+        import_name = str(tool.get("module_import_name", ""))
+        probe_item = probe_by_import.get(import_name, {})
+        lines.append(
+            f"- {tool_id} source={tool.get('source_library', '') or 'unknown'} "
+            f"risk_class={tool.get('risk_class', 'risk_gate')} "
+            f"selection_enabled={str(bool(status.get('selection_enabled', False))).lower()} "
+            f"availability_status={status.get('availability_status', 'unknown')} "
+            f"import_probe_passed={str(bool(status.get('import_probe_worked', False))).lower()} "
+            f"runtime_package={status.get('runtime_package_name', '') or tool.get('package_name', '')} "
+            f"runtime_import={status.get('runtime_import_name', '') or tool.get('module_import_name', '')} "
+            f"version={status.get('runtime_version_if_available', '') or probe_item.get('version_if_available', '') or 'unknown'}"
+        )
+    if semantic_candidates:
+        lines.append("Semantic registry candidates:")
+        for candidate in semantic_candidates[:8]:
+            if not isinstance(candidate, dict):
+                continue
+            lines.append(
+                f"- {candidate.get('tool_id', '')} score={candidate.get('score', 0)} "
+                f"selection_enabled={str(bool(candidate.get('selection_enabled', False))).lower()} "
+                f"availability_status={candidate.get('availability_status', 'unknown')} "
+                f"reason={candidate.get('reason', '')}"
+            )
+    autogen_alias = status_by_id.get("external_adapter:autogen", {})
+    if autogen_alias:
+        lines.append(
+            "Legacy alias status: "
+            f"external_adapter:autogen availability_status={autogen_alias.get('availability_status', 'unknown')} "
+            f"selection_enabled={str(bool(autogen_alias.get('selection_enabled', False))).lower()} "
+            f"blocked_reason={autogen_alias.get('activation_blocked_reason', '') or 'none'}"
+        )
+    lines.extend(
+        (
+            f"runtime_python={adapter_runtime.get('runtime_python', '')}",
+            "direct_execution_allowed=false",
+            "canonical_write_allowed=false",
+            "pc_control_allowed=false",
         )
     )
     return "\n".join(lines)

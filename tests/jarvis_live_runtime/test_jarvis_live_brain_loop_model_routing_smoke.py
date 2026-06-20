@@ -52,7 +52,7 @@ def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
         assert model_id == "jarvis:chat8b"
         assert prompt
         assert route_mode
-        assert timeout_seconds is None
+        assert timeout_seconds == 180.0
         assert response_mode_text == "Джарвис, кто ты?"
         yield {"event": "chunk", "text": "<think>hidden reasoning</think>Я JARVIS.", "pc_control_allowed": False}
         yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
@@ -546,7 +546,7 @@ def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
     ):
         assert model_id == "jarvis:chat8b"
         assert "enterprise_business_memory" in prompt
-        assert timeout_seconds == 120.0
+        assert timeout_seconds == 180.0
         assert response_mode_text == "Что у нас есть по продаже суверенного ИИ?"
         yield {"event": "chunk", "text": "По суверенному ИИ есть business memory context.", "ollama_model_used": model_id, "pc_control_allowed": False}
         yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
@@ -569,4 +569,4 @@ def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
 
 
 def test_command_timeout_default_is_not_too_aggressive() -> None:
-    assert _command_timeout_seconds(None) == 120.0
+    assert _command_timeout_seconds(None) == 180.0

@@ -74,6 +74,7 @@ from tools.jarvis_live_runtime.ollama_transport import (
     PRIMARY_CONVERSATION_MODEL_ID,
     ollama_get_json as _ollama_get_json,
     ollama_post_json as _ollama_post_json,
+    timeout_policy_for_model_role,
 )
 from tools.jarvis_live_runtime.ollama_streaming import (
     _collect_chat_stream_events,
@@ -277,6 +278,8 @@ PROJECT_FILE_MAX_BYTES = 12000
 PROJECT_SEARCH_MAX_RESULTS = 40
 PROJECT_SEARCH_CONTEXT_LINES = 2
 PROJECT_IMPORT_MAX_EDGES = 80
+DEFAULT_TERMINAL_RESPONSE_MAX_CHARS = 131072
+DEFAULT_GROUNDED_RESPONSE_MAX_CHARS = 262144
 
 
 PROJECT_VISIBILITY_EXCLUDED_DIRS = {
@@ -312,6 +315,18 @@ STABLE_STYLE_PROFILE = {
     "avoid": "не повторять 'Нужна помощь?' после каждого ответа; не начинать отношения заново в новой сессии",
     "concise_rule": "быть коротким только когда владелец просит коротко; иначе отвечать достаточно полно для задачи",
 }
+
+
+def _apply_terminal_output_policy(response_text: str, *, grounded_answer: bool) -> tuple[str, bool, str]:
+    text = str(response_text or "")
+    limit = DEFAULT_GROUNDED_RESPONSE_MAX_CHARS if grounded_answer else DEFAULT_TERMINAL_RESPONSE_MAX_CHARS
+    if len(text) <= limit:
+        return text, False, ""
+    marker = "[output_truncated=true reason=terminal_response_size_cap next_action=ask_continue]"
+    trimmed = text[:limit].rstrip()
+    if not trimmed.endswith("\n"):
+        trimmed += "\n"
+    return trimmed + marker, True, "terminal_response_size_cap"
 
 FORBIDDEN_CHAT_TEMPLATE_MARKERS = (
     "долго не общались",
@@ -360,7 +375,11 @@ def run_jarvis_live_brain_once(
 ) -> dict[str, Any]:
     chunks: list[str] = []
     final_payload: dict[str, Any] = {}
-    timeout_seconds = _command_timeout_seconds(command_timeout_seconds)
+    selected_model_role = select_jarvis_live_model_role(user_text)
+    timeout_seconds = _command_timeout_seconds(
+        command_timeout_seconds,
+        str(selected_model_role.get("selected_model_role", "jarvis_chat_model")),
+    )
     started_at = time.monotonic()
     try:
         for event in stream_jarvis_live_brain_response(
@@ -387,8 +406,13 @@ def run_jarvis_live_brain_once(
             "response_text": _sanitize_model_output("".join(chunks)).strip(),
             "ollama_model_used": "",
             "pc_control_allowed": False,
+            "output_truncated": False,
+            "output_truncation_reason": "",
         }
-    response_text = str(final_payload.get("response_text", "")).strip()
+    response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+        str(final_payload.get("response_text", "")).strip(),
+        grounded_answer=bool(final_payload.get("grounded_answer", False)),
+    )
     if not response_text:
         response_text = "Модельный runtime сейчас не вернул ответ. Повтори запрос или проверь Ollama статус."
     return {
@@ -430,6 +454,8 @@ def run_jarvis_live_brain_once(
         "evidence_required": bool(final_payload.get("evidence_required", False)),
         "evidence_count": int(final_payload.get("evidence_count", 0)),
         "ollama_called": final_payload.get("ollama_called"),
+        "output_truncated": bool(final_payload.get("output_truncated", output_truncated)),
+        "output_truncation_reason": str(final_payload.get("output_truncation_reason", output_truncation_reason)),
     }
 
 
@@ -481,6 +507,12 @@ def stream_jarvis_live_brain_response(
     )
     transport_plan = _ollama_transport_plan(context.route_mode, context.to_prompt(), clean_text)
     read_only_tool_plan = _build_read_only_tool_plan(clean_text, context)
+    timeout_policy = timeout_policy_for_model_role(context.selected_model_role["selected_model_role"])
+    effective_ollama_timeout_seconds = (
+        float(ollama_timeout_seconds)
+        if ollama_timeout_seconds is not None and ollama_timeout_seconds > 0
+        else float(timeout_policy["total_request_timeout_seconds"])
+    )
     _save_session_state(state)
     context_elapsed_seconds = round(time.monotonic() - context_started_at, 4)
 
@@ -522,6 +554,7 @@ def stream_jarvis_live_brain_response(
         "grounded_answer": False,
         "ollama_called": False,
         "evidence_count": 0,
+        "timeout_policy": timeout_policy,
     }
     if read_only_tool_plan["intent_family"] != "CONVERSATION":
         yield {
@@ -540,6 +573,10 @@ def stream_jarvis_live_brain_response(
     guarded_response = _guarded_local_response(clean_text, context, read_only_tool_plan)
     if guarded_response is not None:
         sanitized_guarded_response = _sanitize_model_output(guarded_response)
+        sanitized_guarded_response, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+            sanitized_guarded_response,
+            grounded_answer=True,
+        )
         for chunk in _sentence_chunks(sanitized_guarded_response):
             yield _event("chunk", text=chunk, route_mode=context.route_mode)
         _append_assistant_and_summarize(state, sanitized_guarded_response, context)
@@ -580,6 +617,8 @@ def stream_jarvis_live_brain_response(
             "evidence_count": read_only_tool_plan.get("evidence_count", 0),
             "grounded_answer": True,
             "ollama_called": False,
+            "output_truncated": output_truncated,
+            "output_truncation_reason": output_truncation_reason,
         }
         return
 
@@ -598,7 +637,7 @@ def stream_jarvis_live_brain_response(
             model_id,
             context.to_prompt(),
             context.route_mode,
-            timeout_seconds=ollama_timeout_seconds,
+            timeout_seconds=effective_ollama_timeout_seconds,
             response_mode_text=clean_text,
         ):
             streamed = True
@@ -654,6 +693,10 @@ def stream_jarvis_live_brain_response(
         response_text = _repair_forbidden_chat_template_response(context)
         error_kind = "template_response_filtered"
         error_message = "model returned a repeated generic chat template; local guard replaced it"
+    response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+        response_text,
+        grounded_answer=False,
+    )
     _append_assistant_and_summarize(state, response_text, context)
     yield {
         **_event("done", response_text=response_text, route_mode=context.route_mode),
@@ -709,6 +752,8 @@ def stream_jarvis_live_brain_response(
         "evidence_count": read_only_tool_plan.get("evidence_count", len(context.retrieved_snippets)),
         "grounded_answer": False,
         "ollama_called": True,
+        "output_truncated": output_truncated,
+        "output_truncation_reason": output_truncation_reason,
     }
 
 
@@ -1235,8 +1280,6 @@ def _asks_safety_status_question(lowered: str) -> bool:
 def _compact_text(text: str, source: Path) -> str:
     single_line = " ".join(text.split())
     return f"{source}: {single_line[:700]}"
-
-
 
 
 
