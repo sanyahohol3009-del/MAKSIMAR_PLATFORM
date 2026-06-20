@@ -78,6 +78,20 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "tool/capability catalog question"
         needs_ollama = False
         evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_agent_catalog_question(lowered):
+        intent_family = "AGENT_CATALOG"
+        selected_tools = ("build_jarvis_agent_catalog_read_model",)
+        confidence = 0.96
+        reason = "grounded agent catalog question"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_skill_visibility_question(lowered):
+        intent_family = "SKILL_VISIBILITY"
+        selected_tools = ("build_jarvis_skill_visibility_read_model", "build_jarvis_live_tool_catalog_read_model")
+        confidence = 0.96
+        reason = "grounded skill/capability visibility question"
+        needs_ollama = False
+        evidence_required = True
     if intent_family == "CONVERSATION" and _asks_activation_matrix_question(lowered):
         intent_family = "ACTIVATION_MATRIX"
         selected_tools = ("build_default_capability_activation_matrix", "runtime_activation_matrix_preview")
@@ -275,6 +289,36 @@ def _asks_project_status_question(lowered: str) -> bool:
             "статус git",
             "что в git",
             "что сейчас в проекте поменялось",
+        )
+    )
+
+
+def _asks_agent_catalog_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "каких агентов ты видишь",
+            "какие агенты доступны",
+            "список агентов",
+            "каких агентов видишь",
+            "какие agent доступны",
+            "available agents",
+            "agent catalog",
+        )
+    )
+
+
+def _asks_skill_visibility_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "какие скилы ты видишь",
+            "какие навыки доступны",
+            "какие возможности доступны",
+            "какие скилы доступны",
+            "список навыков",
+            "skill visibility",
+            "available skills",
         )
     )
 

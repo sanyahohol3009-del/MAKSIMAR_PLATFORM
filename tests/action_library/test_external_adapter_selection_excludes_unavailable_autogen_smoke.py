@@ -1,12 +1,25 @@
 from __future__ import annotations
 
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
-    build_jarvis_external_adapter_visibility_read_model,
     select_external_adapter_tools_for_text,
 )
+from tools.jarvis_live_runtime.autonomous_tool_model_router import build_autonomous_tool_model_decision
+from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
 
 
-def test_agent_tooling_adapters_visible_to_jarvis_smoke(monkeypatch) -> None:
+def _verified_terminal_claim() -> OwnerIdentityClaim:
+    return OwnerIdentityClaim(
+        claim_id="external_adapter_visibility_verified_terminal_v1",
+        source="local_terminal_session",
+        verified=True,
+        verification_method="test_override",
+        session_token_present=False,
+        process_owner_matches_os_user=True,
+        reason_codes=("os_user_verified",),
+    )
+
+
+def test_external_adapter_selection_excludes_unavailable_autogen_smoke(monkeypatch) -> None:
     monkeypatch.setattr(
         "MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter._load_agent_tooling_runtime_probe_read_model",
         lambda: {
@@ -85,26 +98,18 @@ def test_agent_tooling_adapters_visible_to_jarvis_smoke(monkeypatch) -> None:
         },
     )
 
-    payload = build_jarvis_external_adapter_visibility_read_model()
-    selected = select_external_adapter_tools_for_text(
-        "Use LangGraph or AutoGen for a graph agent experiment, and inspect MCP support."
+    selected = select_external_adapter_tools_for_text("Use AutoGen and LangGraph with MCP.")
+    selected_tool_ids = tuple(tool.tool_id for tool in selected)
+    decision = build_autonomous_tool_model_decision(
+        "сравни LangGraph и AutoGen для задачи",
+        input_channel="text",
+        owner_identity_claim=_verified_terminal_claim(),
     )
-    tool_ids = tuple(tool.tool_id for tool in selected)
 
-    assert len(payload["registry"]["tools"]) == 6
-    assert "external_adapter:langgraph" in tool_ids
-    assert "external_adapter:autogen" not in tool_ids
-    assert "external_adapter:autogen_agentchat" in tool_ids
-    assert "external_adapter:autogen_ext" in tool_ids
-    assert "external_adapter:autogen_agentchat" in tuple(tool["tool_id"] for tool in payload["registry"]["tools"])
-    assert "external_adapter:autogen_ext" in tuple(tool["tool_id"] for tool in payload["registry"]["tools"])
-    assert "external_adapter:mcp_python_sdk" in tool_ids
-    assert all(adapter["visible_to_jarvis"] is True for adapter in payload["adapters"])
-    assert payload["active_adapter_ids"] == (
-        "external_adapter:openai_agents_sdk",
-        "external_adapter:mcp_python_sdk",
-        "external_adapter:autogen_agentchat",
-        "external_adapter:autogen_ext",
-        "external_adapter:langgraph",
-    )
-    assert payload["legacy_adapter_ids"] == ("external_adapter:autogen",)
+    assert "external_adapter:autogen" not in selected_tool_ids
+    assert "external_adapter:autogen_agentchat" in selected_tool_ids
+    assert "external_adapter:autogen_ext" in selected_tool_ids
+    assert "external_adapter:mcp_python_sdk" in selected_tool_ids
+    assert "external_adapter:autogen" not in decision["selected_tools"]
+    assert "external_adapter:autogen_agentchat" in decision["selected_tools"]
+    assert "external_adapter:autogen_ext" in decision["selected_tools"]

@@ -7,6 +7,8 @@ from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     build_jarvis_live_runtime_model_role_profiles,
 )
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    list_active_external_adapter_tool_ids,
+    normalize_external_adapter_tool_ids,
     select_external_adapter_tools_for_text,
 )
 from tools.jarvis_live_runtime.helper_model_decision_parser import (
@@ -126,6 +128,8 @@ def build_autonomous_tool_model_decision(
         fallback_used = bool(helper_model_called)
         helper_model_used = False
         risk_class = _select_risk_class(intent, tools)
+
+    tools = normalize_external_adapter_tool_ids(tuple(tools))
 
     risk_gate = _is_risk_action(lowered, intent, tools) or _requires_owner_risk_gate(
         tools,
@@ -355,26 +359,12 @@ def _select_tools(intent: str, lowered: str) -> tuple[tuple[str, ...], str]:
     if intent == "screen_observer":
         return ("screen_observer_read",), "screen read request"
     if intent == "agent_engine_comparison":
-        return (
-            "external_adapter:openai_agents_sdk",
-            "external_adapter:autogen_agentchat",
-            "external_adapter:autogen",
-            "external_adapter:autogen_ext",
-            "external_adapter:langgraph",
-            "external_adapter:mcp_python_sdk",
-        ), "agent engine comparison request"
+        return list_active_external_adapter_tool_ids(), "agent engine comparison request"
     if intent == "external_agent_tooling":
         selected = tuple(tool.tool_id for tool in select_external_adapter_tools_for_text(lowered))
         if selected:
             return selected, "external agent/tooling request"
-        return (
-            "external_adapter:openai_agents_sdk",
-            "external_adapter:autogen_agentchat",
-            "external_adapter:autogen",
-            "external_adapter:autogen_ext",
-            "external_adapter:langgraph",
-            "external_adapter:mcp_python_sdk",
-        ), "external agent/tooling request"
+        return list_active_external_adapter_tool_ids(), "external agent/tooling request"
     if intent == "project_workspace":
         return ("repo_git_status", "repo_tree", "repo_files", "read_file_snippet"), "project workspace request"
     if intent == "complex_code_analysis":

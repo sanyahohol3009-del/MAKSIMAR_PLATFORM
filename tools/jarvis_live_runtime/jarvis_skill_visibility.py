@@ -65,18 +65,45 @@ def _scan_visible_skills() -> tuple[str, ...]:
     return tuple(sorted(found))
 
 
+def build_jarvis_agent_catalog_read_model() -> dict[str, Any]:
+    swarm_agents = tuple(contract.to_read_model() for contract in build_default_swarm_agent_role_contracts())
+    visible_agents = tuple(agent["role_id"] for agent in swarm_agents)
+    required_grounded_agents = tuple(
+        agent_id
+        for agent_id in (
+            "tool_selector_agent",
+            "project_coder_agent",
+            "architect_agent",
+            "safety_guard_agent",
+            "action_worker_agent",
+        )
+        if agent_id in visible_agents
+    )
+    return {
+        "agents": swarm_agents,
+        "visible_agents": visible_agents,
+        "required_grounded_agents": required_grounded_agents,
+        "external_adapter_selector_agent_present": "external_adapter_selector_agent" in visible_agents,
+        "external_adapter_selector_agent_status": "not_present_in_canonical_swarm_roles",
+        "read_only": True,
+        "execution_allowed": False,
+        "pc_control_allowed": False,
+        "canonical_write_allowed": False,
+    }
+
+
 def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
     tool_catalog = build_jarvis_live_tool_catalog_read_model()
     memory_status = build_jarvis_live_memory_federation_status()
     action_inventory = build_action_capability_inventory_read_model().to_read_model()
     external_visibility = build_jarvis_external_adapter_visibility_read_model()
     activation = build_default_capability_activation_matrix().to_read_model()
-    swarm_agents = tuple(contract.to_read_model() for contract in build_default_swarm_agent_role_contracts())
+    agent_catalog = build_jarvis_agent_catalog_read_model()
 
     read_only_tools = tuple(tool_catalog["read_tools"])
     proposal_tools = tuple(tool_catalog["proposal_tools"])
     action_tools = tuple(capability["capability_id"] for capability in action_inventory["capabilities"])
-    external_adapter_tools = tuple(tool["tool_id"] for tool in external_visibility["registry"]["tools"])
+    external_adapter_tools = tuple(external_visibility["active_adapter_ids"])
     memory_tools = tuple(tool_catalog["memory_surfaces"])
     activation_tools = tuple(entry["capability_id"] for entry in activation["entries"])
 
@@ -97,14 +124,18 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         )
     )
     visible_tools = tuple(sorted(dict.fromkeys(all_tools)))
-    visible_agents = tuple(agent["role_id"] for agent in swarm_agents)
+    visible_agents = tuple(agent_catalog["visible_agents"])
     visible_skills = _scan_visible_skills()
 
     return {
         "visible_tools": visible_tools,
         "visible_agents": visible_agents,
         "visible_skills": visible_skills,
+        "agents": tuple(agent_catalog["agents"]),
         "external_adapter_tools": external_adapter_tools,
+        "external_adapter_statuses": tuple(external_visibility["adapters"]),
+        "external_adapter_legacy_tools": tuple(external_visibility["legacy_adapter_ids"]),
+        "external_adapter_unavailable_tools": tuple(external_visibility["unavailable_adapter_ids"]),
         "read_only_tools": read_only_tools,
         "safe_direct_tools": tuple(action_inventory["safe_direct_capabilities"])
         + tuple(external_visibility["registry"]["safe_direct_tool_ids"]),
@@ -115,6 +146,15 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "semantic_dedupe_enabled": True,
         "memory_tools": memory_tools,
         "activation_capabilities": activation_tools,
+        "project_workspace_tools": tuple(tool_catalog["project_repo_read_only_tools"]),
+        "repo_introspection_tools": ("repo_search", "read_file_snippet", "read_file_outline", "repo_import_graph"),
+        "memory_retrieval_tools": tuple(tool_catalog["memory_history_read_only_tools"])
+        + tuple(tool_catalog["retrieval_read_only_tools"]),
+        "tests_roadmap_drift_tools": ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status"),
+        "model_runtime_tools": tuple(tool_catalog["model_status_read_only_tools"]),
+        "action_proposal_tools": proposal_tools,
+        "windows_gui_bridge_enabled": False,
+        "pc_control_allowed": False,
         "universal_registry_tools": tuple(tool["tool_id"] for tool in external_visibility["registry"]["tools"]),
     }
 

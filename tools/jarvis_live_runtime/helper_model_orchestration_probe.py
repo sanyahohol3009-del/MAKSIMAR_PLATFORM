@@ -47,6 +47,8 @@ def _helper_system_prompt() -> str:
         "local_chat_memory, pc_open_browser, pc_open_app, risk_gate, operator_proposal, external_adapter:openai_agents_sdk, "
         "external_adapter:mcp_python_sdk, external_adapter:autogen_agentchat, external_adapter:autogen, "
         "external_adapter:autogen_ext, external_adapter:langgraph. "
+        "Treat external_adapter:autogen as a legacy alias unless runtime import is explicitly available; "
+        "prefer external_adapter:autogen_agentchat and external_adapter:autogen_ext for AutoGen requests. "
         "Use safe_direct only for verified owner browser/app open requests; otherwise use risk_gate or read_only."
     )
 

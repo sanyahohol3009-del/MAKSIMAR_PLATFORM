@@ -48,6 +48,10 @@ from tools.jarvis_live_runtime.read_only_tool_router import (
     _extract_filename_token,
     _extract_requested_file_path,
 )
+from tools.jarvis_live_runtime.jarvis_skill_visibility import (
+    build_jarvis_agent_catalog_read_model,
+    build_jarvis_skill_visibility_read_model,
+)
 from tools.jarvis_live_runtime.session_memory_store import _memory_truth_contract
 
 def _answer_with_read_only_tools_if_grounded(
@@ -131,6 +135,14 @@ def _answer_with_read_only_tools_if_grounded(
         catalog = build_jarvis_live_tool_catalog_read_model()
         plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
         return _format_tool_catalog_answer(catalog)
+    if intent == "AGENT_CATALOG":
+        catalog = build_jarvis_agent_catalog_read_model()
+        plan["evidence_count"] = len(catalog["visible_agents"])
+        return _format_agent_catalog_answer(catalog)
+    if intent == "SKILL_VISIBILITY":
+        visibility = build_jarvis_skill_visibility_read_model()
+        plan["evidence_count"] = len(visibility["visible_tools"]) + len(visibility["visible_agents"])
+        return _format_skill_visibility_answer(visibility)
     return ""
 
 
@@ -727,6 +739,25 @@ def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
     lines.extend(
         (
             f"- roadmap_status status=available read_only drift_check_wired={str(bool(catalog.get('all_existing_read_tools_connected', True))).lower()}",
+            "External adapters (runtime-grounded):",
+        )
+    )
+    for adapter in catalog.get("external_adapter_runtime_status", ()):
+        if not isinstance(adapter, dict):
+            continue
+        lines.append(
+            f"- {adapter.get('tool_id', '')} status={adapter.get('availability_status', 'unknown')} "
+            f"selection_enabled={str(bool(adapter.get('selection_enabled', False))).lower()} "
+            f"import_probe_passed={str(bool(adapter.get('import_probe_worked', False))).lower()} "
+            f"package={adapter.get('runtime_package_name', '') or adapter.get('package_name', '')} "
+            f"import={adapter.get('runtime_import_name', '') or adapter.get('import_name', '')} "
+            f"blocked_reason={adapter.get('activation_blocked_reason', '') or 'none'}"
+        )
+    lines.extend(
+        (
+            f"external_adapter_tools={_csv(catalog.get('external_adapter_tools', ())) or 'none'}",
+            f"external_adapter_unavailable={_csv(catalog.get('external_adapter_unavailable_tools', ())) or 'none'}",
+            f"external_adapter_legacy={_csv(catalog.get('external_adapter_legacy_tools', ())) or 'none'}",
             "Action tools:",
         )
     )
@@ -749,6 +780,78 @@ def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
             "shell_execution_enabled=false",
             "direct_execution_allowed=false",
             "execution_allowed=false",
+        )
+    )
+    return "\n".join(lines)
+
+
+def _format_agent_catalog_answer(catalog: dict[str, Any]) -> str:
+    lines = [
+        "[work] intent=AGENT_CATALOG tools=build_jarvis_agent_catalog_read_model read_only=true execution_allowed=false",
+        "Grounded agent catalog:",
+    ]
+    for agent in catalog.get("agents", ()):
+        if not isinstance(agent, dict):
+            continue
+        lines.append(
+            f"- {agent.get('role_id', '')} capabilities={_csv(agent.get('allowed_capabilities', ())) or 'none'} "
+            f"may_route={str(bool(agent.get('may_route', False))).lower()} "
+            f"may_propose={str(bool(agent.get('may_propose', False))).lower()}"
+        )
+    lines.extend(
+        (
+            f"required_grounded_agents={_csv(catalog.get('required_grounded_agents', ())) or 'none'}",
+            "external_adapter_selector_agent=not_present_in_canonical_swarm_roles",
+            "direct_execution_allowed=false",
+            "canonical_write_allowed=false",
+            "pc_control_allowed=false",
+        )
+    )
+    return "\n".join(lines)
+
+
+def _format_skill_visibility_answer(visibility: dict[str, Any]) -> str:
+    lines = [
+        "[work] intent=SKILL_VISIBILITY tools=build_jarvis_skill_visibility_read_model,build_jarvis_live_tool_catalog_read_model "
+        "read_only=true execution_allowed=false",
+        "Project workspace tools:",
+    ]
+    for tool in visibility.get("project_workspace_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.append("Repo read/search/outline/import graph:")
+    for tool in visibility.get("repo_introspection_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.append("Memory/history/retrieval:")
+    for tool in visibility.get("memory_retrieval_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.append("Tests/roadmap/drift:")
+    for tool in visibility.get("tests_roadmap_drift_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.append("Model/runtime status:")
+    for tool in visibility.get("model_runtime_tools", ()):
+        lines.append(f"- {tool} status=available read_only")
+    lines.append("External adapters:")
+    for adapter in visibility.get("external_adapter_statuses", ()):
+        if not isinstance(adapter, dict):
+            continue
+        lines.append(
+            f"- {adapter.get('tool_id', '')} status={adapter.get('availability_status', 'unknown')} "
+            f"selection_enabled={str(bool(adapter.get('selection_enabled', False))).lower()} "
+            f"import_probe_passed={str(bool(adapter.get('import_probe_worked', False))).lower()}"
+        )
+    lines.append("Action proposals:")
+    for tool in visibility.get("action_proposal_tools", ()):
+        lines.append(f"- {tool} status=proposal_only disabled")
+    lines.extend(
+        (
+            f"visible_agents={_csv(visibility.get('visible_agents', ())) or 'none'}",
+            f"external_adapter_tools={_csv(visibility.get('external_adapter_tools', ())) or 'none'}",
+            f"external_adapter_unavailable={_csv(visibility.get('external_adapter_unavailable_tools', ())) or 'none'}",
+            "PC-control status:",
+            f"- windows_gui_bridge_enabled={str(bool(visibility.get('windows_gui_bridge_enabled', False))).lower()}",
+            f"- pc_control_allowed={str(bool(visibility.get('pc_control_allowed', False))).lower()}",
+            "direct_execution_allowed=false",
+            "canonical_write_allowed=false",
         )
     )
     return "\n".join(lines)

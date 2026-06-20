@@ -5,6 +5,9 @@ import shutil
 import subprocess
 from typing import Any
 
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    build_jarvis_external_adapter_visibility_read_model,
+)
 from MAKSIMAR_CORE_LIB.enterprise_memory_domains.enterprise_memory_preview_builder import (
     build_enterprise_memory_preview,
 )
@@ -145,6 +148,7 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
 
 def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
     memory = build_jarvis_live_memory_federation_status()
+    external_adapters = build_jarvis_external_adapter_visibility_read_model()
     mgrep = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
     sqlite_vec = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
     qdrant = inspect_qdrant_readonly_availability(PROJECT_ROOT).to_read_model()
@@ -262,6 +266,13 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "enterprise_memory_preview_ready": bool(enterprise_preview.get("preview_ready", False)),
         "regulatory_routing_preview_ready": bool(regulatory_preview.get("preview_ready", False)),
         "mempalace_routing_ready": bool(mempalace_preview.get("routing_integration_ready", False)),
+        "external_adapter_tools": tuple(external_adapters["active_adapter_ids"]),
+        "external_adapter_registry_tools": tuple(tool["tool_id"] for tool in external_adapters["registry"]["tools"]),
+        "external_adapter_runtime_status": tuple(external_adapters["adapters"]),
+        "external_adapter_unavailable_tools": tuple(external_adapters["unavailable_adapter_ids"]),
+        "external_adapter_legacy_tools": tuple(external_adapters["legacy_adapter_ids"]),
+        "external_adapter_runtime_python": str(external_adapters["runtime_python"]),
+        "external_adapter_probe": external_adapters["probe"],
         "qdrant_server_runtime_enabled": False,
         "direct_execution_allowed": False,
         "canonical_write_allowed": False,
