@@ -69,6 +69,32 @@ def test_skill_visibility_grounded_response_smoke(monkeypatch) -> None:
                 },
             ),
             "action_proposal_tools": ("operator_proposal", "pytest_run_proposal"),
+            "runtime_library_packages": (
+                {
+                    "package_name": "autogen-agentchat",
+                    "module_name": "autogen_agentchat",
+                    "version": "0.7.5",
+                    "import_ok": True,
+                    "category": "agents",
+                    "runtime_only": True,
+                },
+                {
+                    "package_name": "llama-index",
+                    "module_name": "llama_index",
+                    "version": "0.14.22",
+                    "import_ok": True,
+                    "category": "skills_rag",
+                    "runtime_only": True,
+                },
+                {
+                    "package_name": "playwright",
+                    "module_name": "playwright",
+                    "version": "1.60.0",
+                    "import_ok": True,
+                    "category": "tools_browser",
+                    "runtime_only": True,
+                },
+            ),
             "visible_agents": (
                 "tool_selector_agent",
                 "project_coder_agent",
@@ -104,6 +130,10 @@ def test_skill_visibility_grounded_response_smoke(monkeypatch) -> None:
     assert "External adapters:" in response
     assert "external_adapter:autogen status=legacy_unavailable selection_enabled=false import_probe_passed=false" in response
     assert "Action proposals:" in response
+    assert "Runtime library store:" in response
+    assert "autogen-agentchat module=autogen_agentchat version=0.7.5 import_ok=true runtime_only=true execution_enabled=false" in response
+    assert "llama-index module=llama_index version=0.14.22 import_ok=true runtime_only=true execution_enabled=false" in response
+    assert "playwright module=playwright version=1.60.0 import_ok=true runtime_only=true execution_enabled=false" in response
     assert "PC-control status:" in response
     assert "- windows_gui_bridge_enabled=false" in response
     assert "- pc_control_allowed=false" in response

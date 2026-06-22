@@ -28,6 +28,9 @@ from tools.jarvis_live_runtime.memory_context_sources import (
     _build_memory_surface_inventory,
     _mempalace_status,
 )
+from tools.jarvis_live_runtime.jarvis_runtime_library_store import (
+    build_runtime_library_store_read_model,
+)
 from tools.jarvis_live_runtime.ollama_transport import (
     PRIMARY_CONVERSATION_MODEL_ID,
     ollama_get_json as _ollama_get_json,
@@ -149,6 +152,7 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
 def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
     memory = build_jarvis_live_memory_federation_status()
     external_adapters = build_jarvis_external_adapter_visibility_read_model()
+    runtime_libraries = build_runtime_library_store_read_model()
     mgrep = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
     sqlite_vec = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
     qdrant = inspect_qdrant_readonly_availability(PROJECT_ROOT).to_read_model()
@@ -273,6 +277,20 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "external_adapter_legacy_tools": tuple(external_adapters["legacy_adapter_ids"]),
         "external_adapter_runtime_python": str(external_adapters["runtime_python"]),
         "external_adapter_probe": external_adapters["probe"],
+        "runtime_library_store_connected": True,
+        "runtime_library_packages": tuple(runtime_libraries["packages"]),
+        "runtime_library_available_packages": tuple(runtime_libraries["available_packages"]),
+        "runtime_library_package_names": tuple(runtime_libraries["package_names"]),
+        "runtime_library_available_package_names": tuple(runtime_libraries["available_package_names"]),
+        "runtime_library_module_names": tuple(runtime_libraries["module_names"]),
+        "runtime_library_agents": tuple(runtime_libraries["agents"]),
+        "runtime_library_skills_rag": tuple(runtime_libraries["skills_rag"]),
+        "runtime_library_tools_browser": tuple(runtime_libraries["tools_browser"]),
+        "runtime_library_categories": tuple(runtime_libraries["categories"]),
+        "runtime_library_probe_reports_read": tuple(runtime_libraries["probe_reports_read"]),
+        "runtime_library_execution_allowed": False,
+        "runtime_library_install_allowed": False,
+        "runtime_library_download_allowed": False,
         "qdrant_server_runtime_enabled": False,
         "direct_execution_allowed": False,
         "canonical_write_allowed": False,

@@ -58,6 +58,9 @@ from tools.jarvis_live_runtime.jarvis_skill_visibility import (
     build_jarvis_agent_catalog_read_model,
     build_jarvis_skill_visibility_read_model,
 )
+from tools.jarvis_live_runtime.jarvis_runtime_library_store import (
+    select_runtime_library_candidates_for_text,
+)
 from tools.jarvis_live_runtime.session_memory_store import _memory_truth_contract
 
 def _answer_with_read_only_tools_if_grounded(
@@ -140,15 +143,15 @@ def _answer_with_read_only_tools_if_grounded(
     if intent == "TOOL_CATALOG":
         catalog = build_jarvis_live_tool_catalog_read_model()
         plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
-        return _format_tool_catalog_answer(catalog)
+        return _format_tool_catalog_answer(catalog, user_text)
     if intent == "AGENT_CATALOG":
         catalog = build_jarvis_agent_catalog_read_model()
         plan["evidence_count"] = len(catalog["visible_agents"])
-        return _format_agent_catalog_answer(catalog)
+        return _format_agent_catalog_answer(catalog, user_text)
     if intent == "SKILL_VISIBILITY":
         visibility = build_jarvis_skill_visibility_read_model()
         plan["evidence_count"] = len(visibility["visible_tools"]) + len(visibility["visible_agents"])
-        return _format_skill_visibility_answer(visibility)
+        return _format_skill_visibility_answer(visibility, user_text)
     if intent in {"EXTERNAL_ADAPTER_SELECTION", "EXTERNAL_AGENT_WORKFLOW_PLAN", "AGENT_ENGINE_COMPARISON"}:
         adapter_runtime = build_agent_tooling_runtime_adapter_read_model()
         adapter_visibility = build_jarvis_external_adapter_visibility_read_model()
@@ -698,7 +701,49 @@ def _format_action_request_proposal_answer(user_text: str) -> str:
     )
 
 
-def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
+def _format_runtime_library_section(runtime_libraries: tuple[dict[str, Any], ...], user_text: str = "") -> list[str]:
+    lines = ["Runtime library store:"]
+    category_order = (
+        ("agents", "Runtime agents:"),
+        ("skills_rag", "Runtime skills/rag:"),
+        ("tools_browser", "Runtime tools/browser:"),
+    )
+    for category, label in category_order:
+        lines.append(label)
+        category_entries = tuple(
+            item for item in runtime_libraries if isinstance(item, dict) and str(item.get("category", "")) == category
+        )
+        if not category_entries:
+            lines.append("- none")
+            continue
+        for item in category_entries:
+            lines.append(
+                f"- {item.get('package_name', '')} module={item.get('module_name', '') or 'unknown'} "
+                f"version={item.get('version', '') or 'unknown'} "
+                f"import_ok={str(bool(item.get('import_ok', False))).lower()} "
+                f"runtime_only={str(bool(item.get('runtime_only', True))).lower()} "
+                "execution_enabled=false"
+            )
+    candidates = select_runtime_library_candidates_for_text(user_text, {"packages": runtime_libraries}) if user_text else ()
+    if candidates:
+        lines.append("Semantic runtime-library candidates:")
+        for item in candidates[:8]:
+            lines.append(
+                f"- {item.get('package_name', '')} category={item.get('category', '')} "
+                f"score={item.get('score', 0)} import_ok={str(bool(item.get('import_ok', False))).lower()} "
+                "execution_allowed=false"
+            )
+    lines.extend(
+        (
+            "runtime_library_execution_allowed=false",
+            "runtime_library_install_allowed=false",
+            "runtime_library_download_allowed=false",
+        )
+    )
+    return lines
+
+
+def _format_tool_catalog_answer(catalog: dict[str, Any], user_text: str = "") -> str:
     read_only = str(bool(catalog.get("read_only", True))).lower()
     execution_allowed = str(bool(catalog.get("execution_allowed", False))).lower()
     mgrep = catalog.get("mgrep_status", {})
@@ -769,9 +814,10 @@ def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
             f"external_adapter_tools={_csv(catalog.get('external_adapter_tools', ())) or 'none'}",
             f"external_adapter_unavailable={_csv(catalog.get('external_adapter_unavailable_tools', ())) or 'none'}",
             f"external_adapter_legacy={_csv(catalog.get('external_adapter_legacy_tools', ())) or 'none'}",
-            "Action tools:",
         )
     )
+    lines.extend(_format_runtime_library_section(tuple(catalog.get("runtime_library_packages", ())), user_text))
+    lines.append("Action tools:")
     for tool in catalog.get("action_proposal_only_tools", ()):
         lines.append(f"- {tool} status=proposal_only disabled")
     lines.extend(
@@ -796,7 +842,7 @@ def _format_tool_catalog_answer(catalog: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _format_agent_catalog_answer(catalog: dict[str, Any]) -> str:
+def _format_agent_catalog_answer(catalog: dict[str, Any], user_text: str = "") -> str:
     lines = [
         "[work] intent=AGENT_CATALOG tools=build_jarvis_agent_catalog_read_model read_only=true execution_allowed=false",
         "Grounded agent catalog:",
@@ -809,6 +855,27 @@ def _format_agent_catalog_answer(catalog: dict[str, Any]) -> str:
             f"may_route={str(bool(agent.get('may_route', False))).lower()} "
             f"may_propose={str(bool(agent.get('may_propose', False))).lower()}"
         )
+    lines.append("Runtime agent libraries:")
+    for package in catalog.get("runtime_agent_libraries", ()):
+        if not isinstance(package, dict):
+            continue
+        lines.append(
+            f"- {package.get('package_name', '')} module={package.get('module_name', '') or 'unknown'} "
+            f"version={package.get('version', '') or 'unknown'} "
+            f"import_ok={str(bool(package.get('import_ok', False))).lower()} "
+            "execution_enabled=false"
+        )
+    candidates = select_runtime_library_candidates_for_text(
+        user_text,
+        {"packages": tuple(catalog.get("runtime_agent_libraries", ()))},
+    )
+    if candidates:
+        lines.append("Semantic runtime-agent candidates:")
+        for item in candidates[:6]:
+            lines.append(
+                f"- {item.get('package_name', '')} score={item.get('score', 0)} "
+                f"import_ok={str(bool(item.get('import_ok', False))).lower()} execution_allowed=false"
+            )
     lines.extend(
         (
             f"required_grounded_agents={_csv(catalog.get('required_grounded_agents', ())) or 'none'}",
@@ -821,7 +888,7 @@ def _format_agent_catalog_answer(catalog: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _format_skill_visibility_answer(visibility: dict[str, Any]) -> str:
+def _format_skill_visibility_answer(visibility: dict[str, Any], user_text: str = "") -> str:
     lines = [
         "[work] intent=SKILL_VISIBILITY tools=build_jarvis_skill_visibility_read_model,build_jarvis_live_tool_catalog_read_model "
         "read_only=true execution_allowed=false",
@@ -853,6 +920,7 @@ def _format_skill_visibility_answer(visibility: dict[str, Any]) -> str:
     lines.append("Action proposals:")
     for tool in visibility.get("action_proposal_tools", ()):
         lines.append(f"- {tool} status=proposal_only disabled")
+    lines.extend(_format_runtime_library_section(tuple(visibility.get("runtime_library_packages", ())), user_text))
     lines.extend(
         (
             f"visible_agents={_csv(visibility.get('visible_agents', ())) or 'none'}",

@@ -15,6 +15,7 @@ from MAKSIMAR_CORE_LIB.swarm_coordination.swarm_agent_role_contract import (
     build_default_swarm_agent_role_contracts,
 )
 from tools.jarvis_live_runtime.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
+from tools.jarvis_live_runtime.jarvis_runtime_library_store import build_runtime_library_store_read_model
 from tools.jarvis_live_runtime.memory_context_builder import build_jarvis_live_memory_federation_status
 
 
@@ -67,6 +68,7 @@ def _scan_visible_skills() -> tuple[str, ...]:
 
 def build_jarvis_agent_catalog_read_model() -> dict[str, Any]:
     swarm_agents = tuple(contract.to_read_model() for contract in build_default_swarm_agent_role_contracts())
+    runtime_libraries = build_runtime_library_store_read_model()
     visible_agents = tuple(agent["role_id"] for agent in swarm_agents)
     required_grounded_agents = tuple(
         agent_id
@@ -83,6 +85,10 @@ def build_jarvis_agent_catalog_read_model() -> dict[str, Any]:
         "agents": swarm_agents,
         "visible_agents": visible_agents,
         "required_grounded_agents": required_grounded_agents,
+        "runtime_agent_libraries": tuple(runtime_libraries["agents"]),
+        "runtime_agent_library_package_names": tuple(
+            package["package_name"] for package in runtime_libraries["agents"] if isinstance(package, dict)
+        ),
         "external_adapter_selector_agent_present": "external_adapter_selector_agent" in visible_agents,
         "external_adapter_selector_agent_status": "not_present_in_canonical_swarm_roles",
         "read_only": True,
@@ -97,6 +103,7 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
     memory_status = build_jarvis_live_memory_federation_status()
     action_inventory = build_action_capability_inventory_read_model().to_read_model()
     external_visibility = build_jarvis_external_adapter_visibility_read_model()
+    runtime_libraries = build_runtime_library_store_read_model()
     activation = build_default_capability_activation_matrix().to_read_model()
     agent_catalog = build_jarvis_agent_catalog_read_model()
 
@@ -153,6 +160,17 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "tests_roadmap_drift_tools": ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status"),
         "model_runtime_tools": tuple(tool_catalog["model_status_read_only_tools"]),
         "action_proposal_tools": proposal_tools,
+        "runtime_library_packages": tuple(runtime_libraries["packages"]),
+        "runtime_library_package_names": tuple(runtime_libraries["package_names"]),
+        "runtime_library_available_package_names": tuple(runtime_libraries["available_package_names"]),
+        "runtime_library_agents": tuple(runtime_libraries["agents"]),
+        "runtime_library_skills_rag": tuple(runtime_libraries["skills_rag"]),
+        "runtime_library_tools_browser": tuple(runtime_libraries["tools_browser"]),
+        "runtime_library_categories": tuple(runtime_libraries["categories"]),
+        "runtime_library_probe_reports_read": tuple(runtime_libraries["probe_reports_read"]),
+        "runtime_library_execution_allowed": False,
+        "runtime_library_install_allowed": False,
+        "runtime_library_download_allowed": False,
         "windows_gui_bridge_enabled": False,
         "pc_control_allowed": False,
         "universal_registry_tools": tuple(tool["tool_id"] for tool in external_visibility["registry"]["tools"]),
