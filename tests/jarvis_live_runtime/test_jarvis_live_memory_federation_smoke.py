@@ -493,7 +493,8 @@ def test_memory_recall_guard_does_not_claim_memory_without_record(monkeypatch) -
     events = list(stream_jarvis_live_brain_response("Джарвис, ты помнишь мой любимый цвет?", session_id="empty"))
     done = events[-1]
 
-    assert "Не буду выдумывать память" in done["response_text"]
+    assert "Не нашёл подтверждение в текущих read-only источниках" in done["response_text"]
+    assert "canonical_memory_write_allowed=false" in done["response_text"]
     assert "помню" not in done["response_text"].casefold()
     assert done["canonical_memory_write_allowed"] is False
 

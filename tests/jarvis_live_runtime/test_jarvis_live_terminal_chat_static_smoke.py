@@ -77,14 +77,17 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/stream" in source
     assert "/command" in source
     assert "/exit" in source
-    assert "JARVIS>" in source
+    assert "╰─► " in source
     assert "JARVIS terminal ready" in source
 
 
 def test_terminal_chat_does_not_start_server_or_execute_local_control() -> None:
     source = _source()
+
+    # Terminal Truth UI v2 is a local operator shell:
+    # subprocess is allowed only through the allowlisted _run_local_command path
+    # for /git, /diff, /tests. Dangerous direct-control surfaces remain forbidden.
     forbidden = (
-        "subprocess",
         "os.system",
         "shell=True",
         "pyautogui",
@@ -95,14 +98,16 @@ def test_terminal_chat_does_not_start_server_or_execute_local_control() -> None:
         "socket",
         "import uvicorn",
         "uvicorn.run",
-        "write_text",
-        "append(",
-        "history",
     )
 
     for marker in forbidden:
         assert marker not in source
-    assert "JARVIS API is not running. Start it with:" in source
+    assert "import subprocess" in source
+    assert "def _run_local_command(" in source
+    assert "_run_local_command((\"git\", \"status\", \"-sb\")" in source
+    assert "_run_local_command((\"git\", \"diff\", \"-U5\", \"--color=always\")" in source
+    assert "_print_tests((\"pytest\", \"-q\", \"--tb=short\", \"--maxfail=20\", \"tests/\"))" in source
+    assert "target.relative_to(root)" in source
     assert "python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765" in source
 
 
@@ -122,7 +127,8 @@ def test_terminal_chat_sanitizes_lone_surrogate_input_before_json_payload() -> N
 
     assert "def _sanitize_text(value: str) -> str:" in source
     assert '"text": _sanitize_text(text)' in source
-    assert "_sanitize_text(input(\"JARVIS> \"))" in source
+    assert "def _get_user_input() -> str:" in source
+    assert "_sanitize_text(text)" in source
     sanitized = module._sanitize_text("Джарвис\udcd0 кто ты?")
     assert sanitized == "Джарвис? кто ты?"
     assert "\udcd0" not in sanitized
@@ -202,9 +208,13 @@ def test_terminal_chat_prints_tool_catalog_and_operator_work_trace(capsys) -> No
     )
 
     output = capsys.readouterr().out
-    assert "read_tools=repo_search,read_file_snippet" in output
-    assert "proposal_tools=pytest_run_proposal,n8n_adapter_proposal" in output
-    assert "[work] intent=PROJECT_SEARCH tools=repo_search,read_file_snippet read_only=true execution_allowed=false" in output
+    assert "read_tools=repo_search, read_file_snippet" in output
+    assert "proposal_tools=pytest_run_proposal, n8n_adapter_proposal" in output
+    assert "[infra] operator" in output
+    assert "intent=PROJECT_SEARCH" in output
+    assert "tools=repo_search, read_file_snippet" in output
+    assert "read_only=true" in output
+    assert "execution_allowed=false" in output
 
 
 def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
@@ -256,8 +266,8 @@ def test_terminal_chat_prints_compact_operator_trace(capsys) -> None:
     assert "local_memory=0" in output
     assert "[trace] first_token=0.720s ollama=2.140s total=2.190s chunks=34" in output
     assert "[trace] endpoint=http://127.0.0.1:11434/api/chat primary=http://127.0.0.1:11434/api/chat fallback=http://127.0.0.1:11434/api/generate fallback_used=false think_mode=false num_predict=1024 temperature=0.8 top_p=0.95" in output
-    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_required=true" in output
-    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search,read_file_snippet read_only=true execution_allowed=false evidence_count=2 grounded_answer=true ollama_called=false" in output
+    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search, read_file_snippet read_only=true execution_allowed=false evidence_required=true" in output
+    assert "[trace] intent_family=PROJECT_SEARCH selected_tools=repo_search, read_file_snippet read_only=true execution_allowed=false evidence_count=2 grounded_answer=true ollama_called=false" in output
     assert "stream_event=start" not in output
 
 
@@ -303,7 +313,7 @@ def test_terminal_chat_prints_empty_ollama_response_error(capsys) -> None:
     )
 
     output = capsys.readouterr().out
-    assert "[error] ollama_empty_response model=jarvis:chat8b elapsed=57.798s" in output
+    assert "[ERROR] ollama_empty_response model=jarvis:chat8b elapsed=57.798s" in output
     assert "[trace]" not in output
 
 
@@ -318,9 +328,8 @@ def test_terminal_chat_prints_thinking_then_answer(capsys) -> None:
     )
 
     output = capsys.readouterr().out
-    assert "Thinking..." in output
-    assert "Проверяю локально." in output
-    assert "...done thinking." in output
+    assert "[ 🧠 думает... ]" in output
+    assert "готово." in output
     assert "Готов." in output
 
 
@@ -344,10 +353,9 @@ def test_terminal_chat_prints_thinking_without_final_response_error(capsys) -> N
     )
 
     output = capsys.readouterr().out
-    assert "Thinking..." in output
-    assert "Думаю без ответа." in output
-    assert "...done thinking." in output
-    assert "[error] ollama_thinking_without_final_response model=jarvis:chat8b elapsed=1.700s" in output
+    assert "[ 🧠 думает... ]" in output
+    assert "готово." in output
+    assert "[ERROR] ollama_thinking_without_final_response model=jarvis:chat8b elapsed=1.700s" in output
     assert "Модель показала thinking, но не дала финальный ответ. Повтори короче или отключи thinking для FAST." in output
 
 
@@ -545,6 +553,19 @@ def test_terminal_chat_survives_runtime_exception_and_keeps_loop_alive(monkeypat
 
     assert module.main() == 0
     output = capsys.readouterr().out
-    assert "[error] terminal_runtime_error" in output
+    assert "[TERMINAL ERROR]" in output
     assert "api_log=" in output
     assert "Traceback" not in output
+
+
+def test_terminal_truth_ui_v2_operator_shell_commands_are_present() -> None:
+    source = _source()
+
+    assert "/git" in source
+    assert "/diff" in source
+    assert "/tests" in source
+    assert "/show <file>" in source or "/show " in source
+    assert "def _run_local_command(" in source
+    assert "target.relative_to(root)" in source
+    assert "AGENTS_INFO" not in source
+    assert "SKILLS_INFO" not in source

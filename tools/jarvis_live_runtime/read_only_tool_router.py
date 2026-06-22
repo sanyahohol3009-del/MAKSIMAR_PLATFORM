@@ -467,25 +467,53 @@ def _extract_filename_token(user_text: str) -> str:
 
 
 def _asks_memory_history_question(lowered: str) -> bool:
-    memory_markers = (
+    explicit_memory_markers = (
         "что мы обсуждали",
         "что обсуждали",
         "что я говорил",
         "что я просил",
         "что было в переписке",
-        "переписке с gpt",
-        "gpt",
-        "история",
-        "history",
+        "что было в истории",
+        "история сообщений",
+        "история чата",
+        "покажи историю",
+        "найди в истории",
+        "вспомни",
         "помнишь",
         "что ты помнишь",
-        "загружен",
-        "загрузили",
+        "из памяти",
+        "в памяти",
+        "по памяти",
+        "memory recall",
+        "history recall",
+        "conversation history",
     )
-    topic_markers = ("голос", "voice", "проект", "n8n", "roadmap", "роадмап", "gpt")
-    return any(marker in lowered for marker in memory_markers) and (
-        any(marker in lowered for marker in topic_markers) or "что я" in lowered
+
+    project_history_markers = (
+        "project history",
+        "project_history",
+        "imported project history",
+        "imported gpt project history",
+        "gpt project history",
+        "history по проекту",
+        "project history по проекту",
+        "история проекта",
+        "истории проекта",
+        "историю проекта",
+        "история по проекту",
+        "истории по проекту",
+        "историю по проекту",
+        "переписке по проекту",
+        "переписка по проекту",
     )
+
+    # Важно: простое упоминание GPT не является запросом к памяти.
+    # Но явные формулировки "project history / история проекта" обязаны
+    # идти retrieval-first и не должны падать в free Ollama.
+    if any(marker in lowered for marker in project_history_markers):
+        return True
+
+    return any(marker in lowered for marker in explicit_memory_markers)
 
 
 def _asks_model_status_question(lowered: str) -> bool:
