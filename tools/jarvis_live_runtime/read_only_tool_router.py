@@ -37,6 +37,20 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         reason = "action verb requires proposal boundary"
         needs_ollama = False
         evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_wsl_project_diagnostic_question(lowered):
+        intent_family = "WSL_PROJECT_DIAGNOSTICS"
+        selected_tools = (
+            "repo_git_status",
+            "pytest_report_read",
+            "repo_search",
+            "read_file_snippet",
+            "read_file_outline",
+            "build_wsl_project_diagnostics_read_model",
+        )
+        confidence = 0.96
+        reason = "bounded WSL project diagnostics request"
+        needs_ollama = False
+        evidence_required = True
     # RETRIEVAL_SEMANTIC_PRIORITY_GUARD_V2
     # Explicit retrieval/container/project-search questions must be answered by
     # read-only tools before any Ollama free generation.
@@ -337,6 +351,28 @@ def _asks_project_status_question(lowered: str) -> bool:
             "что сейчас в проекте поменялось",
         )
     )
+
+
+def _asks_wsl_project_diagnostic_question(lowered: str) -> bool:
+    test_markers = (
+        "ломаются тесты",
+        "сломались тесты",
+        "падают тесты",
+        "где ломаются тесты",
+        "почему тесты падают",
+        "find failing tests",
+        "failing tests",
+        "pytest",
+    )
+    plan_markers = (
+        "план фикса",
+        "fix plan",
+        "диагност",
+        "почему",
+        "предложи план",
+        "найди где",
+    )
+    return any(marker in lowered for marker in test_markers) and any(marker in lowered for marker in plan_markers)
 
 
 def _asks_agent_catalog_question(lowered: str) -> bool:

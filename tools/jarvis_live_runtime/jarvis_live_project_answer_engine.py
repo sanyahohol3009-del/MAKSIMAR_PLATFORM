@@ -62,6 +62,9 @@ from tools.jarvis_live_runtime.jarvis_runtime_library_store import (
     select_runtime_library_candidates_for_text,
 )
 from tools.jarvis_live_runtime.session_memory_store import _memory_truth_contract
+from tools.jarvis_live_runtime.wsl_project_operator import (
+    build_wsl_project_diagnostics_read_model,
+)
 
 def _answer_with_read_only_tools_if_grounded(
     user_text: str,
@@ -104,6 +107,10 @@ def _answer_with_read_only_tools_if_grounded(
     if intent == "TEST_STATUS":
         plan["evidence_count"] = 1
         return _format_roadmap_answer()
+    if intent == "WSL_PROJECT_DIAGNOSTICS":
+        diagnostics = build_wsl_project_diagnostics_read_model(user_text)
+        plan["evidence_count"] = len(diagnostics.get("failing_tests", ())) + len(diagnostics.get("related_snippets", ())) + 1
+        return _format_wsl_project_diagnostics_answer(diagnostics)
     if intent == "SOURCE_EVIDENCE":
         answer, evidence_count = _format_source_evidence_answer(user_text)
         plan["evidence_count"] = evidence_count
@@ -581,6 +588,72 @@ def _format_tests_answer() -> str:
     for group, paths in groups.items():
         if paths:
             lines.append(f"- {group}: {len(paths)} files; sample={', '.join(paths[:6])}")
+    return "\n".join(lines)
+
+
+def _format_wsl_project_diagnostics_answer(diagnostics: dict[str, Any]) -> str:
+    git_probe = diagnostics.get("git_probe", {}) if isinstance(diagnostics.get("git_probe"), dict) else {}
+    pytest_probe = diagnostics.get("pytest_probe", {}) if isinstance(diagnostics.get("pytest_probe"), dict) else {}
+    lines = [
+        "[work] intent=WSL_PROJECT_DIAGNOSTICS "
+        "tools=repo_git_status,pytest_report_read,repo_search,read_file_snippet,read_file_outline,build_wsl_project_diagnostics_read_model "
+        "read_only=true execution_allowed=false proposal_only=true",
+        "WSL project diagnostics:",
+        f"git_status_command={' '.join(git_probe.get('command', ())) or 'git status -sb'}",
+        f"git_status_returncode={git_probe.get('returncode', '')}",
+        f"git_status_output={diagnostics.get('git_status_stdout', '') or 'none'}",
+        f"pytest_scope={_csv(diagnostics.get('selected_scope', ())) or 'none'}",
+        f"scope_selection_reason={diagnostics.get('selection_reason', '') or 'unknown'}",
+        f"pytest_command={' '.join(pytest_probe.get('command', ())) or 'none'}",
+        f"pytest_returncode={pytest_probe.get('returncode', '')}",
+        f"pytest_timed_out={str(bool(pytest_probe.get('timed_out', False))).lower()}",
+        "pytest_stdout:",
+        diagnostics.get("pytest_stdout", "") or "none",
+        "pytest_stderr:",
+        diagnostics.get("pytest_stderr", "") or "none",
+        f"failing_tests={_csv(diagnostics.get('failing_tests', ())) or 'none'}",
+    ]
+    related_refs = diagnostics.get("related_file_refs", ())
+    if related_refs:
+        lines.append("related_file_refs:")
+        for ref in related_refs:
+            if isinstance(ref, dict):
+                lines.append(f"- {ref.get('path', '')}:{ref.get('line', '')}")
+    snippets = diagnostics.get("related_snippets", ())
+    if snippets:
+        lines.append("related_snippets:")
+        for item in snippets:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- {item.get('path', '')} line_hint={item.get('line_hint', '')} "
+                f"functions={_csv(item.get('functions', ())) or 'none'}"
+            )
+            for snippet_line in item.get("snippet", ())[:8]:
+                lines.append(f"  {snippet_line}")
+    diagnosis = diagnostics.get("diagnosis", ())
+    if diagnosis:
+        lines.append("diagnosis:")
+        for item in diagnosis:
+            lines.append(f"- {item}")
+    fix_plan = diagnostics.get("fix_plan", ())
+    if fix_plan:
+        lines.append("fix_plan:")
+        for index, item in enumerate(fix_plan, start=1):
+            lines.append(f"{index}. {item}")
+    lines.extend(
+        (
+            "read_only=true",
+            "execution_allowed=false",
+            "proposal_only=true",
+            "direct_execution_allowed=false",
+            "canonical_write_allowed=false",
+            "install_allowed=false",
+            "download_allowed=false",
+            "pc_control_allowed=false",
+            "git_write_allowed=false",
+        )
+    )
     return "\n".join(lines)
 
 
