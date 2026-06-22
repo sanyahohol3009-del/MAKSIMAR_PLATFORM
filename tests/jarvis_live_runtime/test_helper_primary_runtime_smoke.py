@@ -92,7 +92,22 @@ def test_helper_primary_route_survives_to_final_events(monkeypatch) -> None:
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
     monkeypatch.setattr(answer_engine, "build_wsl_project_diagnostics_read_model", fake_diagnostics)
+    monkeypatch.setattr(
+        brain_loop,
+        "_stream_ollama_model",
+        lambda model_id, prompt, route_mode, timeout_seconds=None, response_mode_text=None: iter(
+            (
+                {
+                    "event": "chunk",
+                    "text": "Я проверил ограниченную pytest-диагностику и увидел проблему в выбранном smoke scope. Дальше нужен патч-предложение и повторная проверка того же ограниченного набора тестов.",
+                    "ollama_model_used": model_id,
+                },
+                {"event": "done", "ollama_model_used": model_id},
+            )
+        ),
+    )
 
     events = list(
         stream_jarvis_live_brain_response(
@@ -114,7 +129,10 @@ def test_helper_primary_route_survives_to_final_events(monkeypatch) -> None:
     assert "project_workspace_analysis" in done["selected_skills"]
     assert done["selection_source"] == "helper_model"
     assert done["fallback_used"] is False
-    assert done["ollama_called"] is False
+    assert done["ollama_called"] is True
+    assert "[work]" not in done["response_text"]
+    assert "execution_allowed=false" not in done["response_text"]
+    assert "proposal_only=true" not in done["response_text"]
 
 
 def test_marker_fallback_still_works_when_helper_is_unavailable(monkeypatch) -> None:

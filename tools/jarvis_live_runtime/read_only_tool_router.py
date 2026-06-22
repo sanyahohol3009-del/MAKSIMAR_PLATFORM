@@ -23,6 +23,8 @@ _HELPER_PROJECT_DIAGNOSTIC_INTENTS = {
     "project_debug",
     "project_diagnostics",
     "failure_analysis",
+    "architecture_review",
+    "blocker_audit",
 }
 
 
@@ -37,6 +39,10 @@ def _decision_skills(decision: dict[str, Any]) -> tuple[str, ...]:
 
 
 def _merge_tools(existing: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(existing + extra))
+
+
+def _merge_roles(existing: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(existing + extra))
 
 
@@ -62,10 +68,46 @@ def _helper_truth_read_only_plan(user_text: str, context: Any) -> dict[str, Any]
     intent_family = ""
     risk_class = str(decision.get("risk_class", "read_only") or "read_only")
     reason = str(decision.get("selected_tool_reason", "") or decision.get("reason", "") or "helper semantic plan")
+    force_project_workspace_skill = False
 
-    if any(str(tool).startswith("external_adapter:") for tool in selected_tools) or "external_agent_tooling" in selected_skills:
+    if _asks_code_draft_request(lowered):
+        intent_family = "CODE_DRAFT_PROPOSAL"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_import_graph",
+                "read_file_outline",
+                "read_file_snippet",
+                "build_project_wide_autonomy_audit_read_model",
+            ),
+        )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("project_coder_agent",))
+        force_project_workspace_skill = True
+    elif any(str(tool).startswith("external_adapter:") for tool in selected_tools) or "external_agent_tooling" in selected_skills:
         intent_family = "AGENT_ENGINE_COMPARISON" if normalized_intent == "agent_engine_comparison" else "EXTERNAL_ADAPTER_SELECTION"
         risk_class = "risk_gate"
+    elif (
+        _asks_project_blocker_audit_question(lowered)
+        or "repo_import_graph" in selected_tools
+        or "repo_files" in selected_tools
+        or normalized_intent in {"blocker_audit", "architecture_review"}
+        or "architect_agent" in selected_agent_roles
+    ):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_git_status",
+                "repo_tree",
+                "repo_files",
+                "repo_import_graph",
+                "read_file_outline",
+                "read_file_snippet",
+                "build_project_wide_autonomy_audit_read_model",
+            ),
+        )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("architect_agent", "project_coder_agent"))
+        force_project_workspace_skill = True
     elif (
         _asks_wsl_project_diagnostic_question(lowered)
         or "build_wsl_project_diagnostics_read_model" in selected_tools
@@ -84,6 +126,8 @@ def _helper_truth_read_only_plan(user_text: str, context: Any) -> dict[str, Any]
                 "build_wsl_project_diagnostics_read_model",
             ),
         )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("project_coder_agent",))
+        force_project_workspace_skill = True
     elif "memory_federation" in selected_skills:
         intent_family = "MEMORY_RECALL"
     elif "build_jarvis_agent_catalog_read_model" in selected_tools:
@@ -98,6 +142,10 @@ def _helper_truth_read_only_plan(user_text: str, context: Any) -> dict[str, Any]
         intent_family = "PROJECT_SEARCH"
     else:
         return None
+
+    selected_skills = select_skills_for_tools(selected_tools, selected_agent_roles)
+    if force_project_workspace_skill:
+        selected_skills = tuple(dict.fromkeys(("project_workspace_analysis",) + tuple(selected_skills)))
 
     return {
         "intent_family": intent_family,
@@ -136,11 +184,40 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
     if helper_truth_plan is not None:
         return helper_truth_plan
 
-    if _asks_action_request(lowered):
+    if intent_family == "CONVERSATION" and _asks_code_draft_request(lowered):
+        intent_family = "CODE_DRAFT_PROPOSAL"
+        selected_tools = (
+            "repo_import_graph",
+            "read_file_outline",
+            "read_file_snippet",
+            "build_project_wide_autonomy_audit_read_model",
+        )
+        selected_agent_roles = ("project_coder_agent",)
+        confidence = 0.95
+        reason = "code draft request should produce proposal text without mutating files"
+        needs_ollama = False
+        evidence_required = True
+    if _asks_action_request(lowered) and intent_family == "CONVERSATION":
         intent_family = "ACTION_REQUEST"
         selected_tools = ("capability_registry_read", "approval_boundary_read", "operator_proposal")
         confidence = 0.92
         reason = "action verb requires proposal boundary"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_project_blocker_audit_question(lowered):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = (
+            "repo_git_status",
+            "repo_tree",
+            "repo_files",
+            "repo_import_graph",
+            "read_file_outline",
+            "read_file_snippet",
+            "build_project_wide_autonomy_audit_read_model",
+        )
+        selected_agent_roles = ("architect_agent", "project_coder_agent")
+        confidence = 0.97
+        reason = "project-wide blocker audit requires codebase inspection, import graph, and answer-layer diagnosis"
         needs_ollama = False
         evidence_required = True
     if intent_family == "CONVERSATION" and _asks_wsl_project_diagnostic_question(lowered):
@@ -486,6 +563,51 @@ def _asks_wsl_project_diagnostic_question(lowered: str) -> bool:
         "найди где",
     )
     return any(marker in lowered for marker in test_markers) and any(marker in lowered for marker in plan_markers)
+
+
+def _asks_project_blocker_audit_question(lowered: str) -> bool:
+    if any(marker in lowered for marker in ("тест", "pytest", "failing tests", "падают тесты", "ломаются тесты")):
+        return False
+    blocker_markers = (
+        "что мешает тебе работать",
+        "почему ты не пользуешься агентами",
+        "почему ты не пользуешься скилами",
+        "почему ты не пользуешься инструментами",
+        "проверь где логика сломана",
+        "почему это не работает",
+        "где блокировщики",
+        "проверь проект полностью",
+        "проверь почему джарвис не может пользоваться инструментами",
+        "найди что не на своих местах",
+        "почему джарвис не может",
+        "что мешает джарвису",
+        "проверь весь проект",
+        "blocker audit",
+        "autonomy audit",
+        "project audit",
+    )
+    if any(marker in lowered for marker in blocker_markers):
+        return True
+    return (
+        any(marker in lowered for marker in ("мешает", "блок", "сломана", "не работает", "не может"))
+        and any(marker in lowered for marker in ("джарвис", "агент", "скил", "skill", "инструмент", "tool", "проект", "автоном"))
+    )
+
+
+def _asks_code_draft_request(lowered: str) -> bool:
+    draft_markers = (
+        "напиши код исправления",
+        "подготовь код исправления",
+        "сделай патч",
+        "подготовь патч",
+        "patch proposal",
+        "code draft",
+        "не применяй",
+        "без применения",
+    )
+    return any(marker in lowered for marker in draft_markers) and any(
+        marker in lowered for marker in ("код", "патч", "fix", "исправ", "draft")
+    )
 
 
 def _asks_agent_catalog_question(lowered: str) -> bool:

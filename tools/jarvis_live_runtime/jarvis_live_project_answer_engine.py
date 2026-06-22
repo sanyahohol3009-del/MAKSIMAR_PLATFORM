@@ -63,8 +63,15 @@ from tools.jarvis_live_runtime.jarvis_runtime_library_store import (
 )
 from tools.jarvis_live_runtime.session_memory_store import _memory_truth_contract
 from tools.jarvis_live_runtime.wsl_project_operator import (
+    build_project_wide_autonomy_audit_read_model,
     build_wsl_project_diagnostics_read_model,
 )
+
+def _store_observation_payload(plan: dict[str, Any], payload: dict[str, Any] | None, technical_text: str) -> None:
+    observation_payload = dict(payload or {})
+    observation_payload["technical_response_text"] = technical_text
+    plan["observation_payload"] = observation_payload
+
 
 def _answer_with_read_only_tools_if_grounded(
     user_text: str,
@@ -110,7 +117,22 @@ def _answer_with_read_only_tools_if_grounded(
     if intent == "WSL_PROJECT_DIAGNOSTICS":
         diagnostics = build_wsl_project_diagnostics_read_model(user_text)
         plan["evidence_count"] = len(diagnostics.get("failing_tests", ())) + len(diagnostics.get("related_snippets", ())) + 1
-        return _format_wsl_project_diagnostics_answer(diagnostics)
+        answer = _format_wsl_project_diagnostics_answer(diagnostics)
+        _store_observation_payload(plan, diagnostics, answer)
+        return answer
+    if intent == "PROJECT_WIDE_DIAGNOSTICS":
+        diagnostics = build_project_wide_autonomy_audit_read_model(user_text)
+        bounded_pytest = diagnostics.get("bounded_pytest", {}) if isinstance(diagnostics.get("bounded_pytest"), dict) else {}
+        plan["evidence_count"] = len(diagnostics.get("inspected_files", ())) + len(diagnostics.get("inspected_import_edges", ())) + len(bounded_pytest.get("failing_tests", ()))
+        answer = _format_project_wide_autonomy_audit_answer(diagnostics)
+        _store_observation_payload(plan, diagnostics, answer)
+        return answer
+    if intent == "CODE_DRAFT_PROPOSAL":
+        diagnostics = build_project_wide_autonomy_audit_read_model(user_text)
+        plan["evidence_count"] = len(diagnostics.get("inspected_files", ())) + len(diagnostics.get("recommended_patch_plan", ()))
+        answer = _format_code_draft_proposal_observation(diagnostics, user_text)
+        _store_observation_payload(plan, diagnostics, answer)
+        return answer
     if intent == "SOURCE_EVIDENCE":
         answer, evidence_count = _format_source_evidence_answer(user_text)
         plan["evidence_count"] = evidence_count
@@ -150,20 +172,36 @@ def _answer_with_read_only_tools_if_grounded(
     if intent == "TOOL_CATALOG":
         catalog = build_jarvis_live_tool_catalog_read_model()
         plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
-        return _format_tool_catalog_answer(catalog, user_text)
+        answer = _format_tool_catalog_answer(catalog, user_text)
+        _store_observation_payload(plan, catalog, answer)
+        return answer
     if intent == "AGENT_CATALOG":
         catalog = build_jarvis_agent_catalog_read_model()
         plan["evidence_count"] = len(catalog["visible_agents"])
-        return _format_agent_catalog_answer(catalog, user_text)
+        answer = _format_agent_catalog_answer(catalog, user_text)
+        _store_observation_payload(plan, catalog, answer)
+        return answer
     if intent == "SKILL_VISIBILITY":
         visibility = build_jarvis_skill_visibility_read_model()
         plan["evidence_count"] = len(visibility["visible_tools"]) + len(visibility["visible_agents"])
-        return _format_skill_visibility_answer(visibility, user_text)
+        answer = _format_skill_visibility_answer(visibility, user_text)
+        _store_observation_payload(plan, visibility, answer)
+        return answer
     if intent in {"EXTERNAL_ADAPTER_SELECTION", "EXTERNAL_AGENT_WORKFLOW_PLAN", "AGENT_ENGINE_COMPARISON"}:
         adapter_runtime = build_agent_tooling_runtime_adapter_read_model()
         adapter_visibility = build_jarvis_external_adapter_visibility_read_model()
         plan["evidence_count"] = len(plan.get("semantic_candidates", ())) or len(plan.get("selected_tools", ()))
-        return _format_external_adapter_grounded_answer(plan, adapter_runtime, adapter_visibility)
+        answer = _format_external_adapter_grounded_answer(plan, adapter_runtime, adapter_visibility)
+        _store_observation_payload(
+            plan,
+            {
+                "adapter_runtime": adapter_runtime,
+                "adapter_visibility": adapter_visibility,
+                "selected_tools": tuple(plan.get("selected_tools", ())),
+            },
+            answer,
+        )
+        return answer
     return ""
 
 
@@ -654,6 +692,121 @@ def _format_wsl_project_diagnostics_answer(diagnostics: dict[str, Any]) -> str:
             "git_write_allowed=false",
         )
     )
+    return "\n".join(lines)
+
+
+def _format_project_wide_autonomy_audit_answer(diagnostics: dict[str, Any]) -> str:
+    lines = [
+        "[work] intent=PROJECT_WIDE_DIAGNOSTICS "
+        "tools=repo_git_status,repo_tree,repo_files,repo_import_graph,read_file_outline,read_file_snippet,build_project_wide_autonomy_audit_read_model "
+        "read_only=true execution_allowed=false proposal_only=true",
+        "Project-wide autonomy audit:",
+        f"git_status_output={diagnostics.get('git_status_stdout', '') or 'none'}",
+    ]
+    tree_summary = diagnostics.get("tree_summary", {}) if isinstance(diagnostics.get("tree_summary"), dict) else {}
+    if tree_summary:
+        lines.append(
+            "repo_tree_summary: "
+            f"depth={tree_summary.get('depth', '')} "
+            f"entry_count={tree_summary.get('entry_count', '')} "
+            f"entries={_csv(tree_summary.get('entries', ())) or 'none'}"
+        )
+    files_page = diagnostics.get("repo_files_page", {}) if isinstance(diagnostics.get("repo_files_page"), dict) else {}
+    if files_page:
+        lines.append(
+            "repo_files_page: "
+            f"total_files={files_page.get('total_files', 0)} "
+            f"sample={_csv(files_page.get('files', ())) or 'none'}"
+        )
+    lines.append(f"inspected_files={_csv(diagnostics.get('inspected_files', ())) or 'none'}")
+    outlines = diagnostics.get("inspected_outlines", ())
+    if outlines:
+        lines.append("inspected_outlines:")
+        for item in outlines:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- {item.get('path', '')} "
+                f"functions={_csv(item.get('functions', ())) or 'none'} "
+                f"classes={_csv(item.get('classes', ())) or 'none'} "
+                f"imports={_csv(item.get('imports', ())) or 'none'}"
+            )
+    snippets = diagnostics.get("inspected_snippets", ())
+    if snippets:
+        lines.append("inspected_snippets:")
+        for item in snippets:
+            if not isinstance(item, dict):
+                continue
+            lines.append(f"- {item.get('path', '')}")
+            for snippet_line in item.get("snippet", ())[:8]:
+                lines.append(f"  {snippet_line}")
+    import_edges = diagnostics.get("inspected_import_edges", ())
+    if import_edges:
+        lines.append("inspected_import_edges:")
+        for edge in import_edges[:20]:
+            if isinstance(edge, dict):
+                lines.append(f"- {edge.get('from', '')} -> {edge.get('to', '')}")
+    for section_name in (
+        "detected_blockers",
+        "misplaced_logic",
+        "missing_connections",
+        "wrong_intent_routes",
+        "answer_layer_issues",
+        "permission_flag_issues",
+        "final_answer_blockers",
+    ):
+        values = diagnostics.get(section_name, ())
+        if values:
+            lines.append(f"{section_name}:")
+            for item in values:
+                lines.append(f"- {item}")
+    bounded_pytest = diagnostics.get("bounded_pytest", {}) if isinstance(diagnostics.get("bounded_pytest"), dict) else {}
+    if bounded_pytest:
+        lines.append("bounded_pytest:")
+        lines.append(f"- selected_scope={_csv(bounded_pytest.get('selected_scope', ())) or 'none'}")
+        lines.append(f"- failing_tests={_csv(bounded_pytest.get('failing_tests', ())) or 'none'}")
+        for item in bounded_pytest.get("diagnosis", ())[:6]:
+            lines.append(f"- diagnosis={item}")
+    patch_plan = diagnostics.get("recommended_patch_plan", ())
+    if patch_plan:
+        lines.append("recommended_patch_plan:")
+        for index, item in enumerate(patch_plan, start=1):
+            lines.append(f"{index}. {item}")
+    lines.extend(
+        (
+            "read_project_allowed=true",
+            "repo_tree_allowed=true",
+            "repo_files_allowed=true",
+            "read_file_allowed=true",
+            "read_outline_allowed=true",
+            "import_graph_allowed=true",
+            "ast_scan_allowed=true",
+            "dependency_check_allowed=true",
+            "bounded_pytest_allowed=true",
+            "code_draft_allowed=true",
+            "patch_proposal_allowed=true",
+            "final_answer_generation_allowed=true",
+            "write_allowed=false",
+            "git_commit_allowed=false",
+            "pc_control_allowed=false",
+        )
+    )
+    return "\n".join(lines)
+
+
+def _format_code_draft_proposal_observation(diagnostics: dict[str, Any], user_text: str) -> str:
+    lines = [
+        "[work] intent=CODE_DRAFT_PROPOSAL "
+        "tools=repo_import_graph,read_file_outline,read_file_snippet,build_project_wide_autonomy_audit_read_model "
+        "read_only=true execution_allowed=false proposal_only=true",
+        f"requested_output={user_text.strip()[:400]}",
+        f"inspected_files={_csv(diagnostics.get('inspected_files', ())) or 'none'}",
+        "code_draft_allowed=true",
+        "patch_proposal_allowed=true",
+        "file_write_allowed=false",
+    ]
+    for item in diagnostics.get("recommended_patch_plan", ())[:6]:
+        lines.append(f"- patch_plan={item}")
     return "\n".join(lines)
 
 

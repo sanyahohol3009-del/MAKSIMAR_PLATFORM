@@ -869,7 +869,8 @@ def _print_stream_event(line: str) -> dict[str, Any]:
 
     if event_type == "operator_trace":
         _LAST_OPERATOR_EVENT = dict(event)
-        _print_operator_trace_event(event)
+        if _chat_mode() == "debug":
+            _print_operator_trace_event(event)
         return event
 
     if event_type in {"command_start", "command_output", "command_done", "test_start", "test_output", "test_result"}:
@@ -901,13 +902,8 @@ def _print_stream_event(line: str) -> dict[str, Any]:
 
 
 def _should_show_infra(event: dict[str, Any]) -> bool:
-    if _chat_mode() == "debug":
-        return True
-    intent = str(event.get("intent_family") or "")
-    tools = _as_tuple(event.get("selected_tools", ()))
-    if not intent or intent == "CONVERSATION":
-        return False
-    return bool(tools or intent)
+    del event
+    return _chat_mode() == "debug"
 
 
 def _print_usage_table(event: dict[str, Any], *, label: str) -> None:
@@ -981,6 +977,9 @@ def _print_file_change_event(event: dict[str, Any]) -> None:
 
 def _maybe_render_operator_work_chunk(chunk: str) -> bool:
     global _OPERATOR_WORK_ACTIVE, _OPERATOR_WORK_BUFFER, _OPERATOR_WORK_PENDING
+
+    if _chat_mode() != "debug":
+        return False
 
     text = str(chunk)
 

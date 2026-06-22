@@ -10,19 +10,34 @@ from tools.jarvis_live_runtime.project_workspace_tools import (
     PROJECT_ROOT,
     _safe_project_path,
     _tracked_project_files,
+    repo_files,
     read_file_outline,
     read_file_snippet,
     repo_git_status,
+    repo_import_graph,
+    repo_tree,
 )
 
 
 _MAX_SCOPE_ITEMS = 4
 _MAX_OUTPUT_LINES = 80
 _MAX_RELATED_FILES = 4
+_MAX_AUDIT_FILES = 12
 _PYTEST_TIMEOUT_SECONDS = 45
 _GIT_TIMEOUT_SECONDS = 5
 _FAIL_LINE_RE = re.compile(r"^FAILED\s+(?P<nodeid>\S+)")
 _FILE_LINE_RE = re.compile(r"(?P<path>[A-Za-z0-9_./-]+\.py):(?P<line>\d+)")
+_PROJECT_AUDIT_FILES = (
+    "tools/jarvis_live_runtime/read_only_tool_router.py",
+    "tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py",
+    "tools/jarvis_live_runtime/jarvis_live_terminal_chat.py",
+    "tools/jarvis_live_runtime/jarvis_live_brain_loop.py",
+    "tools/jarvis_live_runtime/helper_model_orchestration_probe.py",
+    "tools/jarvis_live_runtime/memory_context_builder.py",
+    "tools/jarvis_live_runtime/jarvis_skill_visibility.py",
+    "tools/jarvis_live_runtime/project_workspace_tools.py",
+    "tools/jarvis_live_runtime/wsl_project_operator.py",
+)
 
 def _process_output_as_text(value: Any) -> str:
     if value is None:
@@ -263,6 +278,196 @@ def _truncate_output(text: str) -> str:
         return text.strip()
     clipped = "\n".join(lines[:_MAX_OUTPUT_LINES])
     return clipped.strip() + "\n[output_truncated=true reason=bounded_wsl_operator_output]"
+
+
+def _audit_query_tokens(user_text: str) -> tuple[str, ...]:
+    return tuple(
+        token
+        for token in re.findall(r"[a-z0-9_]+|[а-яё0-9_]+", str(user_text).casefold())
+        if len(token) >= 4
+    )
+
+
+def _collect_project_audit_files(user_text: str) -> tuple[str, ...]:
+    tracked = _tracked_project_files()
+    selected = [path for path in _PROJECT_AUDIT_FILES if path in tracked or _safe_project_path(path)]
+    query_tokens = _audit_query_tokens(user_text)
+    for path in tracked:
+        if len(selected) >= _MAX_AUDIT_FILES:
+            break
+        lowered = path.casefold()
+        if "tools/jarvis_live_runtime/" not in lowered and "tests/jarvis_live_runtime/" not in lowered:
+            continue
+        if query_tokens and not any(token in lowered for token in query_tokens):
+            continue
+        if path not in selected:
+            selected.append(path)
+    return tuple(selected[:_MAX_AUDIT_FILES])
+
+
+def _snippet_preview(path: str) -> tuple[str, ...]:
+    snippet = read_file_snippet(path, start_line=1, end_line=36)
+    if not isinstance(snippet, dict) or not snippet.get("allowed"):
+        return ()
+    return tuple(snippet.get("snippet", ()))[:12]
+
+
+def _import_edges_for_files(paths: tuple[str, ...]) -> tuple[dict[str, str], ...]:
+    edges: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for path in paths:
+        graph = repo_import_graph(path=path, max_edges=16)
+        for edge in graph.get("edges", ()):
+            if not isinstance(edge, dict):
+                continue
+            key = (str(edge.get("from", "")), str(edge.get("to", "")))
+            if key in seen:
+                continue
+            seen.add(key)
+            edges.append({"from": key[0], "to": key[1]})
+            if len(edges) >= 32:
+                return tuple(edges)
+    return tuple(edges)
+
+
+def _source_contains(path: str, needle: str) -> bool:
+    if not _safe_project_path(path):
+        return False
+    full_path = PROJECT_ROOT / path
+    try:
+        return needle in full_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+
+
+def _detect_blockers(inspected_files: tuple[str, ...]) -> dict[str, tuple[str, ...]]:
+    detected_blockers: list[str] = []
+    misplaced_logic: list[str] = []
+    missing_connections: list[str] = []
+    wrong_intent_routes: list[str] = []
+    answer_layer_issues: list[str] = []
+    permission_flag_issues: list[str] = []
+    final_answer_blockers: list[str] = []
+
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py", "[work] intent="):
+        answer_layer_issues.append("answer_engine still emits technical [work] observation blocks as intermediate payloads")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_terminal_chat.py", "_maybe_render_operator_work_chunk"):
+        answer_layer_issues.append("terminal renderer still contains operator-work parsing path and can leak technical blocks if final-answer stage is bypassed")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_brain_loop.py", "grounded_tool_answer"):
+        detected_blockers.append("brain loop contains a dedicated grounded-answer branch; if it returns before model synthesis, autonomy looks like debug output instead of assistant reasoning")
+    if _source_contains("tools/jarvis_live_runtime/read_only_tool_router.py", 'intent_family = "PROJECT_SEARCH"'):
+        wrong_intent_routes.append("generic PROJECT_SEARCH branches are broad and can steal blocker/audit questions unless project-wide diagnostics wins earlier")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py", "Не нашёл подтверждение"):
+        missing_connections.append("answer engine still has weak 'Не нашёл подтверждение' fallbacks instead of escalating to a richer project audit for some questions")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_terminal_chat.py", "_should_show_infra"):
+        misplaced_logic.append("terminal chat still owns infra/debug visibility logic, so user experience depends on renderer mode instead of answer-layer intent")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py", "execution_allowed=false"):
+        permission_flag_issues.append("technical observation builders still carry raw execution_allowed/proposal_only flags; these must stay internal and not replace the user answer")
+    if _source_contains("tools/jarvis_live_runtime/jarvis_live_brain_loop.py", '"ollama_called": False'):
+        final_answer_blockers.append("brain loop still has explicit ollama_called=false branches; if selected too early they suppress the final assistant answer")
+    if not inspected_files:
+        detected_blockers.append("no key runtime files were inspected, so autonomy audit would be incomplete")
+
+    return {
+        "detected_blockers": _dedupe(detected_blockers),
+        "misplaced_logic": _dedupe(misplaced_logic),
+        "missing_connections": _dedupe(missing_connections),
+        "wrong_intent_routes": _dedupe(wrong_intent_routes),
+        "answer_layer_issues": _dedupe(answer_layer_issues),
+        "permission_flag_issues": _dedupe(permission_flag_issues),
+        "final_answer_blockers": _dedupe(final_answer_blockers),
+    }
+
+
+def _recommended_patch_plan(blockers: dict[str, tuple[str, ...]], user_text: str) -> tuple[str, ...]:
+    plan: list[str] = [
+        "keep helper semantic plan primary and let the read-only router execute it instead of replacing it with weak marker routes",
+        "treat [work]/FACTS/catalog payloads as intermediate observations and always synthesize a final Russian answer through the local answer model",
+        "hide raw execution/proposal flags in normal terminal mode and surface only the permission split in human language",
+        "reserve execution_allowed=false for mutation/external actions and keep read/analyze/test/code-draft flows automatically allowed",
+    ]
+    lowered = str(user_text).casefold()
+    if "код" in lowered or "исправ" in lowered:
+        plan.append("prepare a patch proposal text or diff without writing files, then wait for explicit approval before applying it")
+    if "тест" in lowered or "pytest" in lowered:
+        plan.append("rerun only the bounded pytest scope tied to the inspected runtime files after the proposal is ready")
+    return _dedupe(plan)
+
+
+def build_project_wide_autonomy_audit_read_model(user_text: str) -> dict[str, Any]:
+    git_probe = _run_bounded_process(("git", "status", "-sb"), timeout_seconds=_GIT_TIMEOUT_SECONDS)
+    status = repo_git_status()
+    tree = repo_tree(depth=3, max_entries=80)
+    files_page = repo_files(page=1, page_size=120)
+    inspected_files = _collect_project_audit_files(user_text)
+    outlines = tuple(
+        {
+            "path": path,
+            "functions": tuple(read_file_outline(path).get("functions", ()))[:8],
+            "classes": tuple(read_file_outline(path).get("classes", ()))[:6],
+            "imports": tuple(read_file_outline(path).get("imports", ()))[:10],
+        }
+        for path in inspected_files
+    )
+    snippets = tuple(
+        {
+            "path": path,
+            "snippet": _snippet_preview(path),
+        }
+        for path in inspected_files
+    )
+    import_edges = _import_edges_for_files(inspected_files)
+    blockers = _detect_blockers(inspected_files)
+    pytest_payload: dict[str, Any] = {}
+    if any(marker in str(user_text).casefold() for marker in ("тест", "pytest", "падает", "ломает", "ошиб")):
+        pytest_payload = build_wsl_project_diagnostics_read_model(user_text)
+
+    return {
+        "intent_family": "PROJECT_WIDE_DIAGNOSTICS",
+        "read_only": True,
+        "execution_allowed": False,
+        "proposal_only": True,
+        "read_project_allowed": True,
+        "repo_tree_allowed": True,
+        "repo_files_allowed": True,
+        "read_file_allowed": True,
+        "read_outline_allowed": True,
+        "import_graph_allowed": True,
+        "ast_scan_allowed": True,
+        "dependency_check_allowed": True,
+        "bounded_pytest_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "final_answer_generation_allowed": True,
+        "file_write_allowed": False,
+        "file_delete_allowed": False,
+        "install_allowed": False,
+        "download_allowed": False,
+        "git_add_allowed": False,
+        "git_commit_allowed": False,
+        "git_push_allowed": False,
+        "pc_control_allowed": False,
+        "browser_action_allowed": False,
+        "write_allowed": False,
+        "git_probe": git_probe,
+        "git_status": status,
+        "tree_summary": tree,
+        "repo_files_page": files_page,
+        "inspected_files": inspected_files,
+        "inspected_outlines": outlines,
+        "inspected_snippets": snippets,
+        "inspected_import_edges": import_edges,
+        "detected_blockers": blockers["detected_blockers"],
+        "misplaced_logic": blockers["misplaced_logic"],
+        "missing_connections": blockers["missing_connections"],
+        "wrong_intent_routes": blockers["wrong_intent_routes"],
+        "answer_layer_issues": blockers["answer_layer_issues"],
+        "permission_flag_issues": blockers["permission_flag_issues"],
+        "final_answer_blockers": blockers["final_answer_blockers"],
+        "recommended_patch_plan": _recommended_patch_plan(blockers, user_text),
+        "bounded_pytest": pytest_payload,
+        "git_status_stdout": _truncate_output(str(git_probe["stdout"])),
+    }
 
 
 def build_wsl_project_diagnostics_read_model(user_text: str) -> dict[str, Any]:
