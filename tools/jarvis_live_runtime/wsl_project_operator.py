@@ -24,6 +24,14 @@ _GIT_TIMEOUT_SECONDS = 5
 _FAIL_LINE_RE = re.compile(r"^FAILED\s+(?P<nodeid>\S+)")
 _FILE_LINE_RE = re.compile(r"(?P<path>[A-Za-z0-9_./-]+\.py):(?P<line>\d+)")
 
+def _process_output_as_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
 
 def _run_bounded_process(
     command: tuple[str, ...],
@@ -48,16 +56,16 @@ def _run_bounded_process(
         return {
             "command": command,
             "returncode": int(result.returncode),
-            "stdout": result.stdout,
-            "stderr": result.stderr,
+            "stdout": _process_output_as_text(result.stdout),
+            "stderr": _process_output_as_text(result.stderr),
             "timed_out": False,
         }
     except subprocess.TimeoutExpired as exc:
         return {
             "command": command,
             "returncode": 124,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
+            "stdout": _process_output_as_text(exc.stdout),
+            "stderr": _process_output_as_text(exc.stderr),
             "timed_out": True,
         }
     except OSError as exc:
@@ -277,7 +285,7 @@ def build_wsl_project_diagnostics_read_model(user_text: str) -> dict[str, Any]:
             "stderr": "no bounded pytest scope inferred",
             "timed_out": False,
         }
-    combined_output = "\n".join(part for part in (pytest_probe["stdout"], pytest_probe["stderr"]) if part).strip()
+    combined_output = "\n".join(_process_output_as_text(part) for part in (pytest_probe["stdout"], pytest_probe["stderr"]) if _process_output_as_text(part)).strip()
     failing_tests = _parse_failure_nodeids(combined_output)
     file_refs = _related_file_refs(combined_output)
     error_excerpt = _error_excerpt(pytest_probe["stdout"], pytest_probe["stderr"])

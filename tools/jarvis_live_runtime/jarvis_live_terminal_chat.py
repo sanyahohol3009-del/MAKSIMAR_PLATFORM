@@ -920,6 +920,7 @@ def _print_usage_table(event: dict[str, Any], *, label: str) -> None:
         or event.get("agent_roles")
         or ()
     )
+    skills = _as_tuple(event.get("selected_skills", ()) or ())
     read_only = str(bool(event.get("read_only", True))).lower()
     execution_allowed = str(bool(event.get("execution_allowed", False))).lower()
     parts = [
@@ -927,6 +928,7 @@ def _print_usage_table(event: dict[str, Any], *, label: str) -> None:
         f"model={model}",
         f"intent={intent}",
         f"agents={_csv(agents) or 'нет данных'}",
+        f"skills={_csv(skills) or 'нет данных'}",
         f"tools={_csv(tools) or 'нет'}",
         f"read_only={read_only}",
         f"execution_allowed={execution_allowed}",
@@ -1030,6 +1032,7 @@ def _render_operator_work_text(text: str) -> None:
         "intent",
         "tools",
         "selected_agent_roles",
+        "selected_skills",
         "risk_class",
         "reason",
         "read_only",
@@ -1091,6 +1094,7 @@ def _operator_work_facts(text: str) -> dict[str, str]:
         "intent",
         "tools",
         "selected_agent_roles",
+        "selected_skills",
         "risk_class",
         "read_only",
         "execution_allowed",

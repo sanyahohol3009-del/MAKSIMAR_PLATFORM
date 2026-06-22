@@ -357,6 +357,8 @@ def build_helper_model_orchestration_probe(
         "helper_model_status": "ready"
         if helper_decision is not None
         else ("unavailable" if helper_response.available is False else "invalid"),
+        "normalized_intent": router_payload["normalized_intent"],
+        "task_complexity": router_payload["task_complexity"],
         "helper_model_called": router_payload["helper_model_called"],
         "helper_model_used": router_payload["helper_model_used"],
         "helper_model_id": router_payload["helper_model_id"],
@@ -365,11 +367,12 @@ def build_helper_model_orchestration_probe(
         "selection_source": router_payload["selection_source"],
         "selected_model_role_id": router_payload["selected_model_role_id"],
         "selected_model_id": router_payload["selected_model_id"],
-        "selected_agents": router_payload["selected_agent_roles"],
+        "selected_agent_roles": router_payload["selected_agent_roles"],
         "selected_tools": router_payload["selected_tools"],
         "selected_skills": selected_skills,
         "workflow_steps": router_payload["workflow_steps"],
         "risk_class": router_payload["risk_class"],
+        "selected_tool_reason": router_payload["selected_tool_reason"],
         "risk_gate_required": router_payload["risk_gate_required"],
         "safe_direct_action_allowed": router_payload["safe_direct_action_allowed"],
         "pc_tool_direct_allowed": router_payload["selected_model_role"]["pc_tool_direct_allowed"],

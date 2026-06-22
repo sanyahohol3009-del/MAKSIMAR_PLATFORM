@@ -548,6 +548,8 @@ def stream_jarvis_live_brain_response(
         "context_elapsed_seconds": context_elapsed_seconds,
         "intent_family": read_only_tool_plan["intent_family"],
         "selected_tools": read_only_tool_plan["selected_tools"],
+        "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+        "selected_skills": read_only_tool_plan.get("selected_skills", ()),
         "read_only": read_only_tool_plan["read_only"],
         "execution_allowed": read_only_tool_plan["execution_allowed"],
         "evidence_required": read_only_tool_plan["evidence_required"],
@@ -568,10 +570,16 @@ def stream_jarvis_live_brain_response(
             **_event("operator_trace"),
             "intent_family": read_only_tool_plan["intent_family"],
             "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
             "reason": read_only_tool_plan["reason"],
             "read_only": read_only_tool_plan["read_only"],
             "execution_allowed": read_only_tool_plan["execution_allowed"],
             "evidence_required": read_only_tool_plan["evidence_required"],
+            "risk_class": read_only_tool_plan.get("risk_class", "read_only"),
+            "proposal_only": read_only_tool_plan.get("proposal_only", True),
+            "selection_source": context.orchestration_decision.get("selection_source", ""),
+            "fallback_used": context.orchestration_decision.get("fallback_used", False),
             "ollama_called": False,
             "pc_control_allowed": False,
             "canonical_memory_write_allowed": False,
@@ -618,6 +626,8 @@ def stream_jarvis_live_brain_response(
             "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
             "intent_family": read_only_tool_plan["intent_family"],
             "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
             "read_only": read_only_tool_plan["read_only"],
             "execution_allowed": read_only_tool_plan["execution_allowed"],
             "evidence_required": read_only_tool_plan["evidence_required"],
@@ -626,6 +636,13 @@ def stream_jarvis_live_brain_response(
             "ollama_called": False,
             "output_truncated": output_truncated,
             "output_truncation_reason": output_truncation_reason,
+            "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+            "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+            "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+            "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+            "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+            "selection_source": context.orchestration_decision.get("selection_source", ""),
+            "fallback_used": context.orchestration_decision.get("fallback_used", False),
         }
         return
 
@@ -753,6 +770,8 @@ def stream_jarvis_live_brain_response(
         "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
         "intent_family": read_only_tool_plan["intent_family"],
         "selected_tools": read_only_tool_plan["selected_tools"],
+        "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+        "selected_skills": read_only_tool_plan.get("selected_skills", ()),
         "read_only": read_only_tool_plan["read_only"],
         "execution_allowed": read_only_tool_plan["execution_allowed"],
         "evidence_required": read_only_tool_plan["evidence_required"],
@@ -761,6 +780,13 @@ def stream_jarvis_live_brain_response(
         "ollama_called": True,
         "output_truncated": output_truncated,
         "output_truncation_reason": output_truncation_reason,
+        "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+        "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+        "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+        "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+        "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+        "selection_source": context.orchestration_decision.get("selection_source", ""),
+        "fallback_used": context.orchestration_decision.get("fallback_used", False),
     }
 
 
@@ -1287,7 +1313,6 @@ def _asks_safety_status_question(lowered: str) -> bool:
 def _compact_text(text: str, source: Path) -> str:
     single_line = " ".join(text.split())
     return f"{source}: {single_line[:700]}"
-
 
 
 

@@ -72,20 +72,20 @@ def test_live_helper_model_orchestration_probe() -> None:
     assert weather["helper_model_used"] is True
     assert weather["selected_tools"] == ("weather_lookup",)
     assert weather["selected_model_role_id"] == "jarvis_chat_model"
-    assert weather["selected_agents"] == ("tool_selector_agent",)
+    assert weather["selected_agent_roles"] == ("tool_selector_agent",)
 
     assert debug["selected_model_role_id"] == "daily_coder_model"
-    assert debug["selected_agents"] == ("project_coder_agent",)
+    assert debug["selected_agent_roles"] == ("project_coder_agent",)
     assert "repo_search" in debug["selected_tools"]
     assert "read_file_snippet" in debug["selected_tools"]
 
     assert architecture["selected_model_role_id"] == "heavy_coder_model"
-    assert architecture["selected_agents"] == ("architect_agent",)
+    assert architecture["selected_agent_roles"] == ("architect_agent",)
     assert architecture["heavy_model_selected"] is True
     assert architecture["parallel_heavy_model_allowed"] is False
 
     assert browser_terminal["selected_tools"] == ("pc_open_browser",)
-    assert browser_terminal["selected_agents"] == ("action_worker_agent",)
+    assert browser_terminal["selected_agent_roles"] == ("action_worker_agent",)
     assert browser_terminal["safe_direct_action_allowed"] is True
     assert browser_terminal["pc_tool_direct_allowed"] is True
 
@@ -93,7 +93,7 @@ def test_live_helper_model_orchestration_probe() -> None:
     assert browser_voice["pc_tool_direct_allowed"] is False
     assert browser_voice["risk_gate_required"] is True
 
-    assert risk["selected_agents"] == ("safety_guard_agent",)
+    assert risk["selected_agent_roles"] == ("safety_guard_agent",)
     assert risk["risk_gate_required"] is True
     assert risk["safe_direct_action_allowed"] is False
     assert risk["risk_class"] == "risk_gate"

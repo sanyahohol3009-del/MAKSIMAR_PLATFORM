@@ -133,6 +133,56 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
     visible_tools = tuple(sorted(dict.fromkeys(all_tools)))
     visible_agents = tuple(agent_catalog["visible_agents"])
     visible_skills = _scan_visible_skills()
+    skill_execution_profiles = {
+        "project_workspace_analysis": {
+            "tool_ids": tuple(
+                dict.fromkeys(
+                    tuple(tool_catalog["project_repo_read_only_tools"])
+                    + ("repo_search", "read_file_snippet", "read_file_outline", "pytest_report_read", "build_wsl_project_diagnostics_read_model")
+                )
+            ),
+            "read_only": True,
+            "execution_allowed": False,
+        },
+        "memory_federation": {
+            "tool_ids": (
+                "stable_style_profile",
+                "session_memory",
+                "local_chat_memory",
+                "memory_engine_registry",
+                "runtime_history_store",
+                "history_query",
+                "mempalace_read_only_sandbox",
+            ),
+            "read_only": True,
+            "execution_allowed": False,
+        },
+        "external_agent_tooling": {
+            "tool_ids": tuple(
+                dict.fromkeys(
+                    external_adapter_tools
+                    + (
+                        "build_runtime_library_store_read_model",
+                        "build_jarvis_external_adapter_visibility_read_model",
+                        "build_agent_tooling_runtime_adapter_read_model",
+                        "build_agent_tooling_runtime_probe_read_model",
+                    )
+                )
+            ),
+            "read_only": True,
+            "execution_allowed": False,
+        },
+        "tool_selection": {
+            "tool_ids": (
+                "build_jarvis_live_tool_catalog_read_model",
+                "build_jarvis_skill_visibility_read_model",
+                "build_jarvis_agent_catalog_read_model",
+                "build_runtime_library_store_read_model",
+            ),
+            "read_only": True,
+            "execution_allowed": False,
+        },
+    }
 
     return {
         "visible_tools": visible_tools,
@@ -174,6 +224,7 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "windows_gui_bridge_enabled": False,
         "pc_control_allowed": False,
         "universal_registry_tools": tuple(tool["tool_id"] for tool in external_visibility["registry"]["tools"]),
+        "skill_execution_profiles": skill_execution_profiles,
     }
 
 
@@ -181,16 +232,11 @@ def select_skills_for_tools(selected_tools: tuple[str, ...], selected_agent_role
     visibility = build_jarvis_skill_visibility_read_model()
     selected: list[str] = []
     tool_set = set(selected_tools)
-    if tool_set & set(visibility["external_adapter_tools"]):
-        selected.append("external_agent_tooling")
-    if tool_set & set(visibility["read_only_tools"]):
-        selected.append("read_only_discovery")
-    if tool_set & set(visibility["safe_direct_tools"]):
-        selected.append("action_library_safe_direct")
-    if tool_set & set(visibility["risk_gated_tools"]):
-        selected.append("risk_gate_or_action_library")
-    if tool_set & set(visibility["memory_tools"]):
-        selected.append("memory_federation")
+    for skill_name, profile in visibility.get("skill_execution_profiles", {}).items():
+        if not isinstance(profile, dict):
+            continue
+        if tool_set & set(profile.get("tool_ids", ())):
+            selected.append(str(skill_name))
     if "project_coder_agent" in selected_agent_roles or "architect_agent" in selected_agent_roles:
         selected.append("project_workspace_analysis")
     if "tool_selector_agent" in selected_agent_roles:
@@ -199,6 +245,10 @@ def select_skills_for_tools(selected_tools: tuple[str, ...], selected_agent_role
         selected.append("action_library")
     if "safety_guard_agent" in selected_agent_roles:
         selected.append("safety_guard")
+    if tool_set & set(visibility["safe_direct_tools"]):
+        selected.append("action_library_safe_direct")
+    if tool_set & set(visibility["risk_gated_tools"]):
+        selected.append("risk_gate_or_action_library")
     if not selected:
         selected.append("conversation")
     return tuple(dict.fromkeys(selected))

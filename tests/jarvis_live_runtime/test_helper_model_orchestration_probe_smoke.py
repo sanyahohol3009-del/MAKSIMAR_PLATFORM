@@ -56,8 +56,9 @@ def test_helper_model_orchestration_probe_uses_helper_when_decision_is_valid() -
     assert payload["helper_model_used"] is True
     assert payload["fallback_used"] is False
     assert payload["selection_source"] == "helper_model"
+    assert payload["normalized_intent"] == "code_debug"
     assert payload["selected_model_role_id"] == "daily_coder_model"
-    assert payload["selected_agents"] == ("project_coder_agent",)
+    assert payload["selected_agent_roles"] == ("project_coder_agent",)
     assert "repo_search" in payload["selected_tools"]
     assert "project_workspace_analysis" in payload["selected_skills"]
     assert len(payload["workflow_steps"]) == 3

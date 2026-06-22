@@ -550,7 +550,7 @@ def test_helper_classifier_path_is_wired_into_context(monkeypatch) -> None:
             "selection_source": "helper_model",
             "selected_model_role_id": "jarvis_chat_model",
             "selected_model_id": "jarvis:chat8b",
-            "selected_agents": ("tool_selector_agent",),
+            "selected_agent_roles": ("tool_selector_agent",),
             "selected_tools": ("external_adapter:mcp_python_sdk",),
             "selected_skills": (),
             "selected_model_role": {

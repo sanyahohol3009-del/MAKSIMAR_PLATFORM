@@ -9,18 +9,120 @@ from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter imp
 )
 from MAKSIMAR_CORE_LIB.retrieval_backend import build_retrieval_readonly_tool_route
 
+from tools.jarvis_live_runtime.jarvis_skill_visibility import select_skills_for_tools
 from tools.jarvis_live_runtime.project_workspace_tools import (
     _safe_project_path,
     _tracked_project_files,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_HELPER_CONFIDENCE_THRESHOLD = 0.70
+_HELPER_PROJECT_DIAGNOSTIC_INTENTS = {
+    "code_debug",
+    "test_debug",
+    "project_debug",
+    "project_diagnostics",
+    "failure_analysis",
+}
+
+
+def _decision_agent_roles(decision: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(decision.get("selected_agent_roles") or ())
+
+
+def _decision_skills(decision: dict[str, Any]) -> tuple[str, ...]:
+    selected_tools = tuple(decision.get("selected_tools", ()))
+    selected_agent_roles = _decision_agent_roles(decision)
+    return tuple(decision.get("selected_skills", ())) or select_skills_for_tools(selected_tools, selected_agent_roles)
+
+
+def _merge_tools(existing: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(existing + extra))
+
+
+def _helper_truth_read_only_plan(user_text: str, context: Any) -> dict[str, Any] | None:
+    decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    if not isinstance(decision, dict):
+        return None
+    helper_used = bool(decision.get("helper_model_used")) or str(decision.get("selection_source", "")).casefold() == "helper_model"
+    if not helper_used or bool(decision.get("fallback_used", False)):
+        return None
+    confidence = float(decision.get("helper_decision_confidence", 0.0) or 0.0)
+    if confidence and confidence < _HELPER_CONFIDENCE_THRESHOLD:
+        return None
+
+    lowered = user_text.casefold()
+    selected_tools = tuple(decision.get("selected_tools", ()))
+    selected_agent_roles = _decision_agent_roles(decision)
+    selected_skills = _decision_skills(decision)
+    normalized_intent = str(decision.get("normalized_intent", "")).casefold()
+    if not (selected_tools or selected_agent_roles or selected_skills):
+        return None
+
+    intent_family = ""
+    risk_class = str(decision.get("risk_class", "read_only") or "read_only")
+    reason = str(decision.get("selected_tool_reason", "") or decision.get("reason", "") or "helper semantic plan")
+
+    if any(str(tool).startswith("external_adapter:") for tool in selected_tools) or "external_agent_tooling" in selected_skills:
+        intent_family = "AGENT_ENGINE_COMPARISON" if normalized_intent == "agent_engine_comparison" else "EXTERNAL_ADAPTER_SELECTION"
+        risk_class = "risk_gate"
+    elif (
+        _asks_wsl_project_diagnostic_question(lowered)
+        or "build_wsl_project_diagnostics_read_model" in selected_tools
+        or "pytest_report_read" in selected_tools
+        or normalized_intent in _HELPER_PROJECT_DIAGNOSTIC_INTENTS
+    ):
+        intent_family = "WSL_PROJECT_DIAGNOSTICS"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_git_status",
+                "pytest_report_read",
+                "repo_search",
+                "read_file_snippet",
+                "read_file_outline",
+                "build_wsl_project_diagnostics_read_model",
+            ),
+        )
+    elif "memory_federation" in selected_skills:
+        intent_family = "MEMORY_RECALL"
+    elif "build_jarvis_agent_catalog_read_model" in selected_tools:
+        intent_family = "AGENT_CATALOG"
+    elif "build_jarvis_skill_visibility_read_model" in selected_tools:
+        intent_family = "SKILL_VISIBILITY"
+    elif "build_jarvis_live_tool_catalog_read_model" in selected_tools:
+        intent_family = "TOOL_CATALOG"
+    elif {"repo_git_status", "build_project_workspace_read_model"} & set(selected_tools):
+        intent_family = "PROJECT_STATUS"
+    elif {"repo_search", "read_file_snippet", "read_file_outline"} & set(selected_tools):
+        intent_family = "PROJECT_SEARCH"
+    else:
+        return None
+
+    return {
+        "intent_family": intent_family,
+        "confidence": max(confidence, 0.78),
+        "selected_tools": selected_tools,
+        "selected_agent_roles": selected_agent_roles,
+        "selected_skills": selected_skills,
+        "reason": reason or "helper semantic plan selected read-only workflow",
+        "read_only": True,
+        "execution_allowed": False,
+        "needs_ollama": False,
+        "evidence_required": True,
+        "evidence_count": 0,
+        "risk_class": risk_class,
+        "proposal_only": True,
+        "semantic_candidates": (),
+        "tool_route": {},
+    }
 
 def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> dict[str, Any]:
     lowered = user_text.casefold()
     intent_family = "CONVERSATION"
     selected_tools: tuple[str, ...] = ()
     selected_agent_roles: tuple[str, ...] = ()
+    selected_skills: tuple[str, ...] = ()
     tool_route = None
     confidence = 0.0
     reason = "ordinary conversation"
@@ -29,6 +131,10 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
     risk_class = "read_only"
     proposal_only = True
     semantic_candidates: tuple[dict[str, Any], ...] = ()
+    helper_truth_plan = _helper_truth_read_only_plan(user_text, context)
+
+    if helper_truth_plan is not None:
+        return helper_truth_plan
 
     if _asks_action_request(lowered):
         intent_family = "ACTION_REQUEST"
@@ -254,12 +360,19 @@ def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> d
         risk_class = str(external_route["risk_class"])
         proposal_only = bool(external_route["proposal_only"])
         semantic_candidates = tuple(external_route["candidate_matches"])
+    orchestration_decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    if not selected_agent_roles and isinstance(orchestration_decision, dict):
+        selected_agent_roles = _decision_agent_roles(orchestration_decision)
+    selected_skills = (
+        tuple(orchestration_decision.get("selected_skills", ())) if isinstance(orchestration_decision, dict) else ()
+    ) or select_skills_for_tools(selected_tools, selected_agent_roles)
 
     return {
         "intent_family": intent_family,
         "confidence": confidence,
         "selected_tools": selected_tools,
         "selected_agent_roles": selected_agent_roles,
+        "selected_skills": selected_skills,
         "reason": reason,
         "read_only": True,
         "execution_allowed": False,

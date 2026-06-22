@@ -286,7 +286,7 @@ class JarvisBrainContext:
 
 
 def _helper_classifier_enabled() -> bool:
-    value = os.environ.get("JARVIS_HELPER_CLASSIFIER_ENABLED", "false").strip().casefold()
+    value = os.environ.get("JARVIS_HELPER_CLASSIFIER_ENABLED", "true").strip().casefold()
     return value not in {"0", "false", "no", "off", "disabled"}
 
 
@@ -336,6 +336,27 @@ def _selected_model_role_from_orchestration_decision(decision: dict[str, Any]) -
     }
 
 
+def _normalize_orchestration_decision_payload(decision: dict[str, Any]) -> dict[str, Any]:
+    # Lazy import prevents a circular import with helper orchestration wiring.
+    from tools.jarvis_live_runtime.jarvis_skill_visibility import select_skills_for_tools
+
+    normalized = dict(decision)
+    selected_agent_roles = tuple(
+        normalized.get("selected_agent_roles")
+        or normalized.get("selected_agents")
+        or ()
+    )
+    selected_tools = tuple(normalized.get("selected_tools", ()))
+    selected_skills = tuple(normalized.get("selected_skills", ())) or select_skills_for_tools(
+        selected_tools,
+        selected_agent_roles,
+    )
+    normalized["selected_agent_roles"] = selected_agent_roles
+    normalized["selected_skills"] = selected_skills
+    normalized.pop("selected_agents", None)
+    return normalized
+
+
 def _build_orchestration_decision_with_optional_helper(
     user_text: str,
     *,
@@ -351,6 +372,7 @@ def _build_orchestration_decision_with_optional_helper(
                 require_live_helper=False,
             )
             if isinstance(helper_payload, dict):
+                helper_payload = _normalize_orchestration_decision_payload(helper_payload)
                 selected_model_role = _selected_model_role_from_orchestration_decision(helper_payload)
                 return {
                     **helper_payload,
@@ -365,6 +387,7 @@ def _build_orchestration_decision_with_optional_helper(
             )
             fallback["helper_model_status"] = "fallback_after_error"
             fallback["helper_error"] = f"{exc.__class__.__name__}: {exc}"
+            fallback = _normalize_orchestration_decision_payload(fallback)
             fallback["selected_model_role"] = _selected_model_role_from_orchestration_decision(fallback)
             return fallback
 
@@ -375,6 +398,7 @@ def _build_orchestration_decision_with_optional_helper(
         helper_model_called=False,
     )
     fallback["helper_model_status"] = "disabled"
+    fallback = _normalize_orchestration_decision_payload(fallback)
     fallback["selected_model_role"] = _selected_model_role_from_orchestration_decision(fallback)
     return fallback
 
