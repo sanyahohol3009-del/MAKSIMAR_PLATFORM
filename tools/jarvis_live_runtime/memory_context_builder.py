@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from tools.jarvis_live_runtime import memory_context_sources
 from tools.jarvis_live_runtime.jarvis_personality_policy import build_jarvis_personality_prompt
@@ -283,6 +284,101 @@ class JarvisBrainContext:
         }
 
 
+
+def _helper_classifier_enabled() -> bool:
+    value = os.environ.get("JARVIS_HELPER_CLASSIFIER_ENABLED", "false").strip().casefold()
+    return value not in {"0", "false", "no", "off", "disabled"}
+
+
+
+def _call_helper_orchestration_probe(
+    user_text: str,
+    *,
+    input_channel: str,
+    owner_identity_claim: OwnerIdentityClaim,
+    require_live_helper: bool = False,
+) -> dict[str, Any]:
+    # Lazy import prevents circular import:
+    # memory_context_builder -> helper_model_orchestration_probe
+    # -> jarvis_skill_visibility -> memory_context_builder.
+    from tools.jarvis_live_runtime.helper_model_orchestration_probe import (
+        build_helper_model_orchestration_probe,
+    )
+
+    return build_helper_model_orchestration_probe(
+        user_text,
+        input_channel=input_channel,
+        owner_identity_claim=owner_identity_claim,
+        require_live_helper=require_live_helper,
+    )
+
+
+def _selected_model_role_from_orchestration_decision(decision: dict[str, Any]) -> dict[str, Any]:
+    raw = decision.get("selected_model_role")
+    if isinstance(raw, dict) and raw.get("model_id"):
+        result = dict(raw)
+        role_id = str(result.get("role_id") or result.get("selected_model_role") or "jarvis_chat_model")
+        result["role_id"] = role_id
+        result["selected_model_role"] = str(result.get("selected_model_role") or role_id)
+        result["model_id"] = str(result.get("model_id") or decision.get("selected_model_id") or "jarvis:chat8b")
+        result["status"] = str(result.get("status") or "available")
+        result["load_policy"] = str(result.get("load_policy") or "keep_warm")
+        return result
+
+    role_id = str(decision.get("selected_model_role_id") or "jarvis_chat_model")
+    model_id = str(decision.get("selected_model_id") or "jarvis:chat8b")
+    return {
+        "role_id": role_id,
+        "selected_model_role": role_id,
+        "model_id": model_id,
+        "status": "available",
+        "load_policy": "keep_warm",
+    }
+
+
+def _build_orchestration_decision_with_optional_helper(
+    user_text: str,
+    *,
+    input_channel: str,
+    owner_identity_claim: OwnerIdentityClaim,
+) -> dict[str, Any]:
+    if _helper_classifier_enabled():
+        try:
+            helper_payload = _call_helper_orchestration_probe(
+                user_text,
+                input_channel=input_channel,
+                owner_identity_claim=owner_identity_claim,
+                require_live_helper=False,
+            )
+            if isinstance(helper_payload, dict):
+                selected_model_role = _selected_model_role_from_orchestration_decision(helper_payload)
+                return {
+                    **helper_payload,
+                    "selected_model_role": selected_model_role,
+                }
+        except Exception as exc:
+            fallback = build_autonomous_tool_model_decision(
+                user_text,
+                input_channel=input_channel,
+                owner_identity_claim=owner_identity_claim,
+                helper_model_called=True,
+            )
+            fallback["helper_model_status"] = "fallback_after_error"
+            fallback["helper_error"] = f"{exc.__class__.__name__}: {exc}"
+            fallback["selected_model_role"] = _selected_model_role_from_orchestration_decision(fallback)
+            return fallback
+
+    fallback = build_autonomous_tool_model_decision(
+        user_text,
+        input_channel=input_channel,
+        owner_identity_claim=owner_identity_claim,
+        helper_model_called=False,
+    )
+    fallback["helper_model_status"] = "disabled"
+    fallback["selected_model_role"] = _selected_model_role_from_orchestration_decision(fallback)
+    return fallback
+
+
 def build_jarvis_live_brain_context(
     user_text: str,
     state: dict[str, Any] | None = None,
@@ -295,12 +391,16 @@ def build_jarvis_live_brain_context(
     request_plan = _plan_jarvis_request(user_text) if request_plan is None else request_plan
     route_mode = request_plan["route_mode"]
     claim = owner_identity_claim if owner_identity_claim is not None else build_owner_identity_claim_for_terminal()
-    orchestration_decision = build_autonomous_tool_model_decision(
+    orchestration_decision = _build_orchestration_decision_with_optional_helper(
         user_text,
         input_channel=input_channel,
         owner_identity_claim=claim,
     )
-    selected_model_role = dict(orchestration_decision["selected_model_role"])
+    selected_model_role = _selected_model_role_from_orchestration_decision(orchestration_decision)
+    orchestration_decision = {
+        **orchestration_decision,
+        "selected_model_role": selected_model_role,
+    }
     admission_status = _build_admission_status(selected_model_role)
     retrieved_snippets, retrieval_surfaces_used = _retrieve_memory_federation_snippets(
         user_text,

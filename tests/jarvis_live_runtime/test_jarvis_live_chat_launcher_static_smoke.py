@@ -95,3 +95,11 @@ def test_activation_hook_exposes_manual_chat_function_without_autostart() -> Non
     assert "chat()" in default_branch
     assert "jarvis_live_chat_launcher.py" in default_branch
     assert "jarvis_live_start.py --background" not in default_branch
+
+
+def test_chat_launcher_auto_enables_helper_classifier_env() -> None:
+    source = _source()
+
+    assert '"JARVIS_HELPER_CLASSIFIER_ENABLED", "true"' in source
+    assert '"JARVIS_HELPER_MODEL", "jarvis:helper3b"' in source
+    assert "env=env" in source
