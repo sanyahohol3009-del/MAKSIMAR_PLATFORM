@@ -555,6 +555,13 @@ def stream_jarvis_live_brain_response(
         "ollama_called": False,
         "evidence_count": 0,
         "timeout_policy": timeout_policy,
+        "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+        "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+        "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+        "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+        "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+        "selection_source": context.orchestration_decision.get("selection_source", ""),
+        "fallback_used": context.orchestration_decision.get("fallback_used", False),
     }
     if read_only_tool_plan["intent_family"] != "CONVERSATION":
         yield {

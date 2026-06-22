@@ -534,3 +534,47 @@ def test_stream_start_and_done_include_memory_federation_fields(monkeypatch) -> 
     assert "mempalace_status" in done
     assert done["canonical_memory_write_allowed"] is False
     assert done["pc_control_allowed"] is False
+
+
+def test_helper_classifier_path_is_wired_into_context(monkeypatch) -> None:
+    import tools.jarvis_live_runtime.memory_context_builder as builder
+
+    def fake_helper_probe(text, *, input_channel, owner_identity_claim, require_live_helper=False):
+        return {
+            "helper_model_status": "ready",
+            "helper_model_called": True,
+            "helper_model_used": True,
+            "helper_model_id": "jarvis:helper3b",
+            "helper_decision_confidence": 0.91,
+            "fallback_used": False,
+            "selection_source": "helper_model",
+            "selected_model_role_id": "jarvis_chat_model",
+            "selected_model_id": "jarvis:chat8b",
+            "selected_agents": ("tool_selector_agent",),
+            "selected_tools": ("external_adapter:mcp_python_sdk",),
+            "selected_skills": (),
+            "selected_model_role": {
+                "role_id": "jarvis_chat_model",
+                "selected_model_role": "jarvis_chat_model",
+                "model_id": "jarvis:chat8b",
+                "status": "available",
+                "load_policy": "keep_warm",
+            },
+        }
+
+    monkeypatch.setenv("JARVIS_HELPER_CLASSIFIER_ENABLED", "true")
+    monkeypatch.setattr(builder, "_call_helper_orchestration_probe", fake_helper_probe)
+    monkeypatch.setattr(builder, "_retrieve_memory_federation_snippets", lambda *args, **kwargs: ((), ("session_memory",)))
+    monkeypatch.setattr(builder, "_retrieve_local_chat_memory_snippets", lambda *args, **kwargs: ())
+
+    context = builder.build_jarvis_live_brain_context(
+        "проверь инструменты и скажи что ты думаешь что делать дальше",
+        state=builder._load_session_state(),
+        request_plan={"request_route": "project_memory", "route_mode": "DEEP", "retrieval_mode": "deep_memory"},
+    )
+
+    assert context.orchestration_decision["helper_model_called"] is True
+    assert context.orchestration_decision["helper_model_used"] is True
+    assert context.orchestration_decision["helper_model_id"] == "jarvis:helper3b"
+    assert context.orchestration_decision["selection_source"] == "helper_model"
+    assert context.orchestration_decision["selected_tools"] == ("external_adapter:mcp_python_sdk",)

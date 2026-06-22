@@ -79,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
 def _launcher_env() -> dict[str, str]:
     env = dict(os.environ)
     env.setdefault("JARVIS_LIVE_FAST_FALLBACK_ENABLED", "0")
+    env.setdefault("JARVIS_HELPER_CLASSIFIER_ENABLED", "true")
+    env.setdefault("JARVIS_HELPER_MODEL", "jarvis:helper3b")
     env.setdefault("OLLAMA_KEEP_ALIVE", "30m")
     env.setdefault("OLLAMA_NUM_PARALLEL", "1")
     env.setdefault("OLLAMA_MAX_LOADED_MODELS", "1")

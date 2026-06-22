@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 import time
+import textwrap
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +49,11 @@ _IN_CODE_BLOCK = False
 _CODE_BUFFER = ""
 _LAST_ROUTE_EVENT: dict[str, Any] = {}
 _LAST_OPERATOR_EVENT: dict[str, Any] = {}
+_LAST_USER_TEXT = ""
+_LAST_SEMANTIC_ROUTE_EVENT: dict[str, Any] = {}
+_OPERATOR_WORK_ACTIVE = False
+_OPERATOR_WORK_BUFFER = ""
+_OPERATOR_WORK_PENDING = ""
 
 ANSI = {
     "reset": "\033[0m",
@@ -223,12 +230,15 @@ def _get_user_input() -> str:
     try:
         print()
         print(_color("green", "╭─[") + _color("bold", " АЛЕКСАНДР ") + _color("green", "]─"))
-        line = input(_color("green", "╰─► ")).strip()
+        # Важно: сам prompt ввода должен быть без ANSI/рамочных символов.
+        # Иначе readline неверно считает длину строки: нельзя нормально
+        # стирать хвосты и листать историю длинных команд.
+        line = input("JARVIS> ").strip()
         if line in {"/m", "/multi"}:
             print(_color("yellow", "  [ Режим вставки. Введи '/end' отдельной строкой ]"))
             pasted: list[str] = []
             while True:
-                part = input(_color("dim", "  │ "))
+                part = input("... ")
                 if part.strip() == "/end":
                     break
                 pasted.append(part)
@@ -256,35 +266,68 @@ def _color(name: str, text: str) -> str:
 
 
 def _term_width() -> int:
-    return max(70, min(120, shutil.get_terminal_size((100, 24)).columns - 2))
+    # Автоподстройка под реальную ширину терминала.
+    # Без верхнего cap на 120: если окно широкое — рамка шире.
+    # Минимум нужен, чтобы узкие терминалы не ломали таблицу полностью.
+    return max(60, shutil.get_terminal_size((100, 24)).columns)
 
 
 def _box(title: str, lines: tuple[str, ...] | list[str], color: str = "cyan") -> None:
     clean_lines = [str(line) for line in lines if str(line).strip()]
-    width = _term_width()
-    print(_color(color, f"\n╭─ {title} " + "─" * max(0, width - len(title) - 5) + "╮"))
+    term_width = _term_width()
+    inner_width = max(40, term_width - 4)
+    safe_title = str(title).strip()
+
+    title_prefix = f"╭─ {safe_title} "
+    top_width = inner_width + 2
+    top_fill = max(1, top_width - _display_width(title_prefix))
+    print(_color(color, title_prefix + "─" * top_fill + "╮"))
+
     for line in clean_lines:
-        for part in _wrap_line(line, width - 4):
-            print(_color(color, "│ ") + part.ljust(width - 2) + _color(color, "│"))
-    print(_color(color, "╰" + "─" * width + "╯"))
+        for part in _wrap_line(line, inner_width):
+            print(_color(color, "│ ") + _pad_to_display_width(part, inner_width) + _color(color, " │"))
+
+    print(_color(color, "╰" + "─" * top_width + "╯"))
 
 
 def _wrap_line(text: str, width: int) -> tuple[str, ...]:
     value = str(text)
-    if len(value) <= width:
-        return (value,)
-    parts: list[str] = []
-    current = value
-    while len(current) > width:
-        cut = current.rfind(" ", 0, width)
-        if cut <= 0:
-            cut = width
-        parts.append(current[:cut].rstrip())
-        current = current[cut:].lstrip()
-    if current:
-        parts.append(current)
-    return tuple(parts)
+    if not value:
+        return ("",)
 
+    # Сначала нормализуем частые длинные цепочки, чтобы tools/adapters не
+    # превращались в одну нечитаемую строку.
+    value = value.replace(",", ", ")
+
+    wrapped = textwrap.wrap(
+        value,
+        width=max(20, width),
+        break_long_words=True,
+        break_on_hyphens=False,
+        replace_whitespace=False,
+        drop_whitespace=True,
+    )
+    return tuple(wrapped or ("",))
+
+
+
+def _display_width(value: str) -> int:
+    width = 0
+    for char in str(value):
+        if unicodedata.combining(char):
+            continue
+        if unicodedata.east_asian_width(char) in {"F", "W"}:
+            width += 2
+        else:
+            width += 1
+    return width
+
+
+def _pad_to_display_width(value: str, width: int) -> str:
+    current = _display_width(value)
+    if current >= width:
+        return value
+    return value + " " * (width - current)
 
 def _chat_mode() -> str:
     return _CHAT_RENDER_MODE
@@ -751,11 +794,12 @@ def _get_json(url: str) -> dict[str, Any] | None:
 
 
 def _print_stream_response(text: str) -> None:
-    global _IN_CODE_BLOCK, _CODE_BUFFER, _LAST_ROUTE_EVENT, _LAST_OPERATOR_EVENT
+    global _IN_CODE_BLOCK, _CODE_BUFFER, _LAST_ROUTE_EVENT, _LAST_OPERATOR_EVENT, _LAST_USER_TEXT
     _IN_CODE_BLOCK = False
     _CODE_BUFFER = ""
     _LAST_ROUTE_EVENT = {}
     _LAST_OPERATOR_EVENT = {}
+    _LAST_USER_TEXT = text
     if not text:
         print("stream_error=empty_text")
         return
@@ -932,8 +976,448 @@ def _print_file_change_event(event: dict[str, Any]) -> None:
         print(_color("green", f"+ {item}"))
 
 
+
+def _maybe_render_operator_work_chunk(chunk: str) -> bool:
+    global _OPERATOR_WORK_ACTIVE, _OPERATOR_WORK_BUFFER, _OPERATOR_WORK_PENDING
+
+    text = str(chunk)
+
+    if _OPERATOR_WORK_ACTIVE:
+        _OPERATOR_WORK_BUFFER += text
+        return True
+
+    candidate = _OPERATOR_WORK_PENDING + text
+    stripped = candidate.lstrip()
+
+    if stripped.startswith("[work]"):
+        _OPERATOR_WORK_ACTIVE = True
+        _OPERATOR_WORK_PENDING = ""
+        _OPERATOR_WORK_BUFFER = stripped
+        return True
+
+    # Stream can split the marker: "[", "[w", "[wo", "[wor", "[work".
+    # We swallow only exact marker prefixes, not arbitrary text.
+    if stripped and "[work]".startswith(stripped) and len(stripped) < len("[work]"):
+        _OPERATOR_WORK_PENDING = candidate
+        return True
+
+    _OPERATOR_WORK_PENDING = ""
+    return False
+
+
+def _flush_operator_work_buffer() -> None:
+    global _OPERATOR_WORK_ACTIVE, _OPERATOR_WORK_BUFFER, _OPERATOR_WORK_PENDING
+
+    _OPERATOR_WORK_PENDING = ""
+
+    if not _OPERATOR_WORK_ACTIVE:
+        return
+
+    text = _OPERATOR_WORK_BUFFER.strip()
+    _OPERATOR_WORK_ACTIVE = False
+    _OPERATOR_WORK_BUFFER = ""
+
+    if text:
+        _render_operator_work_text(text)
+
+
+def _render_operator_work_text(text: str) -> None:
+    facts = _operator_work_facts(text)
+    rows = _operator_work_rows(text)
+
+    fact_lines = []
+    for key in (
+        "intent",
+        "tools",
+        "selected_agent_roles",
+        "risk_class",
+        "reason",
+        "read_only",
+        "execution_allowed",
+        "proposal_only",
+        "direct_execution_allowed",
+        "canonical_write_allowed",
+        "pc_control_allowed",
+        "shell_execution_enabled",
+    ):
+        value = facts.get(key, "")
+        if value:
+            fact_lines.append(f"{key}={value}")
+
+    if fact_lines:
+        _box("ФАКТЫ", fact_lines, "cyan")
+
+    available_rows = []
+    closed_rows = []
+    proposal_rows = []
+
+    for row in rows:
+        status = row.get("status", "") or row.get("availability_status", "")
+        enabled = row.get("selection_enabled", "")
+        name = row.get("name", "")
+        line = _format_operator_row(row)
+
+        if "proposal_only" in status or "proposal_only" in row.get("raw", ""):
+            proposal_rows.append(line)
+        elif enabled == "false" or "unavailable" in status or "disabled" in row.get("raw", ""):
+            closed_rows.append(line)
+        else:
+            available_rows.append(line)
+
+    if available_rows:
+        _box("НАЙДЕНО / ДОСТУПНО", available_rows, "green")
+
+    if proposal_rows:
+        _box("PROPOSAL ONLY", proposal_rows, "yellow")
+
+    if closed_rows:
+        _box("ЗАКРЫТО / НЕДОСТУПНО", closed_rows, "red")
+
+    policy = _operator_block_policy(_LAST_USER_TEXT, facts, rows, _LAST_SEMANTIC_ROUTE_EVENT)
+    if policy["show_fact_summary"]:
+        fact_summary_lines = _operator_work_opinion(facts, rows)
+        if fact_summary_lines:
+            _box("ВЫВОД ПО ФАКТАМ", fact_summary_lines, "magenta")
+    if policy["show_next_recommendation"]:
+        next_recommendation_lines = _operator_work_next_steps(facts, rows)
+        if next_recommendation_lines:
+            _box("РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP", next_recommendation_lines, "cyan")
+
+
+def _operator_work_facts(text: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+
+    for key in (
+        "intent",
+        "tools",
+        "selected_agent_roles",
+        "risk_class",
+        "read_only",
+        "execution_allowed",
+        "proposal_only",
+        "direct_execution_allowed",
+        "canonical_write_allowed",
+        "pc_control_allowed",
+        "shell_execution_enabled",
+    ):
+        match = re.search(rf"\b{re.escape(key)}=([^\n]+?)(?=\s+[a-zA-Z_][a-zA-Z0-9_]*=|\s+[A-Z][A-Za-z /():-]+:|$)", text)
+        if match:
+            result[key] = match.group(1).strip()
+
+    reason_match = re.search(r"\breason=([^\n]+?)(?=\s+Selected external adapters:|\s+Semantic registry candidates:|\s+Legacy alias status:|$)", text)
+    if reason_match:
+        result["reason"] = reason_match.group(1).strip()
+
+    return result
+
+
+def _operator_work_rows(text: str) -> list[dict[str, str]]:
+    headers = (
+        "Project / repo read-only:",
+        "Retrieval read-only:",
+        "Memory / history read-only:",
+        "Model/status read-only:",
+        "Roadmap / safety read-only:",
+        "External adapters (runtime-grounded):",
+        "Action tools:",
+        "Project workspace tools:",
+        "Repo read/search/outline/import graph:",
+        "Memory/history/retrieval:",
+        "Tests/roadmap/drift:",
+        "Model/runtime status:",
+        "External adapters:",
+        "Action proposals:",
+        "PC-control status:",
+        "Selected external adapters:",
+        "Semantic registry candidates:",
+        "Legacy alias status:",
+    )
+
+    normalized = text
+    for header in headers:
+        normalized = normalized.replace(header, f"\n## {header}\n")
+
+    rows: list[dict[str, str]] = []
+    current_section = "general"
+
+    for block in normalized.split("\n## "):
+        block = block.strip()
+        if not block:
+            continue
+
+        if "\n" in block and block.split("\n", 1)[0].endswith(":"):
+            current_section, body = block.split("\n", 1)
+            current_section = current_section.rstrip(":")
+        else:
+            body = block
+
+        parts = re.split(r"\s+-\s+", " " + body)
+        for part in parts[1:]:
+            item = part.strip()
+            if not item:
+                continue
+            tokens = item.split()
+            if not tokens:
+                continue
+
+            name = tokens[0].strip()
+            raw = " ".join(tokens[1:]).strip()
+
+            # Обрезаем хвосты, если в raw попал следующий заголовок.
+            for header in headers:
+                raw = raw.split(header, 1)[0].strip()
+
+            if not name:
+                continue
+
+            row = {"section": current_section, "name": name, "raw": raw}
+            for key, value in re.findall(r"\b([a-zA-Z_][a-zA-Z0-9_]*)=([^\s]+)", raw):
+                row[key] = value
+            if "read_only" in raw and "read_only" not in row:
+                row["mode"] = "read_only"
+            if "disabled" in raw and "status" not in row:
+                row["status"] = "disabled"
+            rows.append(row)
+
+    return rows
+
+
+def _format_operator_row(row: dict[str, str]) -> str:
+    name = row.get("name", "")
+    section = row.get("section", "")
+    status = row.get("status", "") or row.get("availability_status", "") or row.get("effective_status", "")
+    enabled = row.get("selection_enabled", "")
+    imported = row.get("import_probe_passed", "")
+    risk = row.get("risk_class", "")
+    blocked = row.get("blocked_reason", "")
+    mode = row.get("mode", "")
+
+    parts = [f"{name}"]
+    if section:
+        parts.append(f"section={section}")
+    if status:
+        parts.append(f"status={status}")
+    if enabled:
+        parts.append(f"selection_enabled={enabled}")
+    if imported:
+        parts.append(f"import_probe_passed={imported}")
+    if risk:
+        parts.append(f"risk={risk}")
+    if mode:
+        parts.append(f"mode={mode}")
+    if blocked:
+        parts.append(f"blocked={blocked}")
+
+    if len(parts) == 1 and row.get("raw"):
+        parts.append(row["raw"])
+
+    return " | ".join(parts)
+
+
+def _operator_work_opinion(facts: dict[str, str], rows: list[dict[str, str]]) -> tuple[str, ...]:
+    """Return no canned opinion lines.
+
+    Operator work renderer is factual only. Semantic opinion must come from
+    the model/brain response, not from terminal templates.
+    """
+    del facts, rows
+    return ()
+
+
+def _operator_user_requested_opinion() -> bool:
+    return _operator_block_policy(_LAST_USER_TEXT, {}, [])["show_fact_summary"]
+
+
+def _operator_user_requested_next_step() -> bool:
+    return _operator_block_policy(_LAST_USER_TEXT, {}, [])["show_next_recommendation"]
+
+
+def _operator_block_policy(
+    user_text: str,
+    facts: dict[str, str],
+    rows: list[dict[str, str]],
+    route_event: dict[str, Any] | None = None,
+) -> dict[str, bool]:
+    """Decide which operator blocks should be rendered.
+
+    The policy is semantic and grounded:
+    - user wording controls summary/next-step intent;
+    - helper/router metadata may strengthen semantic classification;
+    - no fact summary or recommendation is shown without grounded input.
+    """
+
+    route_event = route_event if isinstance(route_event, dict) else {}
+    lowered = str(user_text or "").casefold()
+
+    intent_family = str(route_event.get("intent_family") or "").casefold()
+    selection_source = str(route_event.get("selection_source") or "").casefold()
+    risk_class = str(route_event.get("risk_class") or "").casefold()
+    selected_tools = tuple(str(item).casefold() for item in _as_tuple(route_event.get("selected_tools", ())))
+    selected_agents = tuple(str(item).casefold() for item in _as_tuple(route_event.get("selected_agent_roles", ())))
+
+    helper_used = bool(route_event.get("helper_model_used")) or selection_source == "helper_model"
+    evidence_required = bool(route_event.get("evidence_required", False))
+    retrieved_count = int(route_event.get("retrieved_snippet_count", 0) or 0)
+
+    has_facts = bool(facts)
+    has_rows = bool(rows)
+    has_tools = bool(selected_tools)
+    has_grounded_input = bool(
+        has_facts
+        or has_rows
+        or retrieved_count > 0
+        or evidence_required
+        or has_tools
+        or intent_family not in {"", "conversation", "unknown"}
+    )
+
+    asks_for_opinion = _semantic_user_asks_fact_summary(lowered)
+    asks_for_next = _semantic_user_asks_next_recommendation(lowered)
+
+    helper_summary_signal = bool(
+        helper_used
+        and has_grounded_input
+        and (
+            "summary" in intent_family
+            or "status" in intent_family
+            or "comparison" in intent_family
+            or "selection" in intent_family
+            or "catalog" in intent_family
+            or "tool_selector_agent" in selected_agents
+            or "architect_agent" in selected_agents
+        )
+        and asks_for_opinion
+    )
+
+    helper_next_signal = bool(
+        helper_used
+        and has_grounded_input
+        and asks_for_next
+        and (
+            "roadmap" in intent_family
+            or "project" in intent_family
+            or "selection" in intent_family
+            or "catalog" in intent_family
+            or any(tool.startswith("external_adapter:") for tool in selected_tools)
+            or "architect_agent" in selected_agents
+            or "tool_selector_agent" in selected_agents
+        )
+    )
+
+    risky_or_proposal = bool(
+        risk_class in {"risk_gate", "safe_direct"}
+        or any("operator_proposal" == tool for tool in selected_tools)
+        or any(tool.startswith("external_adapter:") for tool in selected_tools)
+    )
+
+    show_fact_summary = bool(has_grounded_input and (asks_for_opinion or helper_summary_signal))
+    show_next_recommendation = bool(has_grounded_input and (asks_for_next or helper_next_signal))
+
+    row_statuses = tuple(
+        str(row.get("status") or row.get("availability_status") or "").casefold()
+        for row in rows
+        if isinstance(row, dict)
+    )
+    fact_values = {str(key).casefold(): str(value).casefold() for key, value in facts.items()}
+
+    show_available = any(status in {"available", "ready", "enabled", "ok"} for status in row_statuses)
+    show_unavailable = any(
+        status in {"unavailable", "disabled", "missing", "blocked", "error", "not_available"}
+        for status in row_statuses
+    )
+    show_blocked = any(
+        key.endswith("_allowed") and value in {"false", "0", "no", "disabled", "blocked"}
+        for key, value in fact_values.items()
+    ) or risk_class == "risk_gate"
+    show_closed = bool(
+        show_blocked
+        or fact_values.get("proposal_only") in {"true", "1", "yes", "enabled"}
+        or fact_values.get("execution_allowed") in {"false", "0", "no", "disabled", "blocked"}
+        or fact_values.get("canonical_write_allowed") in {"false", "0", "no", "disabled", "blocked"}
+        or fact_values.get("canonical_memory_write_allowed") in {"false", "0", "no", "disabled", "blocked"}
+        or fact_values.get("pc_control_allowed") in {"false", "0", "no", "disabled", "blocked"}
+    )
+
+    return {
+        # Backward-compatible truth/facts block keys.
+        "show_facts": bool(has_grounded_input),
+        "show_available": bool(show_available),
+        "show_unavailable": bool(show_unavailable),
+        "show_closed": bool(show_closed),
+        "show_blocked": bool(show_blocked),
+        "show_proposal_only": bool(fact_values.get("proposal_only") in {"true", "1", "yes", "enabled"}),
+        # Semantic optional blocks.
+        "show_fact_summary": show_fact_summary,
+        "show_next_recommendation": show_next_recommendation,
+        # Backward-compatible alias for older callers/tests.
+        "show_next_step": show_next_recommendation,
+        # Extra semantic metadata.
+        "show_proposal_context": risky_or_proposal,
+        "helper_semantic_used": helper_used,
+    }
+
+
+def _semantic_user_asks_fact_summary(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "что думаешь",
+            "что ты думаешь",
+            "как думаешь",
+            "думаешь",
+            "как считаешь",
+            "твоё мнение",
+            "твое мнение",
+            "мнение",
+            "оцени",
+            "оценка",
+            "вывод",
+            "дай вывод",
+            "сделай вывод",
+            "по фактам",
+            "разбери",
+            "проанализируй",
+        )
+    )
+
+
+def _semantic_user_asks_next_recommendation(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "что дальше",
+            "что делать дальше",
+            "что делать",
+            "следующий шаг",
+            "следующие шаги",
+            "как дальше",
+            "как продолжить",
+            "продолжить",
+            "куда дальше",
+            "что подключать дальше",
+            "что включить дальше",
+            "что надо включить",
+            "рекомендац",
+            "предложи",
+            "план дальше",
+        )
+    )
+
+
+def _operator_work_next_steps(facts: dict[str, str], rows: list[dict[str, str]]) -> tuple[str, ...]:
+    """Return no canned next-step lines.
+
+    Next-step content must be generated by the model/brain layer from grounded
+    context and policy, not hardcoded in the terminal renderer.
+    """
+    del facts, rows
+    return ()
+
+
 def _render_chunk(chunk: str) -> None:
     global _IN_CODE_BLOCK, _CODE_BUFFER
+    if not _IN_CODE_BLOCK and _maybe_render_operator_work_chunk(chunk):
+        return
     _CODE_BUFFER += chunk
     if "```" not in _CODE_BUFFER:
         _print_text_fragment(_CODE_BUFFER)
@@ -962,6 +1446,7 @@ def _print_text_fragment(text: str) -> None:
 
 
 def _print_stream_metadata(event: dict[str, Any]) -> None:
+    _flush_operator_work_buffer()
     _finish_thinking_if_active()
     print()
 
@@ -1074,6 +1559,8 @@ def _finish_thinking_if_active() -> None:
 
 
 def _print_stream_start_trace(event: dict[str, Any]) -> None:
+    global _LAST_SEMANTIC_ROUTE_EVENT
+    _LAST_SEMANTIC_ROUTE_EVENT = {}
     print(
         _color("dim", "[trace] ")
         + f"route={event.get('request_route', '')} "
@@ -1085,6 +1572,8 @@ def _print_stream_start_trace(event: dict[str, Any]) -> None:
 
 
 def _print_stream_route_trace(event: dict[str, Any]) -> None:
+    global _LAST_SEMANTIC_ROUTE_EVENT
+    _LAST_SEMANTIC_ROUTE_EVENT = dict(event)
     print(
         _color("dim", "[trace] ")
         + f"context={_seconds(event.get('context_elapsed_seconds', ''))} "

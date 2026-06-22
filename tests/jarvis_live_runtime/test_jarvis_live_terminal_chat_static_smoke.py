@@ -77,7 +77,7 @@ def test_terminal_chat_supports_operator_commands() -> None:
     assert "/stream" in source
     assert "/command" in source
     assert "/exit" in source
-    assert "╰─► " in source
+    assert "JARVIS>" in source
     assert "JARVIS terminal ready" in source
 
 
@@ -208,8 +208,12 @@ def test_terminal_chat_prints_tool_catalog_and_operator_work_trace(capsys) -> No
     )
 
     output = capsys.readouterr().out
-    assert "read_tools=repo_search, read_file_snippet" in output
-    assert "proposal_tools=pytest_run_proposal, n8n_adapter_proposal" in output
+    assert "read_tools=" in output
+    assert "repo_search" in output
+    assert "read_file_snippet" in output
+    assert "proposal_tools=" in output
+    assert "pytest_run_proposal" in output
+    assert "n8n_adapter_proposal" in output
     assert "[infra] operator" in output
     assert "intent=PROJECT_SEARCH" in output
     assert "tools=repo_search, read_file_snippet" in output
@@ -569,3 +573,305 @@ def test_terminal_truth_ui_v2_operator_shell_commands_are_present() -> None:
     assert "target.relative_to(root)" in source
     assert "AGENTS_INFO" not in source
     assert "SKILLS_INFO" not in source
+
+
+def test_terminal_truth_ui_formats_operator_work_text(capsys) -> None:
+    module = _module()
+    module._render_chunk(
+        "[work] intent=TOOL_CATALOG tools=repo_search,read_file_snippet "
+        "read_only=true execution_allowed=false "
+        "Project / repo read-only: - repo_search status=available read_only "
+        "- read_file_snippet status=available read_only "
+        "Action tools: - pytest_run_proposal status=proposal_only disabled "
+        "direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+
+    module._flush_operator_work_buffer()
+
+    output = capsys.readouterr().out
+    assert "ФАКТЫ" in output
+    assert "НАЙДЕНО / ДОСТУПНО" in output
+    assert "PROPOSAL ONLY" in output
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
+    assert "repo_search" in output
+    assert "read_file_snippet" in output
+    assert "pytest_run_proposal" in output
+    assert "execution_allowed=false" in output
+    assert "прямое выполнение закрыто" not in output
+
+
+def test_terminal_truth_ui_buffers_full_operator_work_until_done(capsys) -> None:
+    module = _module()
+
+    module._render_chunk(
+        "[work] intent=EXTERNAL_ADAPTER_SELECTION tools=build_adapter "
+        "read_only=true execution_allowed=false Selected external adapters: "
+        "- external_adapter:mcp_python_sdk status=available selection_enabled=true "
+    )
+    partial = capsys.readouterr().out
+    assert "ФАКТЫ" not in partial
+    assert "external_adapter:mcp_python_sdk" not in partial
+
+    module._render_chunk(
+        "Semantic registry candidates: - external_adapter:autogen status=legacy_unavailable "
+        "selection_enabled=false blocked_reason=legacy_alias_requires_importable_autogen_runtime "
+        "direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+    module._LAST_USER_TEXT = "проверь инструменты и дай мнение что дальше"
+    module._print_stream_metadata({"selected_model_id": "jarvis:chat8b"})
+
+    output = capsys.readouterr().out
+    assert "ФАКТЫ" in output
+    assert "НАЙДЕНО / ДОСТУПНО" in output
+    assert "ЗАКРЫТО / НЕДОСТУПНО" in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
+    assert "external_adapter:mcp_python_sdk" in output
+    assert "external_adapter:autogen" in output
+    assert "approval-backed operator runner" not in output
+
+
+def test_terminal_truth_ui_formats_opinion_only_when_requested(capsys) -> None:
+    module = _module()
+
+    work = (
+        "[work] intent=TOOL_CATALOG tools=repo_search,read_file_snippet "
+        "read_only=true execution_allowed=false "
+        "Project / repo read-only: - repo_search status=available read_only "
+        "Action tools: - pytest_run_proposal status=proposal_only disabled "
+        "direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+
+    module._LAST_USER_TEXT = "проверь инструменты"
+    module._render_operator_work_text(work)
+    output = capsys.readouterr().out
+    assert "НАЙДЕНО / ДОСТУПНО" in output
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ" not in output
+
+    module._LAST_USER_TEXT = "проверь инструменты и дай мнение что дальше"
+    module._render_operator_work_text(work)
+    output = capsys.readouterr().out
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
+
+
+def test_terminal_truth_ui_semantic_block_policy(capsys) -> None:
+    module = _module()
+
+    work = (
+        "[work] intent=EXTERNAL_ADAPTER_SELECTION tools=build_adapter "
+        "read_only=true execution_allowed=false proposal_only=true "
+        "Selected external adapters: - external_adapter:mcp_python_sdk "
+        "status=available selection_enabled=true import_probe_passed=true risk_class=risk_gate "
+        "Semantic registry candidates: - external_adapter:autogen "
+        "availability_status=legacy_unavailable selection_enabled=false "
+        "direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+
+    module._LAST_USER_TEXT = "проверь инструменты я сегодня буду подключать много агентов инструментов и скилов"
+    module._render_operator_work_text(work)
+    output = capsys.readouterr().out
+    assert "ФАКТЫ" in output
+    assert "НАЙДЕНО / ДОСТУПНО" in output
+    assert "ЗАКРЫТО / НЕДОСТУПНО" in output
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ" not in output
+
+    module._LAST_USER_TEXT = "проверь инструменты и дай вывод что найдено и что закрыто"
+    module._render_operator_work_text(work)
+    output = capsys.readouterr().out
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ" not in output
+
+    module._LAST_USER_TEXT = "проверь инструменты и скажи что делать дальше"
+    module._render_operator_work_text(work)
+    output = capsys.readouterr().out
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
+
+
+def test_terminal_truth_ui_semantic_policy_deepseek_claude_cases() -> None:
+    module = _module()
+    facts = {
+        "execution_allowed": "false",
+        "proposal_only": "true",
+        "canonical_write_allowed": "false",
+        "pc_control_allowed": "false",
+    }
+    rows = [{"name": "external_adapter:mcp_python_sdk", "status": "available"}]
+
+    factual = module._operator_block_policy(
+        "проверь инструменты я сегодня буду подключать тебе много агентов инструментов и скилов",
+        facts,
+        rows,
+    )
+    assert factual["show_facts"] is True
+    assert factual["show_available"] is True
+    assert factual["show_closed"] is True
+    assert factual["show_fact_summary"] is False
+    assert factual["show_next_recommendation"] is False
+
+    opinion = module._operator_block_policy(
+        "проверь инструменты и скажи что ты думаешь",
+        facts,
+        rows,
+    )
+    assert opinion["show_fact_summary"] is True
+    assert opinion["show_next_recommendation"] is False
+
+    next_only = module._operator_block_policy(
+        "проверь инструменты и скажи что делать дальше",
+        facts,
+        rows,
+    )
+    assert next_only["show_fact_summary"] is False
+    assert next_only["show_next_recommendation"] is True
+
+    both = module._operator_block_policy(
+        "проверь инструменты и скажи что ты думаешь что делать дальше",
+        facts,
+        rows,
+    )
+    assert both["show_fact_summary"] is True
+    assert both["show_next_recommendation"] is True
+
+
+def test_terminal_truth_ui_detects_work_marker_split_across_chunks(capsys) -> None:
+    module = _module()
+    module._LAST_USER_TEXT = "проверь инструменты и скажи что ты думаешь что делать дальше"
+
+    module._render_chunk("[wo")
+    first = capsys.readouterr().out
+    assert first == ""
+
+    module._render_chunk(
+        "rk] intent=EXTERNAL_ADAPTER_SELECTION tools=build_adapter "
+        "read_only=true execution_allowed=false proposal_only=true "
+        "Selected external adapters: - external_adapter:mcp_python_sdk "
+        "status=available selection_enabled=true import_probe_passed=true risk_class=risk_gate "
+        "Semantic registry candidates: - external_adapter:autogen "
+        "availability_status=legacy_unavailable selection_enabled=false "
+        "direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
+    )
+    second = capsys.readouterr().out
+    assert second == ""
+
+    module._print_stream_metadata({"selected_model_id": "jarvis:chat8b"})
+    output = capsys.readouterr().out
+
+    assert "ФАКТЫ" in output
+    assert "НАЙДЕНО / ДОСТУПНО" in output
+    assert "ЗАКРЫТО / НЕДОСТУПНО" in output
+    assert "ВЫВОД ПО ФАКТАМ" not in output
+    assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
+    assert "external_adapter:mcp_python_sdk" in output
+    assert "external_adapter:autogen" in output
+
+
+def test_operator_block_policy_uses_helper_semantic_route_without_template_spam() -> None:
+    module = _module()
+
+    facts = {
+        "execution_allowed": "false",
+        "proposal_only": "true",
+        "pc_control_allowed": "false",
+    }
+    rows = [
+        {
+            "name": "external_adapter:mcp_python_sdk",
+            "status": "available",
+            "availability_status": "available",
+        }
+    ]
+    helper_route = {
+        "helper_model_called": True,
+        "helper_model_used": True,
+        "selection_source": "helper_model",
+        "helper_model_id": "jarvis:helper3b",
+        "helper_decision_confidence": 0.91,
+        "intent_family": "EXTERNAL_ADAPTER_SELECTION",
+        "selected_tools": ("external_adapter:mcp_python_sdk",),
+        "selected_agent_roles": ("tool_selector_agent",),
+        "risk_class": "risk_gate",
+        "evidence_required": True,
+        "retrieved_snippet_count": 1,
+    }
+
+    plain = module._operator_block_policy(
+        "проверь инструменты",
+        facts,
+        rows,
+        helper_route,
+    )
+    assert plain["helper_semantic_used"] is True
+    assert plain["show_fact_summary"] is False
+    assert plain["show_next_recommendation"] is False
+
+    opinion = module._operator_block_policy(
+        "проверь инструменты и скажи что ты думаешь",
+        facts,
+        rows,
+        helper_route,
+    )
+    assert opinion["show_fact_summary"] is True
+    assert opinion["show_next_recommendation"] is False
+
+    next_step = module._operator_block_policy(
+        "проверь инструменты и скажи что делать дальше",
+        facts,
+        rows,
+        helper_route,
+    )
+    assert next_step["show_fact_summary"] is False
+    assert next_step["show_next_recommendation"] is True
+
+    both = module._operator_block_policy(
+        "проверь инструменты и скажи что ты думаешь что делать дальше",
+        facts,
+        rows,
+        helper_route,
+    )
+    assert both["show_fact_summary"] is True
+    assert both["show_next_recommendation"] is True
+
+
+def test_operator_block_policy_does_not_show_summary_without_grounded_input() -> None:
+    module = _module()
+
+    empty_route = {
+        "helper_model_called": True,
+        "helper_model_used": True,
+        "selection_source": "helper_model",
+        "intent_family": "CONVERSATION",
+        "selected_tools": (),
+        "selected_agent_roles": (),
+        "evidence_required": False,
+        "retrieved_snippet_count": 0,
+    }
+
+    policy = module._operator_block_policy(
+        "скажи что ты думаешь и что делать дальше",
+        {},
+        [],
+        empty_route,
+    )
+
+    assert policy["helper_semantic_used"] is True
+    assert policy["show_fact_summary"] is False
+    assert policy["show_next_recommendation"] is False
+
+
+def test_terminal_operator_renderer_does_not_emit_canned_summary_or_next_steps() -> None:
+    source = _source()
+
+    forbidden = (
+        "Вывод: чтение и выбор инструментов уже работают",
+        "Вывод: выполнение включено",
+        "Canonical write закрыт — это нормально для текущей стадии.",
+        "PC-control закрыт — управление ПК ещё не включено.",
+        "approval-backed operator runner",
+        "Для proposal-only tools нужен proposal",
+        "Закрытые adapters сначала проверять",
+    )
+    for marker in forbidden:
+        assert marker not in source

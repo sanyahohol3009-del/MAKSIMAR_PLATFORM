@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import signal
 import subprocess
 import sys
@@ -38,6 +39,17 @@ def write_heartbeat(status: str = "alive") -> None:
     ensure_runtime_layout()
     payload = build_heartbeat(source="process_supervisor", status=status)
     atomic_write_json(RUNTIME_HEARTBEAT_FILE, payload)
+
+
+def build_environment() -> dict[str, str]:
+    """Return environment for the Control Plane child process."""
+    env = dict(os.environ)
+    env.setdefault("JARVIS_HELPER_CLASSIFIER_ENABLED", "true")
+    env.setdefault("JARVIS_HELPER_MODEL", "jarvis:helper3b")
+    env.setdefault("OLLAMA_KEEP_ALIVE", "30m")
+    env.setdefault("OLLAMA_NUM_PARALLEL", "1")
+    env.setdefault("OLLAMA_MAX_LOADED_MODELS", "1")
+    return env
 
 
 def build_command() -> list[str]:
@@ -93,6 +105,7 @@ def main() -> None:
             cmd,
             cwd=str(ROOT),
             text=True,
+            env=build_environment(),
         )
 
         while True:
