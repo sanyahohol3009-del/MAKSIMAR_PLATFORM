@@ -67,7 +67,7 @@ def _is_forbidden_chat_template_response(response_text: str) -> bool:
 
 
 def _repair_forbidden_chat_template_response(context: JarvisBrainContext) -> str:
-    if _asks_template_style_complaint(context.user_text.casefold()):
+    if _looks_like_keyboard_layout_noise(context.user_text) or _asks_template_style_complaint(context.user_text.casefold()):
         return _answer_conversation_style_complaint_if_grounded(context)
     return (
         "Сбил шаблонный ответ и не сохраняю его как нормальную память. "

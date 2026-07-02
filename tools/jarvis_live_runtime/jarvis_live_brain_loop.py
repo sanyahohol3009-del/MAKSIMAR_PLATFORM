@@ -8,6 +8,7 @@ import time
 import asyncio
 import ast
 import shutil
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
@@ -366,6 +367,42 @@ DANGEROUS_MEMORY_FLAGS = {
 }
 
 
+def _operator_capability_flags() -> dict[str, Any]:
+    return {
+        "read_project_allowed": True,
+        "read_memory_allowed": True,
+        "read_history_allowed": True,
+        "read_mempalace_allowed": True,
+        "read_n8n_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "bounded_test_allowed": True,
+        "n8n_workflow_read_allowed": True,
+        "n8n_workflow_proposal_allowed": True,
+        "mempalace_read_allowed": True,
+        "mempalace_query_allowed": True,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
 
 
 def run_jarvis_live_brain_once(
@@ -398,8 +435,13 @@ def run_jarvis_live_brain_once(
         final_payload = _command_error_payload(user_text, "command_timeout_or_cancelled")
     except KeyboardInterrupt:
         final_payload = _command_error_payload(user_text, "command_cancelled_by_operator")
-    except Exception:
-        final_payload = _command_error_payload(user_text, "command_runtime_error")
+    except Exception as exc:
+        final_payload = {
+            **_command_error_payload(user_text, "command_runtime_error"),
+            "error_kind": "command_runtime_error",
+            "error_message": f"{exc.__class__.__name__}: {exc}",
+            "exception_traceback": traceback.format_exc(),
+        }
     if not final_payload:
         final_payload = {
             "event": "done",
@@ -458,7 +500,10 @@ def run_jarvis_live_brain_once(
         "ollama_called": final_payload.get("ollama_called"),
         "output_truncated": bool(final_payload.get("output_truncated", output_truncated)),
         "output_truncation_reason": str(final_payload.get("output_truncation_reason", output_truncation_reason)),
+        **_operator_capability_flags(),
     }
+
+
 
 
 def stream_jarvis_live_brain_response(
@@ -494,6 +539,7 @@ def stream_jarvis_live_brain_response(
         "mempalace_status": memory_status["mempalace_status"],
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
+        **_operator_capability_flags(),
     }
 
     context_started_at = time.monotonic()
@@ -507,8 +553,75 @@ def stream_jarvis_live_brain_response(
         request_plan=request_plan,
         session_id=session_id,
     )
-    transport_plan = _ollama_transport_plan(context.route_mode, context.to_prompt(), clean_text)
     read_only_tool_plan = _build_read_only_tool_plan(clean_text, context)
+    if _looks_like_keyboard_layout_noise(clean_text):
+        response_text = _answer_conversation_style_complaint_if_grounded(context)
+        if not response_text:
+            response_text = (
+                "Похоже, раскладка поехала. Я не буду лепить заготовку вместо смысла: "
+                "повтори фразу нормальной раскладкой, и я разберу её по делу."
+            )
+        response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+            response_text,
+            grounded_answer=True,
+        )
+        _append_assistant_and_summarize(state, response_text, context)
+        yield {
+            **_event("done", response_text=response_text, route_mode=context.route_mode),
+            "request_route": context.request_route,
+            "retrieval_mode": context.retrieval_mode,
+            "ollama_model_used": "",
+            "thinking_chunk_count": 0,
+            "answer_chunk_count": len(tuple(_sentence_chunks(response_text))),
+            "stream_chunk_count": len(tuple(_sentence_chunks(response_text))),
+            "had_thinking": False,
+            "retrieved_snippet_count": len(context.retrieved_snippets),
+            "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
+            "retrieval_surfaces_used": context.retrieval_surfaces_used,
+            "memory_federation_available": context.memory_federation_status["memory_federation_available"],
+            "mempalace_status": context.memory_federation_status["mempalace_status"],
+            "selected_model_role": context.selected_model_role["selected_model_role"],
+            "selected_model_id": context.selected_model_role["model_id"],
+            "selected_model_status": context.selected_model_role["status"],
+            "admission_allowed": context.admission_status["admission_allowed"],
+            "resource_gate_surface": context.admission_status["resource_gate_surface"],
+            "session_memory_path": str(SESSION_STATE_PATH),
+            "local_chat_memory_path": str(_session_turn_log_path()),
+            "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+            "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+            "memory_truth_contract": _memory_truth_contract(),
+            "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+            "canonical_memory_write_allowed": False,
+            "pc_control_allowed": False,
+            "context_elapsed_seconds": round(time.monotonic() - context_started_at, 4),
+            "ollama_elapsed_seconds": 0.0,
+            "first_chunk_elapsed_seconds": 0.0,
+            "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+            "grounded_answer": True,
+            "ollama_called": False,
+            "output_truncated": output_truncated,
+            "output_truncation_reason": output_truncation_reason,
+            "error_kind": "",
+            "error_message": "",
+            "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+            "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+            "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+            "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+            "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+            "selection_source": context.orchestration_decision.get("selection_source", ""),
+            "fallback_used": context.orchestration_decision.get("fallback_used", False),
+            **_operator_capability_flags(),
+        }
+        return
+    transport_plan = _ollama_transport_plan(context.route_mode, context.to_prompt(), clean_text)
     timeout_policy = timeout_policy_for_model_role(context.selected_model_role["selected_model_role"])
     effective_ollama_timeout_seconds = (
         float(ollama_timeout_seconds)
@@ -566,6 +679,7 @@ def stream_jarvis_live_brain_response(
         "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
         "selection_source": context.orchestration_decision.get("selection_source", ""),
         "fallback_used": context.orchestration_decision.get("fallback_used", False),
+        **_operator_capability_flags(),
     }
     if read_only_tool_plan["intent_family"] != "CONVERSATION":
         yield {
@@ -585,16 +699,207 @@ def stream_jarvis_live_brain_response(
             "ollama_called": False,
             "pc_control_allowed": False,
             "canonical_memory_write_allowed": False,
+            **_operator_capability_flags(),
         }
 
+    if read_only_tool_plan["intent_family"] == "AGENT_CATALOG":
+        response_text = _format_grounded_agent_catalog_answer()
+        for chunk in _sentence_chunks(response_text):
+            yield _event("chunk", text=chunk, route_mode=context.route_mode)
+        response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+            response_text,
+            grounded_answer=True,
+        )
+        _append_assistant_and_summarize(state, response_text, context)
+        yield {
+            **_event("done", response_text=response_text, route_mode=context.route_mode),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "grounded_answer": True,
+            "ollama_called": False,
+            "output_truncated": output_truncated,
+            "output_truncation_reason": output_truncation_reason,
+            "pc_control_allowed": False,
+            "canonical_memory_write_allowed": False,
+            **_operator_capability_flags(),
+        }
+        return
+
     guarded_response = _guarded_local_response(clean_text, context, read_only_tool_plan)
+    guarded_project_read_answer = bool(
+        guarded_response is not None
+        and read_only_tool_plan.get("intent_family") != "MEMORY_RECALL"
+        and context.request_route == "project_memory"
+        and context.retrieval_mode != "session_only"
+    )
     if guarded_response is not None:
+        if (
+            read_only_tool_plan["intent_family"] in {
+                "MEMORY_RECALL",
+            }
+            or
+            _asks_weather_or_current_facts(clean_text.casefold())
+            or (
+                read_only_tool_plan["intent_family"] == "CONVERSATION"
+                and _answer_conversation_style_complaint_if_grounded(context) is not None
+            )
+        ) and not guarded_project_read_answer:
+            response_text = guarded_response
+            response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+                response_text,
+                grounded_answer=True,
+            )
+            _append_assistant_and_summarize(state, response_text, context)
+            yield {
+                **_event("done", response_text=response_text, route_mode=context.route_mode),
+                "request_route": context.request_route,
+                "retrieval_mode": context.retrieval_mode,
+                "ollama_model_used": "",
+                "thinking_chunk_count": 0,
+                "answer_chunk_count": len(tuple(_sentence_chunks(response_text))),
+                "stream_chunk_count": len(tuple(_sentence_chunks(response_text))),
+                "had_thinking": False,
+                "retrieved_snippet_count": len(context.retrieved_snippets),
+                "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
+                "retrieval_surfaces_used": context.retrieval_surfaces_used,
+                "memory_federation_available": context.memory_federation_status["memory_federation_available"],
+                "mempalace_status": context.memory_federation_status["mempalace_status"],
+                "selected_model_role": context.selected_model_role["selected_model_role"],
+                "selected_model_id": context.selected_model_role["model_id"],
+                "selected_model_status": context.selected_model_role["status"],
+                "admission_allowed": context.admission_status["admission_allowed"],
+                "resource_gate_surface": context.admission_status["resource_gate_surface"],
+                "session_memory_path": str(SESSION_STATE_PATH),
+                "local_chat_memory_path": str(_session_turn_log_path()),
+                "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+                "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+                "memory_truth_contract": _memory_truth_contract(),
+                "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+                "canonical_memory_write_allowed": False,
+                "pc_control_allowed": False,
+                "context_elapsed_seconds": context_elapsed_seconds,
+                "ollama_elapsed_seconds": 0.0,
+                "first_chunk_elapsed_seconds": 0.0,
+                "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+                "intent_family": read_only_tool_plan["intent_family"],
+                "selected_tools": read_only_tool_plan["selected_tools"],
+                "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+                "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+                "read_only": read_only_tool_plan["read_only"],
+                "execution_allowed": read_only_tool_plan["execution_allowed"],
+                "evidence_required": read_only_tool_plan["evidence_required"],
+                "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+                "grounded_answer": True,
+                "ollama_called": False,
+                "output_truncated": output_truncated,
+                "output_truncation_reason": output_truncation_reason,
+                "error_kind": "",
+                "error_message": "",
+                "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+                "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+                "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+                "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+                "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+                "selection_source": context.orchestration_decision.get("selection_source", ""),
+                "fallback_used": context.orchestration_decision.get("fallback_used", False),
+                **_operator_capability_flags(),
+            }
+            return
+    if read_only_tool_plan["intent_family"] in {"EXTERNAL_ADAPTER_SELECTION", "EXTERNAL_AGENT_WORKFLOW_PLAN", "AGENT_ENGINE_COMPARISON"}:
+        response_text = _deterministic_grounded_answer_fallback(
+            clean_text,
+            read_only_tool_plan,
+            guarded_response or "",
+        )
+        for chunk in _sentence_chunks(response_text):
+            yield _event("chunk", text=chunk, route_mode=context.route_mode)
+        response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+            response_text,
+            grounded_answer=True,
+        )
+        _append_assistant_and_summarize(state, response_text, context)
+        yield {
+            **_event("done", response_text=response_text, route_mode=context.route_mode),
+            "request_route": context.request_route,
+            "retrieval_mode": context.retrieval_mode,
+            "ollama_model_used": "",
+            "thinking_chunk_count": 0,
+            "answer_chunk_count": len(tuple(_sentence_chunks(response_text))),
+            "stream_chunk_count": len(tuple(_sentence_chunks(response_text))),
+            "had_thinking": False,
+            "retrieved_snippet_count": len(context.retrieved_snippets),
+            "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
+            "retrieval_surfaces_used": context.retrieval_surfaces_used,
+            "memory_federation_available": context.memory_federation_status["memory_federation_available"],
+            "mempalace_status": context.memory_federation_status["mempalace_status"],
+            "selected_model_role": context.selected_model_role["selected_model_role"],
+            "selected_model_id": context.selected_model_role["model_id"],
+            "selected_model_status": context.selected_model_role["status"],
+            "admission_allowed": context.admission_status["admission_allowed"],
+            "resource_gate_surface": context.admission_status["resource_gate_surface"],
+            "session_memory_path": str(SESSION_STATE_PATH),
+            "local_chat_memory_path": str(_session_turn_log_path()),
+            "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+            "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+            "memory_truth_contract": _memory_truth_contract(),
+            "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+            "canonical_memory_write_allowed": False,
+            "pc_control_allowed": False,
+            "context_elapsed_seconds": context_elapsed_seconds,
+            "ollama_elapsed_seconds": 0.0,
+            "first_chunk_elapsed_seconds": 0.0,
+            "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+            "grounded_answer": True,
+            "ollama_called": False,
+            "output_truncated": output_truncated,
+            "output_truncation_reason": output_truncation_reason,
+            "error_kind": "",
+            "error_message": "",
+            "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+            "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+            "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+            "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+            "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+            "selection_source": context.orchestration_decision.get("selection_source", ""),
+            "fallback_used": context.orchestration_decision.get("fallback_used", False),
+            **_operator_capability_flags(),
+        }
+        return
+    if read_only_tool_plan["intent_family"] == "TOOL_CATALOG":
+        catalog = build_jarvis_live_tool_catalog_read_model()
+        catalog_answer = _format_tool_catalog_answer(catalog, clean_text)
+        read_only_tool_plan["observation_payload"] = {
+            **catalog,
+            "technical_response_text": catalog_answer,
+        }
         grounded_prompt = _build_grounded_answer_prompt(
             clean_text,
             context,
             read_only_tool_plan,
-            guarded_response,
+            catalog_answer,
         )
+        grounding_metadata = (
+            f"GROUNDING_INTENT_FAMILY: {read_only_tool_plan.get('intent_family')}\n"
+            f"GROUNDING_SELECTED_TOOLS: {','.join(read_only_tool_plan.get('selected_tools', ())) }\n"
+            f"GROUNDING_SELECTED_AGENT_ROLES: {','.join(read_only_tool_plan.get('selected_agent_roles', ())) }\n"
+            f"GROUNDING_READ_ONLY: {str(bool(read_only_tool_plan.get('read_only', True))).lower()}\n"
+            f"GROUNDING_EXECUTION_ALLOWED: {str(bool(read_only_tool_plan.get('execution_allowed', False))).lower()}\n"
+            f"GROUNDING_EVIDENCE_REQUIRED: {str(bool(read_only_tool_plan.get('evidence_required', True))).lower()}\n\n"
+        )
+        grounded_prompt = grounding_metadata + grounded_prompt
         grounded_chunks: list[str] = []
         grounded_thinking_chunks: list[str] = []
         grounded_errors: list[dict[str, Any]] = []
@@ -606,6 +911,7 @@ def stream_jarvis_live_brain_response(
         for model_id in _candidate_model_ids_for_context(context):
             streamed = False
             reasoning_state = {"inside_reasoning": False}
+
             for event in _stream_ollama_model(
                 model_id,
                 grounded_prompt,
@@ -623,7 +929,10 @@ def stream_jarvis_live_brain_response(
                     visible_text = _filter_reasoning_chunk(str(event["text"]), reasoning_state)
                     if visible_text:
                         if not grounded_chunks:
-                            grounded_first_chunk_elapsed_seconds = round(time.monotonic() - stream_started_at, 4)
+                            grounded_first_chunk_elapsed_seconds = round(
+                                time.monotonic() - stream_started_at,
+                                4,
+                            )
                         grounded_chunks.append(visible_text)
                         yield {**event, "text": visible_text}
                 elif event["event"] == "done":
@@ -641,6 +950,225 @@ def stream_jarvis_live_brain_response(
                     }
                     grounded_errors.append(error_event)
                     yield error_event
+
+            if streamed and grounded_chunks:
+                break
+
+        response_text = _sanitize_model_output("".join(grounded_chunks)).strip()
+        error_kind = ""
+        error_message = ""
+        ollama_called = bool(grounded_chunks)
+        if not response_text:
+            if grounded_errors:
+                error_kind = str(grounded_errors[-1].get("error_kind", "ollama_stream_error"))
+                error_message = str(grounded_errors[-1].get("error_message", "ollama stream returned an error"))
+            elif grounded_thinking_chunks:
+                error_kind = "ollama_thinking_without_final_response"
+                error_message = "model produced thinking but no final response for grounded answer"
+            else:
+                error_kind = "ollama_empty_response"
+                model_for_error = grounded_empty_model_id or grounded_model_used or context.selected_model_role["model_id"]
+                error_message = f"ollama_empty_response model={model_for_error}"
+            response_text = _deterministic_grounded_answer_fallback(
+                clean_text,
+                read_only_tool_plan,
+                catalog_answer,
+            )
+            for chunk in _sentence_chunks(response_text):
+                yield _event("chunk", text=chunk, route_mode=context.route_mode)
+            ollama_called = False
+        elif _is_forbidden_chat_template_response(response_text):
+            response_text = _repair_forbidden_chat_template_response(context)
+            error_kind = "template_response_filtered"
+            error_message = "model returned a repeated generic chat template; local guard replaced it"
+        response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+            response_text,
+            grounded_answer=True,
+        )
+        _append_assistant_and_summarize(state, response_text, context)
+        yield {
+            **_event("done", response_text=response_text, route_mode=context.route_mode),
+            **grounded_completion_event,
+            "request_route": context.request_route,
+            "retrieval_mode": context.retrieval_mode,
+            "ollama_model_used": grounded_model_used,
+            "thinking_chunk_count": len(grounded_thinking_chunks),
+            "answer_chunk_count": len(grounded_chunks) if ollama_called else len(tuple(_sentence_chunks(response_text))),
+            "stream_chunk_count": len(grounded_thinking_chunks) + (len(grounded_chunks) if ollama_called else len(tuple(_sentence_chunks(response_text)))),
+            "had_thinking": bool(grounded_thinking_chunks),
+            "retrieved_snippet_count": len(context.retrieved_snippets),
+            "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
+            "retrieval_surfaces_used": context.retrieval_surfaces_used,
+            "memory_federation_available": context.memory_federation_status["memory_federation_available"],
+            "mempalace_status": context.memory_federation_status["mempalace_status"],
+            "selected_model_role": context.selected_model_role["selected_model_role"],
+            "selected_model_id": context.selected_model_role["model_id"],
+            "selected_model_status": context.selected_model_role["status"],
+            "admission_allowed": context.admission_status["admission_allowed"],
+            "resource_gate_surface": context.admission_status["resource_gate_surface"],
+            "session_memory_path": str(SESSION_STATE_PATH),
+            "local_chat_memory_path": str(_session_turn_log_path()),
+            "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+            "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+            "memory_truth_contract": _memory_truth_contract(),
+            "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+            "canonical_memory_write_allowed": False,
+            "pc_control_allowed": False,
+            "context_elapsed_seconds": context_elapsed_seconds,
+            "ollama_elapsed_seconds": round(time.monotonic() - grounded_ollama_started_at, 4),
+            "first_chunk_elapsed_seconds": grounded_first_chunk_elapsed_seconds,
+            "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+            "intent_family": read_only_tool_plan["intent_family"],
+            "selected_tools": read_only_tool_plan["selected_tools"],
+            "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+            "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+            "read_only": read_only_tool_plan["read_only"],
+            "execution_allowed": read_only_tool_plan["execution_allowed"],
+            "evidence_required": read_only_tool_plan["evidence_required"],
+            "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+            "grounded_answer": True,
+            "ollama_called": ollama_called,
+            "output_truncated": output_truncated,
+            "output_truncation_reason": output_truncation_reason,
+            "error_kind": error_kind,
+            "error_message": error_message,
+            "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+            "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+            "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+            "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+            "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+            "selection_source": context.orchestration_decision.get("selection_source", ""),
+            "fallback_used": context.orchestration_decision.get("fallback_used", False),
+            **_operator_capability_flags(),
+        }
+        return
+        if read_only_tool_plan["intent_family"] == "AGENT_CATALOG":
+            response_text = guarded_response
+        elif read_only_tool_plan["intent_family"] in {"EXTERNAL_ADAPTER_SELECTION", "EXTERNAL_AGENT_WORKFLOW_PLAN", "AGENT_ENGINE_COMPARISON"}:
+            response_text = _deterministic_grounded_answer_fallback(
+                clean_text,
+                read_only_tool_plan,
+                guarded_response,
+            )
+            for chunk in _sentence_chunks(response_text):
+                yield _event("chunk", text=chunk, route_mode=context.route_mode)
+            response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
+                response_text,
+                grounded_answer=True,
+            )
+            _append_assistant_and_summarize(state, response_text, context)
+            yield {
+                **_event("done", response_text=response_text, route_mode=context.route_mode),
+                "request_route": context.request_route,
+                "retrieval_mode": context.retrieval_mode,
+                "ollama_model_used": "",
+                "thinking_chunk_count": 0,
+                "answer_chunk_count": len(tuple(_sentence_chunks(response_text))),
+                "stream_chunk_count": len(tuple(_sentence_chunks(response_text))),
+                "had_thinking": False,
+                "retrieved_snippet_count": len(context.retrieved_snippets),
+                "local_chat_memory_snippet_count": len(context.local_chat_memory_snippets),
+                "retrieval_surfaces_used": context.retrieval_surfaces_used,
+                "memory_federation_available": context.memory_federation_status["memory_federation_available"],
+                "mempalace_status": context.memory_federation_status["mempalace_status"],
+                "selected_model_role": context.selected_model_role["selected_model_role"],
+                "selected_model_id": context.selected_model_role["model_id"],
+                "selected_model_status": context.selected_model_role["status"],
+                "admission_allowed": context.admission_status["admission_allowed"],
+                "resource_gate_surface": context.admission_status["resource_gate_surface"],
+                "session_memory_path": str(SESSION_STATE_PATH),
+                "local_chat_memory_path": str(_session_turn_log_path()),
+                "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
+                "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
+                "memory_truth_contract": _memory_truth_contract(),
+                "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+                "canonical_memory_write_allowed": False,
+                "pc_control_allowed": False,
+                "context_elapsed_seconds": context_elapsed_seconds,
+                "ollama_elapsed_seconds": 0.0,
+                "first_chunk_elapsed_seconds": 0.0,
+                "total_elapsed_seconds": round(time.monotonic() - stream_started_at, 4),
+                "intent_family": read_only_tool_plan["intent_family"],
+                "selected_tools": read_only_tool_plan["selected_tools"],
+                "selected_agent_roles": read_only_tool_plan.get("selected_agent_roles", ()),
+                "selected_skills": read_only_tool_plan.get("selected_skills", ()),
+                "read_only": read_only_tool_plan["read_only"],
+                "execution_allowed": read_only_tool_plan["execution_allowed"],
+                "evidence_required": read_only_tool_plan["evidence_required"],
+                "evidence_count": read_only_tool_plan.get("evidence_count", 0),
+                "grounded_answer": True,
+                "ollama_called": False,
+                "output_truncated": output_truncated,
+                "output_truncation_reason": output_truncation_reason,
+                "error_kind": "",
+                "error_message": "",
+                "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
+                "helper_model_called": context.orchestration_decision.get("helper_model_called", False),
+                "helper_model_used": context.orchestration_decision.get("helper_model_used", False),
+                "helper_model_id": context.orchestration_decision.get("helper_model_id", ""),
+                "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
+                "selection_source": context.orchestration_decision.get("selection_source", ""),
+                "fallback_used": context.orchestration_decision.get("fallback_used", False),
+                **_operator_capability_flags(),
+            }
+            return
+        grounded_prompt = _build_grounded_answer_prompt(
+            clean_text,
+            context,
+            read_only_tool_plan,
+            guarded_response,
+        )
+        grounded_chunks: list[str] = []
+        grounded_thinking_chunks: list[str] = []
+        grounded_errors: list[dict[str, Any]] = []
+        grounded_completion_event: dict[str, Any] = {}
+        grounded_model_used = ""
+        grounded_first_chunk_elapsed_seconds = 0.0
+        grounded_empty_model_id = ""
+        grounded_ollama_started_at = time.monotonic()
+        for model_id in _candidate_model_ids_for_context(context):
+            streamed = False
+            reasoning_state = {"inside_reasoning": False}
+
+            for event in _stream_ollama_model(
+                model_id,
+                grounded_prompt,
+                context.route_mode,
+                timeout_seconds=effective_ollama_timeout_seconds,
+                response_mode_text=clean_text,
+            ):
+                streamed = True
+                if event["event"] == "thinking":
+                    thinking_text = str(event.get("text", ""))
+                    if thinking_text:
+                        grounded_thinking_chunks.append(thinking_text)
+                        yield event
+                elif event["event"] == "chunk":
+                    visible_text = _filter_reasoning_chunk(str(event["text"]), reasoning_state)
+                    if visible_text:
+                        if not grounded_chunks:
+                            grounded_first_chunk_elapsed_seconds = round(
+                                time.monotonic() - stream_started_at,
+                                4,
+                            )
+                        grounded_chunks.append(visible_text)
+                        yield {**event, "text": visible_text}
+                elif event["event"] == "done":
+                    grounded_completion_event = dict(event)
+                    grounded_model_used = model_id
+                    if not grounded_chunks:
+                        grounded_empty_model_id = model_id
+                    break
+                elif event["event"] == "error":
+                    error_event = {
+                        **event,
+                        "error_kind": "ollama_stream_error",
+                        "selected_model_role": context.selected_model_role["selected_model_role"],
+                        "selected_model_id": context.selected_model_role["model_id"],
+                    }
+                    grounded_errors.append(error_event)
+                    yield error_event
+
             if streamed and grounded_chunks:
                 break
 
@@ -729,8 +1257,48 @@ def stream_jarvis_live_brain_response(
             "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
             "selection_source": context.orchestration_decision.get("selection_source", ""),
             "fallback_used": context.orchestration_decision.get("fallback_used", False),
+            **_operator_capability_flags(),
         }
         return
+
+    grounded_llm_answer = guarded_project_read_answer or read_only_tool_plan.get("intent_family") in {
+        "PROJECT_STRUCTURE",
+        "PROJECT_WORKSPACE",
+        "PROJECT_STATUS",
+        "PROJECT_SEARCH",
+        "PROJECT_WIDE_DIAGNOSTICS",
+        "WSL_PROJECT_DIAGNOSTICS",
+        "CODE_DRAFT_PROPOSAL",
+        "ACTION_REQUEST",
+        "SAFETY_STATUS",
+        "MODEL_STATUS",
+        "ROADMAP_STATUS",
+        "RETRIEVAL_BACKEND_STATUS",
+        "CONTAINER_STATUS",
+        "SEMANTIC_SIMILARITY",
+        "VENDOR_STATUS",
+        "TOOL_CATALOG",
+        "AGENT_CATALOG",
+        "SKILL_VISIBILITY",
+    }
+    model_prompt = context.to_prompt()
+    if grounded_llm_answer:
+        model_prompt = _build_grounded_answer_prompt(
+            clean_text,
+            context,
+            read_only_tool_plan,
+            guarded_response or "",
+        )
+        model_prompt = (
+            f"GROUNDING_INTENT_FAMILY: {read_only_tool_plan.get('intent_family')}\n"
+            f"GROUNDING_SELECTED_TOOLS: {','.join(read_only_tool_plan.get('selected_tools', ()))}\n"
+            f"GROUNDING_SELECTED_AGENT_ROLES: {','.join(read_only_tool_plan.get('selected_agent_roles', ()))}\n"
+            f"GROUNDING_READ_ONLY: {str(read_only_tool_plan.get('read_only', False)).lower()}\n"
+            f"GROUNDING_EXECUTION_ALLOWED: {str(read_only_tool_plan.get('execution_allowed', False)).lower()}\n"
+            f"GROUNDING_EVIDENCE_REQUIRED: {str(read_only_tool_plan.get('evidence_required', False)).lower()}\n"
+            "\n"
+            f"{model_prompt}"
+        )
 
     chunks: list[str] = []
     thinking_chunks: list[str] = []
@@ -745,7 +1313,7 @@ def stream_jarvis_live_brain_response(
         reasoning_state = {"inside_reasoning": False}
         for event in _stream_ollama_model(
             model_id,
-            context.to_prompt(),
+            model_prompt,
             context.route_mode,
             timeout_seconds=effective_ollama_timeout_seconds,
             response_mode_text=clean_text,
@@ -784,14 +1352,26 @@ def stream_jarvis_live_brain_response(
             break
 
     response_text = _sanitize_model_output("".join(chunks)).strip()
+    common_ollama_called = bool(chunks)
     error_kind = ""
     error_message = ""
     if not response_text and errors:
         error_kind = str(errors[-1].get("error_kind", "ollama_stream_error"))
         error_message = str(errors[-1].get("error_message", "ollama stream returned an error"))
-        response_text = "Модельный runtime сейчас не вернул ответ. Проверь Ollama статус и выбранный wrapper."
+        if grounded_llm_answer:
+            fallback_body = guarded_response or "Локальный grounded read-model собран, но финальная модель ответа недоступна."
+            response_text = (
+                "Модель ответа недоступна, показываю технический fallback.\n"
+                f"{fallback_body}"
+            )
+            common_ollama_called = False
+        else:
+            response_text = "Модельный runtime сейчас не вернул ответ. Проверь Ollama статус и выбранный wrapper."
     elif not response_text and int(completion_event.get("tool_call_count", 0)) > 0:
-        response_text = "Модель вернула tool_call proposal; execution_allowed=false; approval_required=true."
+        response_text = (
+            "Модель вернула tool_call proposal. Читать, анализировать, делать probe и готовить sandbox-план я могу "
+            "автоматически, но прямое внешнее выполнение остаётся только по одобрению."
+        )
     elif not response_text and thinking_chunks:
         error_kind = "ollama_thinking_without_final_response"
         error_message = "model produced thinking but no final response; increase num_predict or disable thinking."
@@ -805,7 +1385,7 @@ def stream_jarvis_live_brain_response(
         error_message = "model returned a repeated generic chat template; local guard replaced it"
     response_text, output_truncated, output_truncation_reason = _apply_terminal_output_policy(
         response_text,
-        grounded_answer=False,
+        grounded_answer=grounded_llm_answer,
     )
     _append_assistant_and_summarize(state, response_text, context)
     yield {
@@ -862,8 +1442,8 @@ def stream_jarvis_live_brain_response(
         "execution_allowed": read_only_tool_plan["execution_allowed"],
         "evidence_required": read_only_tool_plan["evidence_required"],
         "evidence_count": read_only_tool_plan.get("evidence_count", len(context.retrieved_snippets)),
-        "grounded_answer": False,
-        "ollama_called": True,
+        "grounded_answer": grounded_llm_answer,
+        "ollama_called": common_ollama_called,
         "output_truncated": output_truncated,
         "output_truncation_reason": output_truncation_reason,
         "helper_model_status": context.orchestration_decision.get("helper_model_status", ""),
@@ -873,6 +1453,7 @@ def stream_jarvis_live_brain_response(
         "helper_decision_confidence": context.orchestration_decision.get("helper_decision_confidence", 0.0),
         "selection_source": context.orchestration_decision.get("selection_source", ""),
         "fallback_used": context.orchestration_decision.get("fallback_used", False),
+        **_operator_capability_flags(),
     }
 
 
@@ -1024,7 +1605,7 @@ def _format_activation_matrix_answer() -> str:
     )
 
     lines = [
-        "Activation Matrix: read_only=true; direct_execution_allowed=false; canonical_write_allowed=false; pc_control_allowed=false; phone_control_allowed=false; deployment_allowed=false.",
+        "Activation Matrix: read/analyze/select/propose/probe/sandbox=true; direct_execution_allowed=false; canonical_write_allowed=false; pc_control_allowed=false; phone_control_allowed=false; deployment_allowed=false.",
         "JARVIS остаётся senior/canonical authority. Android/iOS junior существуют как subordinate app-safe nodes, не как второй JARVIS.",
     ]
 
@@ -1050,12 +1631,80 @@ def _format_activation_matrix_answer() -> str:
     return "\n".join(lines)
 
 
+
+def _is_agent_catalog_question(text: str) -> bool:
+    lowered = str(text or "").casefold()
+    has_agent_word = any(
+        token in lowered
+        for token in ("агент", "агентов", "агенты", "agent", "agents")
+    )
+    has_catalog_intent = any(
+        token in lowered
+        for token in (
+            "каких",
+            "какие",
+            "кого",
+            "видишь",
+            "доступ",
+            "доступны",
+            "список",
+            "покажи",
+            "перечисли",
+            "catalog",
+            "list",
+        )
+    )
+    has_action_intent = any(
+        token in lowered
+        for token in (
+            "запусти",
+            "запуск",
+            "выполни",
+            "создай",
+            "измени",
+            "удали",
+            "commit",
+            "push",
+        )
+    )
+    return has_agent_word and has_catalog_intent and not has_action_intent
+
+
+def _format_grounded_agent_catalog_answer() -> str:
+    roles = (
+        "conversation_agent",
+        "architect_agent",
+        "project_coder_agent",
+        "tool_selector_agent",
+        "safety_guard_agent",
+        "action_worker_agent",
+    )
+    lines = ["Grounded agent catalog:"]
+    for role in roles:
+        lines.append(f"- {role} status=available read_only=true")
+    lines.extend(
+        (
+            "operator_mode=read_analyze_select_propose_probe_sandbox",
+            "runtime_probe_allowed=true",
+            "sandbox_execution_allowed=true",
+            "pc_control_allowed=false",
+            "core_write_allowed=false",
+            "auto_apply_allowed=false",
+            "auto_git_push_allowed=false",
+        )
+    )
+    lines.append("external_adapter_selector_agent=not_present_in_canonical_swarm_roles")
+    return "\n".join(lines)
+
+
 def _guarded_local_response(
     user_text: str,
     context: JarvisBrainContext,
     read_only_tool_plan: dict[str, Any] | None = None,
 ) -> str | None:
     lowered = user_text.casefold()
+    if _is_agent_catalog_question(user_text):
+        return _format_grounded_agent_catalog_answer()
     conversation_style_answer = _answer_conversation_style_complaint_if_grounded(context)
     if conversation_style_answer:
         return conversation_style_answer
@@ -1069,6 +1718,8 @@ def _guarded_local_response(
     )
     if grounded_tool_answer:
         return grounded_tool_answer
+    if read_only_tool_plan.get("intent_family") == "PROJECT_WORKSPACE":
+        return _format_project_structure_grounded_answer()
     project_tool_answer = _answer_project_read_tool_request(user_text)
     if project_tool_answer:
         return project_tool_answer
@@ -1077,8 +1728,8 @@ def _guarded_local_response(
         return project_workspace_answer
     if _asks_memory_recall(lowered) and not _has_stored_memory_for_recall(context):
         return (
-            "Не буду выдумывать память: в local_chat_memory/session_summary нет сохранённой записи по этому запросу. "
-            "Могу продолжить с текущего сообщения или сохранить новый факт в локальную session memory."
+        "Не буду выдумывать память: в local_chat_memory/session_summary нет сохранённой записи по этому запросу. "
+        "Могу продолжить с текущего сообщения или сохранить новый факт в локальную session memory."
         )
     if _asks_permanent_memory_write(lowered):
         return "Прямая запись в постоянную/canonical память выключена: canonical_memory_write_allowed=false. Нужен ingestion proposal, review и approval перед синхронизацией."
@@ -1130,11 +1781,20 @@ def _truncate_grounded_prompt_text(text: str, *, limit: int = 12000) -> str:
 def _permission_split_for_final_answer() -> str:
     return (
         "Автоматически разрешено: читать проект, искать файлы, смотреть outline и import graph, "
-        "делать bounded pytest-диагностику, анализировать зависимости, готовить code draft и patch proposal текстом, "
+        "делать bounded pytest-диагностику, анализировать зависимости, выбирать агенты/скилы/tools, делать runtime import probe, "
+        "runtime probe, sandbox probe, sandbox execution plan, готовить code draft и patch proposal текстом, "
         "собирать финальный ответ. Только по одобрению: запись/удаление файлов, install/download, git add/commit/push, "
         "браузерные действия и управление ПК."
     )
 
+
+
+def _selected_agent_roles_for_grounded_prompt(read_only_tool_plan: dict[str, Any]) -> str:
+    roles = tuple(read_only_tool_plan.get("selected_agent_roles", ()))
+    if read_only_tool_plan.get("intent_family") == "PROJECT_WIDE_DIAGNOSTICS":
+        required_roles = ("architect_agent", "project_coder_agent")
+        roles = tuple(dict.fromkeys(required_roles + roles))
+    return ", ".join(roles)
 
 def _build_grounded_answer_prompt(
     user_text: str,
@@ -1161,7 +1821,7 @@ def _build_grounded_answer_prompt(
             "while file mutation/install/git push/PC control require approval."
         ),
         f"INTENT_FAMILY: {read_only_tool_plan.get('intent_family', '')}",
-        f"SELECTED_AGENT_ROLES: {', '.join(read_only_tool_plan.get('selected_agent_roles', ()))}",
+        f"SELECTED_AGENT_ROLES: {_selected_agent_roles_for_grounded_prompt(read_only_tool_plan)}",
         f"SELECTED_SKILLS: {', '.join(read_only_tool_plan.get('selected_skills', ()))}",
         f"SELECTED_TOOLS: {', '.join(read_only_tool_plan.get('selected_tools', ()))}",
         f"WORKFLOW_STEPS: {', '.join(workflow_steps)}",
@@ -1177,14 +1837,29 @@ def _build_grounded_answer_prompt(
 
 def _filtered_grounded_excerpt(observations_text: str) -> tuple[str, ...]:
     hidden_markers = (
-        "execution_allowed=",
-        "proposal_only=",
-        "direct_execution_allowed=",
-        "canonical_write_allowed=",
-        "pc_control_allowed=",
-        "shell_execution_enabled=",
+        "execution_allowed=false",
+        "proposal_only=true",
+        "direct_execution_allowed=false",
+        "canonical_write_allowed=false",
+        "pc_control_allowed=false",
+        "shell_execution_enabled=false",
         "read_only=true",
     )
+    priority_markers = (
+        "operator_plan_kind=",
+        "runtime_probe_allowed=",
+        "sandbox_probe_allowed=",
+        "sandbox_execution_allowed=",
+        "project_root=",
+        "operator_capabilities=",
+        "approval_only_for=",
+        "selection_enabled=",
+        "import_probe_passed=",
+        "Legacy alias status:",
+        "proposal_path=",
+        "operator_proposal=",
+    )
+    priority_lines: list[str] = []
     lines: list[str] = []
     for raw_line in str(observations_text or "").splitlines():
         line = raw_line.strip()
@@ -1192,8 +1867,15 @@ def _filtered_grounded_excerpt(observations_text: str) -> tuple[str, ...]:
             continue
         if any(marker in line for marker in hidden_markers):
             continue
+        if any(marker in line for marker in priority_markers):
+            priority_lines.append(line)
+            continue
         lines.append(line)
-    return tuple(lines[:14])
+    merged = []
+    for line in priority_lines + lines:
+        if line not in merged:
+            merged.append(line)
+    return tuple(merged[:14])
 
 
 def _deterministic_grounded_answer_fallback(
@@ -1212,6 +1894,11 @@ def _deterministic_grounded_answer_fallback(
     lines = [
         "Модель ответа недоступна, показываю технический fallback.",
         f"Что я понял: {user_text.strip()}",
+        f"selected_agent_roles={_csv(read_only_tool_plan.get('selected_agent_roles', ())) or 'не определены'}",
+        f"selected_skills={_csv(read_only_tool_plan.get('selected_skills', ())) or 'не определены'}",
+        f"selected_tools={_csv(read_only_tool_plan.get('selected_tools', ())) or 'не определены'}",
+        f"proposal_only={str(bool(read_only_tool_plan.get('proposal_only', True))).lower()}",
+        f"execution_allowed={str(bool(read_only_tool_plan.get('execution_allowed', False))).lower()}",
         f"Выбранные агенты: {_csv(read_only_tool_plan.get('selected_agent_roles', ())) or 'не определены'}",
         f"Выбранные скилы: {_csv(read_only_tool_plan.get('selected_skills', ())) or 'не определены'}",
         f"Выбранные инструменты: {_csv(read_only_tool_plan.get('selected_tools', ())) or 'не определены'}",
@@ -1219,8 +1906,16 @@ def _deterministic_grounded_answer_fallback(
     if inspected_files:
         lines.append(f"Что проверил: {_csv(inspected_files)}")
     excerpt = _filtered_grounded_excerpt(observations_text)
+    legacy_alias_line = ""
+    for raw_line in str(observations_text or "").splitlines():
+        line = raw_line.strip()
+        if line.startswith("Legacy alias status:"):
+            legacy_alias_line = line
+            break
     if excerpt:
         lines.append("Короткий технический результат:")
+        if legacy_alias_line:
+            lines.append(legacy_alias_line)
         lines.extend(f"- {item}" for item in excerpt[:8])
     if blockers:
         lines.append("Что мешает:")
@@ -1511,11 +2206,3 @@ def _asks_safety_status_question(lowered: str) -> bool:
 def _compact_text(text: str, source: Path) -> str:
     single_line = " ".join(text.split())
     return f"{source}: {single_line[:700]}"
-
-
-
-
-
-
-
-

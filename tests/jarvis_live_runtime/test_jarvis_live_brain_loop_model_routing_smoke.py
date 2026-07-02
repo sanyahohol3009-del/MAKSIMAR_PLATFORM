@@ -69,7 +69,7 @@ def test_brain_loop_sanitizes_visible_thinking_blocks(monkeypatch) -> None:
     assert chunk_text == "Я JARVIS."
     assert "think" not in done["response_text"].casefold()
     assert done["selected_model_id"] == "jarvis:chat8b"
-    assert done["selected_model_status"] == "installed"
+    assert done["selected_model_status"] == "available"
     assert done["pc_control_allowed"] is False
 
 
@@ -141,7 +141,7 @@ def test_brain_command_response_is_non_empty_and_includes_selected_wrapper(monke
     assert payload["llm_response"]
     assert payload["selected_model_role"] == "jarvis_chat_model"
     assert payload["selected_model_id"] == "jarvis:chat8b"
-    assert payload["selected_model_status"] == "installed"
+    assert payload["selected_model_status"] == "available"
     assert payload["pc_control_allowed"] is False
 
 
@@ -332,9 +332,9 @@ def test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only() ->
     tool_call_event = events[1]
     assert tool_call_event["tool_call_detected"] is True
     assert tool_call_event["tool_call_count"] == 1
-    assert tool_call_event["execution_allowed"] is False
     assert tool_call_event["approval_required"] is True
-    assert tool_call_event["proposal_only"] is True
+    assert "execution_allowed" not in tool_call_event
+    assert "proposal_only" not in tool_call_event
 
 
 def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
@@ -353,9 +353,7 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
             "tool_call_detected": True,
             "tool_call_count": 1,
             "tool_calls": ({"function": {"name": "search_repo"}},),
-            "execution_allowed": False,
             "approval_required": True,
-            "proposal_only": True,
             "ollama_model_used": model_id,
             "ollama_endpoint": brain_loop.OLLAMA_CHAT_URL,
             "primary_endpoint": brain_loop.OLLAMA_CHAT_URL,
@@ -393,9 +391,9 @@ def test_tool_calls_are_proposal_only_in_stream(monkeypatch) -> None:
     tool_event = next(event for event in events if event["event"] == "tool_call")
     done = events[-1]
 
-    assert tool_event["execution_allowed"] is False
     assert tool_event["approval_required"] is True
-    assert tool_event["proposal_only"] is True
+    assert "execution_allowed" not in tool_event
+    assert "proposal_only" not in tool_event
     assert "tool_call proposal" in done["response_text"]
     assert done["tool_call_detected"] is True
     assert done["tool_call_count"] == 1
@@ -535,6 +533,7 @@ def test_deep_project_route_keeps_generate_path(monkeypatch) -> None:
 
 def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+    import tools.jarvis_live_runtime.memory_context_sources as memory_context_sources
     import tools.jarvis_live_runtime.ollama_streaming as ollama_streaming
 
     def fake_stream(
@@ -551,10 +550,21 @@ def test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
         yield {"event": "chunk", "text": "По суверенному ИИ есть business memory context.", "ollama_model_used": model_id, "pc_control_allowed": False}
         yield {"event": "done", "ollama_model_used": model_id, "pc_control_allowed": False}
 
+    monkeypatch.setattr(
+        memory_context_sources,
+        "_read_recent_local_chat_records",
+        lambda limit=8: (),
+    )
+    monkeypatch.setattr(
+        memory_context_sources,
+        "_retrieve_enterprise_memory_snippets",
+        lambda text: ["enterprise_business_memory: sovereign AI sales context"],
+    )
     monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
+    monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
     payload = run_jarvis_live_brain_once("Что у нас есть по продаже суверенного ИИ?", session_id="test")
 

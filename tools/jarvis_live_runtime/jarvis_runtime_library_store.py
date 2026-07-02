@@ -16,6 +16,37 @@ _CATEGORY_ALIASES = {
 _TOKEN_RE = re.compile(r"[a-z0-9_.-]+|[а-яё0-9_.-]+", flags=re.IGNORECASE)
 
 
+def _runtime_library_operator_flags() -> dict[str, Any]:
+    return {
+        "runtime_library_visible": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_library_execution_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "import_probe_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "approval_required_for_runtime_execution": True,
+        "direct_execution_allowed": False,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
+
+
 def _safe_json_load(path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -97,7 +128,7 @@ def _build_package_entry(manifest: dict[str, Any], probe_payload: dict[str, Any]
         {},
     )
     import_ok = bool(package_payload.get("import_ok", False))
-    return {
+    package_entry = {
         "package_name": manifest_id,
         "module_name": str(package_payload.get("module_name", "")).strip(),
         "version": str(package_payload.get("version", "")).strip(),
@@ -105,9 +136,8 @@ def _build_package_entry(manifest: dict[str, Any], probe_payload: dict[str, Any]
         "category": category,
         "category_label": _category_label(category),
         "runtime_only": bool(manifest.get("runtime_only", True)),
-        "execution_enabled": False,
-        "execution_allowed": False,
-        "direct_execution_allowed": False,
+        "execution_enabled": import_ok,
+        "execution_allowed": True,
         "install_allowed": False,
         "download_allowed": False,
         "approval_required_for_write_or_action": bool(manifest.get("approval_required_for_write_or_action", True)),
@@ -117,6 +147,8 @@ def _build_package_entry(manifest: dict[str, Any], probe_payload: dict[str, Any]
         "error": str(package_payload.get("error", "")).strip(),
         "notes": str(manifest.get("notes", "")).strip(),
     }
+    package_entry.update(_runtime_library_operator_flags())
+    return package_entry
 
 
 def build_runtime_library_store_read_model(store_root: Path | None = None) -> dict[str, Any]:
@@ -142,7 +174,7 @@ def build_runtime_library_store_read_model(store_root: Path | None = None) -> di
     available_names = tuple(package["package_name"] for package in available_packages)
     module_names = tuple(package["module_name"] for package in packages if package["module_name"])
 
-    return {
+    payload = {
         "store_root": str(root),
         "manifest_dir": str(_manifest_dir(root)),
         "probe_report_dir": str(_probe_report_dir(root)),
@@ -158,9 +190,6 @@ def build_runtime_library_store_read_model(store_root: Path | None = None) -> di
         "categories": _CATEGORY_ORDER,
         "runtime_only": True,
         "read_only": True,
-        "execution_allowed": False,
-        "direct_execution_allowed": False,
-        "canonical_write_allowed": False,
         "install_allowed": False,
         "download_allowed": False,
         "browser_control_allowed": False,
@@ -169,6 +198,8 @@ def build_runtime_library_store_read_model(store_root: Path | None = None) -> di
         "unavailable_count": len(unavailable_packages),
         "selection_enabled_package_names": available_names,
     }
+    payload.update(_runtime_library_operator_flags())
+    return payload
 
 
 def _semantic_tokens(text: str) -> tuple[str, ...]:
@@ -217,7 +248,15 @@ def select_runtime_library_candidates_for_text(
                 "version": str(package.get("version", "")),
                 "import_ok": bool(package.get("import_ok", False)),
                 "runtime_only": True,
-                "execution_allowed": False,
+                "execution_allowed": True,
+                "runtime_library_visible": True,
+                "import_probe_allowed": True,
+                "runtime_probe_allowed": True,
+                "sandbox_probe_allowed": True,
+                "sandbox_execution_allowed": True,
+                "adapter_selection_allowed": True,
+                "approval_required_for_runtime_execution": True,
+                "direct_execution_allowed": False,
                 "score": round(score, 3),
                 "reason": "; ".join(reasons) if reasons else "semantic_match",
             }

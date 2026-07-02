@@ -20,14 +20,8 @@ def _fake_probe_payload() -> dict[str, object]:
     }
 
 
-def _disable_ollama_and_patch_probe(monkeypatch) -> None:
+def _patch_probe(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
-
-    def fail_stream(*args: object, **kwargs: object):
-        raise AssertionError("grounded tool catalog should not call free Ollama")
-        yield {}
-
-    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
     monkeypatch.setattr(brain_loop, "SESSION_MEMORY_ROOT", brain_loop.PROJECT_ROOT)
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
     monkeypatch.setattr(brain_loop, "_save_session_state", lambda state: None)
@@ -43,7 +37,32 @@ def _disable_ollama_and_patch_probe(monkeypatch) -> None:
 
 
 def test_long_grounded_response_not_silently_truncated_smoke(monkeypatch) -> None:
-    _disable_ollama_and_patch_probe(monkeypatch)
+    _patch_probe(monkeypatch)
+
+    import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
+
+    prompts: list[str] = []
+
+    def fake_stream(model_id: str, prompt: str, route_mode: str, timeout_seconds=None, response_mode_text=None):
+        prompts.append(str(prompt))
+        assert "TOOL_CATALOG" in prompt
+        assert "external_adapter:openai_agents_sdk" in prompt
+        assert "external_adapter:mcp_python_sdk" in prompt
+        assert "external_adapter:autogen_agentchat" in prompt
+        assert "external_adapter:autogen_ext" in prompt
+        assert "external_adapter:langgraph" in prompt
+        yield {
+            "event": "chunk",
+            "text": (
+                "Вижу полный read-only каталог инструментов и отвечаю своими словами: "
+                "доступны external_adapter:openai_agents_sdk, external_adapter:mcp_python_sdk, "
+                "external_adapter:autogen_agentchat, external_adapter:autogen_ext и external_adapter:langgraph. "
+                "Также вижу legacy/unavailable alias external_adapter:autogen, но не буду выдавать его за рабочий инструмент."
+            ),
+        }
+        yield {"event": "done", "ollama_model_used": model_id}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
 
     events = list(stream_jarvis_live_brain_response("какие инструменты ты видишь", session_id="grounded_catalog_long"))
     done = events[-1]
@@ -51,7 +70,7 @@ def test_long_grounded_response_not_silently_truncated_smoke(monkeypatch) -> Non
 
     assert done["intent_family"] == "TOOL_CATALOG"
     assert done["grounded_answer"] is True
-    assert done["ollama_called"] is False
+    assert done["ollama_called"] is True
     assert done["output_truncated"] is False
     assert "[output_truncated=true" not in response
     assert "external_adapter:openai_agents_sdk" in response
@@ -60,3 +79,18 @@ def test_long_grounded_response_not_silently_truncated_smoke(monkeypatch) -> Non
     assert "external_adapter:autogen_ext" in response
     assert "external_adapter:langgraph" in response
     assert "external_adapter:autogen" in response
+
+    forbidden_user_visible_markers = (
+        "[work] intent=",
+        "Project git status read-only",
+        "Safety/security surfaces read-only",
+        "Ollama/model runtime read-only",
+        "Project-wide autonomy audit is proposal-only",
+        "чем могу помочь",
+        "готов помочь",
+        "скажи, что нужно",
+    )
+    for marker in forbidden_user_visible_markers:
+        assert marker not in response
+
+    assert prompts

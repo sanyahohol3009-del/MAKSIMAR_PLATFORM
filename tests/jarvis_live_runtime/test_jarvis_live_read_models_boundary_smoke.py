@@ -21,6 +21,8 @@ def test_brain_loop_uses_extracted_read_model_facade() -> None:
 def test_read_models_remain_read_only() -> None:
     payload = jarvis_live_read_models.build_jarvis_live_project_status_read_model()
     assert payload["read_only"] is True
+    assert payload["read_project_allowed"] is True
+    assert payload["runtime_probe_allowed"] is True
     assert payload["pc_control_allowed"] is False
     assert payload["canonical_memory_write_allowed"] is False
 
@@ -28,5 +30,8 @@ def test_read_models_remain_read_only() -> None:
 def test_memory_federation_read_model_blocks_mutation() -> None:
     payload = jarvis_live_read_models.build_jarvis_live_memory_federation_status()
     assert payload["memory_federation_available"] is True
+    assert payload["read_memory_allowed"] is True
+    assert payload["mempalace_query_allowed"] is True
+    assert payload["sandbox_execution_allowed"] is True
     assert payload["canonical_memory_write_allowed"] is False
     assert payload["pc_control_allowed"] is False

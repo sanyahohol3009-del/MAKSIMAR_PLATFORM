@@ -201,6 +201,7 @@ def test_terminal_chat_prints_tool_catalog_and_operator_work_trace(capsys) -> No
     module._get_json = lambda url: fake_payload
 
     module._print_tools()
+    module._set_trace(True)
     module._print_stream_event(
         '{"event":"operator_trace","intent_family":"PROJECT_SEARCH",'
         '"selected_tools":["repo_search","read_file_snippet"],'

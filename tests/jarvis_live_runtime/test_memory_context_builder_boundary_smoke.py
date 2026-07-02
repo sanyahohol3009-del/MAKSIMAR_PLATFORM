@@ -35,6 +35,10 @@ def test_context_builder_returns_safe_context() -> None:
     assert context.pc_control_allowed is False
     assert context.canonical_memory_write_allowed is False
     assert context.admission_status["pc_control_allowed"] is False
+    assert context.admission_status["read_project_allowed"] is True
+    assert context.admission_status["runtime_probe_allowed"] is True
+    assert context.to_read_model()["sandbox_execution_allowed"] is True
+    assert context.to_read_model()["auto_apply_allowed"] is False
 
 
 def test_context_builder_definitions_no_longer_defined_in_brain_loop() -> None:

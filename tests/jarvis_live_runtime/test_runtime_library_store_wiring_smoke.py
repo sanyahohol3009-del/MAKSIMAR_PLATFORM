@@ -56,6 +56,9 @@ def test_runtime_library_store_reads_probe_reports_smoke(tmp_path) -> None:
     assert payload["agents"][0]["version"] == "0.7.5"
     assert payload["agents"][0]["import_ok"] is True
     assert payload["agents"][0]["runtime_only"] is True
+    assert payload["agents"][0]["runtime_probe_allowed"] is True
+    assert payload["agents"][0]["sandbox_execution_allowed"] is True
+    assert payload["agents"][0]["direct_execution_allowed"] is False
 
 
 def test_tool_catalog_exposes_runtime_library_packages_smoke(monkeypatch) -> None:
@@ -143,7 +146,9 @@ def test_tool_catalog_exposes_runtime_library_packages_smoke(monkeypatch) -> Non
     assert "llama-index" in catalog["runtime_library_package_names"]
     assert "playwright" in catalog["runtime_library_package_names"]
     assert catalog["runtime_library_categories"] == ("agents", "skills_rag", "tools_browser")
-    assert catalog["runtime_library_execution_allowed"] is False
+    assert catalog["runtime_library_execution_allowed"] is True
+    assert catalog["runtime_probe_allowed"] is True
+    assert catalog["sandbox_execution_allowed"] is True
 
 
 def test_skill_visibility_runtime_library_store_stays_proposal_only_smoke(monkeypatch) -> None:
@@ -198,6 +203,8 @@ def test_skill_visibility_runtime_library_store_stays_proposal_only_smoke(monkey
     visibility = build_jarvis_skill_visibility_read_model()
 
     assert visibility["runtime_library_package_names"] == ("browser-use",)
-    assert visibility["runtime_library_execution_allowed"] is False
+    assert visibility["runtime_library_execution_allowed"] is True
+    assert visibility["runtime_probe_allowed"] is True
+    assert visibility["sandbox_execution_allowed"] is True
     assert visibility["runtime_library_install_allowed"] is False
     assert visibility["runtime_library_download_allowed"] is False

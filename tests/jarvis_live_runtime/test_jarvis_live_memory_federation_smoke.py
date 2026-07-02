@@ -295,7 +295,7 @@ def test_keyboard_layout_noise_does_not_use_repeated_template(monkeypatch) -> No
     assert done["ollama_called"] is False
 
 
-def test_project_workspace_question_returns_complete_grounded_answer_without_ollama(monkeypatch) -> None:
+def test_project_workspace_question_uses_grounded_final_brain(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
@@ -303,10 +303,20 @@ def test_project_workspace_question_returns_complete_grounded_answer_without_oll
     monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
-    def fail_stream(*args, **kwargs):
-        raise AssertionError("project workspace summary must not call Ollama")
+    prompts = []
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+    def fake_stream(model_id, prompt, *args, **kwargs):
+        prompts.append(str(prompt))
+        yield {
+            "event": "chunk",
+            "text": (
+                "Брат, вижу проект по read-only данным и отвечаю нормально: "
+                "структура, ветка, файлы и terminal chat chain собраны из фактов."
+            ),
+        }
+        yield {"event": "done", "model": model_id}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
 
     events = list(
         stream_jarvis_live_brain_response(
@@ -316,24 +326,20 @@ def test_project_workspace_question_returns_complete_grounded_answer_without_oll
     )
     done = events[-1]
     answer = done["response_text"]
-    lowered = answer.casefold()
 
-    assert "CONTROL_PLANE" in answer
-    assert "MAKSIMAR_SERVER" in answer
-    assert "tools/jarvis_live_runtime" in answer
-    assert "terminal chat" in lowered
-    assert "read-only" in lowered
-    assert "direct_execution_allowed=false" in answer
-    assert "canonical_write_allowed=false" in answer
-    assert "pc_control_allowed=false" in answer
-    assert not answer.rstrip().endswith("### 1")
-    assert "Скажи, что нужно" not in answer
-    assert "Нужна помощь" not in answer
-    assert done["canonical_memory_write_allowed"] is False
+    assert done["intent_family"] == "PROJECT_STRUCTURE"
+    assert done["grounded_answer"] is True
+    assert done["ollama_called"] is True
+    assert done["read_only"] is True
+    assert done["execution_allowed"] is False
     assert done["pc_control_allowed"] is False
+    assert "отвечаю нормально" in answer
+    assert "[work] intent=" not in answer
+    assert "Project workspace read-only snapshot" not in answer
+    assert prompts
+    assert "terminal chat canonical chain" in prompts[-1] or "terminal chat" in prompts[-1]
 
-
-def test_natural_project_read_questions_use_dynamic_tools_without_ollama(monkeypatch) -> None:
+def test_natural_project_read_questions_use_grounded_final_brain(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
 
     monkeypatch.setattr(brain_loop, "_load_session_state", lambda: brain_loop._empty_session_state())
@@ -341,27 +347,58 @@ def test_natural_project_read_questions_use_dynamic_tools_without_ollama(monkeyp
     monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
-    def fail_stream(*args, **kwargs):
-        raise AssertionError("dynamic project read answers must not call Ollama")
+    prompts = []
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+    def fake_stream(model_id, prompt, *args, **kwargs):
+        prompts.append(str(prompt))
+        yield {
+            "event": "chunk",
+            "text": (
+                "Брат, я посмотрел read-only факты проекта и отвечаю своими словами: "
+                "данные собраны, прямых записей, управления ПК и git-действий не выполнялось."
+            ),
+        }
+        yield {"event": "done", "model": model_id}
 
-    changed = list(stream_jarvis_live_brain_response("джарвис что изменено?", session_id="project_tools"))[-1]["response_text"]
-    atlas = list(stream_jarvis_live_brain_response("покажи полностью весь проект", session_id="project_tools"))[-1]["response_text"]
-    safety = list(stream_jarvis_live_brain_response("что у нас по core guard watchdog safety?", session_id="project_tools"))[-1]["response_text"]
-    models = list(stream_jarvis_live_brain_response("что сделано для моделей и Ollama runtime?", session_id="project_tools"))[-1]["response_text"]
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
 
-    assert "Project git status read-only" in changed
-    assert "branch=" in changed
-    assert "/project files 1" in atlas
-    assert "/project search <term>" in atlas
-    assert "Safety/security surfaces read-only" in safety
-    assert "direct_execution_allowed=false" in safety
-    assert "Ollama is local model engine" in models
-    assert "CONTROL_PLANE" in models
-    assert "tool_calls are proposals" in models
-    assert "pc_control_allowed=false" in models
+    changed = list(stream_jarvis_live_brain_response("джарвис что изменено?", session_id="project_tools"))[-1]
+    atlas = list(stream_jarvis_live_brain_response("покажи полностью весь проект", session_id="project_tools"))[-1]
+    safety = list(stream_jarvis_live_brain_response("что у нас по core guard watchdog safety?", session_id="project_tools"))[-1]
+    models = list(stream_jarvis_live_brain_response("что сделано для моделей и Ollama runtime?", session_id="project_tools"))[-1]
 
+    for done in (changed, atlas, safety, models):
+        assert done["grounded_answer"] is True
+        assert done["ollama_called"] is True
+        assert done["read_only"] is True
+        assert done["execution_allowed"] is False
+        assert done["pc_control_allowed"] is False
+        assert "отвечаю своими словами" in done["response_text"]
+        assert "[work] intent=" not in done["response_text"]
+        assert "Project git status read-only" not in done["response_text"]
+        assert "Safety/security surfaces read-only" not in done["response_text"]
+        assert "Ollama/model runtime read-only" not in done["response_text"]
+
+    assert len(prompts) == 4
+    joined_prompts = "\n".join(prompts)
+
+    assert "GROUNDING_INTENT_FAMILY:" in joined_prompts
+    assert "PROJECT_STATUS" in joined_prompts
+    assert "PROJECT_WIDE_DIAGNOSTICS" in joined_prompts
+    assert "SAFETY_STATUS" in joined_prompts
+    assert "MODEL_STATUS" in joined_prompts
+
+    # Project visibility must not collapse to git-status-only evidence.
+    assert (
+        "build_project_workspace_read_model" in joined_prompts
+        or "repo_tree" in joined_prompts
+        or "repo_files" in joined_prompts
+        or "repo_search" in joined_prompts
+        or "read_file_outline" in joined_prompts
+        or "read_file_snippet" in joined_prompts
+        or "repo_import_graph" in joined_prompts
+        or "build_project_wide_autonomy_audit_read_model" in joined_prompts
+    )
 
 def test_natural_language_tool_router_grounds_project_search_models_and_actions(monkeypatch) -> None:
     import tools.jarvis_live_runtime.jarvis_live_brain_loop as brain_loop
@@ -371,32 +408,63 @@ def test_natural_language_tool_router_grounds_project_search_models_and_actions(
     monkeypatch.setattr(session_memory_store, "_save_session_state", lambda state: None)
     monkeypatch.setattr(brain_loop, "_append_local_chat_memory_record", lambda state, response, context: None)
 
-    def fail_stream(*args, **kwargs):
-        raise AssertionError("read-only tool routed questions must not call Ollama")
+    prompts = []
 
-    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fail_stream)
+    def fake_stream(model_id, prompt, *args, **kwargs):
+        prompts.append(str(prompt))
+        yield {
+            "event": "chunk",
+            "text": (
+                "Брат, я понял запрос по смыслу, собрал read-only факты и отвечаю своими словами. "
+                "Запись, управление ПК, git-действия, install и download не выполнялись."
+            ),
+        }
+        yield {"event": "done", "model": model_id}
+
+    monkeypatch.setattr(brain_loop, "_stream_ollama_model", fake_stream)
 
     terminal = list(stream_jarvis_live_brain_response("где у нас terminal chat?", session_id="tool_router"))[-1]
-    models = list(stream_jarvis_live_brain_response("какие модели у тебя есть?", session_id="tool_router"))[-1]
-    action = list(stream_jarvis_live_brain_response("сделай коммит", session_id="tool_router"))[-1]
-    tools = list(stream_jarvis_live_brain_response("какие tools подключены?", session_id="tool_router"))[-1]
+    models = list(stream_jarvis_live_brain_response("что сделано для моделей и Ollama runtime?", session_id="tool_router"))[-1]
+    safety = list(stream_jarvis_live_brain_response("что у нас по core guard watchdog safety?", session_id="tool_router"))[-1]
+    action = list(stream_jarvis_live_brain_response("джарвис открой браузер и скачай модель", session_id="tool_router"))[-1]
 
-    assert terminal["intent_family"] == "PROJECT_SEARCH"
-    assert "repo_search" in terminal["selected_tools"]
-    assert "jarvis_live_terminal_chat" in terminal["response_text"]
-    assert terminal["grounded_answer"] is True
-    assert terminal["ollama_called"] is False
-    assert models["intent_family"] == "MODEL_STATUS"
-    assert "model_runtime_status" in models["selected_tools"]
-    assert "Ollama/model runtime read-only" in models["response_text"]
-    assert action["intent_family"] == "ACTION_REQUEST"
-    assert "execution_allowed=false" in action["response_text"]
-    assert "approval_required=true" in action["response_text"]
-    assert action["pc_control_allowed"] is False
-    assert tools["intent_family"] == "TOOL_CATALOG"
-    assert "build_jarvis_live_tool_catalog_read_model" in tools["selected_tools"]
-    assert "repo_search" in tools["response_text"]
-    assert "n8n_adapter_proposal" in tools["response_text"]
+    expected_intents = {
+        terminal["intent_family"],
+        models["intent_family"],
+        safety["intent_family"],
+        action["intent_family"],
+    }
+    assert "PROJECT_SEARCH" in expected_intents
+    assert "MODEL_STATUS" in expected_intents
+    assert "SAFETY_STATUS" in expected_intents
+    assert "ACTION_REQUEST" in expected_intents
+
+    forbidden_user_visible_markers = (
+        "[work] intent=",
+        "Project git status read-only",
+        "Safety/security surfaces read-only",
+        "Ollama/model runtime read-only",
+        "Project-wide autonomy audit is proposal-only",
+        "чем могу помочь",
+        "готов помочь",
+        "скажи, что нужно",
+    )
+
+    for done in (terminal, models, safety, action):
+        assert done["grounded_answer"] is True
+        assert done["ollama_called"] is True
+        assert done["read_only"] is True
+        assert done["execution_allowed"] is False
+        assert done["pc_control_allowed"] is False
+        assert "отвечаю своими словами" in done["response_text"]
+        for marker in forbidden_user_visible_markers:
+            assert marker not in done["response_text"]
+
+    assert len(prompts) == 4
+    assert any("terminal chat" in prompt.casefold() for prompt in prompts)
+    assert any("MODEL_STATUS" in prompt for prompt in prompts)
+    assert any("SAFETY_STATUS" in prompt for prompt in prompts)
+    assert any("ACTION_REQUEST" in prompt for prompt in prompts)
 
 
 def test_memory_history_question_checks_history_before_ollama(monkeypatch) -> None:

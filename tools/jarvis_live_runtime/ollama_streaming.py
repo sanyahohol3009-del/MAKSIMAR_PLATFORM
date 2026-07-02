@@ -215,9 +215,7 @@ def _parse_ollama_chat_stream_event(payload: dict[str, Any], model_id: str) -> t
                 tool_call_detected=True,
                 tool_call_count=len(tool_calls),
                 tool_calls=tuple(tool_calls),
-                execution_allowed=False,
                 approval_required=True,
-                proposal_only=True,
             )
         )
     if content:

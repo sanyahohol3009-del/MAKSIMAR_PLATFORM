@@ -1,0 +1,1317 @@
+from __future__ import annotations
+
+import re
+from pathlib import Path
+from typing import Any
+
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+    build_external_adapter_semantic_route,
+)
+from MAKSIMAR_CORE_LIB.retrieval_backend import build_retrieval_readonly_tool_route
+
+from tools.jarvis_live_runtime.jarvis_skill_visibility import select_skills_for_tools
+from tools.jarvis_live_runtime.project_workspace_tools import (
+    _safe_project_path,
+    _tracked_project_files,
+)
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_HELPER_CONFIDENCE_THRESHOLD = 0.70
+_HELPER_WSL_PROJECT_DIAGNOSTIC_INTENTS = {
+    "code_debug",
+    "test_debug",
+    "failure_analysis",
+}
+_PROJECT_WIDE_EVIDENCE_TOOLS = frozenset(
+    {
+        "repo_tree",
+        "repo_files",
+        "repo_search",
+        "repo_import_graph",
+        "read_file_outline",
+        "read_file_snippet",
+        "build_project_wide_autonomy_audit_read_model",
+    }
+)
+_PROJECT_WIDE_DIAGNOSTIC_TOOLS = (
+    "repo_git_status",
+    "build_project_workspace_read_model",
+    "repo_tree",
+    "repo_files",
+    "repo_search",
+    "repo_import_graph",
+    "read_file_outline",
+    "read_file_snippet",
+    "build_project_wide_autonomy_audit_read_model",
+)
+
+
+def _operator_capability_flags() -> dict[str, Any]:
+    return {
+        "read_project_allowed": True,
+        "read_memory_allowed": True,
+        "read_history_allowed": True,
+        "read_mempalace_allowed": True,
+        "read_n8n_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "bounded_test_allowed": True,
+        "n8n_workflow_read_allowed": True,
+        "n8n_workflow_proposal_allowed": True,
+        "mempalace_read_allowed": True,
+        "mempalace_query_allowed": True,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
+
+
+def _decision_agent_roles(decision: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(decision.get("selected_agent_roles") or ())
+
+
+def _decision_skills(decision: dict[str, Any]) -> tuple[str, ...]:
+    selected_tools = tuple(decision.get("selected_tools", ()))
+    selected_agent_roles = _decision_agent_roles(decision)
+    return tuple(decision.get("selected_skills", ())) or select_skills_for_tools(selected_tools, selected_agent_roles)
+
+
+def _merge_tools(existing: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(existing + extra))
+
+
+def _merge_roles(existing: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(dict.fromkeys(existing + extra))
+
+
+def _is_semantic_project_wide_scope_request(
+    user_text: str,
+    context: Any,
+    *,
+    selected_tools: tuple[str, ...] = (),
+    selected_agent_roles: tuple[str, ...] = (),
+    normalized_intent: str = "",
+) -> bool:
+    lowered = user_text.casefold()
+    if str(getattr(context, "request_route", "") or "") != "project_memory":
+        return False
+    if str(getattr(context, "retrieval_mode", "") or "") != "deep_memory":
+        return False
+
+    if (
+        _asks_wsl_project_diagnostic_question(lowered)
+        or _asks_code_draft_request(lowered)
+        or _asks_action_request(lowered)
+        or _extract_requested_file_path(user_text) is not None
+        or _asks_project_status_question(lowered)
+        or _asks_project_structure_question(lowered)
+        or _asks_project_search_question(lowered)
+        or _asks_memory_history_question(lowered)
+        or _asks_tool_catalog_question(lowered)
+        or _asks_agent_catalog_question(lowered)
+        or _asks_skill_visibility_question(lowered)
+        or _asks_activation_matrix_question(lowered)
+        or _asks_safety_status_question(lowered)
+        or _asks_model_status_question(lowered)
+        or _asks_roadmap_status_question(lowered)
+        or _has_backend_status_guard(lowered)
+        or _has_semantic_similarity_guard(lowered)
+    ):
+        return False
+
+    decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    decision_tools = tuple(decision.get("selected_tools", ())) if isinstance(decision, dict) else ()
+    decision_roles = _decision_agent_roles(decision) if isinstance(decision, dict) else ()
+    decision_intent = str(decision.get("normalized_intent", "")) if isinstance(decision, dict) else ""
+
+    effective_tools = tuple(selected_tools) or decision_tools
+    effective_roles = tuple(selected_agent_roles) or decision_roles
+    effective_intent = str(normalized_intent or decision_intent).casefold()
+
+    tools = set(effective_tools)
+    roles = set(effective_roles)
+
+    if effective_intent in {"blocker_audit", "architecture_review", "project_analysis"}:
+        return True
+    if "architect_agent" in roles:
+        return True
+    if "build_project_wide_autonomy_audit_read_model" in tools or "repo_import_graph" in tools:
+        return True
+    if len(tools & _PROJECT_WIDE_EVIDENCE_TOOLS) >= 3:
+        return True
+    return "project_coder_agent" in roles and not tools
+
+
+def _helper_truth_read_only_plan(user_text: str, context: Any) -> dict[str, Any] | None:
+    decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    if not isinstance(decision, dict):
+        return None
+    helper_used = bool(decision.get("helper_model_used")) or str(decision.get("selection_source", "")).casefold() == "helper_model"
+    if not helper_used or bool(decision.get("fallback_used", False)):
+        return None
+    confidence = float(decision.get("helper_decision_confidence", 0.0) or 0.0)
+    if confidence and confidence < _HELPER_CONFIDENCE_THRESHOLD:
+        return None
+
+    lowered = user_text.casefold()
+    selected_tools = tuple(decision.get("selected_tools", ()))
+    selected_agent_roles = _decision_agent_roles(decision)
+    selected_skills = _decision_skills(decision)
+    normalized_intent = str(decision.get("normalized_intent", "")).casefold()
+    if not (selected_tools or selected_agent_roles or selected_skills):
+        return None
+
+    intent_family = ""
+    risk_class = str(decision.get("risk_class", "read_only") or "read_only")
+    reason = str(decision.get("selected_tool_reason", "") or decision.get("reason", "") or "helper semantic plan")
+    force_project_workspace_skill = False
+    proposal_only = False
+
+    if _asks_retrieval_backend_status_question(lowered):
+        intent_family = "RETRIEVAL_BACKEND_STATUS"
+        tool_route = build_retrieval_readonly_tool_route(
+            "RETRIEVAL_BACKEND_STATUS",
+            (
+                "qdrant_readonly_status",
+                "retrieval_backend_status_read_model",
+                "retrieval_tool_registry_contract",
+            ),
+            PROJECT_ROOT,
+        )
+        selected_tools = tuple(tool_route.requested_tools)
+        selected_agent_roles = tuple(
+            role for role in selected_agent_roles if role != "project_coder_agent"
+        )
+        risk_class = "read_only"
+        reason = "semantic retrieval/vector backend status question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_retrieval_container_status_question(lowered):
+        intent_family = "CONTAINER_STATUS"
+        selected_tools = (
+            "retrieval_container_contract",
+            "retrieval_runtime_profile",
+            "qdrant_container_status",
+        )
+        selected_agent_roles = tuple(
+            role for role in selected_agent_roles if role != "project_coder_agent"
+        )
+        risk_class = "read_only"
+        reason = "semantic retrieval container/runtime boundary status question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_semantic_similarity_question(lowered):
+        tool_route = build_retrieval_readonly_tool_route(
+            "SEMANTIC_SIMILARITY",
+            ("sqlite_vec_readonly", "repo_search", "qdrant_readonly"),
+            PROJECT_ROOT,
+        )
+        intent_family = "SEMANTIC_SIMILARITY"
+        selected_tools = tuple(tool_route.requested_tools)
+        selected_agent_roles = tuple(
+            role for role in selected_agent_roles if role != "project_coder_agent"
+        )
+        risk_class = "read_only"
+        reason = "semantic similarity retrieval question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_tool_catalog_question(lowered):
+        intent_family = "TOOL_CATALOG"
+        selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "semantic tool/capability catalog visibility question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_agent_catalog_question(lowered):
+        intent_family = "AGENT_CATALOG"
+        selected_tools = ("build_jarvis_agent_catalog_read_model",)
+        risk_class = "read_only"
+        reason = "semantic agent catalog visibility question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_skill_visibility_question(lowered):
+        intent_family = "SKILL_VISIBILITY"
+        selected_tools = (
+            "build_jarvis_skill_visibility_read_model",
+            "build_jarvis_live_tool_catalog_read_model",
+        )
+        risk_class = "read_only"
+        reason = "semantic skill/capability visibility question"
+        force_project_workspace_skill = False
+        proposal_only = False
+    elif _asks_code_draft_request(lowered):
+        intent_family = "CODE_DRAFT_PROPOSAL"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_import_graph",
+                "read_file_outline",
+                "read_file_snippet",
+                "build_project_wide_autonomy_audit_read_model",
+            ),
+        )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("project_coder_agent",))
+        force_project_workspace_skill = True
+        proposal_only = True
+    elif (
+        _asks_wsl_project_diagnostic_question(lowered)
+        or "build_wsl_project_diagnostics_read_model" in selected_tools
+        or "pytest_report_read" in selected_tools
+        or normalized_intent in _HELPER_WSL_PROJECT_DIAGNOSTIC_INTENTS
+    ):
+        intent_family = "WSL_PROJECT_DIAGNOSTICS"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_git_status",
+                "pytest_report_read",
+                "repo_search",
+                "read_file_snippet",
+                "read_file_outline",
+                "build_wsl_project_diagnostics_read_model",
+            ),
+        )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("project_coder_agent",))
+        force_project_workspace_skill = True
+    elif _is_semantic_project_wide_scope_request(
+        user_text,
+        context,
+        selected_tools=selected_tools,
+        selected_agent_roles=selected_agent_roles,
+        normalized_intent=normalized_intent,
+    ):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = _merge_tools(
+            selected_tools,
+            _PROJECT_WIDE_DIAGNOSTIC_TOOLS,
+        )
+        selected_agent_roles = _merge_roles(
+            selected_agent_roles,
+            ("architect_agent", "project_coder_agent"),
+        )
+        force_project_workspace_skill = True
+        proposal_only = True
+    elif any(str(tool).startswith("external_adapter:") for tool in selected_tools) or "external_agent_tooling" in selected_skills:
+        intent_family = "AGENT_ENGINE_COMPARISON" if normalized_intent == "agent_engine_comparison" else "EXTERNAL_ADAPTER_SELECTION"
+        risk_class = "risk_gate"
+        proposal_only = True
+    elif (
+        _asks_project_status_question(lowered)
+        or any(marker in lowered for marker in ("что изменено", "что поменялось", "какие изменения", "dirty", "untracked"))
+    ):
+        intent_family = "PROJECT_STATUS"
+        selected_tools = ("repo_git_status", "build_project_workspace_read_model")
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "dynamic project status read question"
+        force_project_workspace_skill = True
+        proposal_only = False
+    elif _asks_safety_status_question(lowered):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "dynamic safety/capability boundary read question"
+        force_project_workspace_skill = True
+        proposal_only = False
+    elif _asks_model_status_question(lowered):
+        intent_family = "MODEL_STATUS"
+        selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "dynamic model/runtime status read question"
+        force_project_workspace_skill = True
+        proposal_only = False
+    elif (
+        _asks_project_search_question(lowered)
+        or ("terminal chat" in lowered and any(marker in lowered for marker in ("где", "найди", "что у нас")))
+    ):
+        intent_family = "PROJECT_SEARCH"
+        selected_tools = ("repo_search", "read_file_snippet", "read_file_outline")
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "dynamic project search read question"
+        force_project_workspace_skill = True
+        proposal_only = False
+    elif (
+        _asks_project_structure_question(lowered)
+        and not _asks_project_blocker_audit_question(lowered)
+        and not _asks_wsl_project_diagnostic_question(lowered)
+    ):
+        intent_family = "PROJECT_STRUCTURE"
+        selected_tools = ("build_project_workspace_read_model", "repo_tree", "repo_files")
+        selected_agent_roles = tuple(
+            role
+            for role in selected_agent_roles
+            if role not in {"architect_agent", "project_coder_agent"}
+        )
+        risk_class = "read_only"
+        reason = "project structure/workspace visibility question"
+        force_project_workspace_skill = True
+        proposal_only = False
+    elif not _asks_wsl_project_diagnostic_question(lowered) and (
+        _asks_project_blocker_audit_question(lowered)
+        or "repo_import_graph" in selected_tools
+        or "repo_files" in selected_tools
+        or normalized_intent in {"blocker_audit", "architecture_review"}
+        or "architect_agent" in selected_agent_roles
+    ):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = _merge_tools(
+            selected_tools,
+            (
+                "repo_git_status",
+                "repo_tree",
+                "repo_files",
+                "repo_import_graph",
+                "read_file_outline",
+                "read_file_snippet",
+                "build_project_wide_autonomy_audit_read_model",
+            ),
+        )
+        selected_agent_roles = _merge_roles(selected_agent_roles, ("architect_agent", "project_coder_agent"))
+        force_project_workspace_skill = True
+    elif "memory_federation" in selected_skills:
+        intent_family = "MEMORY_RECALL"
+    elif "build_jarvis_agent_catalog_read_model" in selected_tools:
+        intent_family = "AGENT_CATALOG"
+    elif "build_jarvis_skill_visibility_read_model" in selected_tools:
+        intent_family = "SKILL_VISIBILITY"
+    elif "build_jarvis_live_tool_catalog_read_model" in selected_tools:
+        intent_family = "TOOL_CATALOG"
+    elif {"repo_git_status", "build_project_workspace_read_model"} & set(selected_tools):
+        intent_family = "PROJECT_STATUS"
+    elif {"repo_search", "read_file_snippet", "read_file_outline"} & set(selected_tools):
+        intent_family = "PROJECT_SEARCH"
+    else:
+        return None
+
+    selected_skills = select_skills_for_tools(selected_tools, selected_agent_roles)
+    if force_project_workspace_skill:
+        selected_skills = tuple(dict.fromkeys(("project_workspace_analysis",) + tuple(selected_skills)))
+
+    return {
+        "intent_family": intent_family,
+        "confidence": max(confidence, 0.78),
+        "selected_tools": selected_tools,
+        "selected_agent_roles": selected_agent_roles,
+        "selected_skills": selected_skills,
+        "reason": reason or "helper semantic plan selected read-only workflow",
+        "read_only": True,
+        "execution_allowed": False,
+        "needs_ollama": False,
+        "evidence_required": True,
+        "evidence_count": 0,
+        "risk_class": risk_class,
+        "proposal_only": proposal_only,
+        "semantic_candidates": (),
+        "tool_route": {},
+        **_operator_capability_flags(),
+    }
+
+def _build_read_only_tool_plan(user_text: str, context: JarvisBrainContext) -> dict[str, Any]:
+    lowered = user_text.casefold()
+    intent_family = "CONVERSATION"
+    selected_tools: tuple[str, ...] = ()
+    selected_agent_roles: tuple[str, ...] = ()
+    selected_skills: tuple[str, ...] = ()
+    tool_route = None
+    confidence = 0.0
+    reason = "ordinary conversation"
+    needs_ollama = True
+    evidence_required = False
+    risk_class = "read_only"
+    proposal_only = False
+    semantic_candidates: tuple[dict[str, Any], ...] = ()
+    helper_truth_plan = _helper_truth_read_only_plan(user_text, context)
+
+    if helper_truth_plan is not None:
+        return helper_truth_plan
+
+    if intent_family == "CONVERSATION" and _asks_code_draft_request(lowered):
+        intent_family = "CODE_DRAFT_PROPOSAL"
+        selected_tools = (
+            "repo_import_graph",
+            "read_file_outline",
+            "read_file_snippet",
+            "build_project_wide_autonomy_audit_read_model",
+        )
+        selected_agent_roles = ("project_coder_agent",)
+        confidence = 0.95
+        reason = "code draft request should produce proposal text without mutating files"
+        needs_ollama = False
+        evidence_required = True
+        proposal_only = True
+    if _asks_action_request(lowered) and intent_family == "CONVERSATION":
+        intent_family = "ACTION_REQUEST"
+        selected_tools = ("capability_registry_read", "approval_boundary_read", "operator_proposal")
+        confidence = 0.92
+        reason = "action verb requires proposal boundary"
+        needs_ollama = False
+        evidence_required = True
+        proposal_only = True
+    if intent_family == "CONVERSATION" and _asks_project_blocker_audit_question(lowered):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = (
+            "repo_git_status",
+            "repo_tree",
+            "repo_files",
+            "repo_import_graph",
+            "read_file_outline",
+            "read_file_snippet",
+            "build_project_wide_autonomy_audit_read_model",
+        )
+        selected_agent_roles = ("architect_agent", "project_coder_agent")
+        confidence = 0.97
+        reason = "project-wide blocker audit requires codebase inspection, import graph, and answer-layer diagnosis"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_wsl_project_diagnostic_question(lowered):
+        intent_family = "WSL_PROJECT_DIAGNOSTICS"
+        selected_tools = (
+            "repo_git_status",
+            "pytest_report_read",
+            "repo_search",
+            "read_file_snippet",
+            "read_file_outline",
+            "build_wsl_project_diagnostics_read_model",
+        )
+        confidence = 0.96
+        reason = "bounded WSL project diagnostics request"
+        needs_ollama = False
+        evidence_required = True
+    # RETRIEVAL_SEMANTIC_PRIORITY_GUARD_V2
+    # Explicit retrieval/container/project-search questions must be answered by
+    # read-only tools before any Ollama free generation.
+    if intent_family == "CONVERSATION" and (
+        (
+            any(token in lowered for token in ("container", "docker", "контейнер"))
+            and any(token in lowered for token in ("qdrant", "retrieval", "backend", "runtime", "запуск", "включ"))
+        )
+        or "qdrant container" in lowered
+        or "qdrant контейнер" in lowered
+    ):
+        intent_family = "CONTAINER_STATUS"
+        selected_tools = (
+            "retrieval_container_contract",
+            "retrieval_runtime_profile",
+            "qdrant_container_status",
+        )
+        confidence = 0.96
+        reason = "retrieval container/runtime boundary status question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and (
+        lowered.startswith("найди где ")
+        or "найди где " in lowered
+        or lowered.startswith("где ")
+        or lowered.startswith("find where ")
+        or "source_ref" in lowered
+        or "evidence_ref" in lowered
+    ):
+        intent_family = "PROJECT_SEARCH"
+        tool_route = build_retrieval_readonly_tool_route(
+            "PROJECT_SEARCH",
+            ("mgrep_readonly", "repo_search", "read_file_snippet", "read_file_outline"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.94
+        reason = "explicit project search request must use read-only retrieval tools"
+        needs_ollama = False
+        evidence_required = True
+
+    if intent_family == "CONVERSATION" and _asks_tool_catalog_question(lowered):
+        intent_family = "TOOL_CATALOG"
+        selected_tools = ("build_jarvis_live_tool_catalog_read_model",)
+        confidence = 0.95
+        reason = "tool/capability catalog question"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_agent_catalog_question(lowered):
+        intent_family = "AGENT_CATALOG"
+        selected_tools = ("build_jarvis_agent_catalog_read_model",)
+        confidence = 0.96
+        reason = "grounded agent catalog question"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_skill_visibility_question(lowered):
+        intent_family = "SKILL_VISIBILITY"
+        selected_tools = ("build_jarvis_skill_visibility_read_model", "build_jarvis_live_tool_catalog_read_model")
+        confidence = 0.96
+        reason = "grounded skill/capability visibility question"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _asks_activation_matrix_question(lowered):
+        intent_family = "ACTIVATION_MATRIX"
+        selected_tools = ("build_default_capability_activation_matrix", "runtime_activation_matrix_preview")
+        confidence = 0.96
+        reason = "capability/readiness/activation matrix question"
+        needs_ollama = False
+        evidence_required = True
+    # EXPLICIT_READ_ONLY_INTENT_PRIORITY_BEGIN
+    # Specific read-only intents must be resolved before semantic/project search fallback.
+    if intent_family == "CONVERSATION" and _asks_memory_history_question(lowered):
+        intent_family = "MEMORY_RECALL"
+        selected_tools = (
+            "stable_style_profile",
+            "session_memory",
+            "local_chat_memory",
+            "memory_engine_registry",
+            "runtime_history_store",
+            "history_query",
+            "mempalace_read_only_sandbox",
+        )
+        confidence = 0.9
+        reason = "history or memory question must be retrieval-first"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_safety_status_question(lowered):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        confidence = 0.88
+        reason = "safety/capability boundary question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_model_status_question(lowered):
+        intent_family = "MODEL_STATUS"
+        selected_tools = ("model_runtime_status", "ollama_ps", "ollama_tags", "ollama_show")
+        confidence = 0.9
+        reason = "model/runtime status question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_roadmap_status_question(lowered):
+        intent_family = "ROADMAP_STATUS"
+        selected_tools = ("status_tools", "roadmap_post_step_drift_check", "jarvis_live_ci_status", "repo_search")
+        confidence = 0.88
+        reason = "roadmap/status question"
+        needs_ollama = False
+        evidence_required = True
+    # EXPLICIT_READ_ONLY_INTENT_PRIORITY_END
+    # SAFETY_STATUS_PRIORITY_GUARD_V2
+    if intent_family == "CONVERSATION" and (
+        _asks_safety_status_question(lowered)
+        or any(
+            marker in lowered
+            for marker in (
+                "core guard",
+                "watchdog",
+                "safety",
+                "security",
+                "approval",
+                "execution control",
+                "direct_execution_allowed",
+                "pc_control_allowed",
+            )
+        )
+    ):
+        intent_family = "SAFETY_STATUS"
+        selected_tools = ("repo_search", "DANGEROUS_MEMORY_FLAGS", "project_safety_formatter")
+        confidence = 0.94
+        reason = "explicit safety/capability boundary question"
+        needs_ollama = False
+        evidence_required = True
+
+    if intent_family == "CONVERSATION" and _has_filename_lookup_guard(user_text):
+        intent_family = "PROJECT_FILE"
+        selected_tools = ("read_file_snippet", "read_file_outline", "repo_files")
+        confidence = 0.96
+        reason = "direct filename lookup guard"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _has_backend_status_guard(lowered):
+        intent_family = "RETRIEVAL_BACKEND_STATUS"
+        tool_route = build_retrieval_readonly_tool_route(
+            "RETRIEVAL_BACKEND_STATUS",
+            ("qdrant_readonly_status", "retrieval_backend_status_read_model", "retrieval_tool_registry_contract"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.97
+        reason = "direct retrieval backend status guard"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _has_semantic_similarity_guard(lowered):
+        intent_family = "SEMANTIC_SIMILARITY"
+        tool_route = build_retrieval_readonly_tool_route(
+            "SEMANTIC_SIMILARITY",
+            ("sqlite_vec_readonly", "repo_search", "qdrant_readonly"),
+            PROJECT_ROOT,
+        )
+        selected_tools = tool_route.selected_tool_chain
+        confidence = 0.97
+        reason = "direct semantic similarity guard"
+        needs_ollama = False
+        evidence_required = True
+    if intent_family == "CONVERSATION" and _extract_requested_file_path(user_text):
+        intent_family = "PROJECT_FILE"
+        selected_tools = ("read_file_snippet", "read_file_outline")
+        confidence = 0.88
+        reason = "file content request"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_project_status_question(lowered):
+        intent_family = "PROJECT_STATUS"
+        selected_tools = ("repo_git_status", "build_project_workspace_read_model")
+        confidence = 0.9
+        reason = "workspace/git status question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_project_structure_question(lowered):
+        intent_family = "PROJECT_STRUCTURE"
+        selected_tools = ("build_project_workspace_read_model", "repo_tree", "repo_files")
+        confidence = 0.86
+        reason = "project structure question"
+        needs_ollama = False
+        evidence_required = True
+    elif intent_family == "CONVERSATION" and _asks_project_search_question(lowered):
+        intent_family = "PROJECT_SEARCH"
+        selected_tools = ("repo_search", "read_file_snippet", "read_file_outline")
+        confidence = 0.82
+        reason = "semantic project search question"
+        needs_ollama = False
+        evidence_required = True
+    external_route = _semantic_external_adapter_route(user_text, context)
+    if intent_family == "CONVERSATION" and external_route is not None:
+        intent_family = str(external_route["intent_family"])
+        selected_tools = tuple(external_route["selected_tools"])
+        selected_agent_roles = tuple(external_route["selected_agent_roles"])
+        confidence = float(external_route["confidence"])
+        reason = str(external_route["reason"])
+        needs_ollama = False
+        evidence_required = True
+        risk_class = str(external_route["risk_class"])
+        proposal_only = bool(external_route["proposal_only"])
+        semantic_candidates = tuple(external_route["candidate_matches"])
+    orchestration_decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    if intent_family == "CONVERSATION" and _is_semantic_project_wide_scope_request(
+        user_text,
+        context,
+        selected_tools=selected_tools,
+        selected_agent_roles=selected_agent_roles,
+        normalized_intent=str(orchestration_decision.get("normalized_intent", "")) if isinstance(orchestration_decision, dict) else "",
+    ):
+        intent_family = "PROJECT_WIDE_DIAGNOSTICS"
+        selected_tools = _merge_tools(selected_tools, _PROJECT_WIDE_DIAGNOSTIC_TOOLS)
+        selected_agent_roles = _merge_roles(
+            selected_agent_roles,
+            ("architect_agent", "project_coder_agent"),
+        )
+        confidence = max(confidence, 0.84)
+        reason = "deep project-memory request resolved to project-wide diagnostics via semantic scope signals"
+        evidence_required = True
+    if not selected_agent_roles and isinstance(orchestration_decision, dict):
+        selected_agent_roles = _decision_agent_roles(orchestration_decision)
+    selected_skills = (
+        tuple(orchestration_decision.get("selected_skills", ())) if isinstance(orchestration_decision, dict) else ()
+    ) or select_skills_for_tools(selected_tools, selected_agent_roles)
+
+    return {
+        "intent_family": intent_family,
+        "confidence": confidence,
+        "selected_tools": selected_tools,
+        "selected_agent_roles": selected_agent_roles,
+        "selected_skills": selected_skills,
+        "reason": reason,
+        "read_only": True,
+        "execution_allowed": False,
+        "needs_ollama": needs_ollama,
+        "evidence_required": evidence_required,
+        "evidence_count": 0,
+        "risk_class": risk_class,
+        "proposal_only": proposal_only,
+        "semantic_candidates": semantic_candidates,
+        "tool_route": tool_route.to_read_model() if tool_route is not None else {},
+        **_operator_capability_flags(),
+    }
+
+
+def _semantic_external_adapter_route(user_text: str, context: Any) -> dict[str, Any] | None:
+    route = build_external_adapter_semantic_route(user_text)
+    orchestration_decision = getattr(context, "orchestration_decision", {}) if context is not None else {}
+    selected_tools = tuple(orchestration_decision.get("selected_tools", ())) if isinstance(orchestration_decision, dict) else ()
+    selected_intent = str(orchestration_decision.get("normalized_intent", "")) if isinstance(orchestration_decision, dict) else ""
+    if route["matched"]:
+        return route
+    if any(str(tool).startswith("external_adapter:") for tool in selected_tools):
+        intent_family = "AGENT_ENGINE_COMPARISON" if selected_intent == "agent_engine_comparison" else "EXTERNAL_ADAPTER_SELECTION"
+        return {
+            "matched": True,
+            "intent_family": intent_family,
+            "selected_tools": selected_tools,
+            "selected_agent_roles": tuple(orchestration_decision.get("selected_agent_roles", ("tool_selector_agent",))),
+            "risk_class": "risk_gate",
+            "proposal_only": True,
+            "execution_allowed": False,
+            "confidence": 0.78,
+            "reason": "existing orchestration decision selected external adapters",
+            "candidate_matches": (),
+        }
+    return None
+
+
+def _asks_activation_matrix_question(lowered: str) -> bool:
+    if _asks_action_request(lowered):
+        return False
+    if _asks_memory_history_question(lowered):
+        return False
+    if _asks_safety_status_question(lowered):
+        return False
+    if _asks_model_status_question(lowered):
+        return False
+    if _asks_roadmap_status_question(lowered):
+        return False
+
+    activation_markers = (
+        "activation matrix",
+        "activation",
+        "capability",
+        "capabilities",
+        "readiness",
+        "готовность",
+        "матрица",
+        "матрица активации",
+        "активац",
+        "возможност",
+        "что можешь",
+        "что умеешь",
+        "windows voice edge",
+        "voice edge",
+        "push-to-talk",
+        "ptt",
+        "младш",
+        "android junior",
+        "ios junior",
+        "андроид младш",
+        "айос младш",
+    )
+    return any(marker in lowered for marker in activation_markers)
+
+
+def _asks_project_status_question(lowered: str) -> bool:
+    if "проект" in lowered and any(marker in lowered for marker in ("видишь", "доступ", "доступно", "проверь")):
+        if any(
+            marker in lowered
+            for marker in (
+                "структур",
+                "структура проекта",
+                "структуре проекта",
+                "project workspace",
+                "project tree",
+                "ядро terminal chat",
+            )
+        ):
+            return False
+        return True
+    return any(
+        marker in lowered
+        for marker in (
+            "что изменено",
+            "что поменялось",
+            "какие изменения",
+            "dirty files",
+            "dirty",
+            "untracked",
+            "git status",
+            "статус git",
+            "что в git",
+            "что сейчас в проекте поменялось",
+        )
+    )
+
+
+def _asks_wsl_project_diagnostic_question(lowered: str) -> bool:
+    direct_markers = (
+        "где ломаются тесты",
+        "найди где ломаются тесты",
+        "почему pytest падает",
+        "почему тесты падают",
+        "предложи план фикса",
+        "разберись где ошибка",
+        "find failing tests",
+    )
+    test_markers = (
+        "ломаются тесты",
+        "сломались тесты",
+        "падают тесты",
+        "где ломаются тесты",
+        "почему тесты падают",
+        "find failing tests",
+        "failing tests",
+        "pytest",
+        "ошибка",
+        "error",
+    )
+    plan_markers = (
+        "план фикса",
+        "fix plan",
+        "диагност",
+        "почему",
+        "предложи план",
+        "найди где",
+        "разберись",
+        "исправ",
+        "fix",
+    )
+    return any(marker in lowered for marker in direct_markers) or (
+        any(marker in lowered for marker in test_markers)
+        and any(marker in lowered for marker in plan_markers)
+    )
+
+
+def _asks_project_blocker_audit_question(lowered: str) -> bool:
+    if any(marker in lowered for marker in ("тест", "pytest", "failing tests", "падают тесты", "ломаются тесты")):
+        return False
+    blocker_markers = (
+        "что мешает тебе работать",
+        "почему ты не пользуешься агентами",
+        "почему ты не пользуешься скилами",
+        "почему ты не пользуешься инструментами",
+        "проверь где логика сломана",
+        "почему это не работает",
+        "где блокировщики",
+        "проверь проект полностью",
+        "проверь почему джарвис не может пользоваться инструментами",
+        "найди что не на своих местах",
+        "почему джарвис не может",
+        "что мешает джарвису",
+        "проверь весь проект",
+        "blocker audit",
+        "autonomy audit",
+        "project audit",
+    )
+    if any(marker in lowered for marker in blocker_markers):
+        return True
+    return (
+        any(marker in lowered for marker in ("мешает", "блок", "сломана", "не работает", "не может"))
+        and any(marker in lowered for marker in ("джарвис", "агент", "скил", "skill", "инструмент", "tool", "проект", "автоном"))
+    )
+
+
+def _asks_code_draft_request(lowered: str) -> bool:
+    draft_markers = (
+        "напиши код исправления",
+        "подготовь код исправления",
+        "сделай патч",
+        "подготовь патч",
+        "patch proposal",
+        "code draft",
+        "не применяй",
+        "без применения",
+    )
+    return any(marker in lowered for marker in draft_markers) and any(
+        marker in lowered for marker in ("код", "патч", "fix", "исправ", "draft")
+    )
+
+
+def _asks_agent_catalog_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "каких агентов ты видишь",
+            "какие агенты доступны",
+            "список агентов",
+            "каких агентов видишь",
+            "какие agent доступны",
+            "available agents",
+            "agent catalog",
+        )
+    )
+
+
+def _asks_skill_visibility_question(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "какие скилы ты видишь",
+            "какие навыки доступны",
+            "какие возможности доступны",
+            "какие скилы доступны",
+            "какие библиотеки доступны",
+            "runtime libraries",
+            "available libraries",
+            "library store",
+            "список навыков",
+            "skill visibility",
+            "available skills",
+        )
+    )
+
+
+def _asks_project_structure_question(lowered: str) -> bool:
+    if "проект" in lowered and any(marker in lowered for marker in ("видишь", "доступ", "доступно", "проверь")):
+        return True
+    return any(
+        marker in lowered
+        for marker in (
+            "структура проекта",
+            "структуре проекта",
+            "дерево проекта",
+            "покажи проект",
+            "что ты видишь по проекту",
+            "что у нас по ядру",
+            "структура ядра",
+            "project workspace",
+            "project tree",
+        )
+    )
+
+
+def _asks_project_search_question(lowered: str) -> bool:
+    search_markers = (
+        "где",
+        "найди",
+        "найти",
+        "поищи",
+        "поиск",
+        "что по",
+        "что у нас по",
+        "где у нас",
+        "логика",
+        "лежит",
+        "подключен",
+        "подключено",
+        "скачан",
+        "установлен",
+        "есть доступ",
+    )
+    domain_markers = (
+        "terminal chat",
+        "brain_loop",
+        "jarvis",
+        "n8n",
+        "голос",
+        "voice",
+        "memory",
+        "памят",
+        "roadmap",
+        "роадмап",
+        "core guard",
+        "watchdog",
+        "ollama",
+        "qwen",
+        "tool",
+        "adapter",
+        "адаптер",
+        "автоматизац",
+    )
+    return any(marker in lowered for marker in search_markers) and any(
+        marker in lowered for marker in domain_markers
+    )
+
+
+def _has_semantic_similarity_guard(lowered: str) -> bool:
+    if "semantic similarity" in lowered or "similar to" in lowered or "related to" in lowered:
+        return True
+    if "семантически" in lowered or "по смыслу" in lowered:
+        return True
+    return any(
+        marker in lowered
+        for marker in (
+            "найди похожее на",
+            "похожее на",
+            "похожие на",
+            "найди похожее",
+            "похожие",
+            "похожее",
+            "semantic",
+        )
+    )
+
+
+def _has_backend_status_guard(lowered: str) -> bool:
+    boundary_markers = ("docker", "докер", "container", "контейнер", "порт", "port", "server", "сервер")
+    if any(marker in lowered for marker in boundary_markers):
+        return False
+    backend_markers = ("qdrant", "qdrnt", "qdran", "qudrant", "sqlite", "sqlite-vec", "sqlite_vec", "sqlite vec", "mgrep", "mgreo", "mgreep")
+    status_markers = ("status", "статус", "что по", "включен", "включён", "готов", "ready")
+    return any(marker in lowered for marker in backend_markers) and any(marker in lowered for marker in status_markers)
+
+
+def _has_filename_lookup_guard(user_text: str) -> bool:
+    return bool(_extract_filename_token(user_text))
+
+
+def _extract_filename_token(user_text: str) -> str:
+    match = re.search(r"(?P<filename>[\w.\-]+(?:\.py|\.yaml|\.yml|\.md|\.json|\.toml))", user_text, flags=re.IGNORECASE)
+    return match.group("filename") if match else ""
+
+
+def _asks_memory_history_question(lowered: str) -> bool:
+    explicit_memory_markers = (
+        "что мы обсуждали",
+        "что обсуждали",
+        "что я говорил",
+        "что я просил",
+        "что было в переписке",
+        "что было в истории",
+        "история сообщений",
+        "история чата",
+        "покажи историю",
+        "найди в истории",
+        "вспомни",
+        "помнишь",
+        "что ты помнишь",
+        "из памяти",
+        "в памяти",
+        "по памяти",
+        "memory recall",
+        "history recall",
+        "conversation history",
+    )
+
+    project_history_markers = (
+        "project history",
+        "project_history",
+        "imported project history",
+        "imported gpt project history",
+        "gpt project history",
+        "history по проекту",
+        "project history по проекту",
+        "история проекта",
+        "истории проекта",
+        "историю проекта",
+        "история по проекту",
+        "истории по проекту",
+        "историю по проекту",
+        "переписке по проекту",
+        "переписка по проекту",
+    )
+
+    # Важно: простое упоминание GPT не является запросом к памяти.
+    # Но явные формулировки "project history / история проекта" обязаны
+    # идти retrieval-first и не должны падать в free Ollama.
+    if any(marker in lowered for marker in project_history_markers):
+        return True
+
+    return any(marker in lowered for marker in explicit_memory_markers)
+
+
+def _asks_model_status_question(lowered: str) -> bool:
+    return any(marker in lowered for marker in ("модел", "ollama", "qwen", "gpu", "загружено")) and any(
+        marker in lowered
+        for marker in (
+            "какие",
+            "что по",
+            "статус",
+            "подключ",
+            "отвечает",
+            "есть",
+            "видишь",
+            "runtime",
+        )
+    )
+
+
+def _asks_roadmap_status_question(lowered: str) -> bool:
+    return any(marker in lowered for marker in ("roadmap", "роадмап", "фаза", "batch", "батч")) and any(
+        marker in lowered for marker in ("что дальше", "следующ", "сейчас", "статус", "какая", "какой")
+    )
+
+
+def _asks_action_request(lowered: str) -> bool:
+    return any(
+        marker in lowered
+        for marker in (
+            "сделай коммит",
+            "commit",
+            "git commit",
+            "запусти тест",
+            "запусти pytest",
+            "удали файл",
+            "скачай",
+            "установи",
+            "install",
+            "download",
+            "запусти n8n",
+            "настрой n8n",
+            "управляй пк",
+            "выполни команду",
+            "запусти команду",
+        )
+    )
+
+
+def _asks_tool_catalog_question(lowered: str) -> bool:
+    if any(marker in lowered for marker in ("что тебе доступно", "что тебе доступно?", "что доступно")):
+        return True
+    return any(
+        marker in lowered
+        for marker in (
+            "какие tools",
+            "какие tool",
+            "какие инструменты",
+            "какие инструменты тебе доступны",
+            "какие tools тебе доступны",
+            "что ты умеешь",
+            "что ты можешь",
+            "какие capability",
+            "capabilities",
+            "tool catalog",
+            "available tools",
+            "available runtime libraries",
+            "какие runtime libraries",
+            "tool-каталог",
+            "покажи доступные tools",
+            "список инструментов",
+            "все tools",
+            "все инструменты",
+            "подключенные tools",
+            "подключенные инструменты",
+        )
+    )
+
+
+def _extract_requested_file_path(user_text: str) -> str:
+    lowered = user_text.casefold()
+    filename = _extract_filename_token(user_text)
+    if filename:
+        for path in _tracked_project_files():
+            if Path(path).name.casefold() == filename.casefold():
+                return path
+        if _safe_project_path(filename):
+            return filename
+    if not any(marker in lowered for marker in ("покажи файл", "что внутри", "открой файл", "read file", "file ")):
+        return ""
+    for token in user_text.replace("`", " ").replace("'", " ").replace('"', " ").split():
+        candidate = token.strip(" ,.;:()[]{}")
+        if "/" in candidate or candidate.endswith((".py", ".md", ".yaml", ".yml", ".json", ".txt", ".sh")):
+            if _safe_project_path(candidate):
+                return candidate
+    return ""
+
+
+def _asks_safety_status_question(lowered: str) -> bool:
+    """Detect explicit safety/security/governance status questions.
+
+    This guard must be broad enough to catch mixed Russian/English operator questions
+    like "что у нас по core guard watchdog safety?" before generic semantic search.
+    """
+    return any(
+        marker in lowered
+        for marker in (
+            "core guard",
+            "watchdog",
+            "safety",
+            "security",
+            "approval",
+            "execution control",
+            "policy",
+            "guard",
+            "защит",
+            "безопасн",
+            "апрув",
+            "разрешен",
+            "разрешён",
+            "контроль действий",
+            "контроль выполнения",
+            "ядро безопасности",
+            "security_layer",
+            "approval_service",
+            "execution_allowed",
+            "direct_execution_allowed",
+            "pc_control_allowed",
+        )
+    )
+
+
+def _asks_retrieval_container_status_question(text: str) -> bool:
+    lowered = text.casefold()
+    return (
+        any(marker in lowered for marker in ("container", "контейнер", "docker"))
+        and any(marker in lowered for marker in ("qdrant", "qdrnt", "retrieval", "backend"))
+        and any(marker in lowered for marker in ("включ", "запуск", "runtime", "enabled", "status", "можно запускать"))
+    )
+
+
+def _asks_semantic_similarity_question(text: str) -> bool:
+    lowered = text.casefold()
+    return (
+        "найди похож" in lowered
+        or "похожее на" in lowered
+        or "similar" in lowered
+        or "semantic similarity" in lowered
+        or "sqlite vec" in lowered
+        or "sqlite-vec" in lowered
+        or "sqlite_vec" in lowered
+        or "aqlite-vec" in lowered
+        or "aqlite vec" in lowered
+        or "векторным поиском" in lowered
+        or "векторный поиск" in lowered
+    )
+
+
+def _asks_retrieval_backend_status_question(text: str) -> bool:
+    lowered = text.casefold()
+    backend_markers = (
+        "qdrant",
+        "qdrnt",
+        "qdran",
+        "qudrant",
+        "sqlite-vec",
+        "sqlite_vec",
+        "sqlite vec",
+        "aqlite-vec",
+        "aqlite_vec",
+        "aqlite vec",
+        "retrieval backend",
+        "retrieval",
+        "vector backend",
+        "векторный backend",
+        "векторный бэкенд",
+    )
+    status_markers = (
+        "status",
+        "статус",
+        "что по",
+        "что с",
+        "состояние",
+        "работает",
+        "готов",
+        "usable",
+        "enabled",
+        "runtime",
+    )
+    return (
+        any(marker in lowered for marker in backend_markers)
+        and any(marker in lowered for marker in status_markers)
+    )

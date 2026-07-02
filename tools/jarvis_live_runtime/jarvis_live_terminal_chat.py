@@ -869,7 +869,7 @@ def _print_stream_event(line: str) -> dict[str, Any]:
 
     if event_type == "operator_trace":
         _LAST_OPERATOR_EVENT = dict(event)
-        if _chat_mode() == "debug":
+        if _trace_enabled() or _chat_mode() == "debug":
             _print_operator_trace_event(event)
         return event
 
@@ -978,7 +978,7 @@ def _print_file_change_event(event: dict[str, Any]) -> None:
 def _maybe_render_operator_work_chunk(chunk: str) -> bool:
     global _OPERATOR_WORK_ACTIVE, _OPERATOR_WORK_BUFFER, _OPERATOR_WORK_PENDING
 
-    if _chat_mode() != "debug":
+    if _chat_mode() == "compact":
         return False
 
     text = str(chunk)

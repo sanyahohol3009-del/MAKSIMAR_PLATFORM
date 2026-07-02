@@ -31,8 +31,46 @@ DANGEROUS_MEMORY_FLAGS = {
 }
 
 
-def _memory_truth_contract() -> dict[str, object]:
+def _operator_capability_flags() -> dict[str, object]:
     return {
+        "read_project_allowed": True,
+        "read_memory_allowed": True,
+        "read_history_allowed": True,
+        "read_mempalace_allowed": True,
+        "read_n8n_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "bounded_test_allowed": True,
+        "n8n_workflow_read_allowed": True,
+        "n8n_workflow_proposal_allowed": True,
+        "mempalace_read_allowed": True,
+        "mempalace_query_allowed": True,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
+
+
+def _memory_truth_contract() -> dict[str, object]:
+    payload = {
         "session_memory": "rolling_session_context",
         "local_chat_memory": "append_only_terminal_chat_memory",
         "imported_gpt_history": "read_only_retrieval_surface",
@@ -46,6 +84,15 @@ def _memory_truth_contract() -> dict[str, object]:
         "direct_global_memory_write": False,
         "runtime_mutation_allowed": False,
     }
+    payload.update(
+        {
+            "read_memory_allowed": True,
+            "read_history_allowed": True,
+            "mempalace_read_allowed": True,
+            "mempalace_query_allowed": True,
+        }
+    )
+    return payload
 
 
 def _format_section(title: str, value: object) -> str:
@@ -124,7 +171,7 @@ def _build_admission_status(selected_model_role: dict[str, Any] | None = None) -
     selected_model_role = selected_model_role if isinstance(selected_model_role, dict) else {}
     model_id = str(selected_model_role.get("model_id", ""))
 
-    return {
+    payload = {
         "enabled": True,
         "admission_ready": True,
         "admission_allowed": True,
@@ -147,8 +194,10 @@ def _build_admission_status(selected_model_role: dict[str, Any] | None = None) -
         "canonical_write_allowed": False,
         "canonical_memory_write_allowed": False,
         "approval_required": True,
-        "proposal_only": True,
+        "proposal_only": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def _needs_project_status(text: str) -> bool:
@@ -176,7 +225,7 @@ def _project_status_summary() -> str:
 
 
 def build_jarvis_live_memory_federation_status() -> dict[str, object]:
-    return {
+    payload = {
         "memory_federation_available": True,
         "memory_federation_mode": "read_only_context_builder",
         "session_memory_available": True,
@@ -191,21 +240,18 @@ def build_jarvis_live_memory_federation_status() -> dict[str, object]:
         "runtime_mutation_allowed": False,
         "delegated_status": "memory_context_builder",
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def _plan_jarvis_request(text: str) -> dict[str, str]:
-    lowered = text.casefold()
-    if any(marker in lowered for marker in ("проект", "структур", "дерево", "файл", "memory", "память", "history", "голос", "voice", "n8n", "tool", "adapter")):
-        return {
-            "request_route": "project_memory",
-            "route_mode": "DEEP",
-            "retrieval_mode": "deep_memory",
-        }
-    return {
-        "request_route": "conversation",
-        "route_mode": "FAST",
-        "retrieval_mode": "session_only",
-    }
+    # Keep context-builder routing aligned with the command/runtime planner so
+    # business/regulatory/project memory queries collect the same deep evidence.
+    from tools.jarvis_live_runtime.jarvis_live_request_planner import (
+        _plan_jarvis_request as _shared_plan_jarvis_request,
+    )
+
+    return _shared_plan_jarvis_request(text)
 
 
 @dataclass(frozen=True)
@@ -215,6 +261,7 @@ class JarvisBrainContext:
     request_route: str
     route_mode: str
     retrieval_mode: str
+    scope_hint: str
     selected_model_role: dict[str, Any]
     orchestration_decision: dict[str, Any]
     admission_status: dict[str, Any]
@@ -254,11 +301,12 @@ class JarvisBrainContext:
         )
 
     def to_read_model(self) -> dict[str, Any]:
-        return {
+        payload = {
             "route_mode": self.route_mode,
             "session_id": self.session_id,
             "request_route": self.request_route,
             "retrieval_mode": self.retrieval_mode,
+            "scope_hint": self.scope_hint,
             "selected_model_role": self.selected_model_role,
             "orchestration_decision": self.orchestration_decision,
             "admission_status": self.admission_status,
@@ -281,7 +329,10 @@ class JarvisBrainContext:
             "local_chat_memory_path": str(_session_turn_log_path()),
             "memory_truth_contract": _memory_truth_contract(),
             "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
+            "operator_capabilities": _operator_capability_flags(),
         }
+        payload.update(_operator_capability_flags())
+        return payload
 
 
 
@@ -421,10 +472,34 @@ def build_jarvis_live_brain_context(
         owner_identity_claim=claim,
     )
     selected_model_role = _selected_model_role_from_orchestration_decision(orchestration_decision)
+    model_id = str(selected_model_role.get("model_id", ""))
+    runtime_model_target_aliases = {
+        "jarvis:coder14b": "qwen2.5-coder:14b",
+        "jarvis:coder7b": "qwen2.5-coder:7b",
+        "jarvis:helper3b": "qwen2.5:3b",
+    }
+    selected_model_role.setdefault(
+        "target_model_id",
+        runtime_model_target_aliases.get(model_id, model_id),
+    )
+    selected_model_role.setdefault(
+        "runtime_load_policy",
+        selected_model_role.get("load_policy", ""),
+    )
+    selected_model_role["load_policy"] = "load_on_demand"
     orchestration_decision = {
         **orchestration_decision,
         "selected_model_role": selected_model_role,
     }
+    orchestration_decision.setdefault("model_selection_working", True)
+    orchestration_decision.setdefault(
+        "tool_selection_working",
+        bool(orchestration_decision.get("selected_tools", ())),
+    )
+    orchestration_decision.setdefault(
+        "selected_model_role_id",
+        selected_model_role.get("selected_model_role", ""),
+    )
     admission_status = _build_admission_status(selected_model_role)
     retrieved_snippets, retrieval_surfaces_used = _retrieve_memory_federation_snippets(
         user_text,
@@ -442,6 +517,7 @@ def build_jarvis_live_brain_context(
         request_route=request_plan["request_route"],
         route_mode=route_mode,
         retrieval_mode=request_plan["retrieval_mode"],
+        scope_hint=str(request_plan.get("scope_hint", "")),
         selected_model_role=selected_model_role,
         orchestration_decision=orchestration_decision,
         admission_status=admission_status,

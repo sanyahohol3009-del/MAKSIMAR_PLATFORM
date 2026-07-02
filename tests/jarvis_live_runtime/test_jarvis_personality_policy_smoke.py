@@ -34,6 +34,7 @@ def test_canonical_personality_prompt_is_active() -> None:
     assert "pc_control_allowed=false" in prompt
     assert "canonical_memory_write_allowed=false" in prompt
     assert "approval_required=true" in prompt
+    assert "read_analyze_test_code_draft_allowed=true" in prompt
     assert "owner prefers calm conversation" in prompt
 
 

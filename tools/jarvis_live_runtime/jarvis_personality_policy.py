@@ -157,7 +157,8 @@ def build_jarvis_personality_prompt(
         f"MODEL_SELECTION_TRACE: model_id={model_id}; route_reason={route_reason}",
         (
             "SAFETY_FLAGS: pc_control_allowed=false; shell_execution_allowed=false; "
-            "canonical_write_allowed=false; canonical_memory_write_allowed=false; direct_execution_allowed=false; proposal_only=true; approval_required=true."
+            "canonical_write_allowed=false; canonical_memory_write_allowed=false; direct_execution_allowed=false; "
+            "read_analyze_test_code_draft_allowed=true; approval_required=true."
         ),
         _format_style_profile(stable_style_profile),
         _clean(rolling_summary, 1200) and f"ROLLING_SESSION_SUMMARY:\n{_clean(rolling_summary, 1200)}",

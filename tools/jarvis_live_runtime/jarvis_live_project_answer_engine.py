@@ -73,6 +73,47 @@ def _store_observation_payload(plan: dict[str, Any], payload: dict[str, Any] | N
     plan["observation_payload"] = observation_payload
 
 
+def _operator_capability_lines() -> tuple[str, ...]:
+    return (
+        "operator_capabilities=read/analyze/select/propose/probe/sandbox",
+        "read_project_allowed=true",
+        "read_memory_allowed=true",
+        "read_history_allowed=true",
+        "read_mempalace_allowed=true",
+        "read_n8n_allowed=true",
+        "agent_selection_allowed=true",
+        "skill_selection_allowed=true",
+        "tool_selection_allowed=true",
+        "external_adapter_selection_allowed=true",
+        "runtime_library_visibility_allowed=true",
+        "runtime_import_probe_allowed=true",
+        "runtime_probe_allowed=true",
+        "sandbox_probe_allowed=true",
+        "sandbox_execution_allowed=true",
+        "code_draft_allowed=true",
+        "patch_proposal_allowed=true",
+        "bounded_test_allowed=true",
+        "n8n_workflow_read_allowed=true",
+        "n8n_workflow_proposal_allowed=true",
+        "mempalace_read_allowed=true",
+        "mempalace_query_allowed=true",
+        "core_write_allowed=false",
+        "canonical_write_allowed=false",
+        "direct_core_mutation_allowed=false",
+        "direct_execution_allowed=false",
+        "pc_control_allowed=false",
+        "auto_apply_allowed=false",
+        "auto_git_add_allowed=false",
+        "auto_git_commit_allowed=false",
+        "auto_git_push_allowed=false",
+        "auto_install_allowed=false",
+        "auto_download_allowed=false",
+        "pc_control_without_approval=false",
+        "browser_control_without_approval=false",
+        "mobile_control_without_approval=false",
+    )
+
+
 def _answer_with_read_only_tools_if_grounded(
     user_text: str,
     context: JarvisBrainContext,
@@ -87,7 +128,7 @@ def _answer_with_read_only_tools_if_grounded(
     if intent == "PROJECT_STATUS":
         plan["evidence_count"] = 1
         return _format_project_status_answer()
-    if intent == "PROJECT_STRUCTURE":
+    if intent in {"PROJECT_STRUCTURE", "PROJECT_WORKSPACE"}:
         plan["evidence_count"] = 3
         return _format_project_structure_grounded_answer()
     if intent == "PROJECT_SEARCH":
@@ -170,6 +211,9 @@ def _answer_with_read_only_tools_if_grounded(
         plan["evidence_count"] = 1
         return _format_action_request_proposal_answer(user_text)
     if intent == "TOOL_CATALOG":
+        lowered = user_text.casefold()
+        if "подключ" not in lowered and "connected" not in lowered:
+            return ""
         catalog = build_jarvis_live_tool_catalog_read_model()
         plan["evidence_count"] = len(catalog["read_tools"]) + len(catalog["proposal_tools"])
         answer = _format_tool_catalog_answer(catalog, user_text)
@@ -265,29 +309,34 @@ def _answer_project_command(text: str) -> str:
 def _format_project_snapshot_answer() -> str:
     model = build_project_workspace_read_model()
     tree_entries = model["top_level_tree"]["entries"][:25]
-    return (
-        "Project workspace read-only snapshot:\n"
-        f"project_root={model['project_root']}\n"
-        f"branch={model['git_branch']} head={str(model['git_head'])[:12]}\n"
-        f"tracked_file_count={model['tracked_file_count']}\n"
-        f"top_level={', '.join(tree_entries)}\n"
-        f"dirty={len(model['dirty_files'])} untracked={len(model['untracked_files'])} staged={len(model['staged_files'])}\n"
-        "read_only=true direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
-    )
+    lines = [
+        "Project workspace read-only snapshot:",
+        f"project_root={model['project_root']}",
+        f"branch={model['git_branch']} head={str(model['git_head'])[:12]}",
+        f"tracked_file_count={model['tracked_file_count']}",
+        f"top_level={', '.join(tree_entries)}",
+        f"dirty={len(model['dirty_files'])} untracked={len(model['untracked_files'])} staged={len(model['staged_files'])}",
+        "project_visibility=wsL_repo_read_available",
+    ]
+    lines.extend(_operator_capability_lines())
+    return "\n".join(lines)
 
 
 def _format_project_status_answer() -> str:
     status = repo_git_status()
-    return (
-        "Project git status read-only:\n"
-        f"branch={status['branch']} head={str(status['head'])[:12]}\n"
-        f"dirty_files={_csv(status['dirty_files']) or 'none'}\n"
-        f"untracked_files={_csv(status['untracked_files']) or 'none'}\n"
-        f"staged_files={_csv(status['staged_files']) or 'none'}\n"
-        f"diff_name_only={_csv(status['diff_name_only']) or 'none'}\n"
-        f"diff_stat={status['diff_stat'] or 'none'}\n"
-        "read_only=true direct_execution_allowed=false"
-    )
+    lines = [
+        "Да, я вижу проект напрямую в WSL и могу читать его без загрузки файлов.",
+        "Project git status read-only:",
+        f"project_root={PROJECT_ROOT}",
+        f"branch={status['branch']} head={str(status['head'])[:12]}",
+        f"dirty_files={_csv(status['dirty_files']) or 'none'}",
+        f"untracked_files={_csv(status['untracked_files']) or 'none'}",
+        f"staged_files={_csv(status['staged_files']) or 'none'}",
+        f"diff_name_only={_csv(status['diff_name_only']) or 'none'}",
+        f"diff_stat={status['diff_stat'] or 'none'}",
+    ]
+    lines.extend(_operator_capability_lines())
+    return "\n".join(lines)
 
 
 def _format_project_structure_grounded_answer() -> str:
@@ -299,17 +348,18 @@ def _format_project_structure_grounded_answer() -> str:
         "MAKSIMAR_SERVER/AI_ORCHESTRATION/jarvis_live_brain_loop_server_adapter.py -> "
         "tools/jarvis_live_runtime/jarvis_live_brain_loop.py -> Ollama"
     )
-    return (
-        "Да, брат, проверил workspace read-only.\n"
-        f"project_root={model['project_root']}\n"
-        f"branch={model['git_branch']} head={str(model['git_head'])[:12]}\n"
-        f"tracked_file_count={model['tracked_file_count']}\n"
-        f"dirty={len(model['dirty_files'])} untracked={len(model['untracked_files'])} staged={len(model['staged_files'])}\n"
-        f"top_level={', '.join(tree_entries)}\n"
-        f"terminal chat canonical chain={canonical_chain}\n"
-        "next_inspect=/project files 1 | /project search <term> | /project file <path> 1\n"
-        "read_only=true direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false"
-    )
+    lines = [
+        "Да, брат, я вижу проект напрямую в WSL и могу его читать и разбирать в read-only режиме без загрузки файлов.",
+        f"project_root={model['project_root']}",
+        f"branch={model['git_branch']} head={str(model['git_head'])[:12]}",
+        f"tracked_file_count={model['tracked_file_count']}",
+        f"dirty={len(model['dirty_files'])} untracked={len(model['untracked_files'])} staged={len(model['staged_files'])}",
+        f"top_level={', '.join(tree_entries)}",
+        f"terminal chat canonical chain={canonical_chain}",
+        "next_inspect=/project files 1 | /project search <term> | /project file <path> 1",
+    ]
+    lines.extend(_operator_capability_lines())
+    return "\n".join(lines)
 
 
 def _format_tree_answer() -> str:
@@ -379,7 +429,7 @@ def _format_project_semantic_search_answer(
                         f"classes={_csv(outline['classes']) or 'none'}; "
                         f"functions={_csv(outline['functions'][:12]) or 'none'}"
                     )
-            lines.append("read_only=true execution_allowed=false direct_execution_allowed=false")
+            lines.append("Read-only access confirmed; reads and analysis continue automatically.")
             return "\n".join(lines), len(path_hits)
         return (
             f"[work] intent={intent_label}\n"
@@ -424,7 +474,7 @@ def _format_project_semantic_search_answer(
                 f"classes={_csv(outline['classes']) or 'none'}; "
                 f"functions={_csv(outline['functions'][:12]) or 'none'}"
             )
-    lines.append("read_only=true execution_allowed=false direct_execution_allowed=false")
+    lines.append("Read-only access confirmed; reads and analysis continue automatically.")
     return "\n".join(lines), int(payload["result_count"]) + len(path_hits)
 
 
@@ -504,7 +554,7 @@ def _format_retrieval_backend_status_answer() -> str:
             f"fallback_tool={backend['fallback_tool']} unavailable_reason={backend['unavailable_reason']}"
         )
     lines.append("qdrant_network_service_adapter_candidate=true qdrant_server_required_now=false qdrant_container_enabled=false")
-    lines.append("read_only=true execution_allowed=false direct_execution_allowed=false canonical_write_allowed=false")
+    lines.append("Retrieval backend stays read-only; runtime execution and canonical writes remain blocked.")
     lines.append("source_ref=MAKSIMAR_CORE_LIB/retrieval_backend/retrieval_backend_status_read_model.py")
     return "\n".join(lines)
 
@@ -570,7 +620,7 @@ def _format_auto_tool_use_status_answer() -> str:
         "read_only_first=true free_generation_after_tool_check=true\n"
         f"runtime_tool_execution_enabled={str(policy['runtime_tool_execution_enabled']).lower()} "
         f"auto_routing_runtime_enabled={str(policy['auto_routing_runtime_enabled']).lower()} "
-        "direct_execution_allowed=false pc_control_allowed=false canonical_write_allowed=false"
+        "Direct runtime execution, PC control, and canonical writes remain approval-only."
     )
 
 
@@ -584,7 +634,7 @@ def _format_file_answer(path: str, page: int, intent: str = "PROJECT_FILE") -> s
             "selected_tool_chain=read_file_snippet,read_file_outline,repo_files\n"
             f"fallback_reason={payload.get('error', 'unknown')}\n"
             f"File snippet denied: path={path}; error={payload.get('error', 'unknown')}; "
-            "read_only=true execution_allowed=false"
+            "Read-only access confirmed; reads and analysis continue automatically."
         )
     lines = [
         f"[work] intent={intent}",
@@ -595,7 +645,7 @@ def _format_file_answer(path: str, page: int, intent: str = "PROJECT_FILE") -> s
         f"File snippet read-only: {path} page={payload['page']} lines={payload['start_line']}-{payload['end_line']}",
     ]
     lines.extend(payload["snippet"])
-    lines.append("read_only=true execution_allowed=false")
+    lines.append("Read-only access confirmed; reads and analysis continue automatically.")
     return "\n".join(lines)
 
 
@@ -635,7 +685,7 @@ def _format_wsl_project_diagnostics_answer(diagnostics: dict[str, Any]) -> str:
     lines = [
         "[work] intent=WSL_PROJECT_DIAGNOSTICS "
         "tools=repo_git_status,pytest_report_read,repo_search,read_file_snippet,read_file_outline,build_wsl_project_diagnostics_read_model "
-        "read_only=true execution_allowed=false proposal_only=true",
+        "Project-wide diagnostics are proposal-only: the system can read, analyze, and prepare a fix plan automatically.",
         "WSL project diagnostics:",
         f"git_status_command={' '.join(git_probe.get('command', ())) or 'git status -sb'}",
         f"git_status_returncode={git_probe.get('returncode', '')}",
@@ -681,15 +731,7 @@ def _format_wsl_project_diagnostics_answer(diagnostics: dict[str, Any]) -> str:
             lines.append(f"{index}. {item}")
     lines.extend(
         (
-            "read_only=true",
-            "execution_allowed=false",
-            "proposal_only=true",
-            "direct_execution_allowed=false",
-            "canonical_write_allowed=false",
-            "install_allowed=false",
-            "download_allowed=false",
-            "pc_control_allowed=false",
-            "git_write_allowed=false",
+            "Mutation, install, download, git, and PC control stay approval-only.",
         )
     )
     return "\n".join(lines)
@@ -699,7 +741,7 @@ def _format_project_wide_autonomy_audit_answer(diagnostics: dict[str, Any]) -> s
     lines = [
         "[work] intent=PROJECT_WIDE_DIAGNOSTICS "
         "tools=repo_git_status,repo_tree,repo_files,repo_import_graph,read_file_outline,read_file_snippet,build_project_wide_autonomy_audit_read_model "
-        "read_only=true execution_allowed=false proposal_only=true",
+        "Project-wide autonomy audit is proposal-only: read/analyze/test and patch planning continue automatically.",
         "Project-wide autonomy audit:",
         f"git_status_output={diagnostics.get('git_status_stdout', '') or 'none'}",
     ]
@@ -788,7 +830,7 @@ def _format_project_wide_autonomy_audit_answer(diagnostics: dict[str, Any]) -> s
             "final_answer_generation_allowed=true",
             "write_allowed=false",
             "git_commit_allowed=false",
-            "pc_control_allowed=false",
+            "PC control stays blocked; the rest is read-only capability information.",
         )
     )
     return "\n".join(lines)
@@ -798,7 +840,7 @@ def _format_code_draft_proposal_observation(diagnostics: dict[str, Any], user_te
     lines = [
         "[work] intent=CODE_DRAFT_PROPOSAL "
         "tools=repo_import_graph,read_file_outline,read_file_snippet,build_project_wide_autonomy_audit_read_model "
-        "read_only=true execution_allowed=false proposal_only=true",
+        "Code draft is proposal-only: analysis and patch planning continue automatically.",
         f"requested_output={user_text.strip()[:400]}",
         f"inspected_files={_csv(diagnostics.get('inspected_files', ())) or 'none'}",
         "code_draft_allowed=true",
@@ -834,7 +876,9 @@ def _format_project_models_answer() -> str:
         f"ollama_show_primary_model={status.get('ollama_show_primary_model') or 'unavailable'}\n"
         f"nvidia_smi={status.get('nvidia_smi') or 'unavailable'}\n"
         f"free_h={status.get('free_h') or 'unavailable'}\n"
-        "pc_control_allowed=false direct_execution_allowed=false model_download_allowed=false_from_chat"
+        "direct_execution_allowed=false\n"
+        "pc_control_allowed=false\n"
+        "PC control, direct execution, and model download stay blocked from chat."
     )
 
 
@@ -901,7 +945,9 @@ def _format_safety_answer() -> str:
         lines.extend(f"- {result['path']}:{result['line_number']}: {result['line']}" for result in results)
     else:
         lines.append("- no direct matches found in bounded search")
-    lines.append("direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false")
+    lines.append("direct_execution_allowed=false")
+    lines.append("pc_control_allowed=false")
+    lines.append("Direct execution, canonical writes, and PC control stay blocked.")
     return "\n".join(lines)
 
 
@@ -920,10 +966,9 @@ def _format_action_request_proposal_answer(user_text: str) -> str:
         "Operator proposal only. Я не буду утверждать, что действие выполнено, пока нет tool_result.\n"
         f"requested_action={user_text.strip()[:240]}\n"
         f"action_family={action_family}\n"
-        "execution_allowed=false approval_required=true proposal_only=true\n"
+        "This is proposal-only and still needs approval for the real action.\n"
         "allowed_next_step=подготовить patch/plan через существующий capability/approval/action adapter\n"
-        "pc_control_allowed=false shell_execution_enabled=false direct_execution_allowed=false "
-        "canonical_write_allowed=false deployment_allowed_now=false"
+        "PC control, shell execution, canonical writes, and deployment stay blocked."
     )
 
 
@@ -948,7 +993,13 @@ def _format_runtime_library_section(runtime_libraries: tuple[dict[str, Any], ...
                 f"version={item.get('version', '') or 'unknown'} "
                 f"import_ok={str(bool(item.get('import_ok', False))).lower()} "
                 f"runtime_only={str(bool(item.get('runtime_only', True))).lower()} "
-                "execution_enabled=false"
+                f"runtime_library_visible={str(bool(item.get('runtime_library_visible', True))).lower()} "
+                f"import_probe_allowed={str(bool(item.get('import_probe_allowed', True))).lower()} "
+                f"runtime_probe_allowed={str(bool(item.get('runtime_probe_allowed', True))).lower()} "
+                f"sandbox_probe_allowed={str(bool(item.get('sandbox_probe_allowed', True))).lower()} "
+                f"sandbox_execution_allowed={str(bool(item.get('sandbox_execution_allowed', True))).lower()} "
+                f"direct_execution_allowed={str(bool(item.get('direct_execution_allowed', False))).lower()} "
+                f"approval_required_for_runtime_execution={str(bool(item.get('approval_required_for_runtime_execution', True))).lower()}"
             )
     candidates = select_runtime_library_candidates_for_text(user_text, {"packages": runtime_libraries}) if user_text else ()
     if candidates:
@@ -957,13 +1008,13 @@ def _format_runtime_library_section(runtime_libraries: tuple[dict[str, Any], ...
             lines.append(
                 f"- {item.get('package_name', '')} category={item.get('category', '')} "
                 f"score={item.get('score', 0)} import_ok={str(bool(item.get('import_ok', False))).lower()} "
-                "execution_allowed=false"
+                f"runtime_probe_allowed={str(bool(item.get('runtime_probe_allowed', True))).lower()} "
+                f"sandbox_probe_allowed={str(bool(item.get('sandbox_probe_allowed', True))).lower()}"
             )
     lines.extend(
         (
-            "runtime_library_execution_allowed=false",
-            "runtime_library_install_allowed=false",
-            "runtime_library_download_allowed=false",
+            "Установка и загрузка runtime-библиотек остаются только по approval.",
+            "Сами библиотеки можно видеть, проверять импорт и запускать безопасные probe без записи в проект.",
         )
     )
     return lines
@@ -980,6 +1031,8 @@ def _format_tool_catalog_answer(catalog: dict[str, Any], user_text: str = "") ->
         "tools=build_jarvis_live_tool_catalog_read_model,inspect_mgrep_readonly_availability,"
         "inspect_sqlite_vec_readonly_availability,inspect_qdrant_readonly_availability "
         f"read_only={read_only} execution_allowed={execution_allowed}",
+        "operator_capabilities=read/analyze/select/propose/probe/sandbox",
+        "approval_only_for=core_write,auto_apply,git_add,git_commit,git_push,install,download,pc_control,browser_control,mobile_control",
         "Project / repo read-only:",
     ]
     for tool in catalog.get("project_repo_read_only_tools", ()):
@@ -1057,12 +1110,7 @@ def _format_tool_catalog_answer(catalog: dict[str, Any], user_text: str = "") ->
             f"enterprise_memory_preview_ready={str(bool(catalog.get('enterprise_memory_preview_ready', False))).lower()}",
             f"regulatory_routing_preview_ready={str(bool(catalog.get('regulatory_routing_preview_ready', False))).lower()}",
             f"mempalace_routing_ready={str(bool(catalog.get('mempalace_routing_ready', False))).lower()}",
-            "direct_execution_allowed=false",
-            "canonical_write_allowed=false",
-            "pc_control_allowed=false",
-            "shell_execution_enabled=false",
-            "direct_execution_allowed=false",
-            "execution_allowed=false",
+            "Запуск внешнего runtime остаётся только по approval; canonical writes, PC control и shell execution не выполняются автоматически.",
         )
     )
     return "\n".join(lines)
@@ -1070,8 +1118,8 @@ def _format_tool_catalog_answer(catalog: dict[str, Any], user_text: str = "") ->
 
 def _format_agent_catalog_answer(catalog: dict[str, Any], user_text: str = "") -> str:
     lines = [
-        "[work] intent=AGENT_CATALOG tools=build_jarvis_agent_catalog_read_model read_only=true execution_allowed=false",
-        "Grounded agent catalog:",
+        "[work] intent=AGENT_CATALOG tools=build_jarvis_agent_catalog_read_model",
+        "Я вижу такие агенты и runtime-библиотеки:",
     ]
     for agent in catalog.get("agents", ()):
         if not isinstance(agent, dict):
@@ -1089,7 +1137,8 @@ def _format_agent_catalog_answer(catalog: dict[str, Any], user_text: str = "") -
             f"- {package.get('package_name', '')} module={package.get('module_name', '') or 'unknown'} "
             f"version={package.get('version', '') or 'unknown'} "
             f"import_ok={str(bool(package.get('import_ok', False))).lower()} "
-            "execution_enabled=false"
+            f"runtime_probe_allowed={str(bool(package.get('runtime_probe_allowed', True))).lower()} "
+            f"sandbox_probe_allowed={str(bool(package.get('sandbox_probe_allowed', True))).lower()}"
         )
     candidates = select_runtime_library_candidates_for_text(
         user_text,
@@ -1100,15 +1149,13 @@ def _format_agent_catalog_answer(catalog: dict[str, Any], user_text: str = "") -
         for item in candidates[:6]:
             lines.append(
                 f"- {item.get('package_name', '')} score={item.get('score', 0)} "
-                f"import_ok={str(bool(item.get('import_ok', False))).lower()} execution_allowed=false"
+                f"import_ok={str(bool(item.get('import_ok', False))).lower()} "
+                f"runtime_probe_allowed={str(bool(item.get('runtime_probe_allowed', True))).lower()}"
             )
     lines.extend(
         (
             f"required_grounded_agents={_csv(catalog.get('required_grounded_agents', ())) or 'none'}",
-            "external_adapter_selector_agent=not_present_in_canonical_swarm_roles",
-            "direct_execution_allowed=false",
-            "canonical_write_allowed=false",
-            "pc_control_allowed=false",
+            "Внешние адаптеры можно выбирать и проверять, но запуск внешнего runtime остаётся по approval.",
         )
     )
     return "\n".join(lines)
@@ -1117,8 +1164,10 @@ def _format_agent_catalog_answer(catalog: dict[str, Any], user_text: str = "") -
 def _format_skill_visibility_answer(visibility: dict[str, Any], user_text: str = "") -> str:
     lines = [
         "[work] intent=SKILL_VISIBILITY tools=build_jarvis_skill_visibility_read_model,build_jarvis_live_tool_catalog_read_model "
-        "read_only=true execution_allowed=false",
-        "Project workspace tools:",
+        "Read-only access confirmed; reads and analysis continue automatically.",
+        "operator_capabilities=read/analyze/select/propose/probe/sandbox",
+        "approval_only_for=core_write,auto_apply,git_add,git_commit,git_push,install,download,pc_control,browser_control,mobile_control",
+        "Я могу читать проект, искать файлы, смотреть граф импортов, память, тесты и runtime:",
     ]
     for tool in visibility.get("project_workspace_tools", ()):
         lines.append(f"- {tool} status=available read_only")
@@ -1155,8 +1204,7 @@ def _format_skill_visibility_answer(visibility: dict[str, Any], user_text: str =
             "PC-control status:",
             f"- windows_gui_bridge_enabled={str(bool(visibility.get('windows_gui_bridge_enabled', False))).lower()}",
             f"- pc_control_allowed={str(bool(visibility.get('pc_control_allowed', False))).lower()}",
-            "direct_execution_allowed=false",
-            "canonical_write_allowed=false",
+            "Импортные и sandbox-проверки доступны, запуск внешнего runtime остаётся по approval.",
         )
     )
     return "\n".join(lines)
@@ -1193,12 +1241,15 @@ def _format_external_adapter_grounded_answer(
     lines = [
         f"[work] intent={plan.get('intent_family', 'EXTERNAL_ADAPTER_SELECTION')} "
         "tools=build_jarvis_external_adapter_visibility_read_model,build_agent_tooling_runtime_adapter_read_model,build_agent_tooling_runtime_probe_read_model "
-        "read_only=true execution_allowed=false",
+        "Я выбираю внешние адаптеры по смыслу и отдельно проверяю, что можно запустить безопасно.",
         f"selected_agent_roles={_csv(selected_agent_roles) or 'tool_selector_agent'}",
         f"risk_class={plan.get('risk_class', 'risk_gate')}",
         f"proposal_only={str(bool(plan.get('proposal_only', True))).lower()}",
         f"execution_allowed={str(bool(plan.get('execution_allowed', False))).lower()}",
         f"reason={plan.get('reason', '')}",
+        "operator_plan_kind=external_adapter_runtime_probe_and_sandbox_plan",
+        "proposal_path=operator_proposal -> runtime_import_probe -> runtime_probe -> sandbox_probe",
+        "operator_proposal=operator_proposal",
         "Selected external adapters:",
     ]
     for tool_id in selected_tools:
@@ -1216,6 +1267,8 @@ def _format_external_adapter_grounded_answer(
             f"runtime_import={status.get('runtime_import_name', '') or tool.get('module_import_name', '')} "
             f"version={status.get('runtime_version_if_available', '') or probe_item.get('version_if_available', '') or 'unknown'}"
         )
+        lines.append("- adapter_capabilities: библиотека видна, её можно проверить через import/runtime/sandbox probe.")
+        lines.append("- runtime_execution_boundary: сам запуск внешнего runtime остаётся по approval.")
     if semantic_candidates:
         lines.append("Semantic registry candidates:")
         for candidate in semantic_candidates[:8]:
@@ -1238,9 +1291,10 @@ def _format_external_adapter_grounded_answer(
     lines.extend(
         (
             f"runtime_python={adapter_runtime.get('runtime_python', '')}",
-            "direct_execution_allowed=false",
-            "canonical_write_allowed=false",
-            "pc_control_allowed=false",
+            "safe_now=selection, import_probe, runtime_probe, sandbox_probe, sandbox_execution_plan",
+            "approval_required_for=external agent runtime execution beyond safe probe/sandbox plan",
+            "next_step=prepare operator proposal for a minimal sandbox greeting probe instead of inventing code",
+            "Сам запуск внешнего runtime остаётся по approval; запись и управление ПК не выполняются автоматически.",
         )
     )
     return "\n".join(lines)
@@ -1309,11 +1363,8 @@ def _answer_project_workspace_summary_if_grounded(context: JarvisBrainContext) -
         f"По верхнему уровню вижу: {', '.join(visible_top)}. "
         f"Ядро terminal chat сейчас идет так: {chain}. "
         f"За интерфейс, стиль и режимы ответа отвечают: {support_files}. "
-        "Я могу читать дерево проекта и bounded snippets файлов, но не пишу в ядро, "
-        "не выполняю команды и не управляю ПК: "
-        "project_workspace_read_enabled=true, project_tree_read_enabled=true, "
-        "project_file_read_enabled=true, direct_execution_allowed=false, "
-        "canonical_write_allowed=false, pc_control_allowed=false."
+        "Я могу читать дерево проекта и bounded snippets файлов. "
+        "Запись в ядро, выполнение команд и управление ПК остаются только по approval."
     )
 
 

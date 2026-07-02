@@ -1,0 +1,41 @@
+## voice-edge-v2-clean-reset...origin/voice-edge-v2-clean-reset
+ M .pymon
+ M EXTERNAL_BACKENDS/mempalace/smoke_reports/mempalace_controlled_real_backend_probe_report.json
+ M tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_project_answer_engine_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_read_models_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_personality_policy_smoke.py
+ M tests/jarvis_live_runtime/test_long_grounded_response_not_silently_truncated_smoke.py
+ M tests/jarvis_live_runtime/test_memory_context_builder_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_read_only_tool_router_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py
+ M tests/jarvis_live_runtime/test_runtime_library_store_wiring_smoke.py
+ M tests/jarvis_live_runtime/test_skill_visibility_grounded_response_smoke.py
+ M tests/jarvis_live_runtime/test_wsl_project_operator_smoke.py
+ M tools/jarvis_live_runtime/jarvis_live_brain_loop.py
+ M tools/jarvis_live_runtime/jarvis_live_guarded_answer_engine.py
+ M tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py
+ M tools/jarvis_live_runtime/jarvis_live_read_models.py
+ M tools/jarvis_live_runtime/jarvis_live_terminal_chat.py
+ M tools/jarvis_live_runtime/jarvis_personality_policy.py
+ M tools/jarvis_live_runtime/jarvis_runtime_library_store.py
+ M tools/jarvis_live_runtime/jarvis_skill_visibility.py
+ M tools/jarvis_live_runtime/memory_context_builder.py
+ M tools/jarvis_live_runtime/ollama_streaming.py
+ M tools/jarvis_live_runtime/read_only_tool_router.py
+ M tools/jarvis_live_runtime/wsl_project_operator.py
+?? .runtime/
+?? RUNTIME/audits/
+?? RUNTIME/state/jarvis_full_relock_audit.txt
+?? RUNTIME/state/jarvis_live_critical_relock_audit.txt
+?? RUNTIME/state/jarvis_old_cage_phrases_audit.txt
+?? tests/final_memory_map/test_final_memory_source_paths_exist_smoke.py
+?? tests/jarvis_live_runtime/test_runtime_relock_removal_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_display_handoff_contract_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_routing_contract_smoke.py
+?? tests/oob_truth/
+?? tests/runtime_core/
+?? tests/voice_display_handoff/test_voice_display_handoff_contract_smoke_vdh.py
+?? tests/voice_routing/test_voice_routing_contract_smoke_vr.py

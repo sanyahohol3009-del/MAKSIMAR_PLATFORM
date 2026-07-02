@@ -47,6 +47,44 @@ _ROUTER_VISIBLE_TOOLS = (
 )
 
 
+def _operator_capability_flags() -> dict[str, Any]:
+    return {
+        "read_project_allowed": True,
+        "read_memory_allowed": True,
+        "read_history_allowed": True,
+        "read_mempalace_allowed": True,
+        "read_n8n_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "bounded_test_allowed": True,
+        "n8n_workflow_read_allowed": True,
+        "n8n_workflow_proposal_allowed": True,
+        "mempalace_read_allowed": True,
+        "mempalace_query_allowed": True,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
+
+
 def _normalize_tool_name(name: str) -> str:
     return "".join(ch for ch in str(name).casefold() if ch.isalnum() or ch == "_")
 
@@ -81,7 +119,7 @@ def build_jarvis_agent_catalog_read_model() -> dict[str, Any]:
         )
         if agent_id in visible_agents
     )
-    return {
+    payload = {
         "agents": swarm_agents,
         "visible_agents": visible_agents,
         "required_grounded_agents": required_grounded_agents,
@@ -96,6 +134,8 @@ def build_jarvis_agent_catalog_read_model() -> dict[str, Any]:
         "pc_control_allowed": False,
         "canonical_write_allowed": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
@@ -142,7 +182,9 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
                 )
             ),
             "read_only": True,
-            "execution_allowed": False,
+            "tool_use_allowed": True,
+            "sandbox_probe_allowed": True,
+            "direct_execution_allowed": False,
         },
         "memory_federation": {
             "tool_ids": (
@@ -155,7 +197,9 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
                 "mempalace_read_only_sandbox",
             ),
             "read_only": True,
-            "execution_allowed": False,
+            "tool_use_allowed": True,
+            "sandbox_probe_allowed": True,
+            "direct_execution_allowed": False,
         },
         "external_agent_tooling": {
             "tool_ids": tuple(
@@ -170,7 +214,9 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
                 )
             ),
             "read_only": True,
-            "execution_allowed": False,
+            "tool_use_allowed": True,
+            "sandbox_probe_allowed": True,
+            "direct_execution_allowed": False,
         },
         "tool_selection": {
             "tool_ids": (
@@ -180,11 +226,13 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
                 "build_runtime_library_store_read_model",
             ),
             "read_only": True,
-            "execution_allowed": False,
+            "tool_use_allowed": True,
+            "sandbox_probe_allowed": True,
+            "direct_execution_allowed": False,
         },
     }
 
-    return {
+    payload = {
         "visible_tools": visible_tools,
         "visible_agents": visible_agents,
         "visible_skills": visible_skills,
@@ -218,7 +266,7 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "runtime_library_tools_browser": tuple(runtime_libraries["tools_browser"]),
         "runtime_library_categories": tuple(runtime_libraries["categories"]),
         "runtime_library_probe_reports_read": tuple(runtime_libraries["probe_reports_read"]),
-        "runtime_library_execution_allowed": False,
+        "runtime_library_execution_allowed": True,
         "runtime_library_install_allowed": False,
         "runtime_library_download_allowed": False,
         "windows_gui_bridge_enabled": False,
@@ -226,6 +274,8 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "universal_registry_tools": tuple(tool["tool_id"] for tool in external_visibility["registry"]["tools"]),
         "skill_execution_profiles": skill_execution_profiles,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def select_skills_for_tools(selected_tools: tuple[str, ...], selected_agent_roles: tuple[str, ...]) -> tuple[str, ...]:

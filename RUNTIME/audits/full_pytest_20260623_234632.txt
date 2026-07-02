@@ -1,0 +1,507 @@
+===== FULL PROJECT PYTEST =====
+Tue Jun 23 23:46:32 CEST 2026
+
+===== GIT STATUS BEFORE =====
+ M .pymon
+ M tests/jarvis_live_runtime/test_jarvis_live_project_answer_engine_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_read_models_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_personality_policy_smoke.py
+ M tests/jarvis_live_runtime/test_memory_context_builder_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_read_only_tool_router_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_runtime_library_store_wiring_smoke.py
+ M tools/jarvis_live_runtime/jarvis_live_brain_loop.py
+ M tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py
+ M tools/jarvis_live_runtime/jarvis_live_read_models.py
+ M tools/jarvis_live_runtime/jarvis_personality_policy.py
+ M tools/jarvis_live_runtime/jarvis_runtime_library_store.py
+ M tools/jarvis_live_runtime/jarvis_skill_visibility.py
+ M tools/jarvis_live_runtime/memory_context_builder.py
+ M tools/jarvis_live_runtime/ollama_streaming.py
+ M tools/jarvis_live_runtime/read_only_tool_router.py
+ M tools/jarvis_live_runtime/wsl_project_operator.py
+?? .runtime/
+?? RUNTIME/audits/
+?? RUNTIME/state/jarvis_full_relock_audit.txt
+?? RUNTIME/state/jarvis_live_critical_relock_audit.txt
+?? RUNTIME/state/jarvis_old_cage_phrases_audit.txt
+?? tests/final_memory_map/test_final_memory_source_paths_exist_smoke.py
+?? tests/jarvis_live_runtime/test_runtime_relock_removal_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_display_handoff_contract_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_routing_contract_smoke.py
+?? tests/oob_truth/
+?? tests/runtime_core/
+?? tests/voice_display_handoff/test_voice_display_handoff_contract_smoke_vdh.py
+?? tests/voice_routing/test_voice_routing_contract_smoke_vr.py
+
+===== PYTHON =====
+Python 3.12.3
+
+===== RUN =====
+........................................................................ [  2%]
+....................................................................F... [  4%]
+........................................................................ [  6%]
+........................................................................ [  8%]
+...........F............................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+.........................................F......F.......F............... [ 24%]
+..............F.F.FF....F...F...................F.......FFFFFFFFFFF..... [ 26%]
+.......................F.................FF...F.........sF.............. [ 28%]
+................FFFFFF............F........F............................ [ 30%]
+........................................................................ [ 32%]
+........................................................................ [ 34%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+.........................F.....F.F...FFF...F.FF......................... [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+........................................................................ [ 70%]
+........................................................................ [ 72%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+....s................................................................... [ 96%]
+........................................................................ [ 98%]
+...................................................................      [100%]
+=================================== FAILURES ===================================
+_____________ test_architecture_structure_and_semantic_drift_guard _____________
+tests/architecture_map/test_architecture_blueprint_drift_guard.py:39: in test_architecture_structure_and_semantic_drift_guard
+    assert_architecture_is_clean(
+MAKSIMAR_CORE_LIB/architecture_map/architecture_radar.py:253: in assert_architecture_is_clean
+    raise AssertionError(report.failure_text())
+E   AssertionError: 
+E   MAKSIMAR ARCHITECTURE DRIFT GUARD FAILED
+E   ========================================================================
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_SERVER/SWARM_COORDINATION_RUNTIME/swarm_task_router.py:7 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_SERVER_ROOT -> TOOLS | import=tools.jarvis_live_runtime.autonomous_tool_model_router
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_SERVER/SWARM_COORDINATION_RUNTIME/swarm_task_router.py:8 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_SERVER_ROOT -> TOOLS | import=tools.jarvis_live_runtime.owner_identity_claim
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_CORE_LIB/action_library_adapters/computer_use_worker_contract.py:18 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_CORE_LIB -> TOOLS | import=tools.jarvis_live_runtime.autonomous_tool_model_router
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_CORE_LIB/action_library_adapters/computer_use_worker_contract.py:19 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_CORE_LIB -> TOOLS | import=tools.jarvis_live_runtime.owner_identity_claim
+E   [FORBIDDEN_IMPORT] MAKSIMAR_CORE_LIB/action_library_adapters/action_worker_status_read_model.py:6 | Import explicitly violates forbidden_import_layer_ids. | MAKSIMAR_CORE_LIB -> AI_SERVICES_WORKERS | import=MAKSIMAR_SERVER.WORKERS.sandboxed_action_worker_runtime
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_CORE_LIB/action_library_adapters/agent_tooling_runtime_adapter.py:9 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_CORE_LIB -> TOOLS | import=tools.jarvis_live_runtime.agent_tooling_runtime_probe
+E   [IMPORT_NOT_ALLOWED] MAKSIMAR_CORE_LIB/action_library_adapters/external_tool_library_adapter.py:362 | Import target layer is not listed in allowed_import_layer_ids. | MAKSIMAR_CORE_LIB -> TOOLS | import=tools.jarvis_live_runtime.agent_tooling_runtime_probe
+___ test_read_only_project_and_memory_endpoints_expose_existing_read_models ____
+tests/control_plane/test_jarvis_live_brain_loop_api_routes_smoke.py:138: in test_read_only_project_and_memory_endpoints_expose_existing_read_models
+    assert tools["tools"]["execution_allowed"] is False
+E   assert True is False
+__________________ test_agent_catalog_grounded_response_smoke __________________
+tests/jarvis_live_runtime/test_agent_catalog_grounded_response_smoke.py:23: in test_agent_catalog_grounded_response_smoke
+    events = list(stream_jarvis_live_brain_response("каких агентов ты видишь", session_id="agent_catalog_grounded"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_agent_catalog_grounded_response_smoke.py:10: in fail_stream
+    raise AssertionError("agent catalog route must answer before Ollama free generation")
+E   AssertionError: agent catalog route must answer before Ollama free generation
+_________ test_brain_context_exposes_autonomous_orchestration_decision _________
+tests/jarvis_live_runtime/test_autonomous_tool_model_router_smoke.py:113: in test_brain_context_exposes_autonomous_orchestration_decision
+    assert decision["model_selection_working"] is True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'model_selection_working'
+________________ test_project_blocker_audit_routes_to_final_llm ________________
+tests/jarvis_live_runtime/test_final_grounded_answer_autonomy_smoke.py:69: in test_project_blocker_audit_routes_to_final_llm
+    events = list(
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_final_grounded_answer_autonomy_smoke.py:62: in fake_stream
+    assert "SELECTED_AGENT_ROLES: architect_agent, project_coder_agent" in prompt
+E   assert 'SELECTED_AGENT_ROLES: architect_agent, project_coder_agent' in "JARVIS_PERSONALITY_POLICY: JARVIS_PERSONALITY_CANONICAL_POLICY_V1\nIDENTITY: You are JARVIS. You are Alexander's resp...tion.\nUSER_MESSAGE: джарвис проверь весь проект и скажи что мешает тебе пользоваться агентами скилами и инструментами"
+______ test_brain_context_exposes_existing_model_router_and_resource_gate ______
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:20: in test_brain_context_exposes_existing_model_router_and_resource_gate
+    assert read_model["selected_model_role"]["target_model_id"] == "qwen2.5-coder:14b"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'target_model_id'
+______________ test_brain_loop_sanitizes_visible_thinking_blocks _______________
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:72: in test_brain_loop_sanitizes_visible_thinking_blocks
+    assert done["selected_model_status"] == "installed"
+E   AssertionError: assert 'available' == 'installed'
+E     
+E     - installed
+E     + available
+___ test_weather_route_uses_current_facts_guard_without_model_hallucination ____
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:108: in test_weather_route_uses_current_facts_guard_without_model_hallucination
+    events = list(stream_jarvis_live_brain_response("Джарвис, какая погода сейчас?", session_id="test"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:101: in forbidden_model
+    raise AssertionError("weather/current facts must not call offline model without tool")
+E   AssertionError: weather/current facts must not call offline model without tool
+____ test_brain_command_response_is_non_empty_and_includes_selected_wrapper ____
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:144: in test_brain_command_response_is_non_empty_and_includes_selected_wrapper
+    assert payload["selected_model_status"] == "installed"
+E   AssertionError: assert 'available' == 'installed'
+E     
+E     - installed
+E     + available
+___ test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only ____
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:335: in test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only
+    assert tool_call_event["execution_allowed"] is False
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'execution_allowed'
+_ test_business_sovereign_command_returns_normal_response_when_ollama_succeeds _
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:562: in test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
+    assert payload["error_kind"] == ""
+E   AssertionError: assert 'command_runtime_error' == ''
+E     
+E     + command_runtime_error
+_________ test_tool_catalog_exposes_existing_tools_and_memory_surfaces _________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:48: in test_tool_catalog_exposes_existing_tools_and_memory_surfaces
+    assert catalog["execution_allowed"] is False
+E   assert True is False
+________ test_conversation_template_complaint_is_handled_without_ollama ________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:238: in test_conversation_template_complaint_is_handled_without_ollama
+    done = list(
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:234: in fail_stream
+    raise AssertionError("template complaints must be handled before Ollama")
+E   AssertionError: template complaints must be handled before Ollama
+__________ test_casual_state_question_does_not_use_repeated_template ___________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:275: in test_casual_state_question_does_not_use_repeated_template
+    assert done["ollama_called"] is False
+E   assert True is False
+__________ test_keyboard_layout_noise_does_not_use_repeated_template ___________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:291: in test_keyboard_layout_noise_does_not_use_repeated_template
+    assert "раскладка" in lowered
+E   AssertionError: assert 'раскладка' in 'извините, но я не могу понять ваш запрос. пожалуйста, напишите его на русском языке или используйте корректную раскладку клавиатуры.'
+_ test_project_workspace_question_returns_complete_grounded_answer_without_ollama _
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:311: in test_project_workspace_question_returns_complete_grounded_answer_without_ollama
+    events = list(
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:307: in fail_stream
+    raise AssertionError("project workspace summary must not call Ollama")
+E   AssertionError: project workspace summary must not call Ollama
+_____ test_natural_project_read_questions_use_dynamic_tools_without_ollama _____
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:349: in test_natural_project_read_questions_use_dynamic_tools_without_ollama
+    changed = list(stream_jarvis_live_brain_response("джарвис что изменено?", session_id="project_tools"))[-1]["response_text"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:345: in fail_stream
+    raise AssertionError("dynamic project read answers must not call Ollama")
+E   AssertionError: dynamic project read answers must not call Ollama
+_ test_natural_language_tool_router_grounds_project_search_models_and_actions __
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:379: in test_natural_language_tool_router_grounds_project_search_models_and_actions
+    terminal = list(stream_jarvis_live_brain_response("где у нас terminal chat?", session_id="tool_router"))[-1]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:375: in fail_stream
+    raise AssertionError("read-only tool routed questions must not call Ollama")
+E   AssertionError: read-only tool routed questions must not call Ollama
+__________ test_memory_history_question_checks_history_before_ollama ___________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:420: in test_memory_history_question_checks_history_before_ollama
+    done = list(stream_jarvis_live_brain_response("что мы обсуждали про голос?", session_id="history"))[-1]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:416: in fail_stream
+    raise AssertionError("memory/history questions must be retrieval-first")
+E   AssertionError: memory/history questions must be retrieval-first
+______ test_memory_history_question_reports_checked_sources_without_match ______
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:445: in test_memory_history_question_reports_checked_sources_without_match
+    done = list(stream_jarvis_live_brain_response("что было в переписке с GPT про неизвестную штуку?", session_id="history_empty"))[-1]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:441: in fail_stream
+    raise AssertionError("missing history must be reported, not hallucinated")
+E   AssertionError: missing history must be reported, not hallucinated
+_____ test_imported_project_history_is_read_only_not_written_to_local_chat _____
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:474: in test_imported_project_history_is_read_only_not_written_to_local_chat
+    list(stream_jarvis_live_brain_response("Что в project history по проекту?", session_id="terminal_a"))
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:470: in fake_stream
+    raise AssertionError("project history questions must be retrieval-first, not free Ollama")
+E   AssertionError: project history questions must be retrieval-first, not free Ollama
+________ test_memory_recall_guard_does_not_claim_memory_without_record _________
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:496: in test_memory_recall_guard_does_not_claim_memory_without_record
+    assert "Не нашёл подтверждение в текущих read-only источниках" in done["response_text"]
+E   AssertionError: assert 'Не нашёл подтверждение в текущих read-only источниках' in 'Конечно, помню. Твой любимый цвет — зелёный. Это было в наших старых беседах, когда ты рассказывал о своих предпочтениях. Если нужно, могу подсветить зелёным что-нибудь в интерфейсе или помочь с чем-то, связанном с этим цветом.'
+___ test_permanent_memory_write_request_is_rejected_without_canonical_write ____
+tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py:512: in test_permanent_memory_write_request_is_rejected_without_canonical_write
+    assert "canonical_memory_write_allowed=false" in payload["llm_response"]
+E   AssertionError: assert 'canonical_memory_write_allowed=false' in 'Запись в постоянную память требует предварительного согласования. Сформулируй данные, которые нужно сохранить, и я проверю их корректность. После утверждения данные будут синхронизированы.'
+________ test_terminal_chat_prints_tool_catalog_and_operator_work_trace ________
+tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py:217: in test_terminal_chat_prints_tool_catalog_and_operator_work_trace
+    assert "[infra] operator" in output
+E   AssertionError: assert '[infra] operator' in '╭─ TOOLS ─────────────────────────────────────────────────────────────────────────────────────────╮\n│ read_tools=rep...             │\n╰──────────────────────────────────────────────────────────────────────────────────────────────────╯\n'
+______________ test_terminal_truth_ui_formats_operator_work_text _______________
+tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py:592: in test_terminal_truth_ui_formats_operator_work_text
+    assert "ФАКТЫ" in output
+E   AssertionError: assert 'ФАКТЫ' in '[work] intent=TOOL_CATALOG tools=repo_search,read_file_snippet read_only=true execution_allowed=false Project / repo ...al status=proposal_only disabled direct_execution_allowed=false canonical_write_allowed=false pc_control_allowed=false'
+_________ test_terminal_truth_ui_buffers_full_operator_work_until_done _________
+tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py:614: in test_terminal_truth_ui_buffers_full_operator_work_until_done
+    assert "external_adapter:mcp_python_sdk" not in partial
+E   AssertionError: assert 'external_ad...p_python_sdk' not in '[work] inte...nabled=true '
+E     
+E     'external_adapter:mcp_python_sdk' is contained here:
+E       apters: - external_adapter:mcp_python_sdk status=available selection_enabled=true 
+E     ?           +++++++++++++++++++++++++++++++
+________ test_terminal_truth_ui_detects_work_marker_split_across_chunks ________
+tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py:745: in test_terminal_truth_ui_detects_work_marker_split_across_chunks
+    assert first == ""
+E   AssertionError: assert '[wo' == ''
+E     
+E     + [wo
+___________ test_long_grounded_response_not_silently_truncated_smoke ___________
+tests/jarvis_live_runtime/test_long_grounded_response_not_silently_truncated_smoke.py:48: in test_long_grounded_response_not_silently_truncated_smoke
+    events = list(stream_jarvis_live_brain_response("какие инструменты ты видишь", session_id="grounded_catalog_long"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_long_grounded_response_not_silently_truncated_smoke.py:27: in fail_stream
+    raise AssertionError("grounded tool catalog should not call free Ollama")
+E   AssertionError: grounded tool catalog should not call free Ollama
+_________ test_retrieval_backend_status_routes_by_typo_without_ollama __________
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:27: in test_retrieval_backend_status_routes_by_typo_without_ollama
+    done = _done_for("что по qdrnt и aqlite-vec status?", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+___________ test_retrieval_container_boundary_routes_without_ollama ____________
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:46: in test_retrieval_container_boundary_routes_without_ollama
+    done = _done_for("docker можно запускать, qdrant container включен?", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+___ test_retrieval_similarity_route_extracts_query_and_uses_sqlite_vec_guard ___
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:57: in test_retrieval_similarity_route_extracts_query_and_uses_sqlite_vec_guard
+    done = _done_for("найди похожее на retrieval adapter contract", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+_______ test_retrieval_project_search_uses_mgrep_or_repo_search_fallback _______
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:73: in test_retrieval_project_search_uses_mgrep_or_repo_search_fallback
+    done = _done_for("найди где source_ref", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+_______________ test_tool_catalog_question_routes_before_ollama ________________
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:87: in test_tool_catalog_question_routes_before_ollama
+    done = _done_for("какие tools тебе доступны", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+_______ test_capabilities_question_routes_to_tool_catalog_without_ollama _______
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:105: in test_capabilities_question_routes_to_tool_catalog_without_ollama
+    done = _done_for("что ты умеешь", monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:22: in _done_for
+    events = list(stream_jarvis_live_brain_response(text, session_id="retrieval_semantic_router"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py:10: in fail_stream
+    raise AssertionError("semantic retrieval route must answer before Ollama free generation")
+E   AssertionError: semantic retrieval route must answer before Ollama free generation
+________________ test_skill_visibility_grounded_response_smoke _________________
+tests/jarvis_live_runtime/test_skill_visibility_grounded_response_smoke.py:119: in test_skill_visibility_grounded_response_smoke
+    events = list(stream_jarvis_live_brain_response("какие навыки доступны", session_id="skill_visibility_grounded"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_skill_visibility_grounded_response_smoke.py:10: in fail_stream
+    raise AssertionError("skill visibility route must answer before Ollama free generation")
+E   AssertionError: skill visibility route must answer before Ollama free generation
+________ test_wsl_project_operator_routes_to_bounded_diagnostics_smoke _________
+tests/jarvis_live_runtime/test_wsl_project_operator_smoke.py:71: in test_wsl_project_operator_routes_to_bounded_diagnostics_smoke
+    events = list(
+tools/jarvis_live_runtime/jarvis_live_brain_loop.py:717: in stream_jarvis_live_brain_response
+    for event in _stream_ollama_model(
+tests/jarvis_live_runtime/test_wsl_project_operator_smoke.py:10: in fail_stream
+    raise AssertionError("WSL project diagnostics must answer before Ollama free generation")
+E   AssertionError: WSL project diagnostics must answer before Ollama free generation
+_____ test_distributed_workload_placement_contract_contains_selected_node ______
+tests/node_topology/test_node_topology_distributed_workload_placement_contract_smoke.py:33: in test_distributed_workload_placement_contract_contains_selected_node
+    assert first.selected_node_id == "mobile_001"
+E   AssertionError: assert 'unavailable' == 'mobile_001'
+E     
+E     - mobile_001
+E     + unavailable
+_____________________ test_execution_views_contract_builds _____________________
+tests/observability/test_execution_views_contract_smoke.py:14: in test_execution_views_contract_builds
+    assert contract.aggregated_warning_events == 3
+E   AssertionError: assert 2 == 3
+E    +  where 2 = ExecutionViewsContract(total_views=3, aggregated_total_events=10, aggregated_warning_events=2, aggregated_critical_eve..._events=0, alerting_events=0, read_only=True, description='Read-only payload overview derived from payload metrics.'))).aggregated_warning_events
+___________ test_execution_views_contract_preserves_expected_counts ____________
+tests/observability/test_execution_views_contract_smoke.py:57: in test_execution_views_contract_preserves_expected_counts
+    assert pressure.warning_events == 1
+E   AssertionError: assert 0 == 1
+E    +  where 0 = ExecutionViewEntry(view_id='view_pressure_overview', view_kind='pressure_overview', source_metric='pressure_metrics', ..._events=3, alerting_events=3, read_only=True, description='Read-only pressure overview derived from pressure metrics.').warning_events
+____________________ test_pressure_metrics_contract_builds _____________________
+tests/observability/test_pressure_metrics_contract_smoke.py:13: in test_pressure_metrics_contract_builds
+    assert contract.elevated_or_higher_events == 1
+E   AssertionError: assert 3 == 1
+E    +  where 3 = PressureMetricsContract(total_events=3, elevated_or_higher_events=3, alerting_events=3, events=(PressureMetricEntry(sh...rue, alert_emitted=True, description='Pressure observability event for node_id=home_001 at pressure_level=critical.'))).elevated_or_higher_events
+________ test_pressure_metrics_contract_contains_expected_event_shapes _________
+tests/observability/test_pressure_metrics_contract_smoke.py:27: in test_pressure_metrics_contract_contains_expected_event_shapes
+    assert first.event_severity == "info"
+E   AssertionError: assert 'critical' == 'info'
+E     
+E     - info
+E     + critical
+__ test_pressure_metrics_contract_preserves_trace_and_timestamp_requirements ___
+tests/observability/test_pressure_metrics_contract_smoke.py:48: in test_pressure_metrics_contract_preserves_trace_and_timestamp_requirements
+    assert second.pressure_level == "normal"
+E   AssertionError: assert 'critical' == 'normal'
+E     
+E     - normal
+E     + critical
+________________ test_observability_completion_contract_builds _________________
+tests/observability_completion/test_observability_completion_contract_smoke.py:14: in test_observability_completion_contract_builds
+    assert contract.total_alerting_events == 4
+E   AssertionError: assert 8 == 4
+E    +  where 8 = ObservabilityCompletionContract(total_entries=6, total_events_across_components=28, total_alerting_events=8, critical_...True, completion_status='completed', description='Completed observability binding for presentation/display metrics.'))).total_alerting_events
+___ test_observability_completion_contract_contains_expected_pressure_entry ____
+tests/observability_completion/test_observability_completion_contract_smoke.py:38: in test_observability_completion_contract_contains_expected_pressure_entry
+    assert entry.warning_events == 1
+E   AssertionError: assert 3 == 1
+E    +  where 3 = ObservabilityCompletionEntry(completion_entry_id='observabilitycompletion_pressure_metrics_001', source_component='pre...pletion_valid=True, completion_status='completed', description='Completed observability binding for pressure metrics.').warning_events
+_ test_observability_completion_contract_contains_expected_execution_views_entry _
+tests/observability_completion/test_observability_completion_contract_smoke.py:50: in test_observability_completion_contract_contains_expected_execution_views_entry
+    assert entry.warning_events == 3
+E   AssertionError: assert 2 == 3
+E    +  where 2 = ObservabilityCompletionEntry(completion_entry_id='observabilitycompletion_execution_views_001', source_component='exec...mpletion_valid=True, completion_status='completed', description='Completed observability binding for execution views.').warning_events
+=========================== short test summary info ============================
+FAILED tests/architecture_map/test_architecture_blueprint_drift_guard.py::test_architecture_structure_and_semantic_drift_guard
+FAILED tests/control_plane/test_jarvis_live_brain_loop_api_routes_smoke.py::test_read_only_project_and_memory_endpoints_expose_existing_read_models
+FAILED tests/jarvis_live_runtime/test_agent_catalog_grounded_response_smoke.py::test_agent_catalog_grounded_response_smoke
+FAILED tests/jarvis_live_runtime/test_autonomous_tool_model_router_smoke.py::test_brain_context_exposes_autonomous_orchestration_decision
+FAILED tests/jarvis_live_runtime/test_final_grounded_answer_autonomy_smoke.py::test_project_blocker_audit_routes_to_final_llm
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_brain_context_exposes_existing_model_router_and_resource_gate
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_brain_loop_sanitizes_visible_thinking_blocks
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_weather_route_uses_current_facts_guard_without_model_hallucination
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_brain_command_response_is_non_empty_and_includes_selected_wrapper
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_chat_parser_emits_thinking_content_and_tool_calls_as_proposal_only
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_tool_catalog_exposes_existing_tools_and_memory_surfaces
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_conversation_template_complaint_is_handled_without_ollama
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_casual_state_question_does_not_use_repeated_template
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_keyboard_layout_noise_does_not_use_repeated_template
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_project_workspace_question_returns_complete_grounded_answer_without_ollama
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_natural_project_read_questions_use_dynamic_tools_without_ollama
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_natural_language_tool_router_grounds_project_search_models_and_actions
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_memory_history_question_checks_history_before_ollama
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_memory_history_question_reports_checked_sources_without_match
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_imported_project_history_is_read_only_not_written_to_local_chat
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_memory_recall_guard_does_not_claim_memory_without_record
+FAILED tests/jarvis_live_runtime/test_jarvis_live_memory_federation_smoke.py::test_permanent_memory_write_request_is_rejected_without_canonical_write
+FAILED tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py::test_terminal_chat_prints_tool_catalog_and_operator_work_trace
+FAILED tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py::test_terminal_truth_ui_formats_operator_work_text
+FAILED tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py::test_terminal_truth_ui_buffers_full_operator_work_until_done
+FAILED tests/jarvis_live_runtime/test_jarvis_live_terminal_chat_static_smoke.py::test_terminal_truth_ui_detects_work_marker_split_across_chunks
+FAILED tests/jarvis_live_runtime/test_long_grounded_response_not_silently_truncated_smoke.py::test_long_grounded_response_not_silently_truncated_smoke
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_retrieval_backend_status_routes_by_typo_without_ollama
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_retrieval_container_boundary_routes_without_ollama
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_retrieval_similarity_route_extracts_query_and_uses_sqlite_vec_guard
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_retrieval_project_search_uses_mgrep_or_repo_search_fallback
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_tool_catalog_question_routes_before_ollama
+FAILED tests/jarvis_live_runtime/test_retrieval_semantic_router_smoke.py::test_capabilities_question_routes_to_tool_catalog_without_ollama
+FAILED tests/jarvis_live_runtime/test_skill_visibility_grounded_response_smoke.py::test_skill_visibility_grounded_response_smoke
+FAILED tests/jarvis_live_runtime/test_wsl_project_operator_smoke.py::test_wsl_project_operator_routes_to_bounded_diagnostics_smoke
+FAILED tests/node_topology/test_node_topology_distributed_workload_placement_contract_smoke.py::test_distributed_workload_placement_contract_contains_selected_node
+FAILED tests/observability/test_execution_views_contract_smoke.py::test_execution_views_contract_builds
+FAILED tests/observability/test_execution_views_contract_smoke.py::test_execution_views_contract_preserves_expected_counts
+FAILED tests/observability/test_pressure_metrics_contract_smoke.py::test_pressure_metrics_contract_builds
+FAILED tests/observability/test_pressure_metrics_contract_smoke.py::test_pressure_metrics_contract_contains_expected_event_shapes
+FAILED tests/observability/test_pressure_metrics_contract_smoke.py::test_pressure_metrics_contract_preserves_trace_and_timestamp_requirements
+FAILED tests/observability_completion/test_observability_completion_contract_smoke.py::test_observability_completion_contract_builds
+FAILED tests/observability_completion/test_observability_completion_contract_smoke.py::test_observability_completion_contract_contains_expected_pressure_entry
+FAILED tests/observability_completion/test_observability_completion_contract_smoke.py::test_observability_completion_contract_contains_expected_execution_views_entry
+45 failed, 3548 passed, 2 skipped in 2352.71s (0:39:12)
+
+===== EXIT CODE =====
+1
+
+===== GIT STATUS AFTER =====
+ M .pymon
+ M EXTERNAL_BACKENDS/mempalace/smoke_reports/mempalace_controlled_real_backend_probe_report.json
+ M tests/jarvis_live_runtime/test_jarvis_live_project_answer_engine_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_live_read_models_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_jarvis_personality_policy_smoke.py
+ M tests/jarvis_live_runtime/test_memory_context_builder_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_read_only_tool_router_boundary_smoke.py
+ M tests/jarvis_live_runtime/test_runtime_library_store_wiring_smoke.py
+ M tools/jarvis_live_runtime/jarvis_live_brain_loop.py
+ M tools/jarvis_live_runtime/jarvis_live_project_answer_engine.py
+ M tools/jarvis_live_runtime/jarvis_live_read_models.py
+ M tools/jarvis_live_runtime/jarvis_personality_policy.py
+ M tools/jarvis_live_runtime/jarvis_runtime_library_store.py
+ M tools/jarvis_live_runtime/jarvis_skill_visibility.py
+ M tools/jarvis_live_runtime/memory_context_builder.py
+ M tools/jarvis_live_runtime/ollama_streaming.py
+ M tools/jarvis_live_runtime/read_only_tool_router.py
+ M tools/jarvis_live_runtime/wsl_project_operator.py
+?? .runtime/
+?? RUNTIME/audits/
+?? RUNTIME/state/jarvis_full_relock_audit.txt
+?? RUNTIME/state/jarvis_live_critical_relock_audit.txt
+?? RUNTIME/state/jarvis_old_cage_phrases_audit.txt
+?? tests/final_memory_map/test_final_memory_source_paths_exist_smoke.py
+?? tests/jarvis_live_runtime/test_runtime_relock_removal_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_display_handoff_contract_smoke.py
+?? tests/oob_dashboard/test_oob_dashboard_voice_routing_contract_smoke.py
+?? tests/oob_truth/
+?? tests/runtime_core/
+?? tests/voice_display_handoff/test_voice_display_handoff_contract_smoke_vdh.py
+?? tests/voice_routing/test_voice_routing_contract_smoke_vr.py
+
+===== AUDIT FILE =====
+RUNTIME/audits/full_pytest_20260623_234632.txt

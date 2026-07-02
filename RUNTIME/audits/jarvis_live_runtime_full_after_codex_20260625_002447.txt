@@ -1,0 +1,16 @@
+...........................................................F
+=================================== FAILURES ===================================
+_ test_business_sovereign_command_returns_normal_response_when_ollama_succeeds _
+tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py:560: in test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
+    assert payload["error_kind"] == ""
+E   AssertionError: assert 'command_runtime_error' == ''
+E     
+E     + command_runtime_error
+=========================== short test summary info ============================
+FAILED tests/jarvis_live_runtime/test_jarvis_live_brain_loop_model_routing_smoke.py::test_business_sovereign_command_returns_normal_response_when_ollama_succeeds
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 59 passed in 728.94s (0:12:08)
+===== EXIT CODE =====
+1
+===== AUDIT FILE =====
+RUNTIME/audits/jarvis_live_runtime_full_after_codex_20260625_002447.txt

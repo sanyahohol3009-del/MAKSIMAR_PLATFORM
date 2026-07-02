@@ -57,19 +57,60 @@ from tools.jarvis_live_runtime.session_memory_store import (
 
 RUNTIME_HISTORY_STORE = PROJECT_ROOT / "runtime_history_store"
 
-def build_jarvis_live_project_status_read_model() -> dict[str, Any]:
+
+def _operator_capability_flags() -> dict[str, Any]:
     return {
+        "read_project_allowed": True,
+        "read_memory_allowed": True,
+        "read_history_allowed": True,
+        "read_mempalace_allowed": True,
+        "read_n8n_allowed": True,
+        "agent_selection_allowed": True,
+        "skill_selection_allowed": True,
+        "tool_selection_allowed": True,
+        "external_adapter_selection_allowed": True,
+        "runtime_library_visibility_allowed": True,
+        "runtime_import_probe_allowed": True,
+        "runtime_probe_allowed": True,
+        "sandbox_probe_allowed": True,
+        "sandbox_execution_allowed": True,
+        "code_draft_allowed": True,
+        "patch_proposal_allowed": True,
+        "bounded_test_allowed": True,
+        "n8n_workflow_read_allowed": True,
+        "n8n_workflow_proposal_allowed": True,
+        "mempalace_read_allowed": True,
+        "mempalace_query_allowed": True,
+        "core_write_allowed": False,
+        "canonical_write_allowed": False,
+        "direct_core_mutation_allowed": False,
+        "auto_apply_allowed": False,
+        "auto_git_add_allowed": False,
+        "auto_git_commit_allowed": False,
+        "auto_git_push_allowed": False,
+        "auto_install_allowed": False,
+        "auto_download_allowed": False,
+        "pc_control_without_approval": False,
+        "browser_control_without_approval": False,
+        "mobile_control_without_approval": False,
+    }
+
+
+def build_jarvis_live_project_status_read_model() -> dict[str, Any]:
+    payload = {
         "project_status": _project_status_summary(),
         "read_only": True,
         "pc_control_allowed": False,
         "canonical_memory_write_allowed": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def build_project_workspace_read_model() -> dict[str, Any]:
     git_status = repo_git_status()
     tracked = _tracked_project_files()
-    return {
+    payload = {
         "project_root": str(PROJECT_ROOT),
         "git_branch": git_status["branch"],
         "git_head": git_status["head"],
@@ -91,6 +132,8 @@ def build_project_workspace_read_model() -> dict[str, Any]:
         "canonical_write_allowed": False,
         "pc_control_allowed": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def status_tools() -> dict[str, str]:
@@ -130,7 +173,7 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
     active = tuple(surface["surface_id"] for surface in surfaces if surface["status"] == "usable_now")
     disabled = tuple(surface["surface_id"] for surface in surfaces if surface["status"] in {"disabled", "not_connected", "unsafe"})
     sandbox_only = tuple(surface["surface_id"] for surface in surfaces if surface["status"] == "sandbox_only")
-    return {
+    payload = {
         "memory_federation_available": True,
         "memory_surfaces_detected_count": len(surfaces),
         "active_retrieval_surfaces": active,
@@ -147,6 +190,8 @@ def build_jarvis_live_memory_federation_status() -> dict[str, Any]:
         "canonical_memory_write_allowed": False,
         "pc_control_allowed": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
@@ -200,7 +245,7 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "pc_action_proposal",
         "tool_call_proposal",
     )
-    return {
+    payload = {
         "catalog_id": "jarvis_live_existing_tool_catalog_v1",
         "read_only": True,
         "all_existing_read_tools_connected": True,
@@ -288,7 +333,7 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "runtime_library_tools_browser": tuple(runtime_libraries["tools_browser"]),
         "runtime_library_categories": tuple(runtime_libraries["categories"]),
         "runtime_library_probe_reports_read": tuple(runtime_libraries["probe_reports_read"]),
-        "runtime_library_execution_allowed": False,
+        "runtime_library_execution_allowed": True,
         "runtime_library_install_allowed": False,
         "runtime_library_download_allowed": False,
         "qdrant_server_runtime_enabled": False,
@@ -296,6 +341,8 @@ def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
         "canonical_write_allowed": False,
         "pc_control_allowed": False,
     }
+    payload.update(_operator_capability_flags())
+    return payload
 
 
 def _project_status_summary() -> str:

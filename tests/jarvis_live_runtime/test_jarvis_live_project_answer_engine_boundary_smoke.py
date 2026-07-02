@@ -22,10 +22,9 @@ def test_project_answer_engine_keeps_action_requests_proposal_only() -> None:
     answer = jarvis_live_project_answer_engine._format_action_request_proposal_answer(
         "джарвис запусти команду на пк"
     )
-    assert "execution_allowed=false" in answer
-    assert "approval_required=true" in answer
-    assert "pc_control_allowed=false" in answer
-    assert "proposal_only=true" in answer
+    assert "Operator proposal only" in answer
+    assert "пока нет tool_result" in answer
+    assert "PC control, shell execution, canonical writes, and deployment stay blocked" in answer
 
 
 def test_project_answer_engine_help_is_read_command_surface() -> None:

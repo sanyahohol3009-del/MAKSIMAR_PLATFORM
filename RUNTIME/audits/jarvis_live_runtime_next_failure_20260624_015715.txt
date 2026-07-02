@@ -1,0 +1,15 @@
+.......F
+=================================== FAILURES ===================================
+_________ test_brain_context_exposes_autonomous_orchestration_decision _________
+tests/jarvis_live_runtime/test_autonomous_tool_model_router_smoke.py:113: in test_brain_context_exposes_autonomous_orchestration_decision
+    assert decision["model_selection_working"] is True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'model_selection_working'
+=========================== short test summary info ============================
+FAILED tests/jarvis_live_runtime/test_autonomous_tool_model_router_smoke.py::test_brain_context_exposes_autonomous_orchestration_decision
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 7 passed in 55.22s
+===== EXIT CODE =====
+1
+===== AUDIT FILE =====
+RUNTIME/audits/jarvis_live_runtime_next_failure_20260624_015715.txt
