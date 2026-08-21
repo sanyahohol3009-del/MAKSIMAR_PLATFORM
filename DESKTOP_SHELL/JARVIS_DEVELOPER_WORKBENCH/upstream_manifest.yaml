@@ -1,0 +1,65 @@
+component: JARVIS_DEVELOPER_WORKBENCH
+status: accepted_architecture_baseline
+role: first_class_desktop_shell
+
+upstream:
+  project: Code - OSS
+  repository: microsoft/vscode
+  commit: PENDING_BASELINE_PIN
+  license: MIT
+  automatic_merge: false
+  automatic_feature_updates: false
+
+product_policy:
+  architectural_authority: MAKSIMAR_PLATFORM
+  upstream_is_implementation_substrate: true
+  microsoft_release_cadence_dependency: false
+  own_branding: planned
+  own_installer: planned
+  own_release_pipeline: planned
+  own_update_channel: planned
+
+security_policy:
+  monitor_electron_chromium_node_cves: true
+  controlled_security_backports: true
+  automatic_upstream_security_merge: false
+
+initial_keep:
+  - top_bars_and_menus
+  - command_center
+  - settings_and_profiles
+  - themes_and_keybindings
+  - activity_bar
+  - primary_sidebar
+  - secondary_sidebar
+  - explorer
+  - search
+  - source_control
+  - editor_and_tabs
+  - breadcrumbs
+  - terminal
+  - problems_output_testing_debug
+  - diff_editor
+  - status_bar
+  - layout_persistence
+  - extension_host
+  - required_extension_apis
+  - existing_chat_presentation
+
+post_live_gate_removal_candidates:
+  - copilot_backend
+  - copilot_entitlement_and_quota
+  - copilot_signup_pricing_onboarding
+  - copilot_cloud_model_coupling
+  - microsoft_telemetry_endpoints
+  - experiments_and_remote_recommendations
+  - settings_sync_if_not_required
+  - dev_tunnels_if_not_required
+  - upstream_product_updater
+  - unrestricted_external_marketplace
+
+permanent_client_policy:
+  codex:
+    role: independent_co_developer
+    controlled_by_jarvis_initially: false
+    must_remain_compatible: true
