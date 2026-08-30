@@ -1,6 +1,6 @@
 # JARVIS DEVELOPER WORKBENCH — CANONICAL PROJECT MEMORY v1
 
-Status: accepted project-memory retrieval record  
+Status: accepted project-memory retrieval record + active implementation track  
 Purpose: compact cross-session index to the accepted Workbench/cyber architecture without duplicating all implementation detail
 
 ## Canonical facts
@@ -22,6 +22,66 @@ Purpose: compact cross-session index to the accepted Workbench/cyber architectur
 - That cube is defensive-only outside owned/authorized labs and owns observation, detection, incident correlation, governed protective-response proposals, evidence, forensics and isolated cyber-security training capabilities while reusing canonical platform truth/policy/execution boundaries.
 - The Linux kernel is a knowledge/architecture/system-mechanism donor, not code to copy into the core. Relevant mechanisms include eBPF, cgroup v2, seccomp, Landlock/LSM concepts, namespaces, capabilities, netlink, audit/journald, procfs/sysfs, fanotify/inotify and tracing/perf. MAKSIMAR writes independent userspace adapters/controllers/sensors around documented interfaces.
 
+## Active implementation checkpoint — 2026-08-31
+
+The Workbench implementation track has started in isolated branch:
+
+`workbench/code-oss-baseline-2026-08-31`
+
+JWB-0 frozen upstream baseline is pinned to:
+
+- upstream: `microsoft/vscode`
+- Code - OSS commit: `f291f3fd7a3aa047515c65348d8f674a009aba94`
+- observed upstream commit time: `2026-08-30T22:10:47Z`
+- package: `code-oss-dev 1.136.0`
+- Node manifest: `24.18.0`
+- Electron target: `42.10.0`
+- license: MIT
+
+This pin is now the immutable upstream reference for the current Workbench campaign unless the owner explicitly approves a different baseline before JWB-1 acceptance.
+
+The current semantic/GoalFrame repair remains owned by its existing active track. The Workbench branch must not clean/reset/revert or patch around that work. In particular, no UI keyword routing or direct provider shortcut may be introduced to hide semantic defects.
+
+The Code - OSS branch initially owns only:
+
+- frozen upstream baseline
+- reproducible bootstrap/build reproduction
+- Code - OSS archaeology
+- Workbench integration contract
+- shell/read-model integration work that reuses existing JARVIS owners
+
+Before eventual merge, the Workbench branch must be rebased/reconciled onto the completed main semantic/library track and pass the canonical acceptance gates.
+
+New implementation source:
+
+- `docs/workbench/JARVIS_CODE_OSS_INTEGRATION_CONTRACT_v1.md`
+- `scripts/workbench/bootstrap_code_oss_windows.ps1`
+
+## Current reusable JARVIS owners that Workbench must consume
+
+The project state supplied for this campaign records these existing owners/capabilities as already implemented and therefore reuse-first:
+
+- Global Semantic Spine / GoalFrame
+- hierarchical capability -> operation -> organ architecture
+- provider separation
+- authenticated owner identity
+- authorization boundary
+- PC Hands
+- Browser Organ
+- Voice software path
+- External Agent Provider Layer
+- Simulation Worker
+- SANDBOX_REVIEW
+- ExecutionReceipt / EvidenceBundle
+- FinalBrain evidence discipline
+- DeveloperExperience / LearningBundle / CLIENT_LEARNING_INPUT
+- append-only experience persistence / retrieval after restart
+- Proposal Audit / Self Expansion Gate
+- Developer Workbench architecture
+- bounded semantic/candidate observability
+
+No duplicate brain/planner/memory/registry/policy/evidence/learning system is permitted inside the Workbench.
+
 ## Canonical detailed sources
 
 Read these before changing this architecture:
@@ -33,6 +93,7 @@ Read these before changing this architecture:
 5. `DOMAIN_CUBES/CYBER_DEFENSE_AND_FORENSICS_CUBE/README.md`
 6. `docs/core_architecture/CORE_INVARIANTS_AND_FORBIDDEN_DRIFT_v1.md`
 7. `docs/core_architecture/CORE_TRUTH_SOURCES_v1.md`
+8. `docs/workbench/JARVIS_CODE_OSS_INTEGRATION_CONTRACT_v1.md`
 
 ## Retrieval rule
 
