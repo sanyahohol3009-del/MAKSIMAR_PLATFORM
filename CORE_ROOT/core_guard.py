@@ -10,6 +10,7 @@ from CORE_ROOT.heartbeat_io import (
     atomic_write_json,
     build_heartbeat,
     heartbeat_age_seconds,
+    heartbeat_process_alive,
     heartbeat_source,
     heartbeat_status,
     safe_read_json,
@@ -19,7 +20,8 @@ from CORE_ROOT.runtime_paths import (
     CORE_GUARD_LOG_FILE,
     GUARD_HEARTBEAT_FILE,
     GUARD_SESSION_NAME,
-    STOP_GATE_SCRIPT,
+    ROOT,
+    resolve_canonical_python,
     SYSTEM_LOG_FILE,
     ensure_runtime_layout,
 )
@@ -28,6 +30,7 @@ HEARTBEAT_TIMEOUT_SEC = 12.0
 POLL_INTERVAL_SEC = 2.0
 SOURCE_READY_GRACE_SEC = 8.0
 SOURCE_MISMATCH_STRIKE_LIMIT = 3
+PEER_RESYNCHRONIZATION_LIMIT_SEC = 30.0
 
 
 def log(message: str) -> None:
@@ -74,6 +77,7 @@ def write_self_heartbeat(status: str = "alive") -> None:
 def evaluate_guard(
     started_at: float,
     source_mismatch_strikes: int,
+    peer_stale_state: dict[str, float] | None = None,
 ) -> tuple[bool, str, int]:
     """Evaluate stop-gate watcher heartbeat."""
     payload = safe_read_json(GUARD_HEARTBEAT_FILE)
@@ -126,7 +130,20 @@ def evaluate_guard(
     if age is None:
         return True, "guard heartbeat age is invalid", 0
 
+    if peer_stale_state is not None and age <= HEARTBEAT_TIMEOUT_SEC:
+        peer_stale_state.clear()
+
     if age > HEARTBEAT_TIMEOUT_SEC:
+        # A peer can be scheduled later than this observer under resource
+        # pressure. Only the exact live peer gets a bounded lease; identity
+        # mismatch/death and explicit stopped status never receive one.
+        if (peer_stale_state is not None and tmux_session_exists(GUARD_SESSION_NAME)
+                and process_exists("CORE_ROOT.stop_gate_watcher")
+                and heartbeat_process_alive(payload, "CORE_ROOT.stop_gate_watcher")):
+            now = time.monotonic()
+            first_observed = peer_stale_state.setdefault("first_stale_observed", now)
+            if now - first_observed < PEER_RESYNCHRONIZATION_LIMIT_SEC:
+                return False, f"live peer heartbeat delayed; bounded resynchronization ({age:.2f}s)", 0
         return (
             True,
             (
@@ -150,7 +167,8 @@ def activate_core_kill_chain(reason: str) -> None:
     log(f"CORE KILL CHAIN ACTIVATED: {reason}")
 
     subprocess.run(
-        ["python3", str(STOP_GATE_SCRIPT), reason],
+        [str(resolve_canonical_python()), "-m", "CORE_ROOT.stop_gate", reason],
+        cwd=ROOT,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         check=False,
@@ -179,14 +197,27 @@ def main() -> None:
 
     started_at = time.time()
     source_mismatch_strikes = 0
+    peer_stale_state: dict[str, float] = {}
+    last_poll_at = time.time()
 
     try:
         while True:
             write_self_heartbeat(status="alive")
+            poll_gap = time.time() - last_poll_at
+            if poll_gap > HEARTBEAT_TIMEOUT_SEC:
+                log(f"Observer scheduling gap ({poll_gap:.2f}s); refresh self and recheck after two bounded polls")
+                resynchronization_started_at = time.time()
+                write_self_heartbeat(status="alive")
+                time.sleep(2 * POLL_INTERVAL_SEC)
+                if time.time() - resynchronization_started_at > HEARTBEAT_TIMEOUT_SEC:
+                    log("Resynchronization itself was delayed; republish before evaluating peers")
+                    continue
+            last_poll_at = time.time()
 
             is_critical, message, source_mismatch_strikes = evaluate_guard(
                 started_at=started_at,
                 source_mismatch_strikes=source_mismatch_strikes,
+                peer_stale_state=peer_stale_state,
             )
             if is_critical:
                 activate_core_kill_chain(message)

@@ -13,7 +13,8 @@ from CORE_ROOT.run_context import boot_id as metadata_boot_id
 from CORE_ROOT.run_context import monotonic_time as metadata_monotonic_time
 from CORE_ROOT.run_context import read_run_metadata
 from CORE_ROOT.run_context import run_id as metadata_run_id
-from CORE_ROOT.runtime_paths import ensure_runtime_layout
+from pathlib import Path
+from CORE_ROOT.runtime_paths import ROOT, ensure_runtime_layout
 
 HEARTBEAT_SCHEMA_VERSION = 1
 
@@ -90,6 +91,8 @@ def build_heartbeat(source: str, status: str = "alive") -> dict[str, Any]:
         "status": status,
         "ts": time.time(),
         "monotonic_ts": time.monotonic(),
+        "pid": os.getpid(),
+        "process_start_ticks": _process_start_ticks(Path("/proc") / str(os.getpid())),
     }
 
     run_id_value = metadata_run_id(run_meta)
@@ -208,3 +211,29 @@ def heartbeat_run_monotonic_time(payload: dict[str, Any] | None) -> float | None
         return None
 
     return float(value)
+
+
+def _process_start_ticks(proc: Path) -> str | None:
+    try:
+        # comm can contain spaces/parentheses; fields after the final ')' start
+        # at stat field 3, so starttime (22) is offset 19.
+        return proc.joinpath("stat").read_text().rsplit(")", 1)[1].split()[19]
+    except (OSError, IndexError):
+        return None
+
+
+def heartbeat_process_alive(payload: dict[str, Any], expected_module: str,
+                            *, proc_root: Path = Path("/proc")) -> bool:
+    """Read-only identity check for bounded peer resynchronization, not authority."""
+    pid = payload.get("pid")
+    if type(pid) is not int or pid <= 0 or not payload.get("process_start_ticks"):
+        return False
+    proc = proc_root / str(pid)
+    try:
+        argv = proc.joinpath("cmdline").read_bytes().split(b"\0")
+        module = expected_module.encode()
+        return (len(argv) >= 3 and argv[1:3] == [b"-m", module]
+            and str(proc.joinpath("cwd").resolve()) == str(ROOT)
+            and _process_start_ticks(proc) == payload["process_start_ticks"])
+    except OSError:
+        return False

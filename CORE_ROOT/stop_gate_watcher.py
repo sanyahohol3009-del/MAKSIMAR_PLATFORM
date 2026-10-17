@@ -20,7 +20,8 @@ from CORE_ROOT.runtime_paths import (
     PROCESS_SUPERVISOR_SCRIPT,
     RUNTIME_HEARTBEAT_FILE,
     RUNTIME_SESSION_NAME,
-    STOP_GATE_SCRIPT,
+    ROOT,
+    resolve_canonical_python,
     SYSTEM_LOG_FILE,
     ensure_runtime_layout,
 )
@@ -47,6 +48,7 @@ def run_quiet(command: list[str]) -> None:
     """Run subprocess quietly and ignore failures."""
     subprocess.run(
         command,
+        cwd=ROOT,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         check=False,
@@ -143,6 +145,16 @@ def evaluate_runtime(
 
     source_mismatch_strikes = 0
 
+    recovery_deadline = payload.get("recovery_deadline_ts")
+    recovery_state = status in {"broken", "booting"} or (status == "alive" and not process_exists("uvicorn"))
+    if recovery_state and isinstance(recovery_deadline, (int, float)):
+        recovery_remaining = recovery_deadline - time.time()
+        if (0 < recovery_remaining <= HEARTBEAT_TIMEOUT_SEC and age is not None
+                and age <= HEARTBEAT_TIMEOUT_SEC
+                and tmux_session_exists(RUNTIME_SESSION_NAME)
+                and process_exists("SUPERVISOR.process_supervisor")):
+            return False, f"runtime supervisor bounded recovery ({recovery_remaining:.2f}s remaining)", 0
+
     if status != "alive":
         return True, f"runtime heartbeat status is not alive: {status!r}", 0
 
@@ -172,7 +184,7 @@ def activate_guard_kill_chain(reason: str) -> None:
     """Trigger STOP-GATE and terminate runtime session and process."""
     log(f"GUARD KILL CHAIN ACTIVATED: {reason}")
 
-    run_quiet(["python3", str(STOP_GATE_SCRIPT), reason])
+    run_quiet([str(resolve_canonical_python()), "-m", "CORE_ROOT.stop_gate", reason])
     run_quiet(["tmux", "kill-session", "-t", RUNTIME_SESSION_NAME])
     run_quiet(["pkill", "-f", str(PROCESS_SUPERVISOR_SCRIPT)])
     run_quiet(["pkill", "-f", r"uvicorn .*CONTROL_PLANE\.api_server:app"])
@@ -188,10 +200,21 @@ def main() -> None:
 
     started_at = time.time()
     source_mismatch_strikes = 0
+    last_poll_at = time.time()
 
     try:
         while True:
             write_self_heartbeat(status="alive")
+            poll_gap = time.time() - last_poll_at
+            if poll_gap > HEARTBEAT_TIMEOUT_SEC:
+                log(f"Observer scheduling gap ({poll_gap:.2f}s); refresh self and recheck after two bounded polls")
+                resynchronization_started_at = time.time()
+                write_self_heartbeat(status="alive")
+                time.sleep(2 * POLL_INTERVAL_SEC)
+                if time.time() - resynchronization_started_at > HEARTBEAT_TIMEOUT_SEC:
+                    log("Resynchronization itself was delayed; republish before evaluating peers")
+                    continue
+            last_poll_at = time.time()
 
             is_critical, message, source_mismatch_strikes = evaluate_runtime(
                 started_at=started_at,
