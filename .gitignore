@@ -62,3 +62,7 @@ runtime_history_store/
 *.bak*
 EXTERNAL_BACKENDS/**/security_reports/*.json
 codegraph-out/
+
+# Local profiling and append-only runtime data (source remains tracked)
+/.pymon
+/EVENT_BUS/event_journal.jsonl
