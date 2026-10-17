@@ -9,13 +9,17 @@ from dataclasses import dataclass
 from typing import Iterable
 
 
-FORBIDDEN_STAGED_PATTERNS = (
+GENERATED_ARTIFACT_PATTERNS = (
     r"^\.pymon$",
     r"^\.coverage$",
     r"^\.pytest_cache/",
     r"(^|/)__pycache__/",
     r"\.pyc$",
     r"(^|/)node_modules/",
+)
+
+FORBIDDEN_STAGED_PATTERNS = (
+    *GENERATED_ARTIFACT_PATTERNS,
     r"^EXTERNAL_BACKENDS/[^/]+/(source|venv|sandbox_data)(/|$)",
     r"^tests/runtime_core/",
 )
@@ -47,7 +51,14 @@ def get_staged_files() -> tuple[str, ...]:
     output = _git(["diff", "--cached", "--name-only"])
     if not output:
         return ()
-    return tuple(line.strip() for line in output.splitlines() if line.strip())
+    files = tuple(line.strip() for line in output.splitlines() if line.strip())
+    removed = set(_git(["diff", "--cached", "--diff-filter=D", "--name-only"]).splitlines())
+    # Removing generated payloads from the index cannot publish new payload bytes.
+    # Protected source/test paths remain subject to the unchanged guard policy.
+    return tuple(
+        path for path in files
+        if not (path in removed and _matches(path, GENERATED_ARTIFACT_PATTERNS))
+    )
 
 
 def get_short_status_files() -> tuple[str, ...]:
