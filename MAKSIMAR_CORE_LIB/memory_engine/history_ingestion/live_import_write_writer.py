@@ -12,13 +12,18 @@ from MAKSIMAR_CORE_LIB.memory_engine.history_ingestion.live_import_write_models 
 
 
 def _write_json_if_missing(path: Path, payload: object) -> bool:
+    # Existing files count as available only after matching readback. A skipped
+    # file is never a new write, nor evidence of an equivalent import by itself.
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
+    serialized = json.dumps(payload, ensure_ascii=False, indent=2)
+    try:
+        with path.open("x", encoding="utf-8") as output:
+            output.write(serialized)
+    except FileExistsError:
+        existing = json.loads(path.read_text(encoding="utf-8"))
+        if existing != json.loads(serialized):
+            raise ValueError("live_import_existing_payload_conflict")
         return False
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
     return True
 
 
@@ -35,7 +40,7 @@ def execute_live_import_write(
     session_manifest_path = (
         write_root / "registry" / "import_sessions" / f"{session_id}.json"
     )
-    _write_json_if_missing(session_manifest_path, session_payload)
+    session_manifest_written = _write_json_if_missing(session_manifest_path, session_payload)
 
     conversation_manifests_written = 0
     normalized_records_written = 0
@@ -93,7 +98,8 @@ def execute_live_import_write(
     )
 
     return LiveImportWriteResult(
-        session_manifest_written=True,
+        session_manifest_written=session_manifest_written,
+        session_manifest_available=True,
         conversation_manifests_written=conversation_manifests_written,
         normalized_records_written=normalized_records_written,
         message_units_written=message_units_written,

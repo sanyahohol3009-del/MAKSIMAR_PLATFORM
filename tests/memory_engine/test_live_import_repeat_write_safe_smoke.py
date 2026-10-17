@@ -18,6 +18,9 @@ def test_live_import_repeat_write_safe_smoke() -> None:
             write_root_path=tmpdir,
         )
 
+        assert first.session_manifest_written is True
+        assert second.session_manifest_written is False
+        assert first.session_manifest_available is second.session_manifest_available is True
         assert first.repeat_write_safe is True
         assert second.repeat_write_safe is True
 

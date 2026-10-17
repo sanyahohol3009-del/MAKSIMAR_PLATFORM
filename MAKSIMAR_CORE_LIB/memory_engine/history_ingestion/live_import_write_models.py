@@ -13,6 +13,8 @@ def _ensure_non_negative_int(value: int, field_name: str) -> int:
 
 @dataclass(frozen=True)
 class LiveImportWriteResult:
+    # written means created during this call; available means verified matching
+    # readback after it. Repeats preserve availability without a false write.
     session_manifest_written: bool
     conversation_manifests_written: int
     normalized_records_written: int
@@ -20,6 +22,7 @@ class LiveImportWriteResult:
     attachment_root_count: int
     repeat_write_safe: bool
     write_ready: bool
+    session_manifest_available: bool = True
 
     def __post_init__(self) -> None:
         conversation_manifests_written = _ensure_non_negative_int(
@@ -39,8 +42,10 @@ class LiveImportWriteResult:
             "attachment_root_count",
         )
 
-        if not self.session_manifest_written:
-            raise ValueError("session_manifest_written must be True")
+        if type(self.session_manifest_written) is not bool:
+            raise ValueError("session_manifest_written must be a bool")
+        if self.session_manifest_available is not True:
+            raise ValueError("session_manifest_available must be True")
 
         if attachment_root_count == 0:
             raise ValueError("attachment_root_count must be >= 1")

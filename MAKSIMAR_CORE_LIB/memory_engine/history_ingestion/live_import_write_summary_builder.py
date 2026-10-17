@@ -17,6 +17,7 @@ def build_live_import_write_summary(
     )
     return {
         "session_manifest_written": result.session_manifest_written,
+        "session_manifest_available": result.session_manifest_available,
         "conversation_manifests_written": result.conversation_manifests_written,
         "normalized_records_written": result.normalized_records_written,
         "message_units_written": result.message_units_written,
