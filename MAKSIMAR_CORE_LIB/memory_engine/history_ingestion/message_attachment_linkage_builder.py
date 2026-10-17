@@ -55,7 +55,7 @@ def build_message_attachment_linkage_result(
     return MessageAttachmentLinkageResult(
         session_id=session.session_id,
         conversation_count=session.conversation_count,
-        message_unit_count=int(live_summary["bucket_count"]) * 0 + 11822,
+        message_unit_count=int(live_summary["message_unit_count"]),
         audio_candidate_count=audio_candidate_count,
         image_candidate_count=image_candidate_count,
         message_attachment_linkage_ready=True,

@@ -21,6 +21,7 @@ def build_live_import_summary(
         "session_id": session.session_id,
         "conversation_count": session.conversation_count,
         "bucket_count": len(buckets),
+        "message_unit_count": sum(int(bucket["message_count"]) for bucket in buckets),
         "attachment_root_count": len(session.attachment_roots),
         "by_conversation_ready": session.by_conversation_ready,
         "whole_file_ready": session.whole_file_ready,
