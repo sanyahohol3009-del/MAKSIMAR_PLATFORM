@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from typing import Any
 
@@ -43,6 +44,8 @@ def write_incident_record(
 
     with open(INCIDENT_HISTORY_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(payload) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
 
     return payload
 

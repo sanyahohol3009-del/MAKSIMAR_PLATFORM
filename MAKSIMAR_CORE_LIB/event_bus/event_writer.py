@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from MAKSIMAR_CORE_LIB.event_bus.event_models import EventRecord
@@ -25,5 +26,6 @@ def append_event_record(event: EventRecord, journal_path: Path | None = None) ->
     with target_path.open("a", encoding="utf-8") as file_handle:
         file_handle.write(line)
         file_handle.flush()
+        os.fsync(file_handle.fileno())
 
     return target_path
