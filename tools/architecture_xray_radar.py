@@ -175,7 +175,7 @@ VFINAL_LAYERS: tuple[LayerSpec, ...] = (
         phase="FOUNDATION",
         path_candidates=(
             "BOOT",
-            "run_context.py",
+            "CORE_ROOT/run_context.py",
             "refactor.py",
         ),
         expected_laws=(

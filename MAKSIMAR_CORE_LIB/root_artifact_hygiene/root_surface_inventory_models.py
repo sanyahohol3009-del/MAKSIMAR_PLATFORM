@@ -92,7 +92,6 @@ SOURCE_ROOT_FILES: frozenset[str] = frozenset(
         "Makefile",
         "pytest.ini",
         "start_maksimar.sh",
-        "run_context.py",
         "refactor.py",
         "conftest.py",
         "STRUCTURE.md",

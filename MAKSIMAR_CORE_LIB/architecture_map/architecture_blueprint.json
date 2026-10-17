@@ -888,12 +888,12 @@
       "container_profile": "server_service",
       "path_prefixes": [
         "BOOT",
-        "run_context.py",
+        "CORE_ROOT/run_context.py",
         "refactor.py"
       ],
       "module_prefixes": [
         "BOOT",
-        "run_context",
+        "CORE_ROOT.run_context",
         "refactor"
       ],
       "expected_paths": [
@@ -902,7 +902,7 @@
           "mandatory": false
         },
         {
-          "path": "run_context.py",
+          "path": "CORE_ROOT/run_context.py",
           "mandatory": false
         },
         {
