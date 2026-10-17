@@ -61,3 +61,4 @@ runtime_history_store/
 /FOUNDATION_REPORT.md
 *.bak*
 EXTERNAL_BACKENDS/**/security_reports/*.json
+codegraph-out/
