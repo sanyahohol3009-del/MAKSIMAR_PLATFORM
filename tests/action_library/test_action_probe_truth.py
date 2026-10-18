@@ -119,3 +119,12 @@ def test_legacy_cli_forwards_to_same_owner_without_probe(monkeypatch):
         runpy.run_path(str(root / "tools/jarvis_live_runtime/agent_tooling_runtime_probe.py"), run_name="__main__")
     assert exc.value.code == 0
     assert called == ["canonical"]
+
+
+def test_empty_wire_preserves_unknown_import_attempt(tmp_path, monkeypatch):
+    fixture_runtime(tmp_path, monkeypatch)
+    monkeypatch.setattr(probe.subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=0, stdout="{}", stderr=""))
+    result = probe._probe_import_in_external_runtime("package_a", "module_a")
+    assert result.import_probe_passed is False
+    assert result.import_attempted is None
+    assert result.package_metadata_exists is None

@@ -192,7 +192,7 @@ print(json.dumps(result, ensure_ascii=False))
         errors = [*errors, "probe_identity_mismatch"]
     if completed.returncode != 0:
         errors = [*errors, f"returncode:{completed.returncode}"]
-    attempted = payload.get("import_attempted", True)
+    attempted = payload.get("import_attempted", True if payload.get("import_probe_passed") is True else None)
     attempted = attempted if type(attempted) is bool else None
     valid_import = identity_matches and completed.returncode == 0 and not errors and attempted is True
     return AgentToolingRuntimeProbeResult(
