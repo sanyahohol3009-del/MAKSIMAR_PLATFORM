@@ -78,3 +78,9 @@ codegraph-out/
 /RUNTIME/audits/**/*.z
 /RUNTIME/audits/**/*.gz
 /RUNTIME/audits/**/graph.json
+
+# Retained local external-environment diagnostic snapshots (not runtime config).
+/RUNTIME/FINAL_EXTERNAL_DEPENDENCY_GATE.txt
+/RUNTIME/docker-platform-inventory.txt
+/RUNTIME/external-component-machine-truth-v2.txt
+/RUNTIME/external-runtime-docker-ownership-audit.txt
