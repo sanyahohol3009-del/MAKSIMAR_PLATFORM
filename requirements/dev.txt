@@ -1,0 +1,30 @@
+# Existing Codegraph Python structural/test toolchain; pinned wheel resolution.
+# No LLM/provider extras; patches and MIT notice are documented in README.md.
+codegraph-tools==0.3.29
+iniconfig==2.3.1
+networkx==3.4.2
+packaging==26.3
+pluggy==1.7.0
+pygments==2.21.0
+pytest==9.0.2
+tree-sitter-c-sharp==0.23.5
+tree-sitter-c==0.24.2
+tree-sitter-cpp==0.23.4
+tree-sitter-elixir==0.3.5
+tree-sitter-go==0.25.0
+tree-sitter-java==0.23.5
+tree-sitter-javascript==0.25.0
+tree-sitter-julia==0.23.1
+tree-sitter-kotlin==1.1.0
+tree-sitter-lua==0.5.0
+tree-sitter-objc==3.0.2
+tree-sitter-php==0.25.1
+tree-sitter-powershell==0.26.4
+tree-sitter-python==0.25.0
+tree-sitter-ruby==0.23.1
+tree-sitter-rust==0.24.2
+tree-sitter-scala==0.26.3
+tree-sitter-swift==0.7.4
+tree-sitter-typescript==0.23.2
+tree-sitter-zig==1.1.2
+tree-sitter==0.25.2

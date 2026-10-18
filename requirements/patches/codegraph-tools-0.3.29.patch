@@ -1,0 +1,417 @@
+--- a/codegraph/cache.py
++++ b/codegraph/cache.py
+@@ -7,0 +8,2 @@
++
++EXTRACTION_IDENTITY_VERSION = b"project-relative-symbol-v1-python-local-import-v2-python-method-owner-v3"
+@@ -29,0 +32,2 @@
++    h.update(EXTRACTION_IDENTITY_VERSION)
++    h.update(b"\x00")
+--- a/codegraph/extract.py
++++ b/codegraph/extract.py
+@@ -3,0 +4,3 @@
++import ast
++import hashlib
++from functools import lru_cache
+@@ -13,0 +17,15 @@
++@lru_cache(maxsize=8192)
++def _source_root(parent: Path) -> Path:
++    for candidate in (parent, *parent.parents):
++        if (candidate / ".git").exists():
++            return candidate
++    cwd = Path.cwd().resolve()
++    return cwd if parent.is_relative_to(cwd) else Path(parent.anchor)
++
++
++def _source_key(path: Path) -> str:
++    """Canonical project-relative source identity, independent of invocation spelling."""
++    resolved = path.resolve()
++    return resolved.relative_to(_source_root(resolved.parent)).as_posix()
++
++
+@@ -15 +33,6 @@
+-    """Build a stable node ID from one or more name parts."""
++    """Readable identity plus lossless source/symbol discriminator.
++
++    The digest retains case, punctuation and part boundaries that the display
++    spelling normalizes. Different canonical sources never share a stem scope.
++    """
++    raw = json.dumps(parts, ensure_ascii=False, separators=(",", ":"))
+@@ -17,2 +40,2 @@
+-    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", combined)
+-    return cleaned.strip("_").lower()
++    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", combined).strip("_").lower()
++    return cleaned + "_" + hashlib.sha256(raw.encode()).hexdigest()[:20]
+@@ -646 +669 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -838 +861 @@
+-        # Default: recurse
++        # Syntax wrappers (including decorated methods) retain their class owner.
+@@ -840 +863 @@
+-            walk(child, parent_class_nid=None)
++            walk(child, parent_class_nid=parent_class_nid)
+@@ -844,0 +868,6 @@
++    method_parents = {edge["target"]: edge["source"] for edge in edges
++                      if edge["relation"] == "method"}
++    by_id = {node["id"]: node for node in nodes}
++    method_targets = {(owner, by_id[target]["label"].strip("()").lstrip(".")): target
++                      for target, owner in method_parents.items()}
++    class_targets = {by_id[owner]["label"]: owner for owner in method_parents.values()}
+@@ -845,0 +875 @@
++    ambiguous_labels: set[str] = set()
+@@ -847,3 +877,10 @@
+-        raw = n["label"]
+-        normalised = raw.strip("()").lstrip(".")
+-        label_to_nid[normalised.lower()] = n["id"]
++        if config.ts_module == "tree_sitter_python" and n["id"] in method_parents:
++            continue
++        normalised = n["label"].strip("()").lstrip(".")
++        key = normalised if config.ts_module == "tree_sitter_python" else normalised.lower()
++        if config.ts_module == "tree_sitter_python" and key in label_to_nid and label_to_nid[key] != n["id"]:
++            ambiguous_labels.add(key)
++        else:
++            label_to_nid[key] = n["id"]
++    for key in ambiguous_labels:
++        label_to_nid.pop(key, None)
+@@ -858,0 +896 @@
++            func_node = None
+@@ -949 +987,14 @@
+-                tgt_nid = label_to_nid.get(callee_name.lower())
++                if config.ts_module == "tree_sitter_python":
++                    tgt_nid = None
++                    if func_node is not None and func_node.type == "attribute":
++                        receiver_node = func_node.child_by_field_name("object")
++                        receiver = _read_text(receiver_node, source) if receiver_node is not None else ""
++                        owner = (method_parents.get(caller_nid) if receiver in {"self", "cls"}
++                                 else class_targets.get(receiver))
++                        tgt_nid = method_targets.get((owner, callee_name))
++                    elif func_node is not None and func_node.type == "identifier":
++                        tgt_nid = label_to_nid.get(callee_name)
++                    # Unknown receivers cannot borrow a method by matching its name.
++                    # Dynamic/cross-file receiver bindings require independent source proof.
++                else:
++                    tgt_nid = label_to_nid.get(callee_name.lower())
+@@ -970,0 +1022,21 @@
++    # Python imports may be function-local, guarded or inside nested closures.
++    # The declaration walk stops at function boundaries; retain every import
++    # site as an exact file dependency without inventing execution/call edges.
++    if config.ts_module == "tree_sitter_python" and config.import_handler:
++        import_keys = {(edge["source"], edge["target"], edge["relation"],
++                        edge.get("source_location")) for edge in edges}
++        pending_import_nodes = [tree.root_node]
++        while pending_import_nodes:
++            import_node = pending_import_nodes.pop()
++            if import_node.type in config.import_types:
++                local_edges = []
++                config.import_handler(import_node, source, file_nid, stem,
++                                      local_edges, str_path)
++                for edge in local_edges:
++                    key = (edge["source"], edge["target"], edge["relation"],
++                           edge.get("source_location"))
++                    if key not in import_keys:
++                        edges.append(edge)
++                        import_keys.add(key)
++            pending_import_nodes.extend(reversed(import_node.children))
++
+@@ -1002 +1074 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -1173 +1245 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -1385 +1457 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -1576 +1648 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -1745 +1817 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -1900 +1972 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -2042,0 +2115,4 @@
++    """Resolve exact project modules; inferred uses remain static evidence only.
++
++    Never bind an import by basename or select an arbitrary duplicate owner.
++    Source locations select top-level declarations, including private functions.
+@@ -2044,29 +2120,25 @@
+-    Two-pass import resolution: turn file-level imports into class-level edges.
+-
+-    Pass 1 - build a global map: class/function name → node_id, per stem.
+-    Pass 2 - for each `from .module import Name`, look up Name in the global
+-              map and add a direct INFERRED edge from each class in the
+-              importing file to the imported entity.
+-
+-    This turns:
+-        auth.py --imports_from--> models.py          (obvious, filtered out)
+-    Into:
+-        DigestAuth --uses--> Response  [INFERRED]    (cross-file, interesting!)
+-        BasicAuth  --uses--> Request   [INFERRED]
+-    """
+-    try:
+-        import tree_sitter_python as tspython
+-        from tree_sitter import Language, Parser
+-    except ImportError:
+-        return []
+-
+-    language = Language(tspython.language())
+-    parser = Parser(language)
+-
+-    # Pass 1: name → node_id across all files
+-    # Map: stem → {ClassName: node_id}
+-    stem_to_entities: dict[str, dict[str, str]] = {}
+-    for file_result in per_file:
+-        for node in file_result.get("nodes", []):
+-            src = node.get("source_file", "")
+-            if not src:
++    modules: dict[str, tuple[Path, dict, ast.Module]] = {}
++    ambiguous: set[str] = set()
++    for result, path in zip(per_file, paths):
++        try:
++            tree = ast.parse(path.read_bytes(), filename=str(path))
++        except (OSError, SyntaxError):
++            continue
++        parts = list(Path(_source_key(path)).with_suffix("").parts)
++        if parts[-1] == "__init__":
++            parts.pop()
++        module = ".".join(parts)
++        if module in modules:
++            ambiguous.add(module)
++        else:
++            modules[module] = (path, result, tree)
++    for module in ambiguous:
++        modules.pop(module, None)
++
++    entities: dict[str, dict[str, str]] = {}
++    for module, (path, result, tree) in modules.items():
++        declarations = {item.lineno: item.name for item in tree.body
++                        if isinstance(item, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))}
++        indexed = {}
++        for node in result.get("nodes", []):
++            if node.get("source_file") != str(path):
+@@ -2074,8 +2146,9 @@
+-            stem = Path(src).stem
+-            label = node.get("label", "")
+-            nid = node.get("id", "")
+-            # Only index real classes/functions (not file nodes, not method stubs)
+-            if label and not label.endswith((")", ".py")) and "_" not in label[:1]:
+-                stem_to_entities.setdefault(stem, {})[label] = nid
+-
+-    # Pass 2: for each file, find `from .X import A, B, C` and resolve
++            location = node.get("source_location", "")
++            try:
++                name = declarations.get(int(location.removeprefix("L")))
++            except ValueError:
++                continue
++            if name and node.get("label") in (name, name + "()"):
++                indexed[name] = node["id"]
++        entities[module] = indexed
++
+@@ -2083,52 +2156,10 @@
+-    stem_to_path: dict[str, Path] = {p.stem: p for p in paths}
+-
+-    for file_result, path in zip(per_file, paths):
+-        stem = path.stem
+-        str_path = str(path)
+-
+-        # Find all classes defined in this file (the importers)
+-        local_classes = [
+-            n["id"] for n in file_result.get("nodes", [])
+-            if n.get("source_file") == str_path
+-            and not n["label"].endswith((")", ".py"))
+-            and n["id"] != _make_id(stem)  # exclude file-level node
+-        ]
+-        if not local_classes:
+-            continue
+-
+-        # Parse imports from this file
+-        try:
+-            source = path.read_bytes()
+-            tree = parser.parse(source)
+-        except Exception:
+-            continue
+-
+-        def walk_imports(node) -> None:
+-            if node.type == "import_from_statement":
+-                # Find the module name - handles both absolute and relative imports.
+-                # Relative: `from .models import X` → relative_import → dotted_name
+-                # Absolute: `from models import X`  → module_name field
+-                target_stem: str | None = None
+-                for child in node.children:
+-                    if child.type == "relative_import":
+-                        # Dig into relative_import → dotted_name → identifier
+-                        for sub in child.children:
+-                            if sub.type == "dotted_name":
+-                                raw = source[sub.start_byte:sub.end_byte].decode("utf-8", errors="replace")
+-                                target_stem = raw.split(".")[-1]
+-                                break
+-                        break
+-                    if child.type == "dotted_name" and target_stem is None:
+-                        raw = source[child.start_byte:child.end_byte].decode("utf-8", errors="replace")
+-                        target_stem = raw.split(".")[-1]
+-
+-                if not target_stem or target_stem not in stem_to_entities:
+-                    return
+-
+-                # Collect imported names: dotted_name children of import_from_statement
+-                # that come AFTER the 'import' keyword token.
+-                imported_names: list[str] = []
+-                past_import_kw = False
+-                for child in node.children:
+-                    if child.type == "import":
+-                        past_import_kw = True
++    known_node_ids = {node["id"] for result in per_file for node in result.get("nodes", ())}
++    for module, (path, result, tree) in modules.items():
++        package = module.split(".") if path.name == "__init__.py" else module.split(".")[:-1]
++        source_file = str(path)
++        file_id = _make_id(_source_key(path))
++        for statement in ast.walk(tree):
++            targets = []
++            if isinstance(statement, ast.ImportFrom):
++                if statement.level:
++                    if statement.level > len(package):
+@@ -2136 +2167,62 @@
+-                    if not past_import_kw:
++                    prefix = package[:len(package) - statement.level + 1]
++                    target_module = ".".join(prefix + ([statement.module] if statement.module else []))
++                else:
++                    target_module = statement.module or ""
++                targets.append((target_module, statement.names))
++            elif isinstance(statement, ast.Import):
++                targets.extend((name.name, []) for name in statement.names)
++            else:
++                continue
++            for target_module, imported_names in targets:
++                # Both regular packages and namespace packages can import a child
++                # module directly; keep its exact dependency alongside the package.
++                for name in imported_names:
++                    child = modules.get(target_module + "." + name.name)
++                    if child is not None:
++                        new_edges.append({
++                            "source": file_id, "target": _make_id(_source_key(child[0])),
++                            "relation": "imports_from", "confidence": "EXTRACTED",
++                            "source_file": source_file,
++                            "source_location": f"L{statement.lineno}", "weight": 1.0,
++                        })
++                target = modules.get(target_module)
++                if target is None:
++                    # Preserve syntactic dependencies as explicit references, not
++                    # dangling edges or claims that an external provider is installed.
++                    reference_id = _make_id(target_module)
++                    old_ids = {reference_id}
++                    if isinstance(statement, ast.ImportFrom):
++                        old_ids.add(_make_id(statement.module or ""))
++                    matching = [edge for edge in result.get("edges", ())
++                                if edge.get("source") == file_id
++                                and edge.get("source_location") == f"L{statement.lineno}"
++                                and edge.get("relation") in {"imports", "imports_from"}
++                                and edge.get("target") in old_ids]
++                    if matching:
++                        for edge in matching:
++                            edge["target"] = reference_id
++                        if reference_id not in known_node_ids:
++                            result["nodes"].append({
++                                "id": reference_id, "label": target_module,
++                                "file_type": "code", "source_file": "", "source_location": "",
++                                "entity_kind": "module_reference",
++                                "source_scope": ("NATIVE_NAMESPACE" if any(
++                                    name.startswith(target_module + ".") for name in modules
++                                ) else "OUT_OF_SOURCE_SCOPE"),
++                                "runtime_import_status": "NOT_PROBED",
++                            })
++                            known_node_ids.add(reference_id)
++                    continue
++                target_file_id = _make_id(_source_key(target[0]))
++                # Migrate the existing extracted import edge to its exact file owner.
++                for edge in result.get("edges", []):
++                    if (edge.get("source") == file_id
++                            and edge.get("source_location") == f"L{statement.lineno}"
++                            and edge.get("relation") in ("imports", "imports_from")):
++                        original_target = _make_id(target_module)
++                        legacy_relative_target = _make_id(statement.module or "") if isinstance(statement, ast.ImportFrom) else original_target
++                        if edge.get("target") in (original_target, legacy_relative_target):
++                            edge["target"] = target_file_id
++                for name in imported_names:
++                    target_id = entities[target_module].get(name.name)
++                    if target_id is None:
+@@ -2138,31 +2230,5 @@
+-                    if child.type == "dotted_name":
+-                        imported_names.append(
+-                            source[child.start_byte:child.end_byte].decode("utf-8", errors="replace")
+-                        )
+-                    elif child.type == "aliased_import":
+-                        # `import X as Y` - take the original name
+-                        name_node = child.child_by_field_name("name")
+-                        if name_node:
+-                            imported_names.append(
+-                                source[name_node.start_byte:name_node.end_byte].decode("utf-8", errors="replace")
+-                            )
+-
+-                line = node.start_point[0] + 1
+-                for name in imported_names:
+-                    tgt_nid = stem_to_entities[target_stem].get(name)
+-                    if tgt_nid:
+-                        for src_class_nid in local_classes:
+-                            new_edges.append({
+-                                "source": src_class_nid,
+-                                "target": tgt_nid,
+-                                "relation": "uses",
+-                                "confidence": "INFERRED",
+-                                "source_file": str_path,
+-                                "source_location": f"L{line}",
+-                                "weight": 0.8,
+-                            })
+-            for child in node.children:
+-                walk_imports(child)
+-
+-        walk_imports(tree.root_node)
+-
++                    for source_id in entities[module].values():
++                        new_edges.append({"source": source_id, "target": target_id,
++                                          "relation": "uses", "confidence": "INFERRED",
++                                          "source_file": source_file,
++                                          "source_location": f"L{statement.lineno}", "weight": 0.8})
+@@ -2189 +2255 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -2387 +2453 @@
+-    stem = path.stem
++    stem = _source_key(path)
+@@ -2577,0 +2644 @@
++    extracted_paths: list[Path] = []
+@@ -2586,5 +2653 @@
+-            common_len = sum(
+-                1 for i in range(min(len(p.parts) for p in paths))
+-                if len({p.parts[i] for p in paths}) == 1
+-            )
+-            root = Path(*paths[0].parts[:common_len]) if common_len else Path(".")
++            root = Path(os.path.commonpath([str(p.parent.resolve()) for p in paths]))
+@@ -2634,0 +2698 @@
++        extracted_paths.append(path)
+@@ -2645,0 +2710,11 @@
++    # Resolve before aggregation so extracted file edges migrate in place.
++    py_pairs = [(r, p) for r, p in zip(per_file, extracted_paths) if p.suffix == ".py"]
++    cross_file_edges = []
++    if py_pairs:
++        try:
++            cross_file_edges = _resolve_cross_file_imports(
++                [r for r, _ in py_pairs], [p for _, p in py_pairs])
++        except Exception as exc:
++            import logging
++            logging.getLogger(__name__).warning("Cross-file import resolution failed, skipping: %s", exc)
++
+@@ -2651,11 +2726 @@
+-
+-    # Add cross-file class-level edges (Python only - uses Python parser internally)
+-    py_paths = [p for p in paths if p.suffix == ".py"]
+-    if py_paths:
+-        py_results = [r for r, p in zip(per_file, paths) if p.suffix == ".py"]
+-        try:
+-            cross_file_edges = _resolve_cross_file_imports(py_results, py_paths)
+-            all_edges.extend(cross_file_edges)
+-        except Exception as exc:
+-            import logging
+-            logging.getLogger(__name__).warning("Cross-file import resolution failed, skipping: %s", exc)
++    all_edges.extend(cross_file_edges)
