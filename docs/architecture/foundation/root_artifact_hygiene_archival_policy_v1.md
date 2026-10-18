@@ -103,3 +103,35 @@ PHASE 0 / BATCH 0.4 is acceptable only when:
 7. Architecture Guard passes.
 8. X-Ray reports zero AST parse errors.
 9. Full auto pytest passes with `./.venv/bin/python -m pytest -q -n auto`.
+
+
+## Owner-approved Git retention — P2 / Phase 1B, 2026-10-18
+
+The existing `ROOT_ARTIFACT_HYGIENE` policy remains the classification owner.
+The engineering pass may change explicit Git tracking rules; the read-only
+runtime classifiers and dashboard gain no mutation authority.
+
+Raw diagnostics, pytest XML/NDJSON, diagnostic JSONL/audio, compressed path
+inventories and derived `graph.json` snapshots under `RUNTIME/audits` remain
+local. Originals are retained in place. Existing tracked historical evidence
+is unaffected by ignore rules; no source or data is removed to clean status.
+Ordinary JSON contracts, canonical/source manifests, Markdown handoffs and
+saved JSON regression traces remain visible and require content review before
+publication. An extension or missing text hit alone is not a retention decision.
+
+The existing local engineering classification ledger is the audit index:
+`RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/owner_20261017_git_classification.json`.
+Entries record path, observed checksum, provenance/track, retention disposition
+and actual reader evidence. The bounded `owner_20261018_canonical_audit_retention.json`
+records the 6072-path review, confirmed regression consumers, baseline ignore
+comparison and preservation proof. Checksums have an explicit observation scope;
+mutable control ledgers are not claimed to authenticate their own final bytes.
+This index is not a new runtime evidence registry or memory authority.
+
+Required trace readers include the existing relational binding, requested-subject,
+typed-relation, hydration and source-facet tests. The declared project-read
+capability excludes historical audit/archive trees from native source discovery.
+Constructed paths and fixture loading were reviewed separately from basename
+candidates. No new canonical source exclusions or required fixture exclusions
+are allowed. Test results, schema validity and Git publication do not constitute
+natural/runtime acceptance.

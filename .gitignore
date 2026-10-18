@@ -67,3 +67,14 @@ codegraph-out/
 # Local profiling and append-only runtime data (source remains tracked)
 /.pymon
 /EVENT_BUS/event_journal.jsonl
+
+# Local raw diagnostics and derived audit graphs; originals retained.
+# Canonical manifests, Markdown handoffs and JSON regression traces stay visible.
+/RUNTIME/audits/**/*.txt
+/RUNTIME/audits/**/*.xml
+/RUNTIME/audits/**/*.ndjson
+/RUNTIME/audits/**/*.jsonl
+/RUNTIME/audits/**/*.wav
+/RUNTIME/audits/**/*.z
+/RUNTIME/audits/**/*.gz
+/RUNTIME/audits/**/graph.json
