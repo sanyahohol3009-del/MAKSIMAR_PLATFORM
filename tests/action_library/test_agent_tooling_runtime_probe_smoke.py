@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.jarvis_live_runtime import agent_tooling_runtime_probe as probe_module
+from MAKSIMAR_CORE_LIB.action_library_adapters import agent_tooling_runtime_probe as probe_module
 
 
 def test_agent_tooling_runtime_probe_smoke(monkeypatch) -> None:
