@@ -61,6 +61,7 @@ runtime_history_store/
 /FOUNDATION_REPORT.md
 *.bak*
 EXTERNAL_BACKENDS/**/security_reports/*.json
+/.codegraphy/meta.json
 codegraph-out/
 
 # Local profiling and append-only runtime data (source remains tracked)
