@@ -27,7 +27,7 @@ from tools.jarvis_live_runtime.session_memory_store import (
     _memory_truth_contract,
     _session_turn_log_path,
 )
-from tools.jarvis_live_runtime.voice_response_cleaner import clean_voice_response
+from tools.jarvis_live_runtime.voice_response_cleaner import strip_reasoning_blocks
 
 
 def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:
@@ -118,7 +118,7 @@ def _build_admission_status(selected_model_role: dict[str, Any]) -> dict[str, An
 
 
 def _sanitize_model_output(text: str) -> str:
-    return clean_voice_response(text)
+    return strip_reasoning_blocks(text)
 
 
 def _filter_reasoning_chunk(chunk: str, state: dict[str, bool]) -> str:
