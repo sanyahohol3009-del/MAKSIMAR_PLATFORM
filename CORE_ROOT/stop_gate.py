@@ -34,13 +34,20 @@ def recover_previous_run_degradation() -> bool:
     raised during this run remains active; preserve trigger/reason/history.
     This does not reset settings or alter host authorization.
     """
-    from SUPERVISOR.runtime_preflight import inspect_runtime_state
+    from SUPERVISOR.runtime_preflight import inspect_runtime_state, _finite_number
     from CORE_ROOT.incident_history import write_incident_record
     with _transition_lock():
         if not DEGRADED_MODE_FILE.is_file():
             return True
         observation = inspect_runtime_state()
         if observation["decision"].get("healthy") is not True:
+            return False
+        metadata = observation.get("run_metadata")
+        if not isinstance(metadata, dict) or not _finite_number(metadata.get("wall_time")):
+            return False
+        # Run identity now exists before PID publication. An incident in that
+        # startup interval is current even if PID discovery/reconciliation is later.
+        if DEGRADED_MODE_FILE.stat().st_mtime >= metadata["wall_time"]:
             return False
         pid_file = ROOT / "RUNTIME/runtime.pid"
         if not pid_file.is_file() or DEGRADED_MODE_FILE.stat().st_mtime_ns >= pid_file.stat().st_mtime_ns:

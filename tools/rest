@@ -11,7 +11,8 @@ CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
 KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
 PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
 
-OPERATOR_SESSION="maksimar_operator"
+DASHBOARD_SESSION="maksimar_dashboard"
+DASHBOARD_OWNERSHIP_FILE="$RUNTIME_STATE_DIR/dashboard_session_ownership.env"
 
 log() {
   echo "[rest] $1"
@@ -29,7 +30,8 @@ remove_stale_state_files() {
     "$GUARD_HEARTBEAT_FILE" \
     "$CORE_GUARD_HEARTBEAT_FILE" \
     "$KERNEL_HEARTBEAT_FILE" \
-    "$PREFLIGHT_RESULT_FILE"
+    "$PREFLIGHT_RESULT_FILE" \
+    "$RUNTIME_STATE_DIR/model_readiness.json"
 
   rm -f "$RUNTIME_STATE_DIR"/.tmp_*.json 2>/dev/null || true
 }
@@ -39,12 +41,23 @@ close_dashboard_windows() {
   "$TOOLS_DIR/dashboard" close || true
 }
 
-stop_operator_session() {
-  log "stopping operator dashboard session..."
-  if session_exists "$OPERATOR_SESSION"; then
-    tmux kill-session -t "$OPERATOR_SESSION" 2>/dev/null || true
+dashboard_ownership_is_exact() {
+  [[ -f "$DASHBOARD_OWNERSHIP_FILE" ]] \
+    && grep -qx 'owner=jarvis_runtime_dashboard' "$DASHBOARD_OWNERSHIP_FILE" \
+    && grep -qx "tmux_session=$DASHBOARD_SESSION" "$DASHBOARD_OWNERSHIP_FILE" \
+    && grep -qx 'operator_shell_owned=false' "$DASHBOARD_OWNERSHIP_FILE" \
+    && grep -qx 'codex_session_owned=false' "$DASHBOARD_OWNERSHIP_FILE"
+}
+
+stop_runtime_dashboard_session() {
+  log "stopping registered runtime dashboard session..."
+  if dashboard_ownership_is_exact && session_exists "$DASHBOARD_SESSION"; then
+    tmux kill-session -t "$DASHBOARD_SESSION" 2>/dev/null || true
+  elif session_exists "$DASHBOARD_SESSION"; then
+    log "dashboard session is not registered as owned; leaving it untouched"
   fi
-  log "operator dashboard session stopped"
+  rm -f "$DASHBOARD_OWNERSHIP_FILE"
+  log "registered runtime dashboard cleanup complete"
 }
 
 main() {
@@ -58,7 +71,7 @@ main() {
   "$TOOLS_DIR/guard_ctl" stop || true
 
   log "stopping runtime..."
-  "$TOOLS_DIR/ctl" stop || true
+  "$TOOLS_DIR/ctl" stop || { log "runtime stop incomplete; retained diagnostics"; return 1; }
 
   remove_stale_state_files
 
@@ -66,7 +79,7 @@ main() {
   "$TOOLS_DIR/oob_dashboard_ctl" stop || true
 
   close_dashboard_windows
-  stop_operator_session
+  stop_runtime_dashboard_session
 
   log "done"
 }

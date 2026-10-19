@@ -310,7 +310,7 @@ def test_actual_healthy_verdict_preserves_marker_epoch_and_history(monkeypatch, 
     monkeypatch.setattr(incident_history,"write_incident_record",append)
     decision = preflight.classify_runtime_observation(_observation())
     assert decision["healthy"] is True
-    monkeypatch.setattr(preflight,"inspect_runtime_state",lambda:{"decision":decision})
+    monkeypatch.setattr(preflight,"inspect_runtime_state",lambda:{"decision":decision,"run_metadata":_observation()["run_metadata"]})
     if incident_fails:
         with pytest.raises(OSError):
             stop_gate.recover_previous_run_degradation()

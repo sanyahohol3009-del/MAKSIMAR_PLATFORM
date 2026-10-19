@@ -237,3 +237,49 @@ def heartbeat_process_alive(payload: dict[str, Any], expected_module: str,
             and _process_start_ticks(proc) == payload["process_start_ticks"])
     except OSError:
         return False
+
+
+def find_owned_module_process_pids(expected_module: str, *, pidfile: Path | None = None,
+                                   proc_root: Path = Path("/proc")) -> tuple[int, ...] | None:
+    """Read-only owned candidates; None means inspection failed, never absence."""
+    try:
+        candidates = {int(p.name) for p in proc_root.iterdir() if p.name.isdecimal()}
+    except OSError:
+        return None
+    if pidfile is not None:
+        try:
+            hinted_pid = int(pidfile.read_text(encoding="utf-8").strip())
+            if hinted_pid > 0:
+                candidates.add(hinted_pid)
+        except (OSError, ValueError):
+            pass
+    owned = []
+    for pid in sorted(candidates):
+        proc = proc_root / str(pid)
+        try:
+            argv = proc.joinpath("cmdline").read_bytes().split(b"\0")
+            if argv[1:3] != [b"-m", expected_module.encode()]:
+                continue
+            if str(proc.joinpath("cwd").resolve(strict=True)) != str(ROOT):
+                continue
+            start_ticks = _process_start_ticks(proc)
+            if not start_ticks:
+                if proc.exists():
+                    return None
+                continue
+            if heartbeat_process_alive({"pid": pid, "process_start_ticks": start_ticks},
+                                       expected_module, proc_root=proc_root):
+                owned.append(pid)
+            elif proc.exists():
+                return None  # identity changed while collecting; not absence
+        except (OSError, UnicodeError):
+            if proc.exists():
+                return None
+    return tuple(owned)
+
+
+def find_owned_module_process_pid(expected_module: str, *, pidfile: Path | None = None,
+                                  proc_root: Path = Path("/proc")) -> int | None:
+    """Preserve the existing exact-one PID discovery contract for CLI callers."""
+    owned = find_owned_module_process_pids(expected_module, pidfile=pidfile, proc_root=proc_root)
+    return owned[0] if owned is not None and len(owned) == 1 else None

@@ -2,8 +2,10 @@
 set -euo pipefail
 
 ROOT="$HOME/MAKSIMAR_PLATFORM"
-OPERATOR_SESSION="maksimar_operator"
+DASHBOARD_SESSION="maksimar_dashboard"
 OOB_SESSION="maksimar_oob"
+DASHBOARD_OWNERSHIP_FILE="$ROOT/RUNTIME/state/dashboard_session_ownership.env"
+WINDOW_ID="JARVIS_RUNTIME_DASHBOARDS"
 
 log() {
   echo "[ui_open] $1"
@@ -30,8 +32,8 @@ main() {
     exit 0
   fi
 
-  if ! session_exists "$OPERATOR_SESSION"; then
-    log "operator session missing: $OPERATOR_SESSION"
+  if ! session_exists "$DASHBOARD_SESSION"; then
+    log "runtime dashboard session missing: $DASHBOARD_SESSION"
     exit 0
   fi
 
@@ -40,14 +42,18 @@ main() {
     exit 0
   fi
 
-  log "opening Windows Terminal tabs"
+  if [[ ! -f "$DASHBOARD_OWNERSHIP_FILE" ]] \
+    || ! grep -qx "tmux_session=$DASHBOARD_SESSION" "$DASHBOARD_OWNERSHIP_FILE"; then
+    log "dashboard ownership metadata missing; skip ui open"
+    exit 0
+  fi
 
-  cmd.exe /c wt.exe -w 0 \
-    new-tab --title Dashboard wsl.exe -d "$WSL_DISTRO_NAME" bash -lc "cd '$ROOT' && tmux attach -t '$OPERATOR_SESSION:dashboard'" \
+  log "opening registered JARVIS dashboard window"
+
+  cmd.exe /c wt.exe -w "$WINDOW_ID" \
+    new-tab --title JARVIS-Dashboard wsl.exe -d "$WSL_DISTRO_NAME" --cd "$ROOT" --exec tmux attach -t "$DASHBOARD_SESSION:dashboard" \
     ';' \
-    new-tab --title OOB wsl.exe -d "$WSL_DISTRO_NAME" bash -lc "cd '$ROOT' && tmux attach -t '$OOB_SESSION'" \
-    ';' \
-    new-tab --title "Command Console" wsl.exe -d "$WSL_DISTRO_NAME" bash -lc "cd '$ROOT' && source .venv/bin/activate && exec bash" \
+    new-tab --title JARVIS-OOB wsl.exe -d "$WSL_DISTRO_NAME" --cd "$ROOT" --exec tmux attach -t "$OOB_SESSION" \
     >/dev/null 2>&1 || true
 }
 

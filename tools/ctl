@@ -9,9 +9,10 @@ HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
 LOG_FILE="$ROOT/logs/runtime.log"
 PID_FILE="$RUNTIME_DIR/runtime.pid"
 HEARTBEAT_TIMEOUT_SEC=10
+STARTUP_GRACE_SEC=30
 RUNTIME_PORT=8000
 HEALTH_URL="http://127.0.0.1:${RUNTIME_PORT}/health"
-DEGRADED_FILE="$ROOT/RUNTIME/degraded_mode.flag"
+DEGRADED_FILE="$RUNTIME_STATE_DIR/degraded_mode.flag"
 
 STATE_WARMING_UP="WARMING_UP"
 STATE_ALIVE="ALIVE"
@@ -38,74 +39,57 @@ session_exists() {
 }
 
 find_runtime_pid() {
-  local pid=""
-  local patterns=(
-    "SUPERVISOR.process_supervisor"
-    "$CANONICAL_PYTHON -m SUPERVISOR.process_supervisor"
-    "process_supervisor.py"
-    "$ROOT/SUPERVISOR/process_supervisor.py"
-  )
-
-  for pattern in "${patterns[@]}"; do
-    pid="$(pgrep -af "$pattern" | awk '$0 !~ /grep/ {print $1}' | head -n 1 || true)"
-    if [[ -n "${pid:-}" ]]; then
-      printf '%s\n' "$pid"
-      return 0
-    fi
-  done
-
-  return 1
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$PID_FILE" <<'PY'
+import sys
+from pathlib import Path
+from CORE_ROOT.heartbeat_io import find_owned_module_process_pid
+pid = find_owned_module_process_pid("SUPERVISOR.process_supervisor", pidfile=Path(sys.argv[1]))
+if pid is not None:
+    print(pid)
+PY
 }
-
 process_exists() {
   local pid=""
   pid="$(find_runtime_pid || true)"
   [[ -n "${pid:-}" ]]
 }
 
-heartbeat_age() {
-  "$CANONICAL_PYTHON" - "$HEARTBEAT_FILE" <<'PY'
-import json
-import sys
-import time
-from pathlib import Path
+process_age_seconds() {
+  local pid=""
+  pid="$(find_runtime_pid || true)"
+  [[ -n "$pid" ]] || { printf '999999\n'; return; }
+  ps -o etimes= -p "$pid" 2>/dev/null | awk '{print int($1)}'
+}
 
+heartbeat_age() {
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$HEARTBEAT_FILE" <<'PY'
+import sys
+from pathlib import Path
+from CORE_ROOT.heartbeat_io import safe_read_json, heartbeat_age_seconds
 path = Path(sys.argv[1])
 if not path.exists():
     print("missing")
-    raise SystemExit(0)
-
-try:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-except Exception:
-    print("invalid")
-    raise SystemExit(0)
-
-ts = payload.get("ts")
-if not isinstance(ts, (int, float)):
-    print("invalid")
-    raise SystemExit(0)
-
-print(f"{time.time() - ts:.2f}")
+else:
+    age = heartbeat_age_seconds(safe_read_json(path))
+    print("invalid" if age is None else f"{age:.2f}")
 PY
 }
-
 heartbeat_is_fresh() {
-  local age=""
-  age="$(heartbeat_age)"
-  if [[ "$age" == "missing" || "$age" == "invalid" ]]; then
-    return 1
-  fi
-
-  "$CANONICAL_PYTHON" - "$age" "$HEARTBEAT_TIMEOUT_SEC" <<'PY'
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$HEARTBEAT_FILE" "$HEARTBEAT_TIMEOUT_SEC" <<'PY'
 import sys
-
-age = float(sys.argv[1])
-limit = float(sys.argv[2])
-raise SystemExit(0 if age <= limit else 1)
+from CORE_ROOT.heartbeat_io import (
+    safe_read_json, heartbeat_age_seconds, heartbeat_source,
+    heartbeat_status, heartbeat_process_alive,
+)
+payload = safe_read_json(sys.argv[1])
+age = heartbeat_age_seconds(payload)
+valid = (payload is not None and age is not None and age <= float(sys.argv[2])
+         and heartbeat_status(payload) == "alive"
+         and heartbeat_source(payload) == "process_supervisor"
+         and heartbeat_process_alive(payload, "SUPERVISOR.process_supervisor"))
+raise SystemExit(0 if valid else 1)
 PY
 }
-
 http_health() {
   curl -fsS --max-time 2 "$HEALTH_URL" >/dev/null 2>&1
 }
@@ -167,16 +151,15 @@ normalized_state() {
     return 0
   fi
 
-  if [[ "$has_http" == "1" && "$has_port" == "1" && "$has_process" == "1" && "$has_session" == "1" ]]; then
-    if degraded_active; then
-      printf '%s\n' "$STATE_DEGRADED"
-    else
-      printf '%s\n' "$STATE_ALIVE"
-    fi
-    return 0
-  fi
-
   if [[ "$has_session" == "1" || "$has_process" == "1" || "$has_port" == "1" || "$has_http" == "1" ]]; then
+    if [[ "$has_process" == "1" && "$hb_age" != "missing" && "$hb_age" != "invalid" ]]; then
+      local process_age=""
+      process_age="$(process_age_seconds)"
+      if [[ "$process_age" =~ ^[0-9]+$ ]] && (( process_age <= STARTUP_GRACE_SEC )); then
+        printf '%s\n' "$STATE_WARMING_UP"
+        return 0
+      fi
+    fi
     printf '%s\n' "$STATE_BROKEN"
     return 0
   fi
@@ -189,7 +172,9 @@ write_pid_file() {
   pid="$(find_runtime_pid || true)"
   mkdir -p "$RUNTIME_DIR"
   if [[ -n "${pid:-}" ]]; then
-    printf '%s\n' "$pid" > "$PID_FILE"
+    if [[ ! -f "$PID_FILE" ]] || [[ "$(cat "$PID_FILE")" != "$pid" ]]; then
+      printf '%s\n' "$pid" > "$PID_FILE"
+    fi
   fi
 }
 
@@ -199,14 +184,22 @@ remove_pid_file() {
 
 start() {
   if runtime_truth; then
+    # Reconcile owned PID metadata after a delayed supervisor startup.
+    write_pid_file
     log "already running (truthful)"
     status
     return 0
   fi
 
+  if process_exists; then
+    write_pid_file
+    log "owned supervisor already exists; startup/degradation remains pending"
+    status
+    return 0
+  fi
   if session_exists; then
-    log "removing stale tmux session: $SESSION_NAME"
-    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+    log "existing session has no proven owner; refusing replacement"
+    return 1
   fi
 
   remove_pid_file
@@ -225,31 +218,80 @@ start() {
     return 0
   fi
 
-  log "started tmux session, but runtime is not yet truthful"
+  if process_exists; then
+    log "owned supervisor launched; waiting for canonical readiness"
+    status
+    return 0
+  fi
+  log "started tmux session, but runtime owner is not proven"
   status
   return 1
 }
 
 stop() {
   log "stopping runtime..."
+  local session_id=""
   if session_exists; then
-    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+    session_id="$(tmux display-message -p -t "$SESSION_NAME" '#{session_id}')"
   fi
-
-  local pid=""
-  pid="$(find_runtime_pid || true)"
-  if [[ -n "${pid:-}" ]]; then
-    kill "$pid" 2>/dev/null || true
-    sleep 1
+  # pidfd pins the verified process; PID reuse cannot redirect either signal.
+  if ! PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$PID_FILE" "$session_id" <<'PY'
+import os, select, signal, sys
+from pathlib import Path
+from CORE_ROOT.heartbeat_io import (
+    find_owned_module_process_pids, heartbeat_process_alive, _process_start_ticks,
+)
+path = Path(sys.argv[1])
+module = "SUPERVISOR.process_supervisor"
+owned = find_owned_module_process_pids(module, pidfile=path)
+if owned is None or len(owned) > 1:
+    raise SystemExit("runtime stop refused: process identity unknown/ambiguous")
+if not owned:
+    if len(sys.argv) > 2 and sys.argv[2]:
+        raise SystemExit("runtime stop refused: session has no proven process owner")
+    # A retained hint is disposable only when its process is proven absent.
+    # Foreign/unreadable hints stay as diagnostics; never signal or adopt them.
+    if path.is_file():
+        from SUPERVISOR.runtime_preflight import _runtime_pid_identity
+        try:
+            hinted = int(path.read_text().strip())
+        except (OSError, ValueError):
+            hinted = None
+        if hinted is not None and hinted > 0 and _runtime_pid_identity(hinted).get("alive") is False:
+            path.unlink()
+    raise SystemExit(0)
+pid = owned[0]
+identity = {"pid": pid, "process_start_ticks": _process_start_ticks(Path("/proc") / str(pid))}
+fd = os.pidfd_open(pid)
+try:
+    if not heartbeat_process_alive(identity, module):
+        raise SystemExit("runtime stop refused: identity changed")
+    signal.pidfd_send_signal(fd, signal.SIGTERM)
+    ready, _, _ = select.select([fd], [], [], 1.0)  # existing one-second stop bound
+    if not ready:
+        signal.pidfd_send_signal(fd, signal.SIGKILL)
+        raise SystemExit("runtime stop forced; orderly shutdown not proven")
+    if path.is_file() and path.read_text().strip() == str(pid):
+        path.unlink()
+finally:
+    os.close(fd)
+PY
+  then
+    log "runtime stop incomplete; metadata/heartbeats retained"
+    return 1
   fi
-
-  pid="$(find_runtime_pid || true)"
-  if [[ -n "${pid:-}" ]]; then
-    kill -9 "$pid" 2>/dev/null || true
+  if [[ -n "$session_id" ]]; then
+    tmux kill-session -t "$session_id" 2>/dev/null || true
   fi
-
-  remove_pid_file
   log "done"
+}
+
+restart() {
+  # A bare runtime stop/start races the active guard chain. The existing full
+  # lifecycle owns guard ordering, recovery and model readiness as one operation.
+  log "restarting through canonical REST -> WORK lifecycle"
+  bash "$ROOT/tools/rest" || return $?
+  bash "$ROOT/tools/work"
 }
 
 status() {
@@ -325,9 +367,7 @@ case "${1:-}" in
     status
     ;;
   restart)
-    stop || true
-    sleep 1
-    start
+    restart
     ;;
   *)
     echo "usage: $0 {start|stop|status|restart}"

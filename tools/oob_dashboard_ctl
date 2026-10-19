@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$HOME/MAKSIMAR_PLATFORM"
 SESSION_NAME="maksimar_oob"
 SCRIPT_PATH="$ROOT/tools/monitor/oob_foundation_monitor.py"
+OWNERSHIP_FILE="$ROOT/RUNTIME/state/oob_dashboard_session_ownership.env"
 # canonical candidates: ".venv/bin/python" and "/venv/bin/python"
 # this OOB layer must stay independent from runtime truthfulness
 
@@ -41,6 +42,7 @@ start() {
   tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
   tmux send-keys -t "$SESSION_NAME" \
     "cd '$ROOT' && '$CANONICAL_PYTHON' '$SCRIPT_PATH'" C-m
+  printf '%s\n' 'owner=jarvis_oob_dashboard' "tmux_session=$SESSION_NAME" > "$OWNERSHIP_FILE"
 
   sleep 1
   status
@@ -48,9 +50,14 @@ start() {
 
 stop() {
   log "stopping OOB dashboard..."
-  if session_exists; then
+  if session_exists && [[ -f "$OWNERSHIP_FILE" ]] \
+    && grep -qx 'owner=jarvis_oob_dashboard' "$OWNERSHIP_FILE" \
+    && grep -qx "tmux_session=$SESSION_NAME" "$OWNERSHIP_FILE"; then
     tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+  elif session_exists; then
+    log "session is not registered as owned; leaving it untouched"
   fi
+  rm -f "$OWNERSHIP_FILE"
   log "done"
 }
 

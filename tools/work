@@ -5,6 +5,7 @@ ROOT="$HOME/MAKSIMAR_PLATFORM"
 TOOLS_DIR="$ROOT/tools"
 RUNTIME_STATE_DIR="$ROOT/RUNTIME/state"
 LOGS_DIR="$ROOT/logs"
+MODEL_READINESS_FILE="$RUNTIME_STATE_DIR/model_readiness.json"
 
 RUNTIME_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/heartbeat_state.json"
 GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/guard_heartbeat_state.json"
@@ -12,7 +13,8 @@ CORE_GUARD_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/core_guard_heartbeat_state.json"
 KERNEL_HEARTBEAT_FILE="$RUNTIME_STATE_DIR/kernel_heartbeat_state.json"
 PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
 
-OPERATOR_SESSION="maksimar_operator"
+DASHBOARD_SESSION="maksimar_dashboard"
+DASHBOARD_OWNERSHIP_FILE="$RUNTIME_STATE_DIR/dashboard_session_ownership.env"
 
 GUARD_LOG_FILE="$ROOT/logs/guard.log"
 CORE_GUARD_LOG_FILE="$ROOT/logs/core_guard.log"
@@ -103,6 +105,38 @@ print("[work] preflight result ok=true")
 PY
 }
 
+preflight_reports_healthy_runtime() {
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+    "$CANONICAL_PYTHON" - "$PREFLIGHT_RESULT_FILE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+raise SystemExit(0 if data.get("already_running_healthy") is True else 1)
+PY
+}
+
+print_preflight_classification() {
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+    "$CANONICAL_PYTHON" - "$PREFLIGHT_RESULT_FILE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+if not path.exists():
+    print("[work] runtime classification unavailable: preflight result missing")
+    raise SystemExit(0)
+data = json.loads(path.read_text(encoding="utf-8"))
+state = data.get("details", {}).get("runtime_state", {})
+print(f"[work] runtime classification={state.get('classification', 'unknown')}")
+for reason in state.get("reasons", []):
+    print(f"[work]   reason={reason}")
+PY
+}
+
 start_oob_dashboard() {
   log "starting independent OOB dashboard first..."
   "$TOOLS_DIR/oob_dashboard_ctl" start || true
@@ -119,6 +153,24 @@ wait_for_runtime_readiness() {
   log "waiting for runtime readiness..."
   wait_for_file "$RUNTIME_HEARTBEAT_FILE" "runtime heartbeat" 20 || return 1
 }
+
+wait_for_control_plane_health() {
+  log "waiting for control-plane health before model warmup..."
+  local started_at now
+  started_at="$(date +%s)"
+  while true; do
+    if curl --silent --show-error --fail --max-time 2 http://127.0.0.1:8000/health >/dev/null 2>&1; then
+      return 0
+    fi
+    now="$(date +%s)"
+    if (( now - started_at >= 60 )); then
+      log "timeout waiting for control-plane health"
+      return 1
+    fi
+    sleep 1
+  done
+}
+
 
 start_guard() {
   log "starting supervisor guard..."
@@ -139,9 +191,20 @@ start_kernel_watchdog() {
 }
 
 wait_for_guard_chain() {
-  wait_for_file "$GUARD_HEARTBEAT_FILE" "guard heartbeat" 15 || return 1
-  wait_for_file "$CORE_GUARD_HEARTBEAT_FILE" "core guard heartbeat" 15 || return 1
-  wait_for_file "$KERNEL_HEARTBEAT_FILE" "kernel heartbeat" 15 || return 1
+  local started_at now
+  started_at="$(date +%s)"
+  while true; do
+    if PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" -c \
+      'from SUPERVISOR.runtime_preflight import inspect_runtime_state; raise SystemExit(0 if inspect_runtime_state()["decision"]["healthy"] is True else 1)'; then
+      return 0
+    fi
+    now="$(date +%s)"
+    if (( now - started_at >= 15 )); then
+      log "timeout waiting for complete current-run guard chain"
+      return 1
+    fi
+    sleep 1
+  done
 }
 
 open_dashboard_windows() {
@@ -150,17 +213,28 @@ open_dashboard_windows() {
   "$TOOLS_DIR/dashboard" status || true
 }
 
-create_operator_dashboard_session() {
-  log "creating operator dashboard session..."
+register_dashboard_ownership() {
+  printf '%s\n' \
+    'owner=jarvis_runtime_dashboard' \
+    "tmux_session=$DASHBOARD_SESSION" \
+    'windows_terminal_window=JARVIS_RUNTIME_DASHBOARDS' \
+    'operator_shell_owned=false' \
+    'codex_session_owned=false' \
+    > "$DASHBOARD_OWNERSHIP_FILE"
+}
 
-  if session_exists "$OPERATOR_SESSION"; then
-    tmux kill-session -t "$OPERATOR_SESSION" 2>/dev/null || true
+create_runtime_dashboard_session() {
+  log "creating runtime-owned dashboard session..."
+
+  if session_exists "$DASHBOARD_SESSION"; then
+    log "dashboard session already exists; refusing to replace it: $DASHBOARD_SESSION"
+    return 1
   fi
 
-  tmux new-session -d -s "$OPERATOR_SESSION" -n dashboard -c "$ROOT"
+  tmux new-session -d -s "$DASHBOARD_SESSION" -n dashboard -c "$ROOT"
 
   local p_runtime p_cpu p_guard p_tree
-  p_runtime="$(tmux display-message -p -t "$OPERATOR_SESSION:dashboard.0" '#{pane_id}')"
+  p_runtime="$(tmux display-message -p -t "$DASHBOARD_SESSION:dashboard.0" '#{pane_id}')"
 
   p_cpu="$(tmux split-window -h -t "$p_runtime" -l 50% -c "$ROOT" -P -F '#{pane_id}')"
   p_guard="$(tmux split-window -v -t "$p_runtime" -l 50% -c "$ROOT" -P -F '#{pane_id}')"
@@ -178,10 +252,11 @@ create_operator_dashboard_session() {
   tmux send-keys -t "$p_tree" \
     "cd '$ROOT' && watch -n2 'tree -L 2 \"$ROOT\" | sed -n \"1,80p\"'" C-m
 
-  tmux select-window -t "$OPERATOR_SESSION:dashboard"
+  tmux select-window -t "$DASHBOARD_SESSION:dashboard"
   tmux select-pane -t "$p_runtime"
+  register_dashboard_ownership
 
-  log "operator dashboard session ready"
+  log "runtime dashboard session ready"
 }
 
 print_truth_summary() {
@@ -193,28 +268,50 @@ print_truth_summary() {
   [[ -f "$KERNEL_HEARTBEAT_FILE" ]] && log "  kernel heartbeat present"
 }
 
+recover_previous_run_degradation() {
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" -c \
+    'from CORE_ROOT.stop_gate import recover_previous_run_degradation; raise SystemExit(0 if recover_previous_run_degradation() else 1)' \
+    || log "degradation remains active: current-run incident or incomplete recovery evidence"
+}
+
 main() {
   mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
 
+  if ! run_preflight; then
+    print_preflight_classification
+    log "preflight rejected startup; existing runtime/processes were not stopped"
+    exit 1
+  fi
+
+  if preflight_reports_healthy_runtime; then
+    log "already running / healthy"
+    recover_previous_run_degradation
+    print_truth_summary
+    exit 0
+  fi
+
   remove_disposable_runtime_artifacts
 
-  # observer layers must start before any preflight/runtime decision
+  # Observer layers start only after preflight confirms a clean start.
   start_oob_dashboard
-  create_operator_dashboard_session || abort "operator dashboard session failed"
+  create_runtime_dashboard_session || abort "runtime dashboard session failed"
 
   # open visibility immediately
   "$TOOLS_DIR/ui_open" || true
 
-  run_preflight || abort "preflight failed"
-
   start_runtime || abort "runtime start failed"
   wait_for_runtime_readiness || abort "runtime readiness timeout"
+  wait_for_control_plane_health || abort "control-plane health timeout"
+  # Initial tmux launch can precede supervisor discovery; reconcile only after
+  # real HTTP readiness, through the same idempotent lifecycle owner.
+  "$TOOLS_DIR/ctl" start || abort "runtime identity reconciliation failed"
 
   start_guard || abort "guard start failed"
   start_core_guard || abort "core guard start failed"
   start_kernel_watchdog || abort "kernel watchdog start failed"
 
   wait_for_guard_chain || abort "guard chain heartbeat timeout"
+  recover_previous_run_degradation
 
   open_dashboard_windows || abort "dashboard windows open failed"
 

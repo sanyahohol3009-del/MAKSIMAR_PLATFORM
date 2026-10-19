@@ -26,7 +26,7 @@ def environment(monkeypatch, tmp_path):
     monkeypatch.setattr(stop_gate, "log", lambda text: None)
     records = []
     monkeypatch.setattr(incident_history, "write_incident_record", lambda reason, status: records.append((reason,status)))
-    monkeypatch.setattr(runtime_preflight, "inspect_runtime_state", lambda: {"decision":{"healthy":True}})
+    monkeypatch.setattr(runtime_preflight, "inspect_runtime_state", lambda: {"decision":{"healthy":True},"run_metadata":{"wall_time":1.5}})
     return flag, pid, trigger, reason, records
 
 
