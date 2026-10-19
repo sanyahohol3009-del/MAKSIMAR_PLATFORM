@@ -126,6 +126,7 @@ class JarvisRuntimeModelRoleProfile:
     model_download_allowed: bool
     runtime_start_allowed: bool
     pc_control_allowed: bool
+    resident_context_tokens: int | None = None
 
     def __post_init__(self) -> None:
         for field_name in ("role_id", "model_id", "target_model_id", "status", "role", "load_policy"):
@@ -138,6 +139,10 @@ class JarvisRuntimeModelRoleProfile:
             raise ValueError("context token limits must be positive")
         if self.default_context_tokens > self.max_safe_context_tokens:
             raise ValueError("default_context_tokens must not exceed max_safe_context_tokens")
+        if self.resident_context_tokens is not None and not (
+            self.default_context_tokens <= self.resident_context_tokens <= self.max_safe_context_tokens
+        ):
+            raise ValueError("resident_context_tokens must fit the profile's safe context range")
         _require_true(self.proposal_only, "proposal_only")
         _require_false(self.agents_direct_access_allowed, "agents_direct_access_allowed")
         _require_false(self.model_download_allowed, "model_download_allowed")
@@ -168,6 +173,7 @@ class JarvisRuntimeModelRoleProfile:
             "model_download_allowed": self.model_download_allowed,
             "runtime_start_allowed": self.runtime_start_allowed,
             "pc_control_allowed": self.pc_control_allowed,
+            "resident_context_tokens": self.resident_context_tokens or self.default_context_tokens,
         }
 
 
@@ -221,12 +227,12 @@ def build_jarvis_live_runtime_model_role_profiles() -> tuple[JarvisRuntimeModelR
             pc_control_allowed=False,
         ),
         JarvisRuntimeModelRoleProfile(
-            role_id="helper_classifier_model",
+            role_id="helper_input_correction_model",
             model_id="jarvis:helper3b",
             target_model_id="qwen2.5-coder:3b",
             status="installed",
-            role="helper_classifier",
-            use_cases=("task classification", "route selection", "short summaries", "cheap checks"),
+            role="helper_input_correction",
+            use_cases=("STT correction", "typing correction", "input normalization", "ambiguity evidence"),
             load_policy="installed_ollama_wrapper",
             exclusive_gpu=False,
             default_context_tokens=2048,
@@ -247,7 +253,29 @@ def build_jarvis_live_runtime_model_role_profiles() -> tuple[JarvisRuntimeModelR
             use_cases=("daily conversation", "planning", "simple explanations", "voice interaction"),
             load_policy="installed_ollama_wrapper",
             exclusive_gpu=False,
-            default_context_tokens=4096,
+            default_context_tokens=3072,
+            max_safe_context_tokens=8192,
+            resident_context_tokens=4096,
+            installed=True,
+            proposal_only=True,
+            agents_direct_access_allowed=False,
+            model_download_allowed=False,
+            runtime_start_allowed=False,
+            pc_control_allowed=False,
+        ),
+        JarvisRuntimeModelRoleProfile(
+            role_id="heavy_reasoning_model",
+            model_id="jarvis-live:qwen14b",
+            target_model_id="qwen2.5-coder:14b",
+            status="installed",
+            role="heavy_reasoning",
+            use_cases=(
+                "safety-relevant semantic verification",
+                "high-confidence execution-restriction verification",
+            ),
+            load_policy="load_on_demand",
+            exclusive_gpu=True,
+            default_context_tokens=3072,
             max_safe_context_tokens=8192,
             installed=True,
             proposal_only=True,
@@ -287,45 +315,26 @@ def build_jarvis_live_runtime_model_role_read_model() -> dict[str, Any]:
     }
 
 
-def select_jarvis_live_model_role(request_text: str) -> dict[str, Any]:
-    lowered = request_text.casefold()
-    if any(marker in lowered for marker in ("классифиц", "summary", "сводк", "кратко проверь")):
-        role_id = "helper_classifier_model"
-        route_reason = "classification_or_summary"
-    elif any(
-        marker in lowered
-        for marker in ("traceback", "architecture", "архитектур", "сложн", "патч", "diff", "complex", "регресс")
-    ):
-        role_id = "heavy_coder_model"
-        route_reason = "complex_code_or_architecture"
-    elif any(marker in lowered for marker in ("клик", "открой", "запусти", "мыш", "клавиат", "браузер")):
-        role_id = "jarvis_chat_model"
-        route_reason = "pc_action_request_proposal_only"
-    elif any(
-        marker in lowered
-        for marker in ("pytest", "ошибка", "код", "git", "тест", "файл", "python", "brokenpipe")
-    ):
-        role_id = "daily_coder_model"
-        route_reason = "simple_code_help"
-    else:
-        role_id = "jarvis_chat_model"
-        route_reason = "normal_conversation"
-    profiles = {profile.role_id: profile for profile in build_jarvis_live_runtime_model_role_profiles()}
-    profile = profiles[role_id].to_read_model()
-    return {
-        **profile,
-        "selected_model_role": role_id,
-        "route_reason": route_reason,
-        "direct_execution_allowed": False,
-        "pc_control_allowed": False,
-        "model_download_allowed": False,
-        "runtime_start_allowed": False,
-        "enqueue_required": True,
-        "admission_required": True,
-        "resource_gate_required": True,
-        "queue_surface": "MAKSIMAR_CORE_LIB/execution_control",
-        "worker_registry_surface": "MAKSIMAR_CORE_LIB/workers_registry",
-    }
+def context_tokens_for_jarvis_model(model_id: str) -> int:
+    """Return the existing role profile's bounded default context; never infer it from user text."""
+    profile = next(
+        (item for item in build_jarvis_live_runtime_model_role_profiles() if item.model_id == model_id),
+        None,
+    )
+    if profile is None:
+        raise KeyError(f"unknown Jarvis model profile: {model_id}")
+    return int(profile.default_context_tokens)
+
+
+def resident_context_tokens_for_jarvis_model(model_id: str) -> int:
+    """Return the profile-owned compatible context envelope for a resident model."""
+    profile = next(
+        (item for item in build_jarvis_live_runtime_model_role_profiles() if item.model_id == model_id),
+        None,
+    )
+    if profile is None:
+        raise KeyError(f"unknown Jarvis model profile: {model_id}")
+    return int(profile.resident_context_tokens or profile.default_context_tokens)
 
 
 def build_default_model_profiles() -> tuple[ModelProfile, ...]:

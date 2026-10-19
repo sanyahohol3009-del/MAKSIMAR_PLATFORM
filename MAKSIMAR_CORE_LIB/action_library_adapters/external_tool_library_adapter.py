@@ -167,6 +167,9 @@ def load_external_tool_manifests() -> tuple[UniversalToolManifest, ...]:
     manifests: list[UniversalToolManifest] = []
     for path in _manifest_paths():
         payload = json.loads(path.read_text(encoding="utf-8"))
+        tool_id = str(payload.get("tool_id", "")).strip()
+        if not tool_id.startswith("external_adapter:"):
+            continue
         manifests.append(build_universal_tool_manifest(payload))
     return tuple(manifests)
 
@@ -359,7 +362,7 @@ def _score_manifest_for_request(
 
 
 def _load_agent_tooling_runtime_probe_read_model() -> dict[str, Any]:
-    from tools.jarvis_live_runtime.agent_tooling_runtime_probe import build_agent_tooling_runtime_probe_read_model
+    from MAKSIMAR_CORE_LIB.action_library_adapters.agent_tooling_runtime_probe import build_agent_tooling_runtime_probe_read_model
 
     try:
         return build_agent_tooling_runtime_probe_read_model()

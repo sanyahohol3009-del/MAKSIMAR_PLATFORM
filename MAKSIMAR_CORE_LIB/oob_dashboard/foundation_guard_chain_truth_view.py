@@ -99,7 +99,7 @@ def build_foundation_guard_chain_truth_view() -> FoundationGuardChainTruthView:
             log_truth=entry.log_truth,
             derived_status=entry.derived_status,
             consistency_status=entry.consistency_status,
-            last_seen_label="fresh",
+            last_seen_label=entry.last_seen_label,
             reason=_reason_for_entry(
                 entry.consistency_status,
                 entry.derived_status,

@@ -57,8 +57,11 @@ class MemoryRegistryPanelEntry:
     action_exposure_allowed: bool
     display_orchestration_allowed: bool
     status: MemoryRegistryPanelStatus
+    readiness_scope: str = "HISTORICAL_METADATA_CONTRACT_PREVIEW"
 
     def __post_init__(self) -> None:
+        if self.readiness_scope != "HISTORICAL_METADATA_CONTRACT_PREVIEW":
+            raise ValueError("historical preview readiness cannot claim runtime acceptance")
         panel_id = _ensure_non_empty_str(self.panel_id, "panel_id")
         title = _ensure_non_empty_str(self.title, "title")
         source_component = _ensure_non_empty_str(

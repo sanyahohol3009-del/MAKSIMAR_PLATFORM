@@ -40,8 +40,11 @@ class MemoryRegistryViewEntry:
     read_only: bool
     preview_ready: bool
     dashboard_visible: bool
+    readiness_scope: str = "HISTORICAL_METADATA_CONTRACT_PREVIEW"
 
     def __post_init__(self) -> None:
+        if self.readiness_scope != "HISTORICAL_METADATA_CONTRACT_PREVIEW":
+            raise ValueError("historical preview readiness cannot claim runtime acceptance")
         view_id = _ensure_non_empty_str(self.view_id, "view_id")
         panel_id = _ensure_non_empty_str(self.panel_id, "panel_id")
         source_component = _ensure_non_empty_str(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 
@@ -27,6 +28,9 @@ class RetrievalRuntimeReadonlyBackendAvailability:
     backend_kind: str
     vendor_path: str
     source_present: bool
+    implementation_exists: bool
+    configured: bool
+    available: bool
     usable_now: bool
     selected_tool: str
     fallback_tool: str
@@ -49,6 +53,9 @@ class RetrievalRuntimeReadonlyBackendAvailability:
             raise ValueError(f"unsupported backend_kind: {backend_kind}")
         for field_name in (
             "source_present",
+            "implementation_exists",
+            "configured",
+            "available",
             "usable_now",
             "read_only",
             "direct_execution_allowed",
@@ -61,6 +68,8 @@ class RetrievalRuntimeReadonlyBackendAvailability:
             _require_bool(getattr(self, field_name), field_name)
         if not self.read_only:
             raise ValueError("read_only must be True")
+        if self.usable_now != self.available:
+            raise ValueError("usable_now must match available")
         for field_name in (
             "direct_execution_allowed",
             "canonical_write_allowed",
@@ -82,6 +91,9 @@ class RetrievalRuntimeReadonlyBackendAvailability:
             "backend_kind": self.backend_kind,
             "vendor_path": self.vendor_path,
             "source_present": self.source_present,
+            "implementation_exists": self.implementation_exists,
+            "configured": self.configured,
+            "available": self.available,
             "usable_now": self.usable_now,
             "selected_tool": self.selected_tool,
             "fallback_tool": self.fallback_tool,
@@ -187,14 +199,28 @@ def inspect_mgrep_readonly_availability(project_root: Path) -> RetrievalRuntimeR
     vendor_path = _vendor_path(project_root, "mgrep")
     dist_entry = vendor_path / "dist" / "index.js"
     source_present = (vendor_path / "package.json").is_file() and (vendor_path / "src" / "index.ts").is_file()
-    usable_now = dist_entry.is_file()
-    reason = "ready_dist_index_present" if usable_now else "mgrep source is present but dist/index.js executable package is absent"
+    implementation_exists = dist_entry.is_file()
+    authenticated = bool(os.environ.get("MXBAI_API_KEY", "").strip())
+    # The vendored CLI owns search mechanics, but JARVIS has no canonical
+    # Mixedbread index owner or evidence/receipt bridge yet.  A credential by
+    # itself therefore cannot make this backend executable.
+    configured = False
+    available = False
+    if not implementation_exists:
+        reason = "mgrep source exists but dist/index.js executable package is absent"
+    elif not authenticated:
+        reason = "mgrep implementation exists but MXBAI_API_KEY and an authenticated project index are not configured"
+    else:
+        reason = "mgrep authentication exists but no canonical JARVIS project-index owner or evidence provider is configured"
     return RetrievalRuntimeReadonlyBackendAvailability(
         backend_kind="mgrep",
         vendor_path=str(vendor_path),
         source_present=source_present,
-        usable_now=usable_now,
-        selected_tool="mgrep_readonly" if usable_now else "repo_search",
+        implementation_exists=implementation_exists,
+        configured=configured,
+        available=available,
+        usable_now=available,
+        selected_tool="repo_search",
         fallback_tool="repo_search",
         unavailable_reason=reason,
     )
@@ -204,18 +230,26 @@ def inspect_sqlite_vec_readonly_availability(project_root: Path) -> RetrievalRun
     vendor_path = _vendor_path(project_root, "sqlite-vec")
     loadable_extensions = tuple(vendor_path.rglob("*.so")) + tuple(vendor_path.rglob("*.dylib")) + tuple(vendor_path.rglob("*.dll"))
     source_present = (vendor_path / "sqlite-vec.c").is_file() and (vendor_path / "README.md").is_file()
-    usable_now = bool(loadable_extensions)
+    implementation_exists = bool(loadable_extensions)
+    # A loadable vec0 extension is a library, not a JARVIS retrieval runtime.
+    # No canonical database, index builder, query owner, or evidence provider
+    # exists in the current tree.
+    configured = False
+    available = False
     reason = (
-        "ready_loadable_extension_present"
-        if usable_now
-        else "sqlite-vec source is present but no local loadable extension is available"
+        "sqlite-vec extension exists but no canonical JARVIS vector database, index builder, query owner, or evidence provider exists"
+        if implementation_exists
+        else "sqlite-vec source exists but no local loadable extension or JARVIS vector runtime exists"
     )
     return RetrievalRuntimeReadonlyBackendAvailability(
         backend_kind="sqlite_vec",
         vendor_path=str(vendor_path),
         source_present=source_present,
-        usable_now=usable_now,
-        selected_tool="sqlite_vec_readonly" if usable_now else "repo_search",
+        implementation_exists=implementation_exists,
+        configured=configured,
+        available=available,
+        usable_now=available,
+        selected_tool="repo_search",
         fallback_tool="repo_search",
         unavailable_reason=reason,
     )
@@ -228,6 +262,9 @@ def inspect_qdrant_readonly_availability(project_root: Path) -> RetrievalRuntime
         backend_kind="qdrant",
         vendor_path=str(vendor_path),
         source_present=source_present,
+        implementation_exists=False,
+        configured=False,
+        available=False,
         usable_now=False,
         selected_tool="qdrant_readonly_status",
         fallback_tool="retrieval_backend_status_read_model",

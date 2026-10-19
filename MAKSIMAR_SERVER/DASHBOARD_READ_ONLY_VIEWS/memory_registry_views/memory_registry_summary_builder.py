@@ -51,4 +51,6 @@ def build_memory_registry_view_summary() -> Dict[str, object]:
         "action_exposure_allowed": False,
         "display_orchestration_allowed": False,
         "summary_ready": True,
+        "readiness_scope": "HISTORICAL_METADATA_CONTRACT_PREVIEW",
+        "live_runtime_acceptance": False,
     }

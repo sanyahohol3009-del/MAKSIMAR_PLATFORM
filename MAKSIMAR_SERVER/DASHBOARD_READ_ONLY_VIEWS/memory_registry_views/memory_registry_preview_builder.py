@@ -20,12 +20,23 @@ _MEMORY_REGISTRY_VIEW_FLOW = (
 
 
 def build_memory_registry_view_preview() -> Dict[str, object]:
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import (
+        build_jarvis_live_memory_federation_status,
+    )
+
+    # Runtime truth is supplied by the same existing owner as JARVIS.
+    federation = build_jarvis_live_memory_federation_status()
     summary = build_memory_registry_view_summary()
     panel_contract = build_memory_registry_panel_contract()
     view_contract = build_memory_registry_view_contract()
 
     return {
         "flow": _MEMORY_REGISTRY_VIEW_FLOW,
+        "readiness_scope": summary["readiness_scope"],
+        "live_runtime_acceptance": summary["live_runtime_acceptance"],
+        "overview": federation,
+        "inventory_coverage": federation["inventory_coverage"],
+        "whole_organism_inventory_complete": federation["whole_organism_inventory_complete"],
         "summary_ready": summary["summary_ready"],
         "total_panels": panel_contract.total_panels,
         "ready_panels": panel_contract.ready_panels,

@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from typing import Literal
 
 
+MEMORY_COMPONENT_INVENTORY_SCOPE = "CURRENT_LOCAL_NATIVE_LOGICAL_CLASSIFICATION_NOT_RUNTIME_ACCEPTANCE"
+
+
 GlobalRegistryEntryKind = Literal[
     "module",
     "skill",
@@ -148,3 +151,30 @@ class GlobalRegistryProjectionContract:
         object.__setattr__(self, "dashboard_visible_entries", dashboard_visible_entries)
         object.__setattr__(self, "retrieval_visible_entries", retrieval_visible_entries)
         object.__setattr__(self, "observability_visible_entries", observability_visible_entries)
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryComponentProjection:
+    """Source classification under this existing registry projection owner.
+
+    Component identity is distinct from an enrolled memory tier/surface identity.
+    This metadata cannot establish runtime health, retrieval eligibility or a
+    physical store. Those remain observations from the existing surface owner.
+    """
+
+    component_id: str
+    owner: str
+    classification: str
+    source_path: str
+    source_member_count: int
+
+    def __post_init__(self) -> None:
+        for name in ("component_id", "owner", "source_path"):
+            _ensure_non_empty_str(getattr(self, name), name)
+        if self.classification not in {
+            "CANONICAL_OWNER", "CANONICAL_STORE", "CHILD_BACKEND", "DERIVED_INDEX",
+            "READ_MODEL", "OPTIONAL_PROVIDER", "FEDERATED_SOURCE", "LEGACY",
+            "SUPERSEDED_BY_CANONICAL_OWNER", "DECLARED_NOT_PRESENT",
+        }:
+            raise ValueError("unknown memory component classification")
+        _ensure_non_negative_int(self.source_member_count, "source_member_count")
