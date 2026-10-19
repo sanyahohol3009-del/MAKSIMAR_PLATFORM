@@ -145,7 +145,7 @@ start_oob_dashboard() {
 
 start_runtime() {
   log "starting runtime..."
-  "$TOOLS_DIR/ctl" start
+  "$TOOLS_DIR/ctl" start || return $?
   "$TOOLS_DIR/ctl" status
 }
 
@@ -174,19 +174,19 @@ wait_for_control_plane_health() {
 
 start_guard() {
   log "starting supervisor guard..."
-  "$TOOLS_DIR/guard_ctl" start
+  "$TOOLS_DIR/guard_ctl" start || return $?
   "$TOOLS_DIR/guard_ctl" status
 }
 
 start_core_guard() {
   log "starting core guard..."
-  "$TOOLS_DIR/core_guard_ctl" start
+  "$TOOLS_DIR/core_guard_ctl" start || return $?
   "$TOOLS_DIR/core_guard_ctl" status
 }
 
 start_kernel_watchdog() {
   log "starting kernel watchdog..."
-  "$TOOLS_DIR/kernel_guard_ctl" start
+  "$TOOLS_DIR/kernel_guard_ctl" start || return $?
   "$TOOLS_DIR/kernel_guard_ctl" status
 }
 
