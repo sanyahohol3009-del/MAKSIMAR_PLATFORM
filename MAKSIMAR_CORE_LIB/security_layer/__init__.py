@@ -20,4 +20,13 @@ __all__ = [
     "SECURITY_LAYER_CANONICAL_WRITE_ALLOWED",
     "SECURITY_LAYER_DIRECT_EXECUTION_ALLOWED",
     "SECURITY_LAYER_DASHBOARD_MUTATION_ALLOWED",
+    "PendingApproval",
+    "HostApprovalStore",
+    "CANONICAL_HOST_APPROVAL_STORE",
 ]
+
+from .host_approval_handshake import (
+    CANONICAL_HOST_APPROVAL_STORE,
+    HostApprovalStore,
+    PendingApproval,
+)
