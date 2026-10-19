@@ -16,4 +16,4 @@ echo "[START] $(date -Is) Starting MAKSIMAR" | tee -a "$SYSLOG"
 python3 BOOT/system_bootstrap.py 2>&1 | tee -a "$SYSLOG"
 
 # 2) Start the existing canonical runtime lifecycle and its owned dashboards.
-exec "$ROOT/tools/work"
+exec "$ROOT/tools/work" "$@"
