@@ -73,20 +73,14 @@ session_exists() {
 }
 
 remove_disposable_runtime_artifacts() {
-  log "removing disposable runtime artifacts"
+  # Historical receipts are preserved/reconciled only by canonical preflight.
   mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
-
-  rm -f \
-    "$RUNTIME_HEARTBEAT_FILE" \
-    "$GUARD_HEARTBEAT_FILE" \
-    "$CORE_GUARD_HEARTBEAT_FILE" \
-    "$KERNEL_HEARTBEAT_FILE"
 }
 
 run_preflight() {
   log "running runtime preflight"
   PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
-    "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" || return 1
+    "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" --prepare-clean-start || return 1
 
   if [[ ! -f "$PREFLIGHT_RESULT_FILE" ]]; then
     log "preflight result file not found: $PREFLIGHT_RESULT_FILE"
@@ -139,9 +133,13 @@ PY
 }
 
 start_oob_dashboard() {
+  (
+  exec 8>&-
+  unset MAKSIMAR_STARTUP_FD
   log "starting independent OOB dashboard first..."
   "$TOOLS_DIR/oob_dashboard_ctl" start || true
   "$TOOLS_DIR/oob_dashboard_ctl" status || true
+  )
 }
 
 start_runtime() {
@@ -209,9 +207,13 @@ wait_for_guard_chain() {
 }
 
 open_dashboard_windows() {
+  (
+  exec 8>&-
+  unset MAKSIMAR_STARTUP_FD
   log "opening session-bound dashboard windows after sessions exist..."
   "$TOOLS_DIR/dashboards_open" || return 1
   "$TOOLS_DIR/dashboard" status || true
+  )
 }
 
 register_dashboard_ownership() {
@@ -225,6 +227,9 @@ register_dashboard_ownership() {
 }
 
 create_runtime_dashboard_session() {
+  (
+  exec 8>&-
+  unset MAKSIMAR_STARTUP_FD
   log "creating runtime-owned dashboard session..."
 
   if session_exists "$DASHBOARD_SESSION"; then
@@ -258,6 +263,7 @@ create_runtime_dashboard_session() {
   register_dashboard_ownership
 
   log "runtime dashboard session ready"
+  )
 }
 
 print_truth_summary() {
@@ -287,6 +293,12 @@ main() {
     log "model-free startup: launcher warmup disabled"
   fi
 
+  mkdir -p "$RUNTIME_STATE_DIR"
+  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
+    exec 8>>"$RUNTIME_STATE_DIR/startup_reservation.lock"
+    flock -n 8 || { log "another canonical startup owns the reservation"; return 1; }
+    export MAKSIMAR_STARTUP_FD=8
+  fi
   mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
 
   if ! run_preflight; then
@@ -309,7 +321,7 @@ main() {
   create_runtime_dashboard_session || abort "runtime dashboard session failed"
 
   # open visibility immediately
-  "$TOOLS_DIR/ui_open" || true
+  ( exec 8>&-; unset MAKSIMAR_STARTUP_FD; "$TOOLS_DIR/ui_open" ) || true
 
   start_runtime || abort "runtime start failed"
   wait_for_runtime_readiness || abort "runtime readiness timeout"

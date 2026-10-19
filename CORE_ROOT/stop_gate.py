@@ -22,9 +22,11 @@ from CORE_ROOT.runtime_paths import (
 @contextmanager
 def _transition_lock():
     ensure_runtime_layout()
-    with (RUNTIME_STATE_DIR / "stop_gate_transition.lock").open("a") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        yield
+    from CORE_ROOT.run_context import runtime_mutation
+    with runtime_mutation():
+        with (RUNTIME_STATE_DIR / "stop_gate_transition.lock").open("a") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            yield
 
 
 def recover_previous_run_degradation() -> bool:

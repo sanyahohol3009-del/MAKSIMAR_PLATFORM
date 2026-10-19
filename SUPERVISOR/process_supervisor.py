@@ -147,13 +147,14 @@ def main() -> None:
             run_context.initialize_run_metadata()
             initialized = True
             # The same existing hint marks the actual run boundary for StopGate epochs.
-            pidfile = ROOT / "RUNTIME/runtime.pid"
-            temporary = pidfile.with_suffix(".pid.tmp")
-            with temporary.open("w") as handle:
-                handle.write(str(os.getpid()) + "\n")
-                handle.flush()
-                os.fsync(handle.fileno())
-            temporary.replace(pidfile)
+            with run_context.runtime_mutation():
+                pidfile = ROOT / "RUNTIME/runtime.pid"
+                temporary = pidfile.with_suffix(".pid.tmp")
+                with temporary.open("w") as handle:
+                    handle.write(str(os.getpid()) + "\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                temporary.replace(pidfile)
             while not stop_requested:
                 run_context.initialize_run_metadata()  # idempotent identity fence
                 cmd = build_command()

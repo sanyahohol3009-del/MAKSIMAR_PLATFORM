@@ -46,7 +46,7 @@ def run_lifecycle():
     if _writer_pid is not None:
         raise RuntimeError("run lifecycle writer already active")
     ensure_runtime_layout()
-    with (RUNTIME_STATE_DIR / "run_lifecycle.lock").open("a") as lease:
+    with os.fdopen(_coordination_fd(RUNTIME_STATE_DIR / "run_lifecycle.lock"), "a") as lease:
         fcntl.flock(lease.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         from CORE_ROOT.heartbeat_io import heartbeat_process_alive, _process_start_ticks
         from pathlib import Path
@@ -284,3 +284,111 @@ def run_status(payload: dict[str, Any] | None) -> str | None:
 
     value = value.strip().lower()
     return value or None
+
+
+# Canonical coordination only: these lock files carry no runtime truth.
+# Order: startup reservation -> brief prestart lifecycle lease -> mutation ->
+# StopGate transition. The normal supervisor retains only its lifetime lease.
+import threading as _threading
+_mutation_local = _threading.local()
+_mutation_threads = _threading.RLock()
+_mutation_process = os.getpid()
+_mutation_fd = None
+
+
+@contextmanager
+def runtime_mutation(*, blocking=True):
+    """Short cross-process writer exclusion; never the supervisor lifetime lock."""
+    global _mutation_local, _mutation_threads, _mutation_process, _mutation_fd
+    if _mutation_process != os.getpid():
+        if _mutation_fd is not None:
+            os.close(_mutation_fd)  # close child copy, never unlock parent's lease
+        _mutation_fd = None
+        _mutation_local = _threading.local()
+        _mutation_threads = _threading.RLock()
+        _mutation_process = os.getpid()
+    if not _mutation_threads.acquire(blocking=blocking):
+        raise BlockingIOError("runtime mutation thread already active")
+    try:
+        if getattr(_mutation_local, "depth", 0):
+            _mutation_local.depth += 1
+            try:
+                yield
+            finally:
+                _mutation_local.depth -= 1
+            return
+        RUNTIME_STATE_DIR.mkdir(parents=True, exist_ok=True)
+        path = RUNTIME_STATE_DIR / "runtime_mutation.lock"
+        fd = _coordination_fd(path)
+        _mutation_fd = fd
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
+            _mutation_local.depth = 1
+            try:
+                yield
+            finally:
+                _mutation_local.depth = 0
+        finally:
+            _mutation_fd = None
+            os.close(fd)
+    finally:
+        _mutation_threads.release()
+
+
+@contextmanager
+def startup_reservation():
+    """Serialize WORK/ctl startup, borrowing only a verified inherited lock FD."""
+    RUNTIME_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    path = RUNTIME_STATE_DIR / "startup_reservation.lock"
+    inherited = os.environ.get("MAKSIMAR_STARTUP_FD")
+    borrowed = inherited is not None
+    if borrowed:
+        fd = int(inherited)
+        if fd < 3:
+            raise RuntimeError("invalid startup reservation descriptor")
+        identity = os.fstat(fd)
+        current = os.stat(path, follow_symlinks=False)
+        if (identity.st_dev, identity.st_ino) != (current.st_dev, current.st_ino):
+            raise RuntimeError("startup reservation descriptor does not match canonical inode")
+    else:
+        fd = _coordination_fd(path)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        yield
+    finally:
+        # A borrowed descriptor belongs to the outer WORK shell; never unlock it.
+        if not borrowed:
+            os.close(fd)
+
+
+@contextmanager
+def prestart_mutation():
+    """Non-writer prestart scope; never assigns run identity or writer authority."""
+    if _writer_pid is not None:
+        raise RuntimeError("prestart reconciliation cannot run inside a supervisor writer")
+    with startup_reservation():
+        lease_path = RUNTIME_STATE_DIR / "run_lifecycle.lock"
+        fd = _coordination_fd(lease_path)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with runtime_mutation(blocking=False):
+                yield
+        finally:
+            os.close(fd)
+
+
+def _coordination_fd(path):
+    import stat
+    parent = path.parent.lstat()
+    if not stat.S_ISDIR(parent.st_mode) or parent.st_uid != os.getuid() or parent.st_mode & 0o022:
+        raise RuntimeError("canonical coordination directory is unsafe")
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+    try:
+        opened, current = os.fstat(fd), os.stat(path, follow_symlinks=False)
+        if (not stat.S_ISREG(opened.st_mode) or opened.st_uid != os.getuid()
+                or (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino)):
+            raise RuntimeError("canonical coordination inode is unsafe or replaced")
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise

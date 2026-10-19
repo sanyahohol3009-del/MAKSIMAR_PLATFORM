@@ -168,21 +168,28 @@ normalized_state() {
 }
 
 write_pid_file() {
-  local pid=""
-  pid="$(find_runtime_pid || true)"
-  mkdir -p "$RUNTIME_DIR"
-  if [[ -n "${pid:-}" ]]; then
-    if [[ ! -f "$PID_FILE" ]] || [[ "$(cat "$PID_FILE")" != "$pid" ]]; then
-      printf '%s\n' "$pid" > "$PID_FILE"
-    fi
-  fi
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$PID_FILE" "SUPERVISOR.process_supervisor" <<'PY'
+import sys
+from CORE_ROOT.heartbeat_io import write_owned_pid_hint
+write_owned_pid_hint(sys.argv[1], sys.argv[2])
+PY
 }
 
 remove_pid_file() {
-  rm -f "$PID_FILE"
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$PID_FILE" "SUPERVISOR.process_supervisor" <<'PY'
+import sys
+from CORE_ROOT.heartbeat_io import remove_stopped_pid_hint
+remove_stopped_pid_hint(sys.argv[1])
+PY
 }
 
 start() {
+  mkdir -p "$RUNTIME_STATE_DIR"
+  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
+    exec 8>>"$RUNTIME_STATE_DIR/startup_reservation.lock"
+    flock -n 8 || { log "another canonical startup owns the reservation"; return 1; }
+    export MAKSIMAR_STARTUP_FD=8
+  fi
   if runtime_truth; then
     # Reconcile owned PID metadata after a delayed supervisor startup.
     write_pid_file
@@ -202,13 +209,20 @@ start() {
     return 1
   fi
 
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" --prepare-clean-start || return 1
   remove_pid_file
   mkdir -p "$RUNTIME_DIR" "$RUNTIME_STATE_DIR" "$(dirname "$LOG_FILE")"
 
   log "starting runtime tmux session: $SESSION_NAME"
-  tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
-  tmux send-keys -t "$SESSION_NAME" \
-    "cd '$ROOT' && '$CANONICAL_PYTHON' -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" C-m
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$SESSION_NAME" "$ROOT" "cd '$ROOT' && '$CANONICAL_PYTHON' -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" <<'PY'
+import os, subprocess, sys
+from CORE_ROOT.run_context import runtime_mutation
+env = dict(os.environ)
+env.pop("MAKSIMAR_STARTUP_FD", None)
+with runtime_mutation():
+    subprocess.run(["tmux", "new-session", "-d", "-s", sys.argv[1], "-c", sys.argv[2]], check=True, close_fds=True, env=env)
+    subprocess.run(["tmux", "send-keys", "-t", sys.argv[1], sys.argv[3], "C-m"], check=True, close_fds=True, env=env)
+PY
 
   sleep 2
   write_pid_file
@@ -258,7 +272,8 @@ if not owned:
         except (OSError, ValueError):
             hinted = None
         if hinted is not None and hinted > 0 and _runtime_pid_identity(hinted).get("alive") is False:
-            path.unlink()
+            from CORE_ROOT.heartbeat_io import remove_stopped_pid_hint
+            remove_stopped_pid_hint(path)
     raise SystemExit(0)
 pid = owned[0]
 identity = {"pid": pid, "process_start_ticks": _process_start_ticks(Path("/proc") / str(pid))}
@@ -272,7 +287,8 @@ try:
         signal.pidfd_send_signal(fd, signal.SIGKILL)
         raise SystemExit("runtime stop forced; orderly shutdown not proven")
     if path.is_file() and path.read_text().strip() == str(pid):
-        path.unlink()
+        from CORE_ROOT.heartbeat_io import remove_stopped_pid_hint
+        remove_stopped_pid_hint(path)
 finally:
     os.close(fd)
 PY

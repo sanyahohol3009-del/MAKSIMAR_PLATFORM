@@ -26,25 +26,27 @@ def atomic_write_json(path: os.PathLike[str] | str, payload: dict[str, Any]) -> 
         path: Destination file path.
         payload: JSON-serializable payload.
     """
-    ensure_runtime_layout()
+    from CORE_ROOT.run_context import runtime_mutation
+    with runtime_mutation():
+        ensure_runtime_layout()
 
-    path_str = os.fspath(path)
-    target_dir = os.path.dirname(path_str) or "."
+        path_str = os.fspath(path)
+        target_dir = os.path.dirname(path_str) or "."
 
-    fd, temp_path = tempfile.mkstemp(prefix=".tmp_", suffix=".json", dir=target_dir)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as file_obj:
-            json.dump(payload, file_obj, ensure_ascii=False, separators=(",", ":"))
-            file_obj.flush()
-            os.fsync(file_obj.fileno())
-
-        os.replace(temp_path, path_str)
-    except Exception:
+        fd, temp_path = tempfile.mkstemp(prefix=".tmp_", suffix=".json", dir=target_dir)
         try:
-            os.unlink(temp_path)
-        except OSError:
-            pass
-        raise
+            with os.fdopen(fd, "w", encoding="utf-8") as file_obj:
+                json.dump(payload, file_obj, ensure_ascii=False, separators=(",", ":"))
+                file_obj.flush()
+                os.fsync(file_obj.fileno())
+
+            os.replace(temp_path, path_str)
+        except Exception:
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            raise
 
 
 def safe_read_json(path: os.PathLike[str] | str) -> dict[str, Any] | None:
@@ -283,3 +285,45 @@ def find_owned_module_process_pid(expected_module: str, *, pidfile: Path | None 
     """Preserve the existing exact-one PID discovery contract for CLI callers."""
     owned = find_owned_module_process_pids(expected_module, pidfile=pidfile, proc_root=proc_root)
     return owned[0] if owned is not None and len(owned) == 1 else None
+
+
+def write_owned_pid_hint(path, module):
+    """Publish a verified single owner hint without changing an identical hint."""
+    from CORE_ROOT.run_context import runtime_mutation
+    with runtime_mutation():
+        pids = find_owned_module_process_pids(module)
+        if pids is None or len(pids) > 1:
+            raise RuntimeError("PID hint identity unknown or ambiguous")
+        if not pids:
+            return
+        path = Path(path)
+        if path.is_symlink():
+            raise RuntimeError("PID hint symlink refused")
+        text = str(pids[0]) + "\n"
+        if path.is_file() and path.read_text().strip() == str(pids[0]):
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(prefix=".pid_", dir=path.parent)
+        try:
+            with os.fdopen(fd, "w") as handle:
+                handle.write(text); handle.flush(); os.fsync(handle.fileno())
+            os.replace(temporary, path)
+        except BaseException:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+            raise
+
+
+def remove_stopped_pid_hint(path, *, proc_root=Path("/proc")):
+    """Remove only an absent process hint; unknown/live/foreign hints are retained."""
+    from CORE_ROOT.run_context import runtime_mutation
+    with runtime_mutation():
+        path = Path(path)
+        if not path.exists():
+            return
+        if path.is_symlink():
+            raise RuntimeError("PID hint symlink refused")
+        pid = int(path.read_text().strip())
+        if pid <= 0 or (proc_root / str(pid)).exists():
+            raise RuntimeError("PID hint process not proven absent")
+        path.unlink()

@@ -24,16 +24,9 @@ session_exists() {
 }
 
 remove_stale_state_files() {
-  log "removing stale state files"
-  rm -f \
-    "$RUNTIME_HEARTBEAT_FILE" \
-    "$GUARD_HEARTBEAT_FILE" \
-    "$CORE_GUARD_HEARTBEAT_FILE" \
-    "$KERNEL_HEARTBEAT_FILE" \
-    "$PREFLIGHT_RESULT_FILE" \
-    "$RUNTIME_STATE_DIR/model_readiness.json"
-
-  rm -f "$RUNTIME_STATE_DIR"/.tmp_*.json 2>/dev/null || true
+  # Leave receipts/temporary evidence intact. Next canonical pre-start owns
+  # verified archival/reconciliation; STOP is not a stale cleanup authority.
+  log "retaining runtime receipts and temporary evidence for canonical pre-start"
 }
 
 close_dashboard_windows() {

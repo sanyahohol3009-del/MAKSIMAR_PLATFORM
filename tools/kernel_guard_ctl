@@ -119,16 +119,19 @@ normalized_state() {
 }
 
 write_pid_file() {
-  local pid
-  pid="$(find_pid || true)"
-  mkdir -p "$ROOT/RUNTIME"
-  if [[ -n "${pid:-}" ]]; then
-    printf '%s\n' "$pid" > "$PID_FILE"
-  fi
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$PID_FILE" "CORE_ROOT.kernel_watchdog" <<'PY'
+import sys
+from CORE_ROOT.heartbeat_io import write_owned_pid_hint
+write_owned_pid_hint(sys.argv[1], sys.argv[2])
+PY
 }
 
 remove_pid_file() {
-  rm -f "$PID_FILE"
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$PID_FILE" "CORE_ROOT.kernel_watchdog" <<'PY'
+import sys
+from CORE_ROOT.heartbeat_io import remove_stopped_pid_hint
+remove_stopped_pid_hint(sys.argv[1])
+PY
 }
 
 start() {
@@ -139,17 +142,23 @@ start() {
   fi
 
   if session_exists; then
-    log "removing stale tmux session: $SESSION_NAME"
-    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+    log "existing guard session has no proven healthy owner; refusing replacement"
+    return 1
   fi
 
   remove_pid_file
   mkdir -p "$ROOT/RUNTIME" "$ROOT/RUNTIME/state" "$(dirname "$LOG_FILE")"
 
   log "starting kernel watchdog tmux session: $SESSION_NAME"
-  tmux new-session -d -s "$SESSION_NAME" -c "$ROOT"
-  tmux send-keys -t "$SESSION_NAME" \
-    "cd '$ROOT' && python3 -m CORE_ROOT.kernel_watchdog 2>&1 | tee -a '$LOG_FILE'" C-m
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$SESSION_NAME" "$ROOT" "cd '$ROOT' && python3 -m CORE_ROOT.kernel_watchdog 2>&1 | tee -a '$LOG_FILE'" <<'PY'
+import os, subprocess, sys
+from CORE_ROOT.run_context import runtime_mutation
+env = dict(os.environ)
+env.pop("MAKSIMAR_STARTUP_FD", None)
+with runtime_mutation():
+    subprocess.run(["tmux", "new-session", "-d", "-s", sys.argv[1], "-c", sys.argv[2]], check=True, close_fds=True, env=env)
+    subprocess.run(["tmux", "send-keys", "-t", sys.argv[1], sys.argv[3], "C-m"], check=True, close_fds=True, env=env)
+PY
 
   sleep 2
   write_pid_file

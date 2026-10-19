@@ -104,14 +104,16 @@ def log(message: str) -> None:
 
 def write_report(report: PreflightReport) -> None:
     """Write preflight report to JSON."""
-    ensure_runtime_layout()
-    temp_path = PREFLIGHT_RESULT_FILE.with_suffix(".json.tmp")
-    payload = asdict(report)
-    with temp_path.open("w", encoding="utf-8") as file_obj:
-        json.dump(payload, file_obj, ensure_ascii=False, indent=2, sort_keys=True)
-        file_obj.flush()
-        os.fsync(file_obj.fileno())
-    temp_path.replace(PREFLIGHT_RESULT_FILE)
+    from CORE_ROOT.run_context import runtime_mutation
+    with runtime_mutation():
+        ensure_runtime_layout()
+        temp_path = PREFLIGHT_RESULT_FILE.with_suffix(".json.tmp")
+        payload = asdict(report)
+        with temp_path.open("w", encoding="utf-8") as file_obj:
+            json.dump(payload, file_obj, ensure_ascii=False, indent=2, sort_keys=True)
+            file_obj.flush()
+            os.fsync(file_obj.fileno())
+        temp_path.replace(PREFLIGHT_RESULT_FILE)
 
 
 def _finite_number(value: Any) -> bool:
@@ -623,6 +625,177 @@ def run_preflight() -> PreflightReport:
     )
 
 
+
+def _prestart_owned_processes():
+    from CORE_ROOT.heartbeat_io import find_owned_module_process_pids
+    modules = [v[1] for v in EXPECTED_HEARTBEATS.values()] + ["uvicorn"]
+    return {module: find_owned_module_process_pids(module) for module in modules}
+
+
+def _prestart_receipt_paths():
+    return {
+        "runtime": (RUNTIME_PID_FILE, RUNTIME_HEARTBEAT_FILE),
+        "guard": (ROOT / "RUNTIME/guard.pid", GUARD_HEARTBEAT_FILE),
+        "core_guard": (ROOT / "RUNTIME/core_guard.pid", CORE_GUARD_HEARTBEAT_FILE),
+        "kernel_guard": (ROOT / "RUNTIME/kernel_guard.pid", KERNEL_HEARTBEAT_FILE),
+    }
+
+
+def _require_absent_prestart_owners(observation, historical_pids):
+    if observation["tmux"].get("available") is not True or observation["tmux"].get("error") or observation["tmux"].get("sessions"):
+        raise RuntimeError("prestart session ownership not proven empty")
+    port = observation["port"]
+    if port.get("listening") is not False or port.get("error") or port.get("owner_pids") or port.get("owner_identities"):
+        raise RuntimeError("prestart API port not proven free")
+    if observation["health"].get("ok"):
+        raise RuntimeError("prestart unexpected live API")
+    if any(value != () for value in _prestart_owned_processes().values()):
+        raise RuntimeError("prestart owned processes live or unknown")
+    for pid in historical_pids:
+        if _process_identity(pid).get("alive") is not False:
+            raise RuntimeError("prestart historical PID became live or unknown")
+
+
+def _require_historical_stale(observation, paths):
+    """Eligibility is independent from healthy and requires absent actual owners."""
+    _require_absent_prestart_owners(observation, [])
+    meta = observation.get("run_metadata")
+    identities = []
+    pids = []
+    for scope, (hint, receipt) in paths.items():
+        payload = safe_read_json(receipt)
+        if not isinstance(payload, dict) or payload.get("schema_version") != 1 or type(payload.get("schema_version")) is not int:
+            raise RuntimeError("prestart mandatory receipt missing or corrupt")
+        pid = payload.get("pid"); ticks = payload.get("process_start_ticks")
+        if type(pid) is not int or pid <= 0 or not isinstance(ticks, str) or not ticks.isdecimal():
+            raise RuntimeError("prestart receipt process identity missing")
+        if payload.get("source") != EXPECTED_HEARTBEATS[scope][0] or payload.get("status") not in {"alive", "stopped", "broken", "booting"}:
+            raise RuntimeError("prestart receipt owner/status mismatch")
+        ts = payload.get("ts")
+        if not _finite_number(payload.get("monotonic_ts")) or payload["monotonic_ts"] < 0:
+            raise RuntimeError("prestart receipt monotonic evidence missing")
+        if not _finite_number(ts) or not 0 <= ts <= observation["observed_wall_time"]:
+            raise RuntimeError("prestart receipt wall clock invalid")
+        if payload["status"] != "stopped" and observation["observed_wall_time"] - ts <= HEARTBEAT_MAX_AGE_SECONDS:
+            raise RuntimeError("prestart receipt is not historical")
+        if meta is not None and (not isinstance(meta, dict)
+                or not _finite_number(meta.get("wall_time")) or not _finite_number(meta.get("monotonic_time"))
+                or payload["ts"] < meta["wall_time"] or payload["monotonic_ts"] < meta["monotonic_time"]):
+            raise RuntimeError("prestart receipt epoch precedes historical run")
+        if _process_identity(pid).get("alive") is not False:
+            raise RuntimeError("prestart PID live, foreign, reused or unreadable")
+        if hint.exists():
+            if hint.is_symlink() or int(hint.read_text().strip()) != pid:
+                raise RuntimeError("prestart PID hint/receipt mismatch")
+        identities.append((payload.get("run_id"), payload.get("boot_id"), payload.get("run_monotonic_time")))
+        pids.append(pid)
+    if len(set(pids)) != len(paths) or any(i != identities[0] for i in identities):
+        raise RuntimeError("prestart duplicate PID or historical epoch mismatch")
+    historical = identities[0]
+    if RUN_METADATA_FILE.exists() and meta is None:
+        raise RuntimeError("prestart run metadata unreadable or corrupt")
+    if meta is not None and (meta.get("schema_version") != 1 or type(meta.get("schema_version")) is not int
+            or meta.get("status") not in {"booting", "running", "degraded", "maintenance", "shutdown", "crashed"}
+            or not _finite_number(meta.get("wall_time")) or not 0 <= meta["wall_time"] <= observation["observed_wall_time"]
+            or not _finite_number(meta.get("monotonic_time")) or meta["monotonic_time"] < 0):
+        raise RuntimeError("prestart run metadata shape invalid")
+    if meta is None:
+        if historical != (None, None, None):
+            raise RuntimeError("prestart run identity has no matching metadata")
+    elif (not isinstance(meta, dict) or historical != (meta.get("run_id"), meta.get("boot_id"), meta.get("monotonic_time"))
+          or not all(isinstance(meta.get(k), str) and meta[k] for k in ("run_id", "boot_id"))):
+        raise RuntimeError("prestart historical run metadata mismatch")
+
+
+def prepare_clean_start():
+    """Archive/reconcile historical receipts under existing lifecycle coordination."""
+    from CORE_ROOT import run_context, incident_history
+    from CORE_ROOT import runtime_paths
+    removed = []
+    archive = None
+    try:
+        first = inspect_runtime_state()
+        if first["decision"].get("healthy") is True:
+            return {"status": "ALREADY_HEALTHY", "reconciled": False}
+        with run_context.prestart_mutation():
+            observation = inspect_runtime_state()
+            paths = _prestart_receipt_paths()
+            disposable = [p for pair in paths.values() for p in pair]
+            if any(p.is_symlink() for p in disposable + [RUN_METADATA_FILE]):
+                raise RuntimeError("prestart symlink evidence refused")
+            if not any(p.exists() for p in disposable):
+                if observation["decision"].get("clean") is not True or any(v != () for v in _prestart_owned_processes().values()):
+                    raise RuntimeError("prestart clean observation not proven")
+                if RUN_METADATA_FILE.exists() and observation.get("run_metadata") is None:
+                    raise RuntimeError("prestart existing metadata is unreadable")
+                overwritten = [RUN_METADATA_FILE, PREFLIGHT_RESULT_FILE,
+                    RUNTIME_STATE_DIR / "model_readiness.json", runtime_paths.DIAGNOSTICS_DB_FILE]
+                if any(p.is_symlink() for p in overwritten):
+                    raise RuntimeError("prestart status metadata symlink refused")
+                selected = [p for p in overwritten if p.exists()]
+                if selected:
+                    identities = {str(p.absolute()): incident_history._evidence_file_identity(p) for p in selected}
+                    if any(v["st_uid"] != os.getuid() or v["st_mode"] & 0o022 for v in identities.values()):
+                        raise RuntimeError("prestart status metadata owner/permissions are not trusted")
+                    archived = incident_history.preserve_runtime_evidence(selected,
+                        archive_root=RUNTIME_STATE_DIR / "incident_evidence", expected_identities=identities,
+                        reuse_verified=True)
+                    return {"status": "CLEAN", "reconciled": False, "archive_path": archived["archive_path"]}
+                return {"status": "CLEAN", "reconciled": False}
+            _require_historical_stale(observation, paths)
+            selected = [p for p in disposable if p.exists()]
+            preserved = [RUN_METADATA_FILE, runtime_paths.DEGRADED_MODE_FILE,
+                runtime_paths.STOP_GATE_TRIGGER_FILE, runtime_paths.LAST_DEGRADED_REASON_FILE,
+                runtime_paths.INCIDENT_HISTORY_FILE, runtime_paths.INCIDENT_SNAPSHOT_FILE,
+                PREFLIGHT_RESULT_FILE, RUNTIME_STATE_DIR / "model_readiness.json", runtime_paths.DIAGNOSTICS_DB_FILE]
+            selected += [p for p in preserved if p.exists() and p not in selected]
+            identities = {str(p.absolute()): incident_history._evidence_file_identity(p) for p in selected}
+            if any(v["st_uid"] != os.getuid() or v["st_mode"] & 0o022 for v in identities.values()):
+                raise RuntimeError("prestart evidence owner/permissions are not trusted")
+            historical_pids = [safe_read_json(receipt)["pid"] for _, receipt in paths.values()]
+            archive = incident_history.preserve_runtime_evidence(selected,
+                archive_root=RUNTIME_STATE_DIR / "incident_evidence", expected_identities=identities)
+            _require_historical_stale(inspect_runtime_state(), paths)
+            if any(incident_history._evidence_file_identity(p) != identities[str(p.absolute())] for p in selected):
+                raise RuntimeError("prestart originals changed after archive")
+            try:
+                for path in disposable:
+                    if not path.exists():
+                        continue
+                    _require_absent_prestart_owners(inspect_runtime_state(), historical_pids)
+                    if incident_history._evidence_file_identity(path) != identities[str(path.absolute())]:
+                        raise RuntimeError("prestart file identity changed before effect")
+                    path.unlink()
+                    removed.append(path)
+                for parent in {p.parent for p in removed}:
+                    incident_history._fsync_evidence_directory(parent)
+                final = inspect_runtime_state()
+                if final["decision"].get("clean") is not True or final["decision"].get("healthy") is True or any(v != () for v in _prestart_owned_processes().values()):
+                    raise RuntimeError("prestart clean eligibility changed after reconciliation")
+            except BaseException:
+                # Restore only missing paths, never overwrite a changed writer.
+                entries = {item["origin"]: item for item in archive["manifest"]["originals"]}
+                for path in removed:
+                    if path.exists():
+                        continue
+                    item = entries[str(path.absolute())]
+                    source = Path(archive["archive_path"]) / item["archive_file"]
+                    with source.open("rb") as inp, path.open("xb") as out:
+                        while block := inp.read(1024 * 1024):
+                            out.write(block)
+                        out.flush(); os.fsync(out.fileno())
+                    os.chmod(path, item["identity"]["st_mode"] & 0o777)
+                    os.utime(path, ns=(item["identity"]["st_mtime_ns"],) * 2)
+                    incident_history._fsync_evidence_directory(path.parent)
+                raise
+            return {"status": "RECONCILED", "reconciled": True,
+                    "archive_path": archive["archive_path"], "healthy": False,
+                    "removed": [str(p) for p in removed]}
+    except (OSError, ValueError, RuntimeError, TypeError) as exc:
+        return {"status": "HOLD", "reconciled": False, "healthy": False,
+                "error": type(exc).__name__ + ":" + str(exc),
+                "archive_path": archive["archive_path"] if archive else None}
+
 def main() -> None:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description="Run runtime preflight validation.")
@@ -631,11 +804,22 @@ def main() -> None:
         action="store_true",
         help="Exit non-zero if stale runtime artifacts are present.",
     )
+    parser.add_argument("--prepare-clean-start", action="store_true", help="Preserve and reconcile proven historical receipts under canonical coordination.")
     args = parser.parse_args()
 
     ensure_runtime_layout()
+    preparation = prepare_clean_start() if args.prepare_clean_start else None
     report = run_preflight()
-    write_report(report)
+    if preparation is not None:
+        from dataclasses import replace
+        report.details["prestart_reconciliation"] = preparation
+        if preparation["status"] == "HOLD":
+            report = replace(report, ok=False)
+    if preparation is None or preparation["status"] != "HOLD":
+        write_report(report)
+    else:
+        # A failed preservation/reconciliation must not overwrite raw diagnostics.
+        log("prestart HOLD: " + preparation.get("error", "eligibility not proven"))
 
     log(f"preflight ok={report.ok}")
     log(
