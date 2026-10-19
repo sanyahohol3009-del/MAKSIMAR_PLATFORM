@@ -1,0 +1,193 @@
+{
+  "schema_version": "capability_manifest.v2",
+  "id": "project.read",
+  "version": "2.0.0",
+  "purpose": "Read-only evidence collection about the local project",
+  "description": "Project worktree, Git, changed-file and diff EvidenceBundle only; never produces a user-visible response.",
+  "public_operations": [
+    "inspect_git_status",
+    "inspect_changed_files",
+    "inspect_diff_summary",
+    "inspect_structure",
+    "search",
+    "inspect_dependencies",
+    "inspect_imports",
+    "inspect_tests",
+    "inspect_coverage",
+    "inspect_architecture"
+  ],
+  "operation_contracts": [
+    {
+      "operation_id": "inspect_git_status",
+      "description": "Observe the current Git branch and worktree/index state.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "git_status"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_changed_files",
+      "description": "List modified, deleted, untracked and staged files.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "changed_files"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_diff_summary",
+      "description": "Observe bounded worktree and staged diff summaries.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "diff_summary"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_structure",
+      "description": "Observe bounded repository structure.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_structure"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "search",
+      "description": "Search repository text for evidence relevant to a goal.",
+      "required_parameters": [
+        "query"
+      ],
+      "evidence_kinds": [
+        "search"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_dependencies",
+      "description": "Observe declared dependency manifests.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_dependencies"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_imports",
+      "description": "Observe source import relationships.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_imports"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_tests",
+      "description": "Observe existing test-result evidence.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_tests"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_coverage",
+      "description": "Observe existing coverage evidence.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_coverage"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    },
+    {
+      "operation_id": "inspect_architecture",
+      "description": "Inspect architecture conformance and import-direction violations from the existing report. This checks structural compliance; it does not retrieve a named source document, its contents, file SHA or indexed-source freshness.",
+      "required_parameters": [],
+      "evidence_kinds": [
+        "inspect_architecture"
+      ],
+      "effect_type": "OBSERVE",
+      "target_scope": "local_project_worktree",
+      "reversibility": "REVERSIBLE",
+      "external_side_effect": false,
+      "risk_class": "READ_ONLY"
+    }
+  ],
+  "input_schema": "request_understanding.v2+execution_plan.v1",
+  "output_schema": "evidence_bundle.v1",
+  "risk_class": "READ_ONLY",
+  "permissions": [
+    "filesystem.read",
+    "git.read"
+  ],
+  "provider": "existing_project_workspace_tools",
+  "healthcheck": "ProjectUnderstandingPort.health",
+  "timeout_policy": {
+    "operation_seconds": 8.0
+  },
+  "network_policy": "DENY",
+  "filesystem_policy": "READ_ONLY",
+  "exclusions": [
+    ".git",
+    ".venv",
+    ".runtime",
+    ".codex",
+    "RUNTIME/audits",
+    "RUNTIME/deleted_live_track_archive",
+    "htmlcov",
+    "node_modules",
+    "build",
+    "dist",
+    "EXTERNAL_BACKENDS/vendor_quarantine",
+    "generated/cache",
+    "runtime_history_store"
+  ],
+  "degradation_state": "conversation_continues",
+  "examples": [
+    "semantic inspection of project state",
+    "evidence-backed dependency analysis"
+  ],
+  "non_examples": [
+    "filesystem mutation",
+    "process control",
+    "network export",
+    "canonical memory write"
+  ]
+}

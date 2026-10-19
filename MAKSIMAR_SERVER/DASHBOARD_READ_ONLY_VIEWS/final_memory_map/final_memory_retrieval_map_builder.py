@@ -10,12 +10,13 @@ from MAKSIMAR_SERVER.DASHBOARD_READ_ONLY_VIEWS.final_memory_map.final_memory_gra
 def build_final_memory_retrieval_map() -> Dict[str, object]:
     graph = build_final_memory_graph()
 
-    retrieval_sources: Tuple[str, ...] = tuple(node.node_id for node in graph.nodes if node.node_id != "final_memory_dashboard")
+    retrieval_sources: Tuple[str, ...] = graph.registered_surface_ids
 
     return {
         "retrieval_map_id": "final_memory_retrieval_map_001",
         "retrieval_sources": retrieval_sources,
         "retrieval_source_count": len(retrieval_sources),
+        "retrieval_source_count_basis": "REGISTERED_SURFACE_DEFINITIONS_NOT_AVAILABLE_QUERY_PROVIDERS",
         "allowed_query_modes": ("read_only_preview", "evidence_bound_lookup", "dashboard_explanation"),
         "all_retrieval_sources_visible": graph.all_retrieval_sources_visible,
         "canonical_write_allowed": False,

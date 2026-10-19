@@ -1,0 +1,59 @@
+{
+  "tool_id": "external_adapter:smolagents",
+  "source_library": "smolagents",
+  "capability_id": "external_agent_provider",
+  "description": "External adapter capability for smolagents status, catalog visibility, planning, and gated tool execution.",
+  "aliases": [
+    "smolagents",
+    "smol agent",
+    "smolagents agent",
+    "агент через smolagents",
+    "план через smolagents"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "agent_planning",
+    "tool_selection",
+    "gated_external_execution"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "smolagents_agent_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "agent_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "smolagents",
+  "package_name": "smolagents",
+  "metadata": {
+    "probe_runtime": "current_python",
+    "external_path": "",
+    "semantic_hints": [
+      "CodeAgent",
+      "ToolCallingAgent",
+      "LiteLLMModel",
+      "OpenAIServerModel",
+      "TransformersModel",
+      "DuckDuckGoSearchTool"
+    ]
+  }
+}

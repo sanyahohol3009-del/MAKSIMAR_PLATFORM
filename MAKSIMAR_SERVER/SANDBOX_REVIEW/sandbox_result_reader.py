@@ -51,3 +51,22 @@ def build_sandbox_result_reader() -> Dict[str, object]:
         "auto_apply_allowed": contract.auto_apply_allowed,
         "runtime_mutation_allowed": False,
     }
+
+
+def review_simulation_result(result: object) -> Dict[str, object]:
+    """Project an executed simulation result into the existing review boundary."""
+    required = ("task_id", "status", "score", "output_payload_ref", "trace_id")
+    if not all(hasattr(result, field) for field in required):
+        return {"review_status": "REJECTED", "reason": "incomplete_simulation_result", "production_approved": False}
+    status = str(getattr(result, "status"))
+    score = float(getattr(result, "score"))
+    reviewed = status == "completed" and 0.0 <= score <= 1.0
+    return {
+        "review_status": "REVIEWED" if reviewed else "REJECTED",
+        "task_id": str(getattr(result, "task_id")),
+        "trace_id": str(getattr(result, "trace_id")),
+        "score": score,
+        "evidence_ref": str(getattr(result, "output_payload_ref")),
+        "production_approved": False,
+        "artifact_only": True,
+    }

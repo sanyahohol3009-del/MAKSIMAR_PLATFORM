@@ -139,8 +139,51 @@ def build_final_memory_graph() -> FinalMemoryMap:
         ),
     )
 
+    # One inventory supplies both JARVIS self-readability and this existing map.
+    # node_ready validates a graph definition; runtime_status reports live truth.
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.memory_context_sources import _build_memory_surface_inventory
+    surfaces = _build_memory_surface_inventory()
+    nodes += tuple(FinalMemoryMapNode(
+        node_id=surface["surface_id"], label=surface["type"],
+        node_kind="backend_adapter" if surface["classification"] == "CHILD_BACKEND" else "memory_layer",
+        source_path=surface["path"], read_only=True, dashboard_visible=True,
+        canonical_write_allowed=False, runtime_mutation_allowed=False, node_ready=True,
+        classification=surface["classification"], runtime_status=surface["runtime_status"],
+        owner=surface.get("owner", ""), storage_path=surface["path"],
+        persistence=surface.get("persistence", "read-model projection"),
+        writer=surface.get("writer", ""), write_scope=surface.get("write_scope", ""),
+        canonical_store_surface=surface.get("canonical_store_surface", ""),
+        logical_roles=tuple(surface.get("logical_roles", ())),
+    ) for surface in surfaces)
+    edges += tuple(FinalMemoryMapEdge(
+        edge_id="surface_" + surface["surface_id"] + "_to_dashboard",
+        from_node_id=surface["surface_id"], to_node_id="final_memory_dashboard",
+        relation="shared_existing_memory_surface_readback", read_only_relation=True, edge_ready=True,
+    ) for surface in surfaces)
+    edges += (FinalMemoryMapEdge(
+        edge_id="history_reads_canonical_session_store", from_node_id="runtime_history_store",
+        to_node_id="local_chat_memory", relation="reads_same_canonical_append_only_store",
+        read_only_relation=True, edge_ready=True,
+    ),)
+    from MAKSIMAR_SERVER.MEMORY_REGISTRY.global_registry_projection_builder import build_memory_component_inventory_projection
+    components = build_memory_component_inventory_projection()
+    # Source classification nodes do not masquerade as additional stores or
+    # enrolled retrieval surfaces. No decorative runtime edges are fabricated.
+    nodes += tuple(FinalMemoryMapNode(
+        node_id=component.component_id,
+        label=component.owner + " [" + component.classification + "]",
+        node_kind="governance_layer", source_path=component.source_path,
+        read_only=True, dashboard_visible=True, canonical_write_allowed=False,
+        runtime_mutation_allowed=False, node_ready=True,
+        classification=component.classification,
+        runtime_status="SOURCE_CLASSIFICATION_ONLY_NOT_LIVE_ACCEPTANCE",
+        owner=component.owner,
+        persistence="Source classification metadata; physical backing remains in observed registered surfaces",
+    ) for component in components)
     return FinalMemoryMap(
         map_id="final_dashboard_memory_map_001",
+        logical_components=components,
+        registered_surface_ids=tuple(surface["surface_id"] for surface in surfaces),
         nodes=nodes,
         edges=edges,
         all_registered_modules_visible=True,

@@ -14,9 +14,9 @@ from MAKSIMAR_CORE_LIB.runtime_activation import build_default_capability_activa
 from MAKSIMAR_CORE_LIB.swarm_coordination.swarm_agent_role_contract import (
     build_default_swarm_agent_role_contracts,
 )
-from tools.jarvis_live_runtime.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
-from tools.jarvis_live_runtime.jarvis_runtime_library_store import build_runtime_library_store_read_model
-from tools.jarvis_live_runtime.memory_context_builder import build_jarvis_live_memory_federation_status
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
+from MAKSIMAR_CORE_LIB.project_read.jarvis_runtime_library_store import build_runtime_library_store_read_model
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_jarvis_live_memory_federation_status
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -45,6 +45,81 @@ _ROUTER_VISIBLE_TOOLS = (
     "risk_gate",
     "operator_proposal",
 )
+_STATIC_SKILL_TOOL_MAP: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "project_workspace_analysis",
+        (
+            "repo_git_status",
+            "repo_tree",
+            "repo_files",
+            "repo_search",
+            "read_file_snippet",
+            "read_file_outline",
+            "repo_import_graph",
+            "pytest_report_read",
+            "build_project_workspace_read_model",
+        ),
+    ),
+    (
+        "memory_federation",
+        (
+            "stable_style_profile",
+            "session_memory",
+            "local_chat_memory",
+            "memory_engine_registry",
+            "runtime_history_store",
+            "history_query",
+            "mempalace_read_only_sandbox",
+        ),
+    ),
+    (
+        "external_agent_tooling",
+        (
+            "external_adapter:mcp_python_sdk",
+            "external_adapter:openai_agents_sdk",
+            "external_adapter:autogen",
+            "external_adapter:autogen_agentchat",
+            "external_adapter:autogen_ext",
+            "external_adapter:langgraph",
+            "external_adapter:smolagents",
+            "external_adapter:n8n",
+            "external_adapter:mempalace",
+            "build_runtime_library_store_read_model",
+            "build_jarvis_external_adapter_visibility_read_model",
+            "build_agent_tooling_runtime_adapter_read_model",
+            "build_agent_tooling_runtime_probe_read_model",
+        ),
+    ),
+    (
+        "tool_selection",
+        (
+            "build_jarvis_live_tool_catalog_read_model",
+            "build_jarvis_skill_visibility_read_model",
+            "build_jarvis_agent_catalog_read_model",
+            "build_runtime_library_store_read_model",
+        ),
+    ),
+)
+_SAFE_DIRECT_TOOL_IDS = {
+    "pc_open_browser",
+    "pc_open_app",
+    "pc_open_default_browser",
+    "pc_window_focus",
+    "pc_volume_up",
+    "pc_volume_down",
+    "pc_volume_mute",
+    "open_browser",
+}
+_RISK_GATED_TOOL_IDS = {
+    "risk_gate",
+    "operator_proposal",
+    "approval_boundary_read",
+    "shell_execute",
+    "git_commit",
+    "git_push",
+    "deploy",
+    "install_package",
+}
 
 
 def _operator_capability_flags() -> dict[str, Any]:
@@ -178,7 +253,7 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
             "tool_ids": tuple(
                 dict.fromkeys(
                     tuple(tool_catalog["project_repo_read_only_tools"])
-                    + ("repo_search", "read_file_snippet", "read_file_outline", "pytest_report_read", "build_wsl_project_diagnostics_read_model")
+                    + ("repo_search", "read_file_snippet", "read_file_outline", "pytest_report_read")
                 )
             ),
             "read_only": True,
@@ -230,6 +305,26 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
             "sandbox_probe_allowed": True,
             "direct_execution_allowed": False,
         },
+        # n8n authoring knowledge is private to the Automation Organ.  It is
+        # deliberately absent from the global skill scan and is exposed only
+        # when the typed workflow capability has already been selected.
+        "automation_n8n": {
+            "organ_id": "automation",
+            "meta_skill": "RUNTIME/n8n/authoring/.agents/skills/using-n8n-skills-official/SKILL.md",
+            "skill_root": "RUNTIME/n8n/authoring/.agents/skills",
+            "bounded_skill_ids": (
+                "using-n8n-skills-official",
+                "n8n-workflow-lifecycle-official",
+                "n8n-node-configuration-official",
+                "n8n-agents-official",
+                "n8n-extending-mcp-official",
+            ),
+            "tool_ids": ("workflow_automation:n8n", "external_adapter:n8n"),
+            "read_only": True,
+            "tool_use_allowed": True,
+            "direct_execution_allowed": False,
+            "provider_policy_evidence_owned_by_host": True,
+        },
     }
 
     payload = {
@@ -266,6 +361,11 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
         "runtime_library_tools_browser": tuple(runtime_libraries["tools_browser"]),
         "runtime_library_categories": tuple(runtime_libraries["categories"]),
         "runtime_library_probe_reports_read": tuple(runtime_libraries["probe_reports_read"]),
+        "runtime_library_probe_reports_loaded": tuple(runtime_libraries.get("probe_reports_loaded", ())),
+        "runtime_library_source_observations": tuple(runtime_libraries.get("source_observations", ())),
+        "runtime_library_source_errors": tuple(runtime_libraries.get("source_errors", ())),
+        "runtime_library_current_execution_verified": runtime_libraries.get("current_execution_verified", False),
+        "runtime_library_probe_freshness": runtime_libraries.get("probe_freshness", "UNASSESSED"),
         "runtime_library_execution_allowed": True,
         "runtime_library_install_allowed": False,
         "runtime_library_download_allowed": False,
@@ -279,26 +379,59 @@ def build_jarvis_skill_visibility_read_model() -> dict[str, Any]:
 
 
 def select_skills_for_tools(selected_tools: tuple[str, ...], selected_agent_roles: tuple[str, ...]) -> tuple[str, ...]:
-    visibility = build_jarvis_skill_visibility_read_model()
     selected: list[str] = []
     tool_set = set(selected_tools)
-    for skill_name, profile in visibility.get("skill_execution_profiles", {}).items():
-        if not isinstance(profile, dict):
-            continue
-        if tool_set & set(profile.get("tool_ids", ())):
+    if tool_set & {"workflow_automation:n8n", "external_adapter:n8n"}:
+        selected.append("automation_n8n")
+    for skill_name, tool_ids in _STATIC_SKILL_TOOL_MAP:
+        if tool_set & set(tool_ids):
             selected.append(str(skill_name))
     if "project_coder_agent" in selected_agent_roles or "architect_agent" in selected_agent_roles:
         selected.append("project_workspace_analysis")
     if "tool_selector_agent" in selected_agent_roles:
         selected.append("tool_selection")
+    if tool_set & {"build_jarvis_skill_visibility_read_model", "build_jarvis_live_tool_catalog_read_model"}:
+        selected.append("skill_visibility")
     if "action_worker_agent" in selected_agent_roles:
         selected.append("action_library")
     if "safety_guard_agent" in selected_agent_roles:
         selected.append("safety_guard")
-    if tool_set & set(visibility["safe_direct_tools"]):
+    if tool_set & _SAFE_DIRECT_TOOL_IDS:
         selected.append("action_library_safe_direct")
-    if tool_set & set(visibility["risk_gated_tools"]):
+    if tool_set & _RISK_GATED_TOOL_IDS:
         selected.append("risk_gate_or_action_library")
+    if tool_set & {"runtime_history_store", "history_query", "memory_engine_registry", "session_memory", "local_chat_memory"}:
+        selected.append("runtime_history_readonly")
+    if any(tool.startswith("external_adapter:") for tool in tool_set):
+        selected.append("external_adapter_planning")
     if not selected:
         selected.append("conversation")
     return tuple(dict.fromkeys(selected))
+
+
+def load_automation_n8n_private_skill_context(selected_skill_ids: tuple[str, ...]) -> dict[str, Any]:
+    """Read only the bounded official skills selected for the Automation Organ."""
+    allowed = {
+        "using-n8n-skills-official",
+        "n8n-workflow-lifecycle-official",
+        "n8n-node-configuration-official",
+        "n8n-agents-official",
+        "n8n-extending-mcp-official",
+    }
+    entries = []
+    root = PROJECT_ROOT / "RUNTIME/n8n/authoring/.agents/skills"
+    for skill_id in dict.fromkeys(selected_skill_ids):
+        if skill_id not in allowed:
+            continue
+        path = root / skill_id / "SKILL.md"
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        entries.append({"skill_id": skill_id, "path": str(path.relative_to(PROJECT_ROOT)), "content": text[:800]})
+    return {
+        "organ_id": "automation",
+        "skill_ids": tuple(item["skill_id"] for item in entries),
+        "entries": tuple(entries),
+        "provider_policy_evidence_owned_by_host": True,
+        "direct_execution_allowed": False,
+    }

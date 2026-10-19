@@ -42,6 +42,13 @@ from MAKSIMAR_CORE_LIB.evolution_debug.proposal_models import (
     DebugProposalContract,
     DebugProposalPackage,
 )
+from MAKSIMAR_CORE_LIB.evolution_debug.sandbox_selection import (
+    ExperimentRequirement,
+    SANDBOX_CAPABILITY_MAP,
+    sandbox_capability_map,
+    select_sandbox,
+    requirement_from_semantic_understanding,
+)
 
 __all__ = [
     "DebugCycleStage",
@@ -61,4 +68,9 @@ __all__ = [
     "DebugProposalContract",
     "DebugProposalPackage",
     "build_debug_proposal_contract",
+    "ExperimentRequirement",
+    "SANDBOX_CAPABILITY_MAP",
+    "sandbox_capability_map",
+    "select_sandbox",
+    "requirement_from_semantic_understanding",
 ]

@@ -1,93 +1,132 @@
 from __future__ import annotations
 
-import importlib
+import json
 from typing import Any, Iterator
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import FinalBrainPort, RequestDeadline
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.project_workspace_tools import (
+    read_file_outline, read_file_snippet, repo_files, repo_git_status,
+    repo_import_graph, repo_search, repo_tree,
+)
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import (
+    build_jarvis_live_project_status_read_model,
+    build_jarvis_live_tool_catalog_read_model,
+    build_project_workspace_read_model, model_runtime_status, status_tools,
+)
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.ollama_transport import (
+    DEFAULT_OLLAMA_MODEL_ID,
+    build_model_call_timeout_truth,
+    grounded_final_brain_call,
+    grounded_final_brain_stream,
+)
 
 
 def build_jarvis_live_brain_health() -> dict[str, Any]:
-    return _brain_loop().build_jarvis_live_brain_health()
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_jarvis_live_brain_health as canonical
+    return canonical()
 
 
 def build_jarvis_live_session_status() -> dict[str, Any]:
-    return _brain_loop().build_jarvis_live_session_status()
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_jarvis_live_session_status as canonical
+    return canonical()
 
 
 def run_jarvis_live_brain_once(user_text: str, session_id: str = "windows_voice_edge") -> dict[str, Any]:
-    return _brain_loop().run_jarvis_live_brain_once(user_text, session_id=session_id)
+    """Compatibility entrypoint migrated to the canonical semantic /hot turn."""
+    from CONTROL_PLANE.api_server import jarvis_live_hot
+
+    response = jarvis_live_hot({
+        "text": user_text,
+        "session_id": session_id,
+        "input_channel": "windows_voice_edge",
+        "identity": {
+            "identity_id": "unknown",
+            "source": "voice_unverified",
+            "profile_type": "unknown",
+            "verified": False,
+            "trusted_session": False,
+        },
+    })
+    result = response.get("result")
+    return dict(result) if isinstance(result, dict) else dict(response)
 
 
 def stream_jarvis_live_brain_response(
     user_text: str,
     session_id: str = "windows_voice_edge",
 ) -> Iterator[dict[str, Any]]:
-    yield from _brain_loop().stream_jarvis_live_brain_response(user_text, session_id=session_id)
+    """Yield compatibility events from one canonical semantic result, without routing text."""
+    result = run_jarvis_live_brain_once(user_text, session_id=session_id)
+    response_text = str(result.get("response_text", result.get("llm_response", ""))).strip()
+    yield {"event": "start", "status": "accepted", "orchestration_path": "canonical_semantic_turn_v2"}
+    if response_text:
+        yield {"event": "chunk", "text": response_text, "chunk": response_text}
+    yield {
+        "event": "done",
+        "response_text": response_text,
+        "llm_response": response_text,
+        **result,
+    }
 
 
 def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:
-    return _brain_loop().write_stream_event_safely(write_callable, event)
+    try:
+        write_callable(json.dumps(event, ensure_ascii=False) + "\n")
+    except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+        print("[WARNING] Client disconnected before receiving response")
+        return False
+    return True
 
 
-def build_jarvis_live_project_status_read_model() -> dict[str, Any]:
-    return _brain_loop().build_jarvis_live_project_status_read_model()
 
 
-def build_jarvis_live_tool_catalog_read_model() -> dict[str, Any]:
-    return _brain_loop().build_jarvis_live_tool_catalog_read_model()
 
 
-def build_project_workspace_read_model() -> dict[str, Any]:
-    return _brain_loop().build_project_workspace_read_model()
 
 
-def model_runtime_status() -> dict[str, Any]:
-    return _brain_loop().model_runtime_status()
 
 
-def read_file_outline(path: str) -> dict[str, Any]:
-    return _brain_loop().read_file_outline(path)
 
 
-def read_file_snippet(
-    path: str,
-    start_line: int = 1,
-    end_line: int | None = None,
-    page: int = 1,
-) -> dict[str, Any]:
-    return _brain_loop().read_file_snippet(
-        path,
-        start_line=start_line,
-        end_line=end_line,
-        page=page,
-    )
 
 
-def repo_files(page: int = 1, page_size: int = 80) -> dict[str, Any]:
-    return _brain_loop().repo_files(page=page, page_size=page_size)
 
 
-def repo_git_status() -> dict[str, Any]:
-    return _brain_loop().repo_git_status()
 
 
-def repo_import_graph(path: str | None = None, max_edges: int = 80) -> dict[str, Any]:
-    return _brain_loop().repo_import_graph(path=path, max_edges=max_edges)
 
 
-def repo_search(
-    query: str,
-    paths: tuple[str, ...] | None = None,
-    max_results: int = 40,
-) -> dict[str, Any]:
-    return _brain_loop().repo_search(query, paths=paths, max_results=max_results)
 
 
-def repo_tree(depth: int = 2, max_entries: int = 300) -> dict[str, Any]:
-    return _brain_loop().repo_tree(depth=depth, max_entries=max_entries)
 
 
-def status_tools() -> dict[str, Any]:
-    return _brain_loop().status_tools()
 
 
-def _brain_loop() -> Any:
-    return importlib.import_module("tools.jarvis_live_runtime.jarvis_live_brain_loop")
+def run_grounded_final_brain(**payload: Any) -> dict[str, Any]:
+    """Public server facade for the existing grounded Final Brain implementation."""
+    return grounded_final_brain_call(**payload)
+
+
+
+
+class ExistingFinalBrainAdapter(FinalBrainPort):
+    def answer(self, *, deadline: RequestDeadline, **payload: Any) -> dict[str, Any]:
+        timeout_truth = build_model_call_timeout_truth(
+            DEFAULT_OLLAMA_MODEL_ID,
+            deadline_remaining_seconds=deadline.remaining(),
+        )
+        timeout = float(timeout_truth["effective_transport_timeout_seconds"])
+        if timeout <= 0 or deadline.cancelled:
+            raise TimeoutError("final_brain_deadline_exceeded")
+        return grounded_final_brain_call(timeout_truth=timeout_truth, **payload)
+
+    def stream_answer(self, *, deadline: RequestDeadline, **payload: Any) -> Iterator[dict[str, Any]]:
+        timeout_truth = build_model_call_timeout_truth(
+            DEFAULT_OLLAMA_MODEL_ID,
+            deadline_remaining_seconds=deadline.remaining(),
+        )
+        timeout = float(timeout_truth["effective_transport_timeout_seconds"])
+        if timeout <= 0 or deadline.cancelled:
+            yield {"event": "error", "error_kind": "final_brain_deadline_exceeded",
+                   "error_message": "Final Brain deadline exceeded", "response_text": ""}
+            return
+        yield from grounded_final_brain_stream(timeout_truth=timeout_truth, **payload)

@@ -49,12 +49,26 @@ def write_heartbeat(status: str = "alive", *, recovery_deadline_ts: float | None
 def build_environment() -> dict[str, str]:
     """Return environment for the Control Plane child process."""
     env = dict(os.environ)
-    env.setdefault("JARVIS_HELPER_CLASSIFIER_ENABLED", "true")
+    env.setdefault("JARVIS_HELPER_INPUT_CORRECTION_ENABLED", "true")
     env.setdefault("JARVIS_HELPER_MODEL", "jarvis:helper3b")
-    env.setdefault("OLLAMA_KEEP_ALIVE", "30m")
     env.setdefault("OLLAMA_NUM_PARALLEL", "1")
     env.setdefault("OLLAMA_MAX_LOADED_MODELS", "1")
     return env
+
+
+def record_child_lifecycle(event_type: str, *, child_pid: int, exit_code: int | None = None) -> None:
+    """Publish actual child facts through the existing platform event journal."""
+    from uuid import uuid4
+    from MAKSIMAR_CORE_LIB.event_bus.event_models import EventRecord
+    from MAKSIMAR_CORE_LIB.event_bus.event_writer import append_event_record
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import utc_observed_at
+    try:
+        append_event_record(EventRecord(event_id="runtime_" + uuid4().hex,
+            event_type=event_type, source="process_supervisor", created_at=utc_observed_at(),
+            payload={"child_pid": child_pid, "supervisor_pid": os.getpid(),
+                     "exit_code": exit_code, "project_root": str(ROOT)}))
+    except OSError as exc:
+        log(f"Lifecycle event persistence failed: {type(exc).__name__}")
 
 
 def build_command() -> list[str]:
@@ -163,7 +177,7 @@ def main() -> None:
                     break
                 log(f"Starting Control Plane: {' '.join(cmd)}")
                 process = subprocess.Popen(cmd, cwd=str(ROOT), text=True, env=build_environment())
-
+                record_child_lifecycle("runtime.child.started", child_pid=process.pid)
                 while not stop_requested and process.poll() is None:
                     run_context.initialize_run_metadata()  # detects replacement/loss
                     write_heartbeat("alive", recovery_deadline_ts=time.time() + 2 * POLL_INTERVAL_SEC)
@@ -175,13 +189,14 @@ def main() -> None:
                 return_code = process.poll()
                 run_context.set_run_status(run_context.RUN_STATUS_DEGRADED)
                 recovery_deadline_ts = time.time() + 12.0
-
+                record_child_lifecycle("runtime.child.exited", child_pid=process.pid, exit_code=return_code)
                 write_heartbeat("broken", recovery_deadline_ts=recovery_deadline_ts)
                 log(f"Control Plane exited with code {return_code}. Restarting in {RESTART_DELAY_SEC}s...")
                 stop_event.wait(RESTART_DELAY_SEC)
             orderly_child = finish_child()
             run_context.set_run_status(run_context.RUN_STATUS_SHUTDOWN if orderly_child else run_context.RUN_STATUS_CRASHED)
-
+            if process is not None:
+                record_child_lifecycle("runtime.child.stopped", child_pid=process.pid, exit_code=process.poll())
             write_heartbeat("stopped" if orderly_child else "broken")
             log("Supervisor exited cleanly." if orderly_child else "Supervisor exit required forced child cleanup.")
         except BaseException:

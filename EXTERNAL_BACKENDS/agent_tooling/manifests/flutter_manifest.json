@@ -1,0 +1,54 @@
+{
+  "tool_id": "runtime_tooling:flutter",
+  "source_library": "Flutter Runtime",
+  "capability_id": "runtime_tooling",
+  "description": "Runtime tooling manifest for the installed Flutter SDK used by MAKSIMAR app surfaces.",
+  "aliases": [
+    "flutter",
+    "flutter runtime",
+    "app runtime",
+    "мобильная сборка flutter"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "runtime_status",
+    "approval_gated_build_deploy"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "flutter_runtime_tooling_v1",
+  "adapter_mode": "runtime_tooling",
+  "provider_kind": "tool_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "",
+  "package_name": "",
+  "metadata": {
+    "external_path": "/home/aleksandr/MAKSIMAR_RUNTIME/tools/flutter",
+    "semantic_hints": [
+      "sdk path",
+      "flutter version",
+      "build gated",
+      "deploy gated"
+    ]
+  }
+}

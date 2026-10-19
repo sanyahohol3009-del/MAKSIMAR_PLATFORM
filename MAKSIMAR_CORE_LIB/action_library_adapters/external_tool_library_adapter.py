@@ -645,13 +645,14 @@ def build_jarvis_external_adapter_visibility_read_model(probe_read_model: dict[s
     probe_payload = probe_read_model or _load_agent_tooling_runtime_probe_read_model()
     adapter_statuses = probe_external_tool_adapters(probe_payload)
     active_adapter_ids = tuple(status.tool_id for status in adapter_statuses if status.selection_enabled)
+    visible_adapter_ids = tuple(status.tool_id for status in adapter_statuses)
     unavailable_adapter_ids = tuple(status.tool_id for status in adapter_statuses if not status.selection_enabled)
     legacy_adapter_ids = tuple(status.tool_id for status in adapter_statuses if status.legacy_alias)
     return {
         "registry": build_external_tool_registry().to_read_model(),
         "adapters": tuple(status.to_read_model() for status in adapter_statuses),
         "active_adapter_ids": active_adapter_ids,
-        "visible_adapter_ids": active_adapter_ids,
+        "visible_adapter_ids": visible_adapter_ids,
         "unavailable_adapter_ids": unavailable_adapter_ids,
         "legacy_adapter_ids": legacy_adapter_ids,
         "runtime_python": str(probe_payload.get("runtime_python", "")),

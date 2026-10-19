@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Tuple
 
+from MAKSIMAR_SERVER.MEMORY_REGISTRY.global_registry_projection_models import MemoryComponentProjection, MEMORY_COMPONENT_INVENTORY_SCOPE
+
 
 MemoryMapNodeKind = Literal[
     "memory_layer",
@@ -24,6 +26,15 @@ class FinalMemoryMapNode:
     canonical_write_allowed: bool
     runtime_mutation_allowed: bool
     node_ready: bool
+    classification: str = "READ_MODEL"
+    runtime_status: str = "HISTORICAL_CONTRACT_PREVIEW"
+    owner: str = "historical_memory_foundation"
+    storage_path: str = ""
+    persistence: str = "contract metadata; not proof of a populated store"
+    writer: str = ""
+    write_scope: str = ""
+    canonical_store_surface: str = ""
+    logical_roles: Tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.node_id:
@@ -82,6 +93,11 @@ class FinalMemoryMap:
     canonical_write_allowed: bool
     runtime_mutation_allowed: bool
     map_ready: bool
+    inventory_coverage: str = "REGISTERED_NATIVE_SURFACES_ONLY"
+    whole_organism_inventory_complete: bool = False
+    registered_surface_ids: Tuple[str, ...] = ()
+    logical_components: Tuple[MemoryComponentProjection, ...] = ()
+    component_inventory_scope: str = MEMORY_COMPONENT_INVENTORY_SCOPE
 
     def __post_init__(self) -> None:
         if not self.map_id:
@@ -90,7 +106,16 @@ class FinalMemoryMap:
             raise ValueError("nodes must be non-empty")
         if not self.edges:
             raise ValueError("edges must be non-empty")
+        component_ids = tuple(item.component_id for item in self.logical_components)
+        if len(set(component_ids)) != len(component_ids):
+            raise ValueError("logical component identities must be unique")
         node_ids = {node.node_id for node in self.nodes}
+        if len(set(self.registered_surface_ids)) != len(self.registered_surface_ids):
+            raise ValueError("registered surface identities must be unique")
+        if not set(self.registered_surface_ids).issubset(node_ids):
+            raise ValueError("registered surface node missing")
+        if set(component_ids).intersection(self.registered_surface_ids):
+            raise ValueError("component classification must not enroll a retrieval surface")
         if len(node_ids) != len(self.nodes):
             raise ValueError("node_id values must be unique")
         for edge in self.edges:

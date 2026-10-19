@@ -46,3 +46,8 @@ __all__ = [
     "SimulationEngineObservabilityRecord",
     "build_simulation_engine_observability_contract",
 ]
+
+from MAKSIMAR_CORE_LIB.workers_registry.simulation_worker_provider_registry import (
+    register_simulation_worker_factory,
+)
+register_simulation_worker_factory(build_simulation_worker_runtime)

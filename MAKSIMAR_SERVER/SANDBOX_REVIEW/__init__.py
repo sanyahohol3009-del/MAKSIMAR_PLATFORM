@@ -9,6 +9,7 @@ from MAKSIMAR_SERVER.SANDBOX_REVIEW.sandbox_review_models import (
     build_sandbox_review_contract,
 )
 from MAKSIMAR_SERVER.SANDBOX_REVIEW.simulation_result_reader import build_simulation_result_reader
+from MAKSIMAR_SERVER.SANDBOX_REVIEW.sandbox_result_reader import review_simulation_result
 
 __all__ = [
     "SandboxReviewContract",
@@ -20,4 +21,5 @@ __all__ = [
     "build_sandbox_result_reader",
     "build_sandbox_review_contract",
     "build_simulation_result_reader",
+    "review_simulation_result",
 ]

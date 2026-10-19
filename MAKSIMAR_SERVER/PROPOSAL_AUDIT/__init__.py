@@ -8,6 +8,10 @@ from MAKSIMAR_SERVER.PROPOSAL_AUDIT.proposal_audit_spine_models import (
 )
 from MAKSIMAR_SERVER.PROPOSAL_AUDIT.proposal_audit_summary_builder import build_proposal_audit_summary
 from MAKSIMAR_SERVER.PROPOSAL_AUDIT.proposal_inspector_binding import build_proposal_inspector_binding
+from MAKSIMAR_SERVER.PROPOSAL_AUDIT.proposal_audit_runtime import (
+    ProposalAuditResult,
+    audit_proposal_runtime,
+)
 
 __all__ = [
     "ProposalAuditSpineContract",
@@ -18,4 +22,6 @@ __all__ = [
     "build_proposal_audit_spine_contract",
     "build_proposal_audit_summary",
     "build_proposal_inspector_binding",
+    "ProposalAuditResult",
+    "audit_proposal_runtime",
 ]

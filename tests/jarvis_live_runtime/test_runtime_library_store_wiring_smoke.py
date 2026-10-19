@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from tools.jarvis_live_runtime.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
-from tools.jarvis_live_runtime.jarvis_runtime_library_store import build_runtime_library_store_read_model
+from MAKSIMAR_CORE_LIB.project_read.jarvis_runtime_library_store import build_runtime_library_store_read_model
 from tools.jarvis_live_runtime.jarvis_skill_visibility import build_jarvis_skill_visibility_read_model
 
 
@@ -208,3 +210,48 @@ def test_skill_visibility_runtime_library_store_stays_proposal_only_smoke(monkey
     assert visibility["sandbox_execution_allowed"] is True
     assert visibility["runtime_library_install_allowed"] is False
     assert visibility["runtime_library_download_allowed"] is False
+
+
+@pytest.mark.parametrize("report_setting", [None, "", "   ", "explicit", "explicit_missing", "malformed"])
+def test_runtime_library_report_path_binding_preserves_observed_availability(tmp_path, report_setting):
+    store = tmp_path / "library"
+    (store / "manifests").mkdir(parents=True)
+    (store / "probe_reports").mkdir()
+    fallback = store / "probe_reports" / "agents_import_probe.json"
+    report = {"venv_name": "observed_venv", "python": "/observed/python", "packages": [
+        {"pip_name": "observed-package", "module_name": "observed_module", "import_ok": True, "version": "1.2"},
+        {"pip_name": "different-package", "module_name": "other", "import_ok": False},
+    ]}
+    fallback.write_text(json.dumps(report), encoding="utf-8")
+    manifest = {"manifest_id": "observed-package", "category": "agents"}
+    chosen = fallback
+    expected = True
+    if report_setting == "explicit":
+        chosen = store / "custom_report.json"
+        chosen.write_text(json.dumps({**report, "venv_name": "explicit_venv"}), encoding="utf-8")
+        manifest["report_file"] = str(chosen)
+    elif report_setting == "explicit_missing":
+        chosen = store / "missing_report.json"
+        manifest["report_file"] = str(chosen)
+        expected = False  # A supplied missing path must not silently use the available fallback.
+    elif report_setting == "malformed":
+        fallback.write_text("not-json", encoding="utf-8")
+        expected = False
+    elif report_setting is not None:
+        manifest["report_file"] = report_setting
+    (store / "manifests" / "observed-package.json").write_text(json.dumps(manifest), encoding="utf-8")
+    payload = build_runtime_library_store_read_model(store)
+    package = payload["packages"][0]
+    assert package["import_ok"] is expected
+    assert package["probe_report_file"] == str(chosen)
+    assert payload["probe_reports_read"] == (str(chosen),)
+    assert payload["available_count"] == int(expected)
+    assert payload["unavailable_count"] == int(not expected)
+    assert payload["available_package_names"] == (("observed-package",) if expected else ())
+    assert package["direct_execution_allowed"] is False
+    assert package["approval_required_for_runtime_execution"] is True
+    assert payload["install_allowed"] is False
+    if expected:
+        assert package["module_name"] == "observed_module"
+        assert package["runtime_python"] == "/observed/python"
+        assert package["venv_name"] == ("explicit_venv" if report_setting == "explicit" else "observed_venv")

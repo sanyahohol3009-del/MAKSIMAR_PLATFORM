@@ -20,7 +20,14 @@ def build_final_memory_acceptance() -> Dict[str, object]:
     return {
         "acceptance_id": "phase_5_2_final_memory_map_acceptance_001",
         "acceptance_ready": acceptance_ready,
-        "project_fully_visible_in_memory": acceptance_ready,
+        # Graph-definition readiness is not whole-organism inventory closure.
+        "project_fully_visible_in_memory": (
+            acceptance_ready
+            and preview["summary"]["whole_organism_inventory_complete"] is True
+            and preview["summary"]["inventory_coverage"] != "REGISTERED_NATIVE_SURFACES_ONLY"
+        ),
+        "inventory_coverage": preview["summary"]["inventory_coverage"],
+        "whole_organism_inventory_complete": preview["summary"]["whole_organism_inventory_complete"],
         "all_registered_modules_visible": preview["summary"]["all_registered_modules_visible"],
         "all_storage_nodes_visible": preview["summary"]["all_storage_nodes_visible"],
         "all_retrieval_sources_visible": preview["summary"]["all_retrieval_sources_visible"],

@@ -1,0 +1,55 @@
+{
+  "tool_id": "external_adapter:mempalace",
+  "source_library": "MemPalace",
+  "capability_id": "external_memory_provider",
+  "description": "External adapter capability for MemPalace status, read-only search, smoke visibility, and gated mutation flows.",
+  "aliases": [
+    "mempalace",
+    "memory palace",
+    "покажи mempalace",
+    "поиск в mempalace",
+    "memory query"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "memory_query",
+    "gated_memory_mutation"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "mempalace_external_memory_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "tool_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "",
+  "package_name": "",
+  "metadata": {
+    "external_path": "EXTERNAL_BACKENDS/mempalace/source",
+    "semantic_hints": [
+      "smoke report",
+      "read only routing",
+      "memory search",
+      "mcp status"
+    ]
+  }
+}

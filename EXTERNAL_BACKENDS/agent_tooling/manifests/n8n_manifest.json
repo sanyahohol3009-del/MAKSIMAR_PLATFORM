@@ -1,0 +1,55 @@
+{
+  "tool_id": "external_adapter:n8n",
+  "source_library": "n8n",
+  "capability_id": "external_workflow_provider",
+  "description": "External adapter capability for n8n status, template catalog, workflow planning, and approval-gated execution.",
+  "aliases": [
+    "n8n",
+    "workflow automation",
+    "n8n automation",
+    "автоматизации n8n",
+    "workflow через n8n"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  },
+  "risk_class": "risk_gate",
+  "side_effects": [
+    "workflow_planning",
+    "approval_gated_workflow_execution"
+  ],
+  "read_only": false,
+  "requires_verified_owner": true,
+  "safe_direct_allowed": false,
+  "semantic_fingerprint": "n8n_external_workflow_provider_v1",
+  "adapter_mode": "external_adapter",
+  "provider_kind": "agent_provider",
+  "not_canonical_truth": true,
+  "module_import_name": "",
+  "package_name": "",
+  "metadata": {
+    "external_path": "EXTERNAL_BACKENDS/vendor_quarantine/n8n",
+    "semantic_hints": [
+      "workflow templates",
+      "graph inspection",
+      "workflow planning",
+      "browser automation gated"
+    ]
+  }
+}
