@@ -35,6 +35,22 @@ _writer_pid: int | None = None
 _writer_identity: tuple | None = None
 
 
+MODEL_FREE_STARTUP_ENV = "MAKSIMAR_MODEL_FREE_STARTUP"
+
+
+def model_free_startup() -> bool:
+    """Read the process-local canonical launcher context, never HTTP input.
+
+    This is a restrictive startup mode, not permission to execute a provider.
+    WORK resets it for every launch; ctl pins it in the tmux child command.
+    No persistent metadata or process-global cached decision is introduced.
+    """
+    value = os.environ.get(MODEL_FREE_STARTUP_ENV, "0")
+    if value not in {"0", "1"}:
+        raise ValueError("invalid canonical model-free startup context")
+    return value == "1"
+
+
 @contextmanager
 def run_lifecycle():
     """Fence the existing supervisor writer for its process lifetime.

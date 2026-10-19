@@ -53,6 +53,7 @@ exit 95
         target.write_text(r'''#!/bin/bash
 name="${0##*/}"
 echo "$name:$*" >> "$TEST_CALLS"
+if [[ "$name" == ctl && "$1" == start ]]; then echo "STARTUP_CONTEXT:${MAKSIMAR_MODEL_FREE_STARTUP:-unset}" >> "$TEST_CALLS"; fi
 if [[ "$1" == start && "$name" == "${FAIL_START:-none}" ]]; then exit 7; fi
 if [[ "$1" == start ]]; then
  for name in heartbeat_state guard_heartbeat_state core_guard_heartbeat_state kernel_heartbeat_state; do
@@ -124,3 +125,10 @@ def test_published_start_error_reaches_existing_abort(launcher, owner):
 def test_unknown_or_extra_options_refused_before_effects(launcher, args):
     result, calls = launcher(args)
     assert result.returncode == 2 and calls == []
+
+
+@pytest.mark.parametrize("args,expected", [((), "0"), (("--model-free",), "1")])
+def test_work_pins_context_and_normal_launch_clears_inherited_suppression(launcher,args,expected):
+    result,calls=launcher(args,MAKSIMAR_MODEL_FREE_STARTUP="1")
+    assert result.returncode==0
+    assert calls.count("STARTUP_CONTEXT:"+expected)==2

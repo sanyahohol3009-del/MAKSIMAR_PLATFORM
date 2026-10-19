@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from CORE_ROOT.run_context import model_free_startup
+
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import load_external_tool_manifests
 
 
@@ -91,6 +93,14 @@ def _probe_path_only_manifest(path_value: str, capability_name: str) -> AgentToo
 
 
 def _probe_import_with_runtime_python(runtime_python: str, package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
+    if model_free_startup():
+        # Existing bool DTO: False means not proven, with explicit skipped reason.
+        # Registration remains in manifests; this result grants no availability.
+        return AgentToolingRuntimeProbeResult(
+            installed=False, import_probe_passed=False, package_name=package_name,
+            import_name=import_name, version_if_available="", runtime_python=runtime_python,
+            errors=("model_free_import_not_attempted",), import_attempted=False,
+        )
     runtime_python_path = Path(runtime_python)
     if not runtime_python_path.is_file():
         return AgentToolingRuntimeProbeResult(
@@ -182,21 +192,31 @@ print(json.dumps(result, ensure_ascii=False))
             import_name=import_name, version_if_available="", runtime_python=runtime_python,
             errors=("invalid_probe_object",), import_attempted=None,
         )
-    identity_matches = payload.get("package_name", package_name) == package_name and payload.get("import_name", import_name) == import_name
+    identity_matches = (
+        payload.get("package_name") == package_name
+        and payload.get("import_name") == import_name
+        and isinstance(payload.get("runtime_python"), str)
+        and Path(payload["runtime_python"]).absolute() == runtime_python_path.absolute()
+    )
+    required = ("installed", "import_probe_passed", "import_attempted", "errors")
+    complete = all(key in payload for key in required)
+    typed = all(type(payload.get(key)) is bool for key in required[:3])
     errors = payload.get("errors", [])
     if isinstance(errors, str):
         errors = [errors]
     if not isinstance(errors, (list, tuple)):
         errors = ["invalid_probe_errors"]
+    if not complete or not typed:
+        errors = [*errors, "incomplete_or_untyped_probe_result"]
     if not identity_matches:
         errors = [*errors, "probe_identity_mismatch"]
     if completed.returncode != 0:
         errors = [*errors, f"returncode:{completed.returncode}"]
-    attempted = payload.get("import_attempted", True if payload.get("import_probe_passed") is True else None)
+    attempted = payload.get("import_attempted")
     attempted = attempted if type(attempted) is bool else None
-    valid_import = identity_matches and completed.returncode == 0 and not errors and attempted is True
+    valid_import = identity_matches and completed.returncode == 0 and not errors and attempted is True and payload.get("installed") is True
     return AgentToolingRuntimeProbeResult(
-        installed=payload.get("installed") is True and identity_matches,
+        installed=payload.get("installed") is True and identity_matches and complete and typed and completed.returncode == 0 and not errors,
         import_probe_passed=payload.get("import_probe_passed") is True and valid_import,
         package_name=package_name,
         import_name=import_name,

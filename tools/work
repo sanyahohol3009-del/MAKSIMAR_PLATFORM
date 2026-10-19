@@ -292,6 +292,8 @@ main() {
   if (( MODEL_FREE_STARTUP )); then
     log "model-free startup: launcher warmup disabled"
   fi
+  # Explicit per-launch context; ordinary WORK clears any inherited suppression.
+  export MAKSIMAR_MODEL_FREE_STARTUP="$MODEL_FREE_STARTUP"
 
   mkdir -p "$RUNTIME_STATE_DIR"
   if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then

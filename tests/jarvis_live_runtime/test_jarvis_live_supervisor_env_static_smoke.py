@@ -12,9 +12,9 @@ def test_process_supervisor_starts_control_plane_with_helper_classifier_env() ->
     source = _source()
 
     assert "def build_environment()" in source
-    assert '"JARVIS_HELPER_CLASSIFIER_ENABLED", "true"' in source
+    assert '"JARVIS_HELPER_INPUT_CORRECTION_ENABLED", "true"' in source
     assert '"JARVIS_HELPER_MODEL", "jarvis:helper3b"' in source
-    assert '"OLLAMA_KEEP_ALIVE", "30m"' in source
+    assert "OLLAMA_KEEP_ALIVE" not in source
     assert '"OLLAMA_NUM_PARALLEL", "1"' in source
     assert '"OLLAMA_MAX_LOADED_MODELS", "1"' in source
     assert "env=build_environment()" in source

@@ -184,6 +184,8 @@ PY
 }
 
 start() {
+  local model_free="${MAKSIMAR_MODEL_FREE_STARTUP:-0}"
+  case "$model_free" in 0|1) ;; *) log "invalid canonical model-free startup context"; return 2;; esac
   mkdir -p "$RUNTIME_STATE_DIR"
   if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
     exec 8>>"$RUNTIME_STATE_DIR/startup_reservation.lock"
@@ -214,7 +216,7 @@ start() {
   mkdir -p "$RUNTIME_DIR" "$RUNTIME_STATE_DIR" "$(dirname "$LOG_FILE")"
 
   log "starting runtime tmux session: $SESSION_NAME"
-  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$SESSION_NAME" "$ROOT" "cd '$ROOT' && '$CANONICAL_PYTHON' -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" <<'PY'
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - "$SESSION_NAME" "$ROOT" "cd '$ROOT' && MAKSIMAR_MODEL_FREE_STARTUP=$model_free '$CANONICAL_PYTHON' -m SUPERVISOR.process_supervisor 2>&1 | tee -a '$LOG_FILE'" <<'PY'
 import os, subprocess, sys
 from CORE_ROOT.run_context import runtime_mutation
 env = dict(os.environ)

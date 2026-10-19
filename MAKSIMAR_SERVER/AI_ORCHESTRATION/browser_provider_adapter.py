@@ -122,6 +122,10 @@ class ExistingPlaywrightBrowserAdapter:
         self._authorization = HostBrowserAuthorization(approved)
 
     def health(self) -> dict[str, object]:
+        from CORE_ROOT.run_context import model_free_startup
+        if model_free_startup():
+            return {"provider_id": self.provider_id, "status": "UNAVAILABLE",
+                    "reason": "model_free_import_not_attempted", "import_attempted": False}
         if not BROWSER_PYTHON.is_file():
             return {"provider_id": self.provider_id, "status": "UNAVAILABLE", "reason": "runtime_missing"}
         try:

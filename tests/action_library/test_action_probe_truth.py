@@ -55,7 +55,7 @@ def fixture_runtime(tmp_path, monkeypatch):
 def test_import_status_is_typed_and_not_runtime_execution(tmp_path, monkeypatch, passed):
     runtime = fixture_runtime(tmp_path, monkeypatch)
     payload = {"installed": True, "import_probe_passed": passed, "import_attempted": True,
-               "package_name": "package_a", "import_name": "module_a", "version_if_available": "1.2", "errors": []}
+               "package_name": "package_a", "import_name": "module_a", "version_if_available": "1.2", "runtime_python": runtime, "errors": []}
     calls = []
     def fake_run(*args, **kwargs):
         calls.append(args)
@@ -70,9 +70,9 @@ def test_import_status_is_typed_and_not_runtime_execution(tmp_path, monkeypatch,
 
 @pytest.mark.parametrize("kind", ["malformed", "nonobject", "nonzero", "foreign_identity", "not_attempted", "timeout", "spawn_failure"])
 def test_bad_wire_or_failed_process_never_proves_import(tmp_path, monkeypatch, kind):
-    fixture_runtime(tmp_path, monkeypatch)
+    runtime = fixture_runtime(tmp_path, monkeypatch)
     payload = {"installed": True, "import_probe_passed": True, "import_attempted": True,
-               "package_name": "package_a", "import_name": "module_a", "errors": []}
+               "package_name": "package_a", "import_name": "module_a", "runtime_python": runtime, "errors": []}
     if kind == "foreign_identity":
         payload["package_name"] = "other"
     if kind == "not_attempted":
