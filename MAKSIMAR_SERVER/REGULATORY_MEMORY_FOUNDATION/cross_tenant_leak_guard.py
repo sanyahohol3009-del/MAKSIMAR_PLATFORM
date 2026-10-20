@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, Tuple
 
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_memory_routing_models import (
+    RegulatoryMemoryRoutingRegistry,
     build_regulatory_memory_routing_registry,
 )
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_retrieval_scope_gate import (
@@ -59,9 +60,12 @@ class CrossTenantLeakGuardResult:
             raise ValueError("deployment_allowed_now must be False")
 
 
-def build_cross_tenant_leak_guard_result() -> CrossTenantLeakGuardResult:
-    registry = build_regulatory_memory_routing_registry()
-    scope_gate = build_regulatory_retrieval_scope_gate_preview()
+def build_cross_tenant_leak_guard_result(
+    *, registry: RegulatoryMemoryRoutingRegistry | None = None,
+) -> CrossTenantLeakGuardResult:
+    if registry is None:
+        registry = build_regulatory_memory_routing_registry()
+    scope_gate = build_regulatory_retrieval_scope_gate_preview(registry=registry)
 
     blocked_decisions = tuple(
         route.route_decision for route in registry.routes if route.route_decision.startswith("deny_")
@@ -85,8 +89,10 @@ def build_cross_tenant_leak_guard_result() -> CrossTenantLeakGuardResult:
     )
 
 
-def build_cross_tenant_leak_guard_preview() -> Dict[str, object]:
-    result = build_cross_tenant_leak_guard_result()
+def build_cross_tenant_leak_guard_preview(
+    *, registry: RegulatoryMemoryRoutingRegistry | None = None,
+) -> Dict[str, object]:
+    result = build_cross_tenant_leak_guard_result(registry=registry)
 
     return {
         "preview_id": "cross_tenant_leak_guard_preview_step_8_001",

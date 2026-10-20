@@ -15,8 +15,9 @@ from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_retrieval_scope_gat
 
 def build_regulatory_routing_preview() -> Dict[str, object]:
     registry = build_regulatory_memory_routing_registry()
-    scope_gate = build_regulatory_retrieval_scope_gate_preview()
-    leak_guard = build_cross_tenant_leak_guard_preview()
+    # Share this invocation's immutable registry; every preview still runs its checks.
+    scope_gate = build_regulatory_retrieval_scope_gate_preview(registry=registry)
+    leak_guard = build_cross_tenant_leak_guard_preview(registry=registry)
 
     preview_path = (
         "regulatory_memory_routing_models",

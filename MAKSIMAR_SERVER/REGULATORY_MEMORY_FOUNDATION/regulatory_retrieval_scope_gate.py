@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, Tuple
 
 from MAKSIMAR_SERVER.REGULATORY_MEMORY_FOUNDATION.regulatory_memory_routing_models import (
+    RegulatoryMemoryRoutingRegistry,
     build_regulatory_memory_routing_registry,
 )
 
@@ -62,8 +63,11 @@ class RegulatoryRetrievalScopeGate:
             raise ValueError("gate_ready must be True")
 
 
-def build_regulatory_retrieval_scope_gate() -> RegulatoryRetrievalScopeGate:
-    registry = build_regulatory_memory_routing_registry()
+def build_regulatory_retrieval_scope_gate(
+    *, registry: RegulatoryMemoryRoutingRegistry | None = None,
+) -> RegulatoryRetrievalScopeGate:
+    if registry is None:
+        registry = build_regulatory_memory_routing_registry()
 
     return RegulatoryRetrievalScopeGate(
         gate_id="regulatory_retrieval_scope_gate_step_8_001",
@@ -85,8 +89,10 @@ def build_regulatory_retrieval_scope_gate() -> RegulatoryRetrievalScopeGate:
     )
 
 
-def build_regulatory_retrieval_scope_gate_preview() -> Dict[str, object]:
-    gate = build_regulatory_retrieval_scope_gate()
+def build_regulatory_retrieval_scope_gate_preview(
+    *, registry: RegulatoryMemoryRoutingRegistry | None = None,
+) -> Dict[str, object]:
+    gate = build_regulatory_retrieval_scope_gate(registry=registry)
 
     return {
         "preview_id": "regulatory_retrieval_scope_gate_preview_step_8_001",
