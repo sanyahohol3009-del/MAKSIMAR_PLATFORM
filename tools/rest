@@ -55,13 +55,13 @@ stop_runtime_dashboard_session() {
 
 main() {
   log "stopping kernel watchdog..."
-  "$TOOLS_DIR/kernel_guard_ctl" stop || true
+  "$TOOLS_DIR/kernel_guard_ctl" stop || { log "kernel_guard_ctl stop incomplete; retained diagnostics"; return 1; }
 
   log "stopping core guard..."
-  "$TOOLS_DIR/core_guard_ctl" stop || true
+  "$TOOLS_DIR/core_guard_ctl" stop || { log "core_guard_ctl stop incomplete; retained diagnostics"; return 1; }
 
   log "stopping supervisor guard..."
-  "$TOOLS_DIR/guard_ctl" stop || true
+  "$TOOLS_DIR/guard_ctl" stop || { log "guard_ctl stop incomplete; retained diagnostics"; return 1; }
 
   log "stopping runtime..."
   "$TOOLS_DIR/ctl" stop || { log "runtime stop incomplete; retained diagnostics"; return 1; }

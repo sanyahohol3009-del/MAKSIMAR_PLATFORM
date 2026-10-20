@@ -174,25 +174,27 @@ PY
 }
 
 stop() {
-  log "stopping kernel watchdog..."
-
+  log "stopping verified guard..."
+  local session_id=""
   if session_exists; then
-    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+    session_id="$(tmux display-message -p -t "$SESSION_NAME" '#{session_id}')"
   fi
-
-  local pid
-  pid="$(find_pid || true)"
-  if [[ -n "${pid:-}" ]]; then
-    kill "$pid" 2>/dev/null || true
-    sleep 1
+  if ! PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$PID_FILE" "$HEARTBEAT_FILE" "$session_id" <<'PY'
+import sys
+from CORE_ROOT.heartbeat_io import stop_owned_guard_process
+try:
+    stop_owned_guard_process('CORE_ROOT.kernel_watchdog', 'kernel_watchdog', sys.argv[1], sys.argv[2], session_id=sys.argv[3])
+except (OSError, RuntimeError, ValueError) as exc:
+    print(str(exc), file=sys.stderr)
+    raise SystemExit(1)
+PY
+  then
+    log "guard stop incomplete; retained receipt/session/evidence"
+    return 1
   fi
-
-  pid="$(find_pid || true)"
-  if [[ -n "${pid:-}" ]]; then
-    kill -9 "$pid" 2>/dev/null || true
+  if [[ -n "$session_id" ]]; then
+    tmux kill-session -t "$session_id" 2>/dev/null || return 1
   fi
-
-  remove_pid_file
   log "done"
 }
 

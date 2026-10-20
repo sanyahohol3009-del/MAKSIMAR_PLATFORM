@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import signal
 import subprocess
 import time
 
 from CORE_ROOT.heartbeat_io import (
     atomic_write_json,
+    write_guard_heartbeat,
     build_heartbeat,
     heartbeat_age_seconds,
     heartbeat_process_alive,
@@ -67,11 +69,10 @@ def process_exists(pattern: str) -> bool:
     return result.returncode == 0
 
 
-def write_self_heartbeat(status: str = "alive") -> None:
+def write_self_heartbeat(status: str = "alive", *, expected_run=None) -> None:
     """Write the core guard heartbeat."""
     ensure_runtime_layout()
-    payload = build_heartbeat(source="core_guard", status=status)
-    atomic_write_json(CORE_GUARD_HEARTBEAT_FILE, payload)
+    write_guard_heartbeat(CORE_GUARD_HEARTBEAT_FILE, "core_guard", status, expected_run=expected_run)
 
 
 def evaluate_guard(
@@ -162,7 +163,7 @@ def evaluate_guard(
     return False, f"guard heartbeat OK (age={age:.2f}s)", 0
 
 
-def activate_core_kill_chain(reason: str) -> None:
+def activate_core_kill_chain(reason: str, *, expected_run=None) -> None:
     """Trigger STOP-GATE and terminate the watcher tmux session."""
     log(f"CORE KILL CHAIN ACTIVATED: {reason}")
 
@@ -186,7 +187,7 @@ def activate_core_kill_chain(reason: str) -> None:
         check=False,
     )
 
-    write_self_heartbeat(status="stopped")
+    write_self_heartbeat(status="stopped", expected_run=expected_run)
     log("CORE KILL CHAIN COMPLETED")
 
 
@@ -195,6 +196,22 @@ def main() -> None:
     ensure_runtime_layout()
     log("Core Guard started")
 
+    from CORE_ROOT import run_context
+    meta = run_context.read_run_metadata()
+    run_identity = run_context._identity(meta) if meta else ()
+    stopping = False
+
+    def handle_stop(signum, frame):
+        nonlocal stopping
+        if not stopping:
+            stopping = True
+            raise KeyboardInterrupt
+
+    previous_handlers = {sig: signal.getsignal(sig) for sig in
+                         (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    for sig in previous_handlers:
+        signal.signal(sig, handle_stop)
+
     started_at = time.time()
     source_mismatch_strikes = 0
     peer_stale_state: dict[str, float] = {}
@@ -202,12 +219,12 @@ def main() -> None:
 
     try:
         while True:
-            write_self_heartbeat(status="alive")
+            write_self_heartbeat(status="alive", expected_run=run_identity)
             poll_gap = time.time() - last_poll_at
             if poll_gap > HEARTBEAT_TIMEOUT_SEC:
                 log(f"Observer scheduling gap ({poll_gap:.2f}s); refresh self and recheck after two bounded polls")
                 resynchronization_started_at = time.time()
-                write_self_heartbeat(status="alive")
+                write_self_heartbeat(status="alive", expected_run=run_identity)
                 time.sleep(2 * POLL_INTERVAL_SEC)
                 if time.time() - resynchronization_started_at > HEARTBEAT_TIMEOUT_SEC:
                     log("Resynchronization itself was delayed; republish before evaluating peers")
@@ -220,17 +237,21 @@ def main() -> None:
                 peer_stale_state=peer_stale_state,
             )
             if is_critical:
-                activate_core_kill_chain(message)
+                activate_core_kill_chain(message, expected_run=run_identity)
                 break
 
             log(message)
             time.sleep(POLL_INTERVAL_SEC)
 
     except KeyboardInterrupt:
-        write_self_heartbeat(status="stopped")
+        write_self_heartbeat(status="stopped", expected_run=run_identity)
         log("Core Guard stopped by user")
     except Exception as exc:  # noqa: BLE001
-        activate_core_kill_chain(f"core guard exception: {exc}")
+        activate_core_kill_chain(f"core guard exception: {exc}", expected_run=run_identity)
+
+    finally:
+        for sig, handler in previous_handlers.items():
+            signal.signal(sig, handler)
 
 
 if __name__ == "__main__":

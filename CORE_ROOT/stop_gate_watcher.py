@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import signal
 import subprocess
 import time
 
 from CORE_ROOT.heartbeat_io import (
     atomic_write_json,
+    write_guard_heartbeat,
     build_heartbeat,
     heartbeat_age_seconds,
     heartbeat_source,
@@ -77,11 +79,10 @@ def process_exists(pattern: str) -> bool:
     return result.returncode == 0
 
 
-def write_self_heartbeat(status: str = "alive") -> None:
+def write_self_heartbeat(status: str = "alive", *, expected_run=None) -> None:
     """Write watcher heartbeat atomically."""
     ensure_runtime_layout()
-    payload = build_heartbeat(source="stop_gate_watcher", status=status)
-    atomic_write_json(GUARD_HEARTBEAT_FILE, payload)
+    write_guard_heartbeat(GUARD_HEARTBEAT_FILE, "stop_gate_watcher", status, expected_run=expected_run)
 
 
 def evaluate_runtime(
@@ -180,7 +181,7 @@ def evaluate_runtime(
     return False, f"runtime heartbeat OK (age={age:.2f}s)", 0
 
 
-def activate_guard_kill_chain(reason: str) -> None:
+def activate_guard_kill_chain(reason: str, *, expected_run=None) -> None:
     """Trigger STOP-GATE and terminate runtime session and process."""
     log(f"GUARD KILL CHAIN ACTIVATED: {reason}")
 
@@ -189,7 +190,7 @@ def activate_guard_kill_chain(reason: str) -> None:
     run_quiet(["pkill", "-f", str(PROCESS_SUPERVISOR_SCRIPT)])
     run_quiet(["pkill", "-f", r"uvicorn .*CONTROL_PLANE\.api_server:app"])
 
-    write_self_heartbeat(status="stopped")
+    write_self_heartbeat(status="stopped", expected_run=expected_run)
     log("GUARD KILL CHAIN COMPLETED")
 
 
@@ -198,18 +199,34 @@ def main() -> None:
     ensure_runtime_layout()
     log("Stop-Gate watcher started")
 
+    from CORE_ROOT import run_context
+    meta = run_context.read_run_metadata()
+    run_identity = run_context._identity(meta) if meta else ()
+    stopping = False
+
+    def handle_stop(signum, frame):
+        nonlocal stopping
+        if not stopping:
+            stopping = True
+            raise KeyboardInterrupt
+
+    previous_handlers = {sig: signal.getsignal(sig) for sig in
+                         (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    for sig in previous_handlers:
+        signal.signal(sig, handle_stop)
+
     started_at = time.time()
     source_mismatch_strikes = 0
     last_poll_at = time.time()
 
     try:
         while True:
-            write_self_heartbeat(status="alive")
+            write_self_heartbeat(status="alive", expected_run=run_identity)
             poll_gap = time.time() - last_poll_at
             if poll_gap > HEARTBEAT_TIMEOUT_SEC:
                 log(f"Observer scheduling gap ({poll_gap:.2f}s); refresh self and recheck after two bounded polls")
                 resynchronization_started_at = time.time()
-                write_self_heartbeat(status="alive")
+                write_self_heartbeat(status="alive", expected_run=run_identity)
                 time.sleep(2 * POLL_INTERVAL_SEC)
                 if time.time() - resynchronization_started_at > HEARTBEAT_TIMEOUT_SEC:
                     log("Resynchronization itself was delayed; republish before evaluating peers")
@@ -221,17 +238,21 @@ def main() -> None:
                 source_mismatch_strikes=source_mismatch_strikes,
             )
             if is_critical:
-                activate_guard_kill_chain(message)
+                activate_guard_kill_chain(message, expected_run=run_identity)
                 break
 
             log(message)
             time.sleep(POLL_INTERVAL_SEC)
 
     except KeyboardInterrupt:
-        write_self_heartbeat(status="stopped")
+        write_self_heartbeat(status="stopped", expected_run=run_identity)
         log("Stop-Gate watcher stopped by user")
     except Exception as exc:  # noqa: BLE001
-        activate_guard_kill_chain(f"guard watcher exception: {exc}")
+        activate_guard_kill_chain(f"guard watcher exception: {exc}", expected_run=run_identity)
+
+    finally:
+        for sig, handler in previous_handlers.items():
+            signal.signal(sig, handler)
 
 
 if __name__ == "__main__":

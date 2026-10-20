@@ -17,7 +17,7 @@ def test_delayed_resynchronization_republishes_before_next_peer_evaluation(monke
     monkeypatch.setattr(module, "log", lambda message:None)
     monkeypatch.setattr(module.time, "time", lambda:clock["now"])
     monkeypatch.setattr(module, heartbeat, lambda **kwargs:written.append(clock["now"]))
-    monkeypatch.setattr(module, kill, killed.append)
+    monkeypatch.setattr(module, kill, lambda reason, **kwargs: killed.append(reason))
     def sleep(seconds):
         clock["sleeps"] += 1
         if clock["sleeps"] <= 2:
@@ -54,7 +54,7 @@ def test_common_pause_allows_delayed_peer_but_not_permanent_source_loss(monkeypa
     monkeypatch.setattr(module, "log", lambda message:None)
     monkeypatch.setattr(module.time, "time", lambda:clock["now"])
     monkeypatch.setattr(module, heartbeat, lambda **kwargs:written.append(clock["now"]))
-    monkeypatch.setattr(module, kill, killed.append)
+    monkeypatch.setattr(module, kill, lambda reason, **kwargs: killed.append(reason))
     def sleep(seconds):
         clock["sleeps"] += 1
         if clock["sleeps"] == 1:
@@ -106,7 +106,7 @@ def test_observer_resume_rechecks_without_masking_dead_source(monkeypatch, name,
     monkeypatch.setattr(module, "log", lambda message: None)
     monkeypatch.setattr(module, heartbeat, lambda **kwargs: None)
     monkeypatch.setattr(module.time, "time", lambda: clock["now"])
-    monkeypatch.setattr(module, kill, kills.append)
+    monkeypatch.setattr(module, kill, lambda reason, **kwargs: kills.append(reason))
 
     def sleep(seconds):
         clock["sleeps"] += 1

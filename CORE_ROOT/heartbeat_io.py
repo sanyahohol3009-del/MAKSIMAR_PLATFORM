@@ -327,3 +327,128 @@ def remove_stopped_pid_hint(path, *, proc_root=Path("/proc")):
         if pid <= 0 or (proc_root / str(pid)).exists():
             raise RuntimeError("PID hint process not proven absent")
         path.unlink()
+
+def write_guard_heartbeat(path, source, status="alive", *, expected_run=None):
+    """Use the existing atomic writer with a pinned guard run and terminal readback."""
+    import math
+    from CORE_ROOT import run_context
+    with run_context.runtime_mutation():
+        meta = run_context.read_run_metadata()
+        if expected_run is not None and (
+                not expected_run or not isinstance(meta, dict)
+                or type(meta.get("schema_version")) is not int
+                or meta["schema_version"] != run_context.RUN_METADATA_SCHEMA_VERSION
+                or not all(isinstance(meta.get(k), str) and bool(meta[k].strip())
+                           for k in ("run_id", "boot_id"))
+                or not all(type(meta.get(k)) in (int, float) and math.isfinite(meta[k])
+                           and meta[k] >= 0 for k in ("wall_time", "monotonic_time"))
+                or run_context._identity(meta) != expected_run):
+            raise RuntimeError("guard heartbeat run identity changed or missing")
+        payload = build_heartbeat(source=source, status=status)
+        previous = safe_read_json(path)
+        if (status == "alive" and previous and previous.get("status") == "stopped"
+                and all(previous.get(k) == payload.get(k) for k in
+                        ("source", "pid", "process_start_ticks", "run_id", "boot_id", "run_monotonic_time"))):
+            raise RuntimeError("guard terminal heartbeat cannot return to alive")
+        atomic_write_json(path, payload)
+        if safe_read_json(path) != payload:
+            raise RuntimeError("guard heartbeat readback failed")
+        if status == "stopped":
+            directory = os.open(Path(path).parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+
+
+def stop_owned_guard_process(module, source, pidfile, heartbeat_file, *, session_id=""):
+    """Complete the existing guard stop contract; never manufacture a receipt.
+
+    Same one-second grace as the existing controllers, pinned with pidfd.
+    Startup reservation serializes duplicate stop/start requests. The mutation
+    lock is deliberately not held while waiting for the guard's own writer.
+    """
+    import math
+    import select
+    import signal
+    from CORE_ROOT import run_context
+    pidfile, heartbeat_file = Path(pidfile), Path(heartbeat_file)
+
+    def finite_number(value):
+        return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+    def receipt_matches(receipt, meta, *, pid=None, ticks=None):
+        return bool(isinstance(receipt, dict) and isinstance(meta, dict)
+            and type(meta.get("schema_version")) is int
+            and meta["schema_version"] == run_context.RUN_METADATA_SCHEMA_VERSION
+            and meta.get("status") in run_context.ALLOWED_RUN_STATUSES
+            and finite_number(meta.get("monotonic_time"))
+            and finite_number(meta.get("wall_time"))
+            and finite_number(receipt.get("monotonic_ts"))
+            and finite_number(receipt.get("ts"))
+            and type(receipt.get("schema_version")) is int
+            and receipt["schema_version"] == HEARTBEAT_SCHEMA_VERSION
+            and receipt.get("source") == source
+            and type(receipt.get("pid")) is int and receipt["pid"] > 0
+            and isinstance(receipt.get("process_start_ticks"), str)
+            and receipt["process_start_ticks"].isdecimal()
+            and isinstance(meta.get("run_id"), str) and bool(meta["run_id"])
+            and isinstance(meta.get("boot_id"), str) and bool(meta["boot_id"])
+            and receipt.get("run_id") == meta["run_id"]
+            and receipt.get("boot_id") == meta["boot_id"]
+            and receipt.get("run_monotonic_time") == meta.get("monotonic_time")
+            and (pid is None or receipt["pid"] == pid)
+            and (ticks is None or receipt["process_start_ticks"] == ticks))
+
+    with run_context.startup_reservation():
+        if pidfile.is_symlink() or heartbeat_file.is_symlink():
+            raise RuntimeError("guard stop refused: symlink state path")
+        owned = find_owned_module_process_pids(module, pidfile=pidfile)
+        if owned is None or len(owned) > 1:
+            raise RuntimeError("guard stop refused: identity unknown or ambiguous")
+        meta = run_context.read_run_metadata()
+        before = safe_read_json(heartbeat_file)
+        if not owned:
+            if session_id:
+                raise RuntimeError("guard stop refused: session has no proven process owner")
+            if (not receipt_matches(before, meta) or before.get("status") != "stopped"
+                    or (Path("/proc") / str(before["pid"])).exists()):
+                raise RuntimeError("guard stop unproven: no verified owner or terminal receipt")
+            if pidfile.exists():
+                if pidfile.read_text().strip() != str(before["pid"]):
+                    raise RuntimeError("guard PID hint mismatches terminal receipt")
+                remove_stopped_pid_hint(pidfile)
+            return
+
+        pid = owned[0]
+        ticks = _process_start_ticks(Path("/proc") / str(pid))
+        if not receipt_matches(before, meta, pid=pid, ticks=ticks):
+            raise RuntimeError("guard stop refused: heartbeat/run identity mismatch")
+        fd = os.pidfd_open(pid)
+        try:
+            if not heartbeat_process_alive(before, module):
+                raise RuntimeError("guard stop refused: identity changed before signal")
+            started = time.monotonic()
+            signal.pidfd_send_signal(fd, signal.SIGTERM)
+            ready, _, _ = select.select([fd], [], [], 1.0)
+            if not ready:
+                signal.pidfd_send_signal(fd, signal.SIGKILL)
+                raise RuntimeError("guard stop forced; terminal lifecycle not proven")
+            # A dead but not yet reaped pipeline child must not be a live PID hint.
+            while (Path("/proc") / str(pid)).exists() and time.monotonic() - started < 1.0:
+                time.sleep(0.01)
+            after = safe_read_json(heartbeat_file)
+            if (run_context._identity(run_context.read_run_metadata() or {})
+                    != run_context._identity(meta or {})
+                    or not receipt_matches(after, meta, pid=pid, ticks=ticks)
+                    or after.get("status") != "stopped"
+                    or not isinstance(after.get("monotonic_ts"), (int, float))
+                    or after["monotonic_ts"] < started
+                    or (Path("/proc") / str(pid)).exists()):
+                raise RuntimeError("guard stop incomplete: terminal receipt/exit not proven")
+            if pidfile.exists():
+                if pidfile.read_text().strip() != str(pid):
+                    raise RuntimeError("guard PID hint changed during stop")
+                remove_stopped_pid_hint(pidfile)
+        finally:
+            os.close(fd)
