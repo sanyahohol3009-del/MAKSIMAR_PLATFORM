@@ -70,8 +70,8 @@ def test_real_api_lifespan_model_free_never_imports_external_providers_or_loads_
     monkeypatch.setattr(transport,"ollama_post_json",forbidden)
     monkeypatch.setattr(transport,"grounded_final_brain_call",forbidden)
     metadata=[]
-    monkeypatch.setattr(obs,"ollama_get_json",lambda url,**kw:metadata.append(url) or {"ok":False,"models":[]})
-    monkeypatch.setattr(obs.ExistingWindowsEdgeAdapter,"health",lambda self:{"status":"UNAVAILABLE"})
+    monkeypatch.setattr(obs,"ollama_get_json",lambda url,**kw:metadata.append(url) or forbidden())
+    monkeypatch.setattr(obs.ExistingWindowsEdgeAdapter,"health",forbidden)
     inventory._inventory_records.cache_clear()
     async def cycle():
         async with api._control_plane_lifespan(api.app):
@@ -85,7 +85,7 @@ def test_real_api_lifespan_model_free_never_imports_external_providers_or_loads_
             assert obs.build_runtime_readiness_payload()["chat_model_ready"] is False
     try:asyncio.run(cycle())
     finally:inventory._inventory_records.cache_clear()
-    assert attempted==[] and metadata
+    assert attempted==[] and metadata==[]
     # HTTP claims have no authority to change the process launch policy.
     assert api._payload_text({"text":"audit","model_free":False})=="audit"
     assert run_context.model_free_startup() is True

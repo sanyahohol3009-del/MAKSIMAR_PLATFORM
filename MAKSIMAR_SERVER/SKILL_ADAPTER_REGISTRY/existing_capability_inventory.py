@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from CORE_ROOT.run_context import model_free_startup
+
 """Server-owned read-only inventory of existing JARVIS capabilities."""
 
 import importlib.util
@@ -224,6 +226,7 @@ def build_semantic_capability_registry_projection(
     installation paths.  Turn-specific identity, policy, execution and receipt
     truth remains unresolved until the canonical spine evaluates a typed plan.
     """
+    model_free = model_free_startup()  # HTTP/readiness payloads cannot override launch context.
     runtime = dict(readiness or {})
     manifests = {str(item["id"]): item for item in load_capability_manifests()}
     entries = [
@@ -240,9 +243,17 @@ def build_semantic_capability_registry_projection(
         if capability_id not in projected_ids
     )
     entries.extend(_model_role_projection_entries(runtime))
+    if model_free:
+        for entry in entries:
+            if entry["kind"] == "model_role" or MODEL_ROLE_PROVIDER_ID in entry.get("provider_ids", ()):
+                # Preserve typed operation/installation metadata, but never infer
+                # executable provider availability from it in this launch mode.
+                entry["provider_available"] = False
+                entry["availability_status"] = "UNAVAILABLE"
     return {
         "schema_version": "semantic_capability_registry_projection.v1",
         "registry_id": "existing_capability_inventory_v2",
+        "model_free_startup": model_free,
         "source_owner": "MAKSIMAR_SERVER.SKILL_ADAPTER_REGISTRY.existing_capability_inventory",
         "capability_count": len(entries),
         "inventory_capability_count": len(build_existing_capability_inventory()),

@@ -14,6 +14,7 @@ from pathlib import Path
 import time
 
 from CONTROL_PLANE.health.monitor import take_snapshot
+from CORE_ROOT.run_context import model_free_startup
 from CONTROL_PLANE.canonical_semantic_spine import (
     CANDIDATE_DISCOVERY_JSON_SCHEMA,
     KIND_DISCOVERY_JSON_SCHEMA,
@@ -411,12 +412,7 @@ def jarvis_live_project_roadmap() -> dict[str, Any]:
 
 @app.get("/jarvis-live/project/models")
 def jarvis_live_project_models() -> dict[str, Any]:
-    return {
-        "ok": True,
-        "surface": "CONTROL_PLANE/api_server.py",
-        "models": _legacy_readonly_adapter().model_runtime_status(),
-        "read_only": True,
-    }
+    return jarvis_live_models()
 
 
 @app.get("/jarvis-live/project/safety")
@@ -461,6 +457,10 @@ def jarvis_live_memory() -> dict[str, Any]:
 
 @app.get("/jarvis-live/models")
 def jarvis_live_models() -> dict[str, Any]:
+    if model_free_startup():
+        raise HTTPException(status_code=503, detail={
+            "status": "UNAVAILABLE", "reason": "model_free_startup",
+        })
     return {
         "ok": True,
         "surface": "CONTROL_PLANE/api_server.py",

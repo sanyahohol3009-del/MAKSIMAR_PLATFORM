@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from CORE_ROOT.run_context import model_free_startup
 import threading
 import time
 import json
@@ -182,16 +183,25 @@ def build_jarvis_live_observability_read_model() -> dict[str, Any]:
 
 def build_runtime_readiness_payload(control_plane_alive: bool = True) -> dict[str, Any]:
     """Publish only directly observed runtime facts from the existing observability owner."""
-    ollama_alive = _http_alive(f"{OLLAMA_BASE_URL}/api/tags")
-    stt_alive = _http_alive(STT_SERVER_URL)
-    windows_edge_health = ExistingWindowsEdgeAdapter().health()
-    windows_edge_alive = windows_edge_health.get("status") == "AVAILABLE"
-    installed_models, running_models = _ollama_model_state() if ollama_alive else (set(), {})
+    model_free = model_free_startup()  # Validate before any provider observation.
+    if model_free:
+        # None means unobserved, not a failed probe or an absent installation.
+        ollama_alive = stt_alive = windows_edge_alive = None
+        installed_models, running_models = set(), {}
+    else:
+        ollama_alive = _http_alive(f"{OLLAMA_BASE_URL}/api/tags")
+        stt_alive = _http_alive(STT_SERVER_URL)
+        windows_edge_health = ExistingWindowsEdgeAdapter().health()
+        windows_edge_alive = windows_edge_health.get("status") == "AVAILABLE"
+        installed_models, running_models = _ollama_model_state() if ollama_alive else (set(), {})
     model_ids = (PRIMARY_CONVERSATION_MODEL_ID, HELPER_INPUT_CORRECTION_MODEL_ID)
     model_residency = {
         model_id: _model_residency_truth(model_id, installed_models, running_models.get(model_id))
         for model_id in model_ids
     }
+    if model_free:
+        for state in model_residency.values():
+            state.update(installed=None, resident=None)
     primary_model = model_residency[PRIMARY_CONVERSATION_MODEL_ID]
     expected_context = resident_context_tokens_for_jarvis_model(PRIMARY_CONVERSATION_MODEL_ID)
     model_ready = bool(
@@ -200,6 +210,7 @@ def build_runtime_readiness_payload(control_plane_alive: bool = True) -> dict[st
     )
     return {
         "control_plane_alive": bool(control_plane_alive),
+        "model_free_startup": model_free,
         "stt_server_alive": stt_alive,
         "ollama_alive": ollama_alive,
         "chat_model_resident": model_residency[PRIMARY_CONVERSATION_MODEL_ID]["resident"],
@@ -208,8 +219,8 @@ def build_runtime_readiness_payload(control_plane_alive: bool = True) -> dict[st
         "helper_model_resident": model_residency[HELPER_INPUT_CORRECTION_MODEL_ID]["resident"],
         "model_residency": model_residency,
         "windows_edge_alive": windows_edge_alive,
-        "pc_executor_available": windows_edge_alive,
-        "pc_executor_status": "available" if windows_edge_alive else "executor_unreachable",
+        "pc_executor_available": False if model_free else windows_edge_alive,
+        "pc_executor_status": "UNKNOWN" if model_free else "available" if windows_edge_alive else "executor_unreachable",
         "direct_pc_action_families": DIRECT_PC_ACTION_FAMILIES,
         "stt_server_url": STT_SERVER_URL,
         "ollama_base_url": OLLAMA_BASE_URL,

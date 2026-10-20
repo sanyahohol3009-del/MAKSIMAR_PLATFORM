@@ -21,7 +21,9 @@ def launcher(tmp_path):
     tools.mkdir()
     for name in ("tools/work", "start_maksimar.sh"):
         target = root / name
-        shutil.copyfile(ROOT / name, target)
+        # This fixture verifies published source, while test_work_model_free_startup
+        # independently verifies the held dirty WORK contract.
+        target.write_bytes(subprocess.check_output(["git", "show", "HEAD:" + name], cwd=ROOT))
         target.chmod(0o755)
     markers = {name: ("retained:" + name).encode() for name in
                ("degraded_mode.flag", "stop_gate_trigger.txt", "last_degraded_reason.txt", "incident_history.jsonl")}
