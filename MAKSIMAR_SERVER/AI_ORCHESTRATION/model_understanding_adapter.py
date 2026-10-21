@@ -23,6 +23,7 @@ from MAKSIMAR_SERVER.AI_ORCHESTRATION.ollama_transport import (
     OPERATION_DISCOVERY_NUM_PREDICT,
     think_policy_for_model_id,
     model_role_for_model_id,
+    model_keep_alive_for_model_id,
     build_model_call_timeout_truth,
     ollama_model_call_result,
     ollama_post_json,
@@ -243,7 +244,8 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
             "messages": [{"role": "system", "content": system_prompt},
                          {"role": "user", "content": user_prompt}],
             "options": {"temperature": 0, "num_predict": num_predict, "num_ctx": requested_num_ctx},
-            "keep_alive": keep_alive if keep_alive is not None else OLLAMA_LIVE_MODEL_KEEP_ALIVE,
+            "keep_alive": model_keep_alive_for_model_id(
+                model_id, requested_keep_alive=keep_alive),
         }
         trace_id, model_ordinal, model_started = trace_model_call_started(
             purpose=deadline_error.removesuffix("_deadline_exceeded"),

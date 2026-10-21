@@ -414,3 +414,90 @@ def test_r3_transport_stream_no_late_publication_and_closes_own_scope(acquisitio
     assert all(e.get('provider_operation_terminated','UNKNOWN')=='UNKNOWN' for e in observed)
     assert RequestDeadline.current() is None
     assert transport.ollama_post_json('/api/generate',acquisition['payload'])['resource_admission']['admitted']
+
+
+# R4-A: existing real admission/transport with external effects controlled only.
+def _r4a_configured_profile(state, role, future_name=False, load_policy=None):
+    profile = state['configured'][role]
+    model_id = ('fixture-r4a-configured-' + role) if future_name else profile.model_id
+    context = profile.resident_context_tokens or profile.default_context_tokens
+    demand = replace(state['profile'].load_resource_demand,
+                     model_id=model_id, context_tokens=context)
+    profile = replace(profile, model_id=model_id, load_resource_demand=demand,
+                      load_policy=profile.load_policy if load_policy is None else load_policy)
+    state['configured'][role] = profile
+    return profile
+
+
+@pytest.mark.parametrize('future_name', [False, True])
+@pytest.mark.parametrize('role', ['jarvis_chat_model', 'helper_input_correction_model',
+    'daily_coder_model', 'heavy_coder_model', 'heavy_reasoning_model'])
+def test_r4a_common_chat_honors_profile_without_role_substitution(acquisition, role, future_name):
+    state = acquisition
+    author_model_before = transport.DEFAULT_OLLAMA_MODEL_ID
+    profile = _r4a_configured_profile(state, role, future_name)
+    expected = 0 if profile.load_policy == 'load_on_demand' else transport.OLLAMA_LIVE_MODEL_KEEP_ALIVE
+    result = transport.ollama_chat_once('offline bounded task', 'offline bounded system',
+        model_id=profile.model_id,
+        options={'num_ctx': profile.resident_context_tokens or profile.default_context_tokens,
+                 'num_predict': 16})
+    assert result['ok'] and result['selected_model_id'] == profile.model_id
+    assert len(state['posts']) == 1 and state['observations'] == [profile.model_id]
+    assert state['posts'][0][1]['keep_alive'] == expected
+    assert result['model_role'] == role
+    # The transport does not promote helper/heavy into the canonical answer author.
+    assert transport.DEFAULT_OLLAMA_MODEL_ID == author_model_before
+    assert not any('actually_released' in key or 'vram_released' in key for key in result)
+
+
+@pytest.mark.parametrize('role,policy,expected', [
+    ('jarvis_chat_model', 'load_on_demand', 0),
+    ('heavy_reasoning_model', 'installed_ollama_wrapper', transport.OLLAMA_LIVE_MODEL_KEEP_ALIVE),
+])
+def test_r4a_common_chat_uses_configured_policy_not_model_family(acquisition, role, policy, expected):
+    state = acquisition
+    profile = _r4a_configured_profile(state, role, True, policy)
+    result = transport.ollama_chat_once('fixture', 'fixture', model_id=profile.model_id,
+        options={'num_ctx': profile.resident_context_tokens or profile.default_context_tokens,
+                 'num_predict': 16})
+    assert result['ok'] and state['posts'][0][1]['keep_alive'] == expected
+
+
+@pytest.mark.parametrize('unknown', ['model', 'policy'])
+def test_r4a_unknown_retention_configuration_has_no_provider_effect(acquisition, unknown):
+    state = acquisition
+    profile = _r4a_configured_profile(state, 'jarvis_chat_model', True,
+                                    'unsupported-fixture-policy' if unknown == 'policy' else None)
+    model_id = 'fixture-unregistered-r4a' if unknown == 'model' else profile.model_id
+    expected_error = KeyError if unknown == 'model' else ValueError
+    with pytest.raises(expected_error):
+        transport.ollama_chat_once('fixture', 'fixture', model_id=model_id,
+            options={'num_ctx': profile.resident_context_tokens or profile.default_context_tokens})
+    assert not state['posts'] and not state['gets'] and not state['observations']
+
+
+@pytest.mark.parametrize('case', ['unknown_owner', 'foreign_resident', 'low_headroom',
+                                  'unknown_demand', 'stopgate', 'model_free'])
+def test_r4a_resolved_nonretention_never_grants_admission(acquisition, monkeypatch, case):
+    from CORE_ROOT import runtime_paths
+    state = acquisition
+    profile = _r4a_configured_profile(state, 'heavy_reasoning_model', True)
+    observation = transport._observe_model_resources(profile)
+    state['observations'].clear()
+    if case == 'unknown_owner':
+        state['next_observation'] = replace(observation, ownership_verified=False)
+    elif case == 'foreign_resident':
+        state['next_observation'] = replace(observation,
+            resident_models=(('fixture-foreign-r4a', 'fixture-foreign-revision'),))
+    elif case == 'low_headroom':
+        state['next_observation'] = replace(observation, memory_available_bytes=(('host', G),))
+    elif case == 'unknown_demand':
+        state['configured'][profile.role_id] = replace(profile, load_resource_demand=None)
+    elif case == 'stopgate':
+        runtime_paths.DEGRADED_MODE_FILE.write_text('fixture R4-A deny')
+    else:
+        monkeypatch.setenv('MAKSIMAR_MODEL_FREE_STARTUP', '1')
+    result = transport.ollama_chat_once('fixture', 'fixture', model_id=profile.model_id,
+        options={'num_ctx': profile.resident_context_tokens or profile.default_context_tokens})
+    assert result['ok'] is False and result['model_call_attempted'] is False
+    assert not state['posts']

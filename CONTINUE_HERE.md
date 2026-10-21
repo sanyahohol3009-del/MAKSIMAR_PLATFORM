@@ -1,3 +1,42 @@
+# CURRENT R4-A OFFLINE VERIFIED / GIT APPROVAL PENDING - 2026-10-22
+
+HEAD f6167b21dff8b7886fe0e91f6ec304fe4361f5de, branch deflation/live-hotpath-reset-v1.
+R3 remains published/closed. R4-A exact six-file source repair approved directly in
+call_6a08cfe8a3e348a0b82cda59fce60402 and completed OFFLINE only. Do not redo discovery.
+Read audit OWNER_R4A_RETENTION_OFFLINE_REPORT_20261022.md and
+owner_20261022_R4A_final_status.json; originals under owner_20261021_R4A_before/.
+Existing transport utility model_keep_alive_for_model_id consumes canonical load_policy:
+load_on_demand0 in common chat, structured default and warmup; ordinary configured
+retention/primary explicit override retained; unknown policy fails closed. No new owner.
+
+377focusedPASS and1198UNIQUEcombinedPASS/0FAIL/0ERROR/0SKIP;unexpected effects0.
+All1135R3 IDs retained+63new cases;focused overlaps, do not sum. Original61test definitions
+unchanged. First376PASS/1new-test exception mismatch retained and resolved test-only;
+read-only shell-manifest audit KeyError also retained/resolved;no hidden failure.
+Current finite graph4025files/20588nodes/71877edges,errors/collisions/hashdrift0.
+Source6 exactly approved;admission/Spine/API/Deadline/WORK/REST/trust pins unchanged.
+Trust3/signature/pins2/state7/4stoppedreceipts/8archives46entries/heavyraw4 preserved.
+Runtime ORDERLY_STOPPED,8000free,no tmux. Shared physical release/abort NOT_TESTED.
+
+NEXT: exact7path Git batch awaits SEPARATE owner approval: approved6source/test files
+plus ONLY this new checkpoint block on published HEAD checkpoint. Manifest
+owner_20261022_R4A_git_checkpoint_plan.json;candidate checkpoint stored in audit.
+Do NOT stage/commit/push before direct exact approval. Prior local checkpoint history,
+audits,state,graph dumps,keys,models and47historical missing stay outside staging.
+Fresh remote/ancestry/hashes and original hooks required after approval; non-force only.
+
+R4-A PASS_OFFLINE is not fullR4 or M1 acceptance. R4-B WORK/REST coordination,
+verified revision/context peak demand,Windows/WSL host scope and typed shared-provider
+residency/admission remain HOLD.5current profiles have no verified full-load demand.
+Do not invent provider lease or demand,or introduce resource manager/scheduler/store.
+Existing8internal/6memory roots unchanged (not global recount);88coverage rows,
+7dormant candidates/38groups preserved with exact6feature-map audit backups.
+NO live START/WORK/REST,models,inference,unload,provider restart,weights,R4-B,admission
+policy changes,natural/selfknowledge,other repositories or P3/Godot authorized.
+FILE+CHAT COPY TO GPT remains mandatory; preserve all earlier local checkpoints below.
+
+--- Previous checkpoints retained verbatim ---
+
 # CURRENT R3 OFFLINE VERIFIED - 2026-10-21
 
 BASE_HEAD 52c51e8a09f56994b7ab2c692873c5724ef89c2d; verified R3 source checkpoint.

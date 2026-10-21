@@ -14,6 +14,7 @@ from MAKSIMAR_SERVER.AI_ORCHESTRATION.ollama_transport import (
     build_model_timeout_policy_read_model,
     ollama_get_json,
     ollama_post_json,
+    model_keep_alive_for_model_id,
 )
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     resident_context_tokens_for_jarvis_model,
@@ -97,7 +98,7 @@ def build_model_warmup_probe_read_model(
                     "prompt": "ready",
                     "stream": False,
                     "think": False,
-                    "keep_alive": OLLAMA_LIVE_MODEL_KEEP_ALIVE,
+                    "keep_alive": model_keep_alive_for_model_id(model_id),
                     "options": {
                         "num_ctx": resident_context_tokens_for_jarvis_model(model_id),
                         "num_predict": 4,

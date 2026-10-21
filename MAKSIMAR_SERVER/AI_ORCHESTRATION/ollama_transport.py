@@ -510,6 +510,22 @@ def build_hot_dialog_options() -> dict[str, Any]:
     }
 
 
+def model_keep_alive_for_model_id(
+    model_id: str, *, requested_keep_alive: str | int | None = None,
+) -> str | int:
+    """Apply the existing role profile to this request, never an unload or lease.
+
+    Non-retention is a provider request policy, not evidence of physical release.
+    """
+    profile = resolve_runtime_model_profile(model_id=model_id)
+    if profile.load_policy == "load_on_demand":
+        return 0
+    if profile.load_policy != "installed_ollama_wrapper":
+        raise ValueError("unsupported runtime model retention policy")
+    return (OLLAMA_LIVE_MODEL_KEEP_ALIVE
+            if requested_keep_alive is None else requested_keep_alive)
+
+
 def ollama_chat_once(
     user_text: str,
     system_prompt: str,
@@ -530,7 +546,7 @@ def ollama_chat_once(
             {"role": "user", "content": user_text},
         ],
         "options": dict(options or build_hot_dialog_options()),
-        "keep_alive": OLLAMA_LIVE_MODEL_KEEP_ALIVE,
+        "keep_alive": model_keep_alive_for_model_id(model_id),
     }
     timeout_truth = build_model_call_timeout_truth(
         model_id,

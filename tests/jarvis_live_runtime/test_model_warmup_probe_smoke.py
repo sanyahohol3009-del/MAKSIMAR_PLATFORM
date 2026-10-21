@@ -205,3 +205,77 @@ def test_admission_denial_cannot_become_ready_from_residency(monkeypatch):
     row=probe.build_model_warmup_probe_read_model(primary_only=True,warmup_enabled=True)["models"][0]
     assert row["running_now"] and row["status"]=="admission_denied"
     assert not row["warmup_attempted"] and not row["model_ready"]
+
+
+
+from tests.ai_orchestration.test_model_admission_transport import (
+    acquisition, _r4a_configured_profile,
+)
+
+
+@pytest.mark.parametrize('future_name', [False, True])
+@pytest.mark.parametrize('selection', ['primary', 'daily', 'heavy'])
+@pytest.mark.parametrize('provider_still_retains_zero', [False, True])
+def test_r4a_warmup_policy_and_independent_residency_truth(
+        acquisition, monkeypatch, future_name, selection, provider_still_retains_zero):
+    from urllib.parse import urlsplit
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION import ollama_transport as transport
+    from tools.jarvis_live_runtime import model_warmup_probe as probe
+    state = acquisition
+    for role in state['configured']:
+        _r4a_configured_profile(state, role, future_name)
+    for name in ('JARVIS_LIVE_WARMUP_INCLUDE_HEAVY', 'JARVIS_LIVE_WARMUP_INCLUDE_DAILY'):
+        monkeypatch.delenv(name, raising=False)
+    if selection == 'daily':
+        monkeypatch.setenv('JARVIS_LIVE_WARMUP_INCLUDE_DAILY', '1')
+    residents = {}
+    original_post = transport.httpx.post
+    class Response:
+        status_code = 200
+        content = b'{}'
+        def __init__(self, payload):
+            self.payload = payload
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return self.payload
+    def get(url, **kwargs):
+        path = urlsplit(url).path
+        assert path in {'/api/tags', '/api/ps'}
+        state['gets'].append(path)
+        models = ([{'name': p.model_id, 'digest': 'fixture-revision'}
+                   for p in state['configured'].values()] if path == '/api/tags' else
+                  list(residents.values()))
+        return Response({'models': models})
+    def post(url, *, json, timeout):
+        result = original_post(url, json=json, timeout=timeout)
+        if urlsplit(url).path == '/api/generate':
+            if json['keep_alive'] != 0 or provider_still_retains_zero:
+                residents[json['model']] = {'name': json['model'],
+                    'context_length': json['options']['num_ctx']}
+            else:
+                residents.pop(json['model'], None)
+        return result
+    monkeypatch.setattr(transport.httpx, 'get', get)
+    monkeypatch.setattr(transport.httpx, 'post', post)
+    result = probe.build_model_warmup_probe_read_model(primary_only=selection == 'primary',
+        include_heavy=selection == 'heavy', warmup_enabled=True)
+    selected_roles = (['jarvis_chat_model'] if selection == 'primary' else
+                      ['helper_input_correction_model', 'jarvis_chat_model',
+                       'daily_coder_model' if selection == 'daily' else 'heavy_coder_model'])
+    assert [row['model_role'] for row in result['models']] == selected_roles
+    loads = [payload for url, payload, timeout in state['posts']
+             if urlsplit(url).path == '/api/generate']
+    assert len(loads) == len(selected_roles) == len(state['observations'])
+    for row, payload in zip(result['models'], loads):
+        profile = state['configured'][row['model_role']]
+        expected_keep = 0 if profile.load_policy == 'load_on_demand' else transport.OLLAMA_LIVE_MODEL_KEEP_ALIVE
+        assert payload['model'] == profile.model_id and payload['keep_alive'] == expected_keep
+        assert row['warmup_ok'] and row['warmup_attempted']
+        assert row['resource_admission']['admitted']
+        expected_resident = expected_keep != 0 or provider_still_retains_zero
+        assert row['running_now'] is expected_resident and row['model_ready'] is expected_resident
+        assert row['status'] == ('resident' if expected_resident else 'not_resident')
+        assert not any('actually_released' in key or 'vram_released' in key for key in row)
+    # A provider that still reports a runner is never declared physically released.
+    assert not result.get('resources_actually_released', False)

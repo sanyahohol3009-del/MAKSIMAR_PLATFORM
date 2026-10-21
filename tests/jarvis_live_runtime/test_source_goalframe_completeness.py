@@ -411,3 +411,67 @@ def test_public_source_verifier_reuses_profile_residency_policy(monkeypatch,poli
     assert result["status"]=="COMPLETE" and len(seen)==1
     assert seen[0]["model_id"]==selected.model_id and seen[0]["keep_alive"]==expected
     assert seen[0]["deadline"] is deadline and seen[0]["schema"] is adapter.SOURCE_CANDIDATE_VERDICT_SCHEMA
+
+
+
+# Reuse the existing R2/R3 real admission fixture; only HTTP/hardware are controlled.
+from tests.ai_orchestration.test_model_admission_transport import (
+    acquisition, _r4a_configured_profile,
+)
+
+
+@pytest.mark.parametrize('future_name', [False, True])
+@pytest.mark.parametrize('role', ['jarvis_chat_model', 'helper_input_correction_model',
+    'daily_coder_model', 'heavy_coder_model', 'heavy_reasoning_model'])
+@pytest.mark.parametrize('requested_keep_alive', [None, 0, '7s'])
+def test_r4a_structured_call_preserves_profile_retention_and_same_deadline(
+        acquisition, monkeypatch, future_name, role, requested_keep_alive):
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION import ollama_transport as transport
+    state = acquisition
+    profile = _r4a_configured_profile(state, role, future_name)
+    class Response:
+        status_code = 200
+        content = b'{}'
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return {'model': profile.model_id, 'done': True, 'done_reason': 'stop',
+                    'message': {'content': '{"ok":true}'}}
+    def post(url, *, json, timeout):
+        state['posts'].append((url, json, timeout))
+        return Response()
+    monkeypatch.setattr(transport.httpx, 'post', post)
+    schema = {'type': 'object', 'additionalProperties': False,
+              'required': ['ok'], 'properties': {'ok': {'type': 'boolean'}}}
+    port = adapter.ExistingOllamaModelUnderstandingAdapter(json_schema=schema)
+    deadline = RequestDeadline(30)
+    identity = (deadline.started_at, deadline.expires_at)
+    result = port._main_model_call(system_prompt='fixture', user_prompt='fixture',
+        deadline=deadline, schema=schema, num_predict=16,
+        deadline_error='fixture_r4a_deadline', model_id=profile.model_id,
+        num_ctx=profile.resident_context_tokens or profile.default_context_tokens,
+        keep_alive=requested_keep_alive)
+    expected = (0 if profile.load_policy == 'load_on_demand' else
+                transport.OLLAMA_LIVE_MODEL_KEEP_ALIVE if requested_keep_alive is None else
+                requested_keep_alive)
+    assert result['ok'] and result['final_valid'] and result['parsed'] == {'ok': True}
+    assert len(state['posts']) == 1 and state['posts'][0][1]['keep_alive'] == expected
+    assert state['observations'] == [profile.model_id]
+    assert (deadline.started_at, deadline.expires_at) == identity
+    assert deadline.understanding_model_attempt_count == 1
+    assert deadline.understanding_model_attempts[0]['model_role'] == role
+    assert deadline.understanding_model_attempts[0]['retry_decision'] is False
+    assert not any('actually_released' in key or 'vram_released' in key for key in result)
+
+
+def test_r4a_structured_unknown_policy_fails_before_model_attempt(acquisition):
+    profile = _r4a_configured_profile(acquisition, 'heavy_reasoning_model', True,
+                                    'unsupported-fixture-policy')
+    port = adapter.ExistingOllamaModelUnderstandingAdapter(json_schema={})
+    deadline = RequestDeadline(30)
+    with pytest.raises(ValueError, match='retention policy'):
+        port._single_model_call(system_prompt='fixture', user_prompt='fixture',
+            deadline=deadline, schema={}, num_predict=16, deadline_error='fixture_deadline',
+            model_id=profile.model_id, num_ctx=profile.default_context_tokens)
+    assert deadline.understanding_model_attempt_count == 0
+    assert not acquisition['posts'] and not acquisition['observations']
