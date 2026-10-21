@@ -255,6 +255,18 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
         started_at, started_clock = transport_clock_snapshot()
         try:
             result = ollama_post_json(OLLAMA_CHAT_URL, payload, timeout_seconds=timeout)
+            finished_at, finished_clock = transport_clock_snapshot()
+            envelope = ollama_model_call_result(
+                result, expected_model_id=model_id,
+                requested_num_ctx=requested_num_ctx, transport_attempted=True,
+                timeout_truth=timeout_truth, transport_started_at=started_at,
+                transport_finished_at=finished_at,
+                transport_duration_seconds=finished_clock - started_clock,
+            )
+            if deadline.cancelled:
+                failure = TimeoutError(deadline_error)
+                failure.model_call_result = envelope
+                raise failure
         except Exception as exc:
             trace_model_call_completed(
                 trace_id=trace_id, ordinal=model_ordinal, started=model_started,
@@ -262,19 +274,12 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
                 error_class=type(exc).__name__,
             )
             raise
-        finished_at, finished_clock = transport_clock_snapshot()
         trace_model_call_completed(
             trace_id=trace_id, ordinal=model_ordinal, started=model_started,
             status="COMPLETED" if result.get("ok", True) else "FAILED",
             deadline_remaining=deadline.remaining(),
         )
-        return ollama_model_call_result(
-            result, expected_model_id=model_id,
-            requested_num_ctx=requested_num_ctx, transport_attempted=True,
-            timeout_truth=timeout_truth, transport_started_at=started_at,
-            transport_finished_at=finished_at,
-            transport_duration_seconds=finished_clock - started_clock,
-        )
+        return envelope
 
     def _main_model_call(
         self, *, system_prompt: str, user_prompt: str, deadline: RequestDeadline,
@@ -308,11 +313,14 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
             except Exception as exc:
                 if deadline.understanding_model_attempt_count > before:
                     from datetime import datetime, timezone
+                    received = getattr(exc, "model_call_result", None)
                     failure = {"attempt_index": index, "request_model_attempt": deadline.understanding_model_attempt_count,
                                "model": model_id, "model_role": model_role_for_model_id(model_id), "timestamp": datetime.now(timezone.utc).isoformat(),
-                               "raw_response": None, "response_received": False, "schema_valid": False,
+                               "raw_response": received.get("content") if received is not None else None,
+                               "response_received": received is not None, "schema_valid": False,
                                "validation_error": type(exc).__name__, "retry_decision": False,
-                               "retry_reason": "transport_exception_no_response", "diagnostic_only": True,
+                               "retry_reason": "cancelled_after_response" if received is not None else "transport_exception_no_response",
+                               "diagnostic_only": True,
                                "user_memory": False, "training_eligible": False}
                     deadline.understanding_model_attempts.append(failure)
                     trace_stage("UNDERSTANDING_ATTEMPT", "FAILED", model_id=model_id,
@@ -429,6 +437,10 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
             transport_finished_at=finished_at,
             transport_duration_seconds=finished_clock - started_clock,
         )
+        if deadline.cancelled:
+            failure = TimeoutError("helper_input_correction_deadline_exceeded")
+            failure.model_call_result = envelope
+            raise failure
         parsed, valid, validation_error = validate_structured_payload(envelope.get("content"), HELPER_INPUT_CORRECTION_SCHEMA)
         envelope.update(parsed=parsed, final_valid=valid, validation_error=validation_error)
         return envelope

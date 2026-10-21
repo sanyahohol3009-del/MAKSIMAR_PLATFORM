@@ -1,3 +1,66 @@
+# Current cancellation response gate checkpoint - 2026-10-21
+
+PERSONAL_JARVIS_RECOVERY / P2 Phase1B PENDING. No P3.
+ROOT /home/aleksandr/MAKSIMAR_PLATFORM.
+HEAD 31656b87da0c5ae19fd814b12adea5fbe2e4a25b, branch deflation/live-hotpath-reset-v1.
+WORK/warmup batch A is committed and remotely verified; do not recreate it.
+Cancellation batch B exact six-file commit/ordinary push APPROVED by owner call_b1af2688f4a24e81bf68e3f49da793d1. Read current Git/report for delivery SHA; do not recreate delivery. Index was empty before staging.
+
+Latest owner approval call_a9f0a157840d48c293e6cbcf73239381 covers exactly two
+existing production adapters and two existing test files. Post-provider cancellation
+checks now protect primary/heavy understanding, direct helper correction/review,
+FinalBrain sync and each stream event. Same RequestDeadline, no new retry/authority.
+Late understanding replies remain diagnostic with response_received=true and raw content.
+Physical provider abort/unload is NOT proven by response withholding.
+
+Final evidence in RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011:
+- OWNER_MODEL_ENABLED_ACTIVATION_REPORT_20261021.md
+- owner_20261021_cancellation_final_status.json
+- owner_20261021_cancellation_combined_repair_final_summary.json and .xml/.log
+- owner_20261021_cancellation_codegraph_final/generation_proof.json
+- owner_20261021_cancellation_final_integrity.json
+- owner_20261021_cancellation_source_review_final.json
+- owner_20261021_cancellation_existing_harness_review.json
+
+Final focused103PASS; combined772PASS/0FAIL/0ERROR/0SKIP. Counts overlap; never sum.
+33 new parametrized cases. Existing finite4023 source hashes fixed during final run.
+Graph20455nodes/69929edges; validation/collisions/internal errors/hash mismatch0.
+Earlier failed fixture runs, intermediate proof and an explicitly aborted test runner
+remain retained; do not report them as final regressions or erase their evidence.
+
+Fresh independent state ORDERLY_STOPPED;8000 free. Public trust3, source pins2,
+terminal receipts4 and8archives/46entries unchanged. Incident/history/state unchanged.
+47historical missing paths retained; unrelated modified hash mismatches0.
+No real model call, WORK/REST, runtime restart, natural or selfknowledge run in batch B.
+
+Delivery review found the two existing tests UNTRACKED. They depend on existing
+UNTRACKED tools/jarvis_live_runtime/phase_1b_model_acceptance.py. This unchanged
+14964-byte tool was statically reviewed; local dependencies tracked; callers are tests
+and opt-in CLI, not production startup. It is NOT live accepted: its adapter exceptions
+can precede final output persistence; synthetic harness identity is not API auth.
+Do not execute its real-model CLI or rewrite this old harness to force acceptance.
+
+NEXT EXACT ACTION:
+1. Candidate dependency-closed Git batch is two adapters, two existing tests,
+   existing phase_1b_model_acceptance.py and CONTINUE_HERE.md (six paths), recorded in
+   owner_20261021_cancellation_reviewed_git_candidate.json. Obtain separate exact
+   owner commit/push approval was received. Execute only this batch; keep hooks, fresh ancestry and ordinary push. After delivery verify report/status and remote SHA; do not recommit.
+2. Continue existing-owner scoped design for actual resource admission, physical owned
+   cancellation/release and shared end-to-end stream deadline. No new scheduler/authority.
+3. Resource capacity vs free-headroom policy and shared daemon ownership are unresolved;
+   do not invent thresholds, unload foreign residency or hide low RAM under PASS.
+4. Existing stream still creates a new180s FinalBrain deadline. Heavy cold-start underlying
+   trigger UNKNOWN, OOM not proven. Do not run more probes without scope approval.
+5. M1 and M2 each require fresh separate live approval; none exists. Selfknowledge frozen.
+
+Ledger roots remain8internal/6memory, not a fresh global recount. Memory integrationFAIL;
+platform activation P2_PHASE_1B_PENDING. Full model-enabled offline gate remains HOLD.
+
+Prior checkpoint retained verbatim below; old ACTIVE/NEXT statements are historical
+where they conflict with this block. Backup: owner_20261021_continue_before_cancellation_checkpoint.md.
+
+--- Historical checkpoint below ---
+
 # Current model-enabled activation checkpoint — 2026-10-21
 
 Track PERSONAL_JARVIS_RECOVERY; P2/Phase1B PENDING. No P3.

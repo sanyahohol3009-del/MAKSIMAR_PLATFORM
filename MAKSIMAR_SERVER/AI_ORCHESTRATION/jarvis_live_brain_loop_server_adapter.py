@@ -117,7 +117,10 @@ class ExistingFinalBrainAdapter(FinalBrainPort):
         timeout = float(timeout_truth["effective_transport_timeout_seconds"])
         if timeout <= 0 or deadline.cancelled:
             raise TimeoutError("final_brain_deadline_exceeded")
-        return grounded_final_brain_call(timeout_truth=timeout_truth, **payload)
+        result = grounded_final_brain_call(timeout_truth=timeout_truth, **payload)
+        if deadline.cancelled:
+            raise TimeoutError("final_brain_deadline_exceeded")
+        return result
 
     def stream_answer(self, *, deadline: RequestDeadline, **payload: Any) -> Iterator[dict[str, Any]]:
         timeout_truth = build_model_call_timeout_truth(
@@ -129,4 +132,9 @@ class ExistingFinalBrainAdapter(FinalBrainPort):
             yield {"event": "error", "error_kind": "final_brain_deadline_exceeded",
                    "error_message": "Final Brain deadline exceeded", "response_text": ""}
             return
-        yield from grounded_final_brain_stream(timeout_truth=timeout_truth, **payload)
+        for event in grounded_final_brain_stream(timeout_truth=timeout_truth, **payload):
+            if deadline.cancelled:
+                yield {"event": "error", "error_kind": "final_brain_deadline_exceeded",
+                       "error_message": "Final Brain deadline exceeded", "response_text": ""}
+                return
+            yield event
