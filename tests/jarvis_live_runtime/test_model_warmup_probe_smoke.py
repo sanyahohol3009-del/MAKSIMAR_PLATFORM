@@ -189,3 +189,19 @@ def test_supported_selection_is_exact_and_metadata_only_without_warm_permission(
     result = probe.build_model_warmup_probe_read_model(primary_only=primary_only, warmup_enabled=False)
     assert tuple(item["model_id"] for item in result["models"]) == expected
     assert not any(item["warmup_attempted"] for item in result["models"])
+
+
+def test_admission_denial_cannot_become_ready_from_residency(monkeypatch):
+    from tools.jarvis_live_runtime import model_warmup_probe as probe
+    from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import resolve_runtime_model_profile
+    primary=resolve_runtime_model_profile(role_id="jarvis_chat_model")
+    monkeypatch.setenv("MAKSIMAR_MODEL_FREE_STARTUP","0")
+    monkeypatch.setattr(probe,"ollama_get_json",lambda *a,**k:{"models":[
+        {"name":primary.model_id,"context_length":primary.resident_context_tokens}]})
+    def rejected(path,payload,**kwargs):
+        if path=="/api/show":return {"ok":True}
+        return {"ok":False,"model_call_attempted":False,"resource_admission":{"admitted":False}}
+    monkeypatch.setattr(probe,"ollama_post_json",rejected)
+    row=probe.build_model_warmup_probe_read_model(primary_only=True,warmup_enabled=True)["models"][0]
+    assert row["running_now"] and row["status"]=="admission_denied"
+    assert not row["warmup_attempted"] and not row["model_ready"]

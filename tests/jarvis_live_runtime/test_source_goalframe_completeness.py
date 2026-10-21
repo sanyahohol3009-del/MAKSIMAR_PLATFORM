@@ -391,3 +391,23 @@ def test_real_goalframe_stream_uses_one_request_token_and_retains_raw_failures(m
                for a in token.understanding_model_attempts)
     assert not any(event["event"] in {"chunk", "done"} for event in events)
     assert events[-1]["result"]["operation_status"] == "UNDERSTANDING_UNAVAILABLE"
+
+
+@pytest.mark.parametrize("policy,expected",[("load_on_demand",0),("installed_ollama_wrapper",None)])
+def test_public_source_verifier_reuses_profile_residency_policy(monkeypatch,policy,expected):
+    from dataclasses import replace
+    profiles=adapter.build_jarvis_live_runtime_model_role_profiles()
+    heavy=next(p for p in profiles if p.role_id=="heavy_reasoning_model")
+    selected=replace(heavy,load_policy=policy)
+    monkeypatch.setattr(adapter,"build_jarvis_live_runtime_model_role_profiles",lambda:tuple(
+        selected if p.role_id==heavy.role_id else p for p in profiles))
+    model=adapter.ExistingOllamaModelUnderstandingAdapter(json_schema=adapter.SOURCE_CANDIDATE_VERDICT_SCHEMA)
+    seen=[];deadline=RequestDeadline(30)
+    def call(**kwargs):
+        seen.append(kwargs)
+        return {"ok":True,"final_valid":True,"parsed":verdict(),"model_attempts":[]}
+    monkeypatch.setattr(model,"_main_model_call",call)
+    result=model.verify_source_candidate(source_text=SOURCE,candidate=candidate(),deadline=deadline)
+    assert result["status"]=="COMPLETE" and len(seen)==1
+    assert seen[0]["model_id"]==selected.model_id and seen[0]["keep_alive"]==expected
+    assert seen[0]["deadline"] is deadline and seen[0]["schema"] is adapter.SOURCE_CANDIDATE_VERDICT_SCHEMA

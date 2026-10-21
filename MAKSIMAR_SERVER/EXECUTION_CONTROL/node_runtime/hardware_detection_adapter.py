@@ -6,6 +6,8 @@ import platform
 import re
 import shutil
 import subprocess
+from pathlib import Path
+from dataclasses import replace
 from typing import Iterable
 
 from MAKSIMAR_CORE_LIB.node_roles.node_identity_models import CanonicalNodeId
@@ -246,6 +248,7 @@ def _detect_memory_snapshot() -> tuple[DetectedMemorySnapshot, tuple[str, ...]]:
     if details:
         sources.append("dmidecode")
 
+    domains, scope_complete = _memory_constraint_domains(free_kb * 1024 if free_kb else None)
     snapshot = DetectedMemorySnapshot(
         ram_total_gb=ram_total_gb,
         ram_free_gb=ram_free_gb,
@@ -258,6 +261,9 @@ def _detect_memory_snapshot() -> tuple[DetectedMemorySnapshot, tuple[str, ...]]:
         ecc_present=bool(details.get("ecc_present", False)),
         registered_or_buffered=str(details.get("registered_or_buffered", "unknown")),
         slot_population=str(details.get("slot_population", "unknown")),
+        available_bytes=free_kb * 1024 if free_kb else None,
+        constraint_domains=domains,
+        scope_complete=scope_complete,
     )
 
     return snapshot, tuple(dict.fromkeys(sources))
@@ -293,7 +299,7 @@ def _detect_nvidia_gpus() -> tuple[tuple[DetectedGpuSnapshot, ...], tuple[str, .
     output = _run_command(
         [
             "nvidia-smi",
-            "--query-gpu=index,name,memory.total,memory.free",
+            "--query-gpu=index,uuid,pci.bus_id,name,memory.total,memory.free",
             "--format=csv,noheader,nounits",
         ]
     )
@@ -303,13 +309,13 @@ def _detect_nvidia_gpus() -> tuple[tuple[DetectedGpuSnapshot, ...], tuple[str, .
     gpus: list[DetectedGpuSnapshot] = []
     for line in output.splitlines():
         parts = [part.strip() for part in line.split(",")]
-        if len(parts) != 4:
+        if len(parts) != 6:
             continue
 
         try:
             gpu_index = int(parts[0])
-            vram_total = max(int(parts[2]) // 1024, 0)
-            vram_free = max(int(parts[3]) // 1024, 0)
+            vram_total = max(int(parts[4]) // 1024, 0)
+            vram_free = max(int(parts[5]) // 1024, 0)
         except ValueError:
             continue
 
@@ -317,12 +323,14 @@ def _detect_nvidia_gpus() -> tuple[tuple[DetectedGpuSnapshot, ...], tuple[str, .
             DetectedGpuSnapshot(
                 gpu_index=gpu_index,
                 gpu_vendor="NVIDIA",
-                gpu_model=parts[1],
+                gpu_model=parts[3],
                 accelerator_class="discrete_gpu",
                 vram_total_gb=vram_total,
                 vram_free_gb=vram_free,
                 shared_memory_mode=False,
                 gpu_capabilities=("graphics", "compute", "cuda"),
+                gpu_uuid=parts[1].lower() if re.fullmatch(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", parts[1], re.IGNORECASE) else "",
+                pci_bus_id=_normalize_pci_identity(parts[2]),
             )
         )
 
@@ -383,6 +391,7 @@ def _detect_generic_gpus() -> tuple[tuple[DetectedGpuSnapshot, ...], tuple[str, 
                 vram_free_gb=0,
                 shared_memory_mode=shared_memory_mode,
                 gpu_capabilities=capabilities,
+                pci_bus_id=_normalize_pci_identity(line.split()[0]),
             )
         )
 
@@ -393,30 +402,119 @@ def _merge_gpu_snapshots(
     primary: Iterable[DetectedGpuSnapshot],
     secondary: Iterable[DetectedGpuSnapshot],
 ) -> tuple[DetectedGpuSnapshot, ...]:
-    """Merge GPU snapshots while avoiding obvious duplicates."""
+    """Merge verified aliases, preserving distinct identical accelerators.
+
+    Vendor/model/index are descriptions, not global physical identities. Unknown
+    identities remain explicit observations and are never admission capacity.
+    """
     merged: list[DetectedGpuSnapshot] = []
-    seen: set[tuple[str, str]] = set()
+    for gpu in tuple(primary) + tuple(secondary):
+        uuid = gpu.gpu_uuid.lower()
+        pci = _normalize_pci_identity(gpu.pci_bus_id)
+        normalized = replace(gpu, gpu_uuid=uuid, pci_bus_id=pci)
+        matches = [i for i, prior in enumerate(merged) if
+                   (uuid and prior.gpu_uuid == uuid) or (pci and prior.pci_bus_id == pci)]
+        if len(matches) > 1:
+            raise ValueError("ambiguous_physical_accelerator_identity")
+        if matches:
+            i = matches[0]; prior = merged[i]
+            if ((uuid and prior.gpu_uuid and uuid != prior.gpu_uuid)
+                    or (pci and prior.pci_bus_id and pci != prior.pci_bus_id)):
+                raise ValueError("conflicting_physical_accelerator_identity")
+            # Prefer the authoritative memory observation; enrich only identities.
+            merged[i] = replace(prior, gpu_uuid=prior.gpu_uuid or uuid,
+                                pci_bus_id=prior.pci_bus_id or pci)
+        else:
+            merged.append(normalized)
+    return tuple(replace(gpu, gpu_index=index) for index, gpu in enumerate(merged))
 
-    for gpu in list(primary) + list(secondary):
-        key = (gpu.gpu_vendor, gpu.gpu_model)
-        if key in seen:
+
+def _normalize_pci_identity(value: str) -> str:
+    """Normalize a PCI address from a host adapter, never a model-name heuristic."""
+    value = value.strip().lower()
+    if re.fullmatch(r"[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]", value):
+        return "00000000:" + value
+    if re.fullmatch(r"[0-9a-f]{4,8}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]", value):
+        domain, bus, function = value.split(":")
+        return domain.zfill(8) + ":" + bus + ":" + function
+    return ""
+
+
+def _memory_constraint_domains(available_bytes):
+    """Intersect environment/cgroup budgets; unsupported host scope stays unknown."""
+    if type(available_bytes) is not int or available_bytes <= 0:
+        return (), False
+    domains = [("execution_environment", available_bytes)]
+    complete = True
+    cgroups = _read_text_file("/proc/self/cgroup")
+    for line in cgroups.splitlines():
+        parts = line.split(":", 2)
+        if len(parts) != 3:
+            complete = False; continue
+        controllers, relative = parts[1], parts[2]
+        if controllers and "memory" not in controllers.split(","):
             continue
-        seen.add(key)
-        merged.append(gpu)
+        root = Path("/sys/fs/cgroup") if not controllers else Path("/sys/fs/cgroup/memory")
+        target = root / relative.lstrip("/")
+        if ".." in target.parts:
+            complete = False; continue
+        limit_name, current_name = (("memory.max", "memory.current") if not controllers
+                                    else ("memory.limit_in_bytes", "memory.usage_in_bytes"))
+        # Every visible ancestor constrains the same allocation, not only self.
+        chain = []
+        cursor = target
+        while cursor == root or root in cursor.parents:
+            chain.append(cursor)
+            if cursor == root:
+                break
+            cursor = cursor.parent
+        for cursor in chain:
+            limit = _read_text_file(str(cursor / limit_name)).strip()
+            current = _read_text_file(str(cursor / current_name)).strip()
+            if limit == "max":
+                continue
+            if limit.isdigit() and current.isdigit():
+                domains.append(("cgroup:" + str(cursor), max(0, int(limit) - int(current))))
+            else:
+                complete = False
+    if not cgroups:
+        complete = False
+    # WSL exposes guest memory, not an independent Windows physical headroom.
+    # No host bridge observation exists here, so never claim a complete host view.
+    kernel = _read_text_file("/proc/sys/kernel/osrelease").lower()
+    if not kernel or "microsoft" in kernel:
+        complete = False
+    return tuple(domains), complete
 
-    for index, gpu in enumerate(merged):
-        merged[index] = DetectedGpuSnapshot(
-            gpu_index=index,
-            gpu_vendor=gpu.gpu_vendor,
-            gpu_model=gpu.gpu_model,
-            accelerator_class=gpu.accelerator_class,
-            vram_total_gb=gpu.vram_total_gb,
-            vram_free_gb=gpu.vram_free_gb,
-            shared_memory_mode=gpu.shared_memory_mode,
-            gpu_capabilities=gpu.gpu_capabilities,
-        )
 
-    return tuple(merged)
+def detect_model_resource_observation() -> dict:
+    """Targeted fresh physical observations; no logical-node duplication or store."""
+    import time
+    started = time.monotonic()
+    # Avoid dmidecode/capacity projection work on the load path.
+    raw = _read_text_file("/proc/meminfo")
+    available = _parse_meminfo_value_kb(raw, "MemAvailable") * 1024
+    domains, complete = _memory_constraint_domains(available or None)
+    primary, _ = _detect_nvidia_gpus()
+    secondary, _ = _detect_generic_gpus()
+    gpus = _merge_gpu_snapshots(primary, secondary)
+    accelerator_values = []
+    identities_verified = True
+    for gpu in gpus:
+        identity = gpu.gpu_uuid or gpu.pci_bus_id
+        if not identity:
+            identities_verified = False
+            continue
+        accelerator_values.append((identity, gpu.vram_free_gb * 1024 ** 3))
+    try:
+        threads = len(os.sched_getaffinity(0))
+    except (AttributeError, OSError):
+        threads = os.cpu_count() or 0
+    return {"observed_monotonic": started, "memory_available_bytes": domains,
+            "accelerator_available_bytes": tuple(accelerator_values),
+            "physical_identity_verified": identities_verified,
+            "cpu_threads": threads, "scope_complete": complete,
+            "scope_id": "local_execution_environment", "source": __name__}
 
 
 def detect_node_hardware(node_id: CanonicalNodeId) -> NodeHardwareDetectionContract:

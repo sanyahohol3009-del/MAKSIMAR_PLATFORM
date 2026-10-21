@@ -105,3 +105,54 @@ def _require_true(value: bool, field_name: str) -> None:
 def _require_false(value: bool, field_name: str) -> None:
     if value is not False:
         raise ValueError(f"{field_name} must remain false")
+
+
+@dataclass(frozen=True, slots=True)
+class ModelLoadResourceDemand:
+    """Validated full-load upper bound, not weights size or an execution permission.
+
+    Peaks include weights, KV/context, workspace, offload and concurrent work.
+    Accelerator placement uses verified physical identities. Unknown bounds are
+    represented by no demand on the existing runtime profile.
+    """
+
+    model_id: str
+    backend_id: str
+    model_revision: str
+    context_tokens: int
+    max_concurrency: int
+    peak_ram_bytes: int
+    accelerator_bytes: tuple[tuple[str, int], ...]
+    min_cpu_threads: int
+    provenance: str
+    max_observation_age_seconds: float
+    bound_kind: str = "UNKNOWN"
+    ram_headroom_bytes: int = 0
+    accelerator_headroom_bytes: int = 0
+
+    def __post_init__(self) -> None:
+        import math
+        for name in ("model_id", "backend_id", "model_revision", "provenance"):
+            _require_non_empty(getattr(self, name), name)
+        for name in ("context_tokens", "max_concurrency", "peak_ram_bytes", "min_cpu_threads"):
+            if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
+                raise ValueError(name + " must be a positive integer")
+        for name in ("ram_headroom_bytes", "accelerator_headroom_bytes"):
+            if type(getattr(self, name)) is not int or getattr(self, name) < 0:
+                raise ValueError(name + " must be a non-negative integer")
+        age = self.max_observation_age_seconds
+        if type(age) not in (int, float) or not math.isfinite(age) or age <= 0:
+            raise ValueError("max_observation_age_seconds invalid")
+        if self.bound_kind not in ("UNKNOWN", "VERIFIED_UPPER_BOUND"):
+            raise ValueError("unsupported resource bound kind")
+        if type(self.accelerator_bytes) is not tuple:
+            raise ValueError("accelerator_bytes must be immutable")
+        seen = set()
+        for entry in self.accelerator_bytes:
+            if type(entry) is not tuple or len(entry) != 2:
+                raise ValueError("invalid accelerator placement")
+            device, size = entry
+            _require_non_empty(device, "physical accelerator identity")
+            if device in seen or type(size) is not int or size <= 0:
+                raise ValueError("duplicate or invalid accelerator placement")
+            seen.add(device)

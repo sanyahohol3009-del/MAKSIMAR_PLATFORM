@@ -1,3 +1,207 @@
+# CURRENT R2 authorized source delivery - 2026-10-21
+
+Direct owner approval call_94527b1a497a4d0e88767fbc3dbc91a2 authorizes ONE exact20-path
+R2 commit and ordinary non-force push to origin/deflation/live-hotpath-reset-v1.
+See owner_20261021_platform_R2_git_direct_approval.json and, once completed,
+owner_20261021_platform_R2_git_delivery.json for actual SHA/hooks/remote readback.
+Do not repeat a verified delivery. Approved19source/test bytes match1074uniquePASS proof;
+no rerun or new production edits. Four untracked offline tests and prior correction-only
+role-test reconciliation were explicitly accepted in this batch. Physical R2/R3/R4/M1 HOLD.
+No live/model/restart/selfknowledge/weight operations authorized. Existing38-group/master-map
+functionality archaeology continues from current80base/88projected inventory and static
+4027source relations;6067selected source/config/docs paths. Global completeness NOT_PROVEN.
+Earlier pending-Git statements below are historical after this direct approval.
+
+# CURRENT canonical platform activation mission - 2026-10-21
+
+Latest owner: OWNER_CANONICAL_PLATFORM_ACTIVATION_MISSION_20261021.txt under existing audit dir.
+HEAD fbdadb480fe30a22d7667cc6243217a18d5609d4/indexempty; R2 approved19 source/test hashes UNCHANGED.
+1074unique accepted offline proof preserved, not rerun. Physical R2/R3/R4/M1 still HOLD/no live authority.
+Current source-only/model-free inventory snapshot:80 base records/88 projection entries/2manifests/5roles.
+Do not add these to38activation groups or67memory components. Snapshot in
+owner_20261021_platform_current_canonical_inventory.json; external network/process effects0.
+Existing MASTER_ORGANISM_RECOVERY_MAP_20261019.md and global_activation_audit.json are audit owners;
+new work reconciles current deltas and source connectivity, not a new production registry.
+Read owner_20261021_platform_first_party_source_scope.json:6067selectedsource/config/docs paths,
+4028Python selected;4outsidegraph include2historicalrollback snapshots and2old lifecycle diagnostics.
+Existinggraph additionally includes1explicit RUNTIME/agent_tooling MCP source. No whole-project completeness claim.
+
+R2 Git batch is eligible for OFFLINE-only delivery under new owner section10; exact20-path manifest
+requires separate direct owner approval.19source/test+CONTINUE;4previously untracked tests are explicit,
+including111413bytehistorical memory regression module and2052byteguard unit. All local imports tracked
+or inbatch. Prior role-test hunks repair stale keyword/helper-classifier assertions whose function is
+already absent in published owner. Review saved owner_20261021_platform_R2_git_readiness_review.json.
+Fresh ls-remote matchesfbdadb4; normalhooks retained; no bulk add/historical47deletions/audits/state/keys.
+No production edits or commit/push authorized by attachment alone. Broad capability mapping continues
+independently while waiting for exact batch approval. Current trust/signature/pins/state/archivebaselinePASS;
+strict orderly_stopped/8000free. Continue from current artifacts, do not redo global million-file census.
+
+--- Prior final R2 checkpoint retained below ---
+
+# CURRENT FINAL R2 checkpoint - 2026-10-21
+
+HEAD fbdadb480fe30a22d7667cc6243217a18d5609d4; index empty; R1 published; NO R2 commit/push.
+Latest mission OWNER_R2_EXISTING_ORCHESTRATION_CONTINUATION_20261021.txt (existing audit directory).
+READ FIRST: OWNER_R2_EXISTING_MODEL_ORCHESTRATION_REPORT_20261021.md and
+owner_20261021_R2_existing_orchestration_final_status.json.
+Exact approved9production+10test scope, hashes and original negative assert proof in
+owner_20261021_R2_final_source_review.json. Three direct approvals retained. No new production modules.
+
+FINAL1074UNIQUE_PASS/0FAIL/0ERROR/0SKIP; unexpected effects0;source-hash drift0.
+Evidence owner_20261021_R2_accepted_combined_final_{summary.json,xml,log,unique_test_ids.json}.
+Focused192PASS overlaps. Ten original failures now use persistent source fixtures and pass WITHOUT audit
+resource/projection plugins. Keep original867/5, expanded1055/5 and one blocked-metadata-attempt evidence.
+Do not rerun these suites unless new code/failure justifies it.
+Graph owner_20261021_R2_codegraph_accepted:4025/20536/70919, errors/collisions/internal/hash0.
+
+Existing roles/structured adapter/transport + EXTERNAL Ollama scheduler reused. Historical August
+8B->14B->8B success was diagnostic/adapter proof; October17 heavy startup still failed362.5489s.
+Public source verifier now propagates load_on_demand keep_alive0; own nonempty inference requires SAME
+admission, empty release denied. Bounded fake-effect adapter sequence passes. FULL prior-residency
+release/coexistence-refresh/physical-reload acceptance HOLD; no physical VRAM release claim.
+
+NEXT MINIMUM OWNER TASK: reconcile existing scheduler/admission resource-sharing contract from evidence.
+Current profile full-load revision/context peaks, Windows/WSL budget and active-client ownership remain
+unproven; current REAL acquisitions fail closed. Never populate fake bounds or call a local lock a lease.
+Any extra production scope needs exact approval. R3 API/provider/warmup/REST physical containment and
+R4 shared-residency readback remain HOLD; mandatory heavy source coverage unchanged/no silent bypass.
+M1 natural/model/start/stop, selfknowledge, provider load/unload, Git commit/push NOT authorized.
+No replay/restart merely because offline tests passed. Proposed20-path Git candidate is not approval.
+
+Strict orderly_stopped;8000free;trust3/signature/pins2/state7/4receipts/8archives46entries/heavy raw unchanged.
+Native91M/47D/140collapsed untracked;unrelated hashes preserved. Shared provider fresh identity PID372,
+UID999/start34537,/usr/local/bin/ollama serve;Windows wslrelay14872. No HTTP/model probe.
+Internal debt8/memory6 retained;memory integrationFAIL,selfknowledgeFAIL_FROZEN,platformP2_PHASE_1B_PENDING.
+COPY TO GPT must be printed in chat from the saved report, not links only.
+
+--- Previous checkpoints retained below; superseded NEXT blocks are historical ---
+
+# CURRENT R2 reconnection and persistent fixtures - 2026-10-21
+
+HEAD fbdadb480fe30a22d7667cc6243217a18d5609d4; index EMPTY. No R2 commit/push.
+Latest owner instruction: OWNER_R2_EXISTING_ORCHESTRATION_CONTINUATION_20261021.txt in existing audit dir.
+Original R2eight/six scope approved. Two additional direct approvals now APPLIED:
+- owner_20261021_R2_residency_reconnection_direct_approval.json: existing structured adapter + transport +2tests.
+- owner_20261021_R2_persistent_fixture_direct_approval.json:3existing downstream tests only.
+TOTAL current approved scope9production +10test files, no new production module/manager/store.
+All original negative assertions retained;19source/test exact hashes in owner_20261021_R2_final_source_review.json.
+
+Original five failures isolated red5 -> fixed5PASS. Expanded5more isolated5PASS.
+Focused192PASS. Reconnected combined1074PASS; that used audit fixture plugins.
+Persistent source fixtures ten formerly failing tests PASS without either audit resource/projection plugin.
+A later1074PASS run had ONE blocked optional tokenizer metadata attempt; ACCEPTANCE NOT PASS.
+Raw log/summary preserved in owner_20261021_R2_persistent_fixture_combined_final_*;
+fixture fixed in the already approved policy test file, no production change.
+FINAL accepted combined currently RUNNING: owner_20261021_R2_accepted_combined_final_runner.py.
+Before ANY rerun read _summary.json/.xml/.log. Accept only pytest0fail AND unexpected effects=[] AND hashes=[]!
+Current graph owner_20261021_R2_codegraph_accepted:4025files/20536nodes/70919edges/errors0.
+
+Reused canonical roles/adapter/transport + EXTERNAL Ollama scheduler; historical Aug8B->14B->8B
+was diagnostic/adapter proof, not a hidden JARVIS model manager. Public source verifier now propagates
+load_on_demand as keep_alive0; empty release still denied; normal primary/helper residency unchanged.
+Actual adapter->admission->fakeHTTP primary/heavy/primary + future names passes, assuming controlled
+empty residency at each acquire. FULL insufficient-coexistence release/refresh/reload remains HOLD.
+Current profiles still have NO verified exact peak demand; Windows host headroom/shared concurrency/ownership
+unproven. Existing scheduler samples, swarm lock strings and capacity minima are NOT proof.
+Mandatory heavy source-completeness policy unchanged; old shadow conditional restriction check not substituted.
+R2 alignment/full source acceptance/M1 remain HOLD. No live readiness or physical VRAM release claim.
+
+Fresh external provider snapshot: previous saved PID253 is gone. Current root-verified Ollama serve
+PID372/UID999/start34537,/usr/local/bin/ollama,same binary SHA;11434owned by372. Windows wslrelay14872.
+No HTTP metadata/generation/model load probes; provider change cause NOT inferred.
+JARVIS strict orderly_stopped;8000free; trust3/signature/pins2/state7/8archives46entries/heavy raw unchanged.
+47historical missing retained; unrelated dirty hashes unchanged; last native91M/47D/140collapsed untracked.
+
+NEXT: finish final serial regression; final integrity/status/report and COPY TO GPT. Existing debt roots8/6
+remain open. No Git or live authorization; no model/WORK/REST/restart/selfknowledge. Do not weaken unknown
+resource/ownership gates. Future real activation needs evidence-backed existing-provider sharing/release
+policy, measured peak/context demands and host budget; physical cancellation/REST/R4 need separate scope.
+
+--- Superseded checkpoints retained below ---
+
+# Current R2 existing orchestration continuation - 2026-10-21
+
+HEAD fbdadb480fe30a22d7667cc6243217a18d5609d4; index empty; R1 already published.
+LATEST OWNER: RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/OWNER_R2_EXISTING_ORCHESTRATION_CONTINUATION_20261021.txt
+The eight-source/six-test R2 scope IS approved and applied. Earlier pending approval text is historical.
+Focused final122PASS. First combined867PASS/5FAIL retained. Exact isolated five red reproduced;
+same five with legitimate typed external facts/fresh empty TMP:5PASS, original negative assertions unchanged.
+Expanded155-target confined regression running; read owner_20261021_R2_combined_expanded_v3_* before any rerun.
+Final graph4025files/20529nodes/70723edges/errors0; discovered22 owner source hashes all covered/current.
+
+NEW KEY FINDINGS: historical Aug report/diag_abc_adapter.py records primary22s ->heavy189s
+(keep_alive0) ->primary37s. Direct diag_one_model.py separate historical proof; neither run now.
+Existing mechanism is canonical roles/structured adapter/transport plus EXTERNAL Ollama scheduler,
+not a separate app model manager. Oct17 real heavy transition FAILED362.5489s; primary returned175.2798s.
+Current mandatory source verifier uses default1800s; profile load_on_demand is not propagated to residency.
+R2 blanket keep_alive0 rejection also rejects own inference-with-release, not just empty foreign unload.
+Read owner_20261021_R2_existing_full_orchestration_map.json for current owner/caller classification.
+No trustworthy shared-provider lease/full-load upper bounds/Windows-host budget found; sample scheduler,
+swarm lock strings and capacity minima are not live allocation proof. R2 alignment/source acceptance HOLD.
+No silent gate removal, no invented resource bounds. Current real model acquisition remains denied.
+
+NEXT: finish/read expanded regression; preserve initial failed proof. Prepare exact existing-owner
+reconnection diff before requesting any edit outside8. Do NOT edit model_understanding_adapter or
+semantic policy under prior R2 scope. No commit/push/live/model/selfknowledge permission.
+Read-only integrity: trust3/signature/pins2/state7/8archives46entries unchanged, orderly_stopped,8000free,
+47historical missing/unrelated dirty hashes preserved. R3/R4 and M1 HOLD; roots8internal/6memory retained.
+
+--- Prior checkpoint retained below; superseded NEXT statements are historical ---
+
+# Current R2 model-agnostic admission checkpoint - 2026-10-21
+
+TRACK PERSONAL_JARVIS_RECOVERY / P2 Phase1B PENDING. No P3.
+ROOT /home/aleksandr/MAKSIMAR_PLATFORM.
+Actual HEAD/remote fbdadb480fe30a22d7667cc6243217a18d5609d4; index empty.
+R1 published and verified; DO NOT recreate its repair or commit/push.
+LATEST OWNER: RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/OWNER_R2_MODEL_AGNOSTIC_ADMISSION_MISSION_20261021.txt
+
+R2 bounded archaeology completed; production edits NOT YET AUTHORIZED.
+Exact eight-production-file/six-test plan saved in
+owner_20261021_R2_exact_repair_approval_plan.json in the same audit directory.
+One precise direct R2 repair approval is pending in chat. No Git/live authority included.
+Do not edit production before the direct answer arrives. Existing source hashes pinned.
+
+New current proof:
+- owner_20261021_R2_baseline.json (HEAD/index/trust/pins/state/archive/source parity)
+- owner_20261021_R2_owner_role_map.json (18 reused mechanisms + current roles/heavy semantics)
+- owner_20261021_R2_role_identity_counterexamples.json (pure fixture counterexamples)
+- owner_20261021_R2_provider_identity_verified.json (actual shared Linux provider identity)
+- owner_20261021_R2_windows_provider_identity_verified_scope.json
+- owner_20261021_R2_R3_containment_contract_map.json
+- owner_20261021_R2_R4_shared_residency_contract_map.json
+
+Initial unprivileged process/port negatives were visibility-limited, NOT absence.
+Verified read-only root /proc + ss: Ollama serve PID253/UID999,
+/usr/local/bin/ollama,127.0.0.1:11434. Windows port is wslrelay.exe PID18396.
+No provider HTTP/model probes executed. JARVIS strict orderly_stopped,8000free.
+Trust/signature/pins/state/8archives46entries unchanged;47historical missing preserved.
+
+Current runtime bindings unchanged: primary jarvis:chat8b; helper jarvis:helper3b;
+daily jarvis:coder7b; heavy coder jarvis:coder14b; heavy reasoning jarvis-live:qwen14b.
+HEAVY_ROUTING_CONTRACT=MIXED: full valid GoalFrame path requires heavy source
+coverage verifier; no task-complexity conditional there. Other heavy paths are
+conditional/load-on-demand. Legacy fallback is not a validated light bypass.
+Do not change completeness/verifier/author policy under R2.
+
+Proven gaps: fixed sample admission not executed before actual POST/stream;
+heavy profile validator pins a concrete tag; unknown model role falls back to primary;
+GPU merge collapses separate identical devices; no measured peak/context/KV demand
+or atomic shared-provider ownership. Capacity declarations are not free headroom.
+
+NEXT: on exact direct approval implement the saved eight-owner R2 plan, tests,
+confined regression, current Codegraph and integrity. Current unknown demand/ownership
+must fail closed; do not invent positive bounds, global lease or hardware exclusivity.
+Positive simulated fixtures are contract proof, not M1 physical readiness.
+R3/R4 production changes need separate approval. No models, weights changes, M1/M2,
+natural replay/selfknowledge/WORK/REST/runtime restart or commit/push authorized here.
+Root debt counts8internal/6memory retained; model activation remains pending.
+
+Prior checkpoint is retained below; earlier NEXT statements are historical where
+superseded. Exact R1 delivery proof is in R1 final_status/remote_verification artifacts.
+
+--- Historical checkpoint below ---
+
 # Current resource lifecycle R1 checkpoint - 2026-10-21
 
 PERSONAL_JARVIS_RECOVERY / P2 Phase1B PENDING. No P3.

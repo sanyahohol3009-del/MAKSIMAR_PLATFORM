@@ -77,3 +77,8 @@ def test_resource_requirement_rejects_download_enablement() -> None:
             model_download_allowed=True,
             runtime_start_allowed=False,
         )
+
+
+def test_current_runtime_profiles_do_not_invent_peak_bounds():
+    from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import build_jarvis_live_runtime_model_role_profiles
+    assert all(p.load_resource_demand is None for p in build_jarvis_live_runtime_model_role_profiles())

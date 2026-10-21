@@ -13,6 +13,7 @@ import httpx
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     context_tokens_for_jarvis_model,
     resident_context_tokens_for_jarvis_model,
+    resolve_runtime_model_profile,
 )
 
 OLLAMA_URL = os.environ.get(
@@ -25,17 +26,17 @@ OLLAMA_CHAT_URL = os.environ.get(
 )
 OLLAMA_BASE_URL = OLLAMA_URL.rsplit("/api/", 1)[0] if "/api/" in OLLAMA_URL else OLLAMA_URL.rstrip("/")
 
-PRIMARY_CONVERSATION_MODEL_ID = "jarvis:chat8b"
-HELPER_INPUT_CORRECTION_MODEL_ID = "jarvis:helper3b"
-DAILY_CODER_MODEL_ID = "jarvis:coder7b"
+PRIMARY_CONVERSATION_MODEL_ID = resolve_runtime_model_profile(role_id="jarvis_chat_model").model_id
+HELPER_INPUT_CORRECTION_MODEL_ID = resolve_runtime_model_profile(role_id="helper_input_correction_model").model_id
+DAILY_CODER_MODEL_ID = resolve_runtime_model_profile(role_id="daily_coder_model").model_id
 DEFAULT_OLLAMA_MODEL_ID = os.environ.get(
     "JARVIS_LIVE_OLLAMA_MODEL",
     PRIMARY_CONVERSATION_MODEL_ID,
 )
-FALLBACK_OLLAMA_MODEL_ID = "jarvis-live:qwen14b"
-HEAVY_CODER_MODEL_ID = "jarvis:coder14b"
-HEAVY_REASONING_MODEL_ID = "jarvis-live:qwen14b"
-BASE_HEAVY_CODER_MODEL_ID = "qwen2.5-coder:14b"
+FALLBACK_OLLAMA_MODEL_ID = resolve_runtime_model_profile(role_id="heavy_reasoning_model").model_id
+HEAVY_CODER_MODEL_ID = resolve_runtime_model_profile(role_id="heavy_coder_model").model_id
+HEAVY_REASONING_MODEL_ID = resolve_runtime_model_profile(role_id="heavy_reasoning_model").model_id
+BASE_HEAVY_CODER_MODEL_ID = resolve_runtime_model_profile(role_id="heavy_coder_model").target_model_id
 
 OLLAMA_FAST_CHAT_NUM_PREDICT = 384
 OLLAMA_FAST_CHAT_TEMPERATURE = 0.85
@@ -164,6 +165,9 @@ MODEL_THINK_POLICY_BY_ROLE = {
 def ollama_get_json(path: str, timeout_seconds: float = 5.0) -> dict[str, Any]:
     url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
     try:
+        from CORE_ROOT.run_context import model_free_startup
+        if model_free_startup():
+            return {"ok": False, "error": "model_free_provider_io_disabled", "model_call_attempted": False}
         response = httpx.get(url, timeout=timeout_seconds)
         response.raise_for_status()
         payload = response.json()
@@ -214,9 +218,25 @@ def ollama_post_json(path: str, payload: dict[str, Any], timeout_seconds: float 
             record_in_flight_trace_event(trace_id, stage, status, transport_ordinal=transport_ordinal, **metadata)
     transport_event("OLLAMA_REQUEST_PREPARED", caller="ollama_post_json", **safe_payload,
                     keep_alive=payload.get("keep_alive"))
+    model_effect_started = False
     try:
-        transport_event("OLLAMA_CONNECTION_STARTED", caller="ollama_post_json")
-        response = httpx.post(url, json=payload, timeout=timeout_seconds)
+        from dataclasses import asdict
+        with _model_effect_admission(url, payload) as admission:
+            admission_evidence = asdict(admission) if admission is not None else None
+            if admission is not None:
+                transport_event("MODEL_RESOURCE_ADMISSION", status="ADMITTED" if admission.admitted else "REJECTED",
+                                resource_admission=admission_evidence)
+                if not admission.admitted:
+                    return {"ok": False, "error": "model_resource_admission_rejected",
+                            "message": admission.reason, "resource_admission": admission_evidence,
+                            "model_call_attempted": False}
+            remaining = float(timeout_seconds) - (time.monotonic() - transport_started)
+            if remaining <= 0:
+                return {"ok": False, "error": "model_admission_budget_exhausted",
+                        "model_call_attempted": False, "resource_admission": admission_evidence}
+            transport_event("OLLAMA_CONNECTION_STARTED", caller="ollama_post_json")
+            model_effect_started = True
+            response = httpx.post(url, json=payload, timeout=min(float(timeout_seconds), remaining))
         transport_event("OLLAMA_RESPONSE_HEADERS_RECEIVED", caller="ollama_post_json", http_status=response.status_code)
         transport_event("OLLAMA_RESPONSE_BODY_RECEIVED", caller="ollama_post_json",
                         response_bytes=len(response.content))
@@ -238,8 +258,11 @@ def ollama_post_json(path: str, payload: dict[str, Any], timeout_seconds: float 
         transport_event("OLLAMA_REQUEST_FAILED", status="FAILED", caller="ollama_post_json",
                         error_class=type(exc).__name__,
                         elapsed_ms=round((time.monotonic() - transport_started) * 1000, 3))
-        return {"ok": False, "error": type(exc).__name__, "message": str(exc)}
-    return result if isinstance(result, dict) else {"ok": False, "payload": result}
+        return {"ok": False, "error": type(exc).__name__, "message": str(exc),
+                "model_call_attempted": model_effect_started}
+    if isinstance(result, dict):
+        return {**result, "resource_admission": admission_evidence} if admission_evidence is not None else result
+    return {"ok": False, "payload": result}
 
 
 def ollama_model_call_result(
@@ -255,6 +278,7 @@ def ollama_model_call_result(
     cold_warm_state: str = "UNKNOWN",
 ) -> ModelCallEnvelope:
     """Return one sanitized transport envelope; canonical use is assigned by the caller."""
+    transport_attempted = transport_attempted and result.get("model_call_attempted") is not False
     message = result.get("message", {})
     raw_content = str(
         message.get("content", "")
@@ -421,7 +445,7 @@ def timeout_policy_for_model_role(role_id: str) -> dict[str, float]:
 
 
 def model_role_for_model_id(model_id: str) -> str:
-    return MODEL_ROLE_BY_MODEL_ID.get(model_id, "jarvis_chat_model")
+    return resolve_runtime_model_profile(model_id=model_id).role_id
 
 
 def think_policy_for_model_id(model_id: str) -> bool:
@@ -1020,7 +1044,21 @@ def grounded_final_brain_stream(
     try:
         timeout = httpx.Timeout(effective_timeout, connect=effective_timeout, read=effective_timeout,
                                 write=effective_timeout, pool=effective_timeout)
-        with httpx.stream("POST", OLLAMA_CHAT_URL, json=payload, timeout=timeout) as response:
+        from dataclasses import asdict
+        from contextlib import ExitStack
+        with ExitStack() as operation_scope:
+            admission = operation_scope.enter_context(_model_effect_admission(OLLAMA_CHAT_URL, payload))
+            remaining = effective_timeout - (time.monotonic() - started_clock)
+            if (admission is not None and not admission.admitted) or remaining <= 0:
+                yield {"event": "error", "error_kind": "model_resource_admission_rejected",
+                       "error_message": admission.reason if admission is not None and not admission.admitted else "model_admission_budget_exhausted",
+                       "response_text": "", "resource_admission": asdict(admission) if admission is not None else None,
+                       "model_call_attempted": False, "model_call_succeeded": False,
+                       "model_call_used": False, "raw_output_present": False, "done": None,
+                       **terminal_runtime_truth()}
+                return
+            timeout = httpx.Timeout(min(effective_timeout, remaining))
+            response = operation_scope.enter_context(httpx.stream("POST", OLLAMA_CHAT_URL, json=payload, timeout=timeout))
             response.raise_for_status()
             for line in response.iter_lines():
                 if not line:
@@ -1055,6 +1093,7 @@ def grounded_final_brain_stream(
                         **terminal_runtime_truth()}
                     return
                 if item.get("done") is True:
+                    operation_scope.close()
                     trailing_visible = _flush_private_reasoning(reasoning_state)
                     if trailing_visible:
                         response_text += trailing_visible
@@ -2559,3 +2598,116 @@ def _marker_prefix_suffix(text: str, markers: tuple[str, ...]) -> str:
 def _flush_private_reasoning(state: dict[str, Any]) -> str:
     carry = str(state.pop("carry", ""))
     return "" if state.get("inside", False) else carry
+
+
+
+def _model_admission_policy() -> dict | None:
+    """Read existing run/StopGate authority; resources do not grant permission."""
+    try:
+        from CORE_ROOT.run_context import model_free_startup
+        from CORE_ROOT.runtime_paths import DEGRADED_MODE_FILE
+        from SUPERVISOR.runtime_preflight import inspect_runtime_state
+        if model_free_startup() or DEGRADED_MODE_FILE.exists():
+            return None
+        observation = inspect_runtime_state()
+        metadata = observation.get("run_metadata", {})
+        if (observation.get("decision", {}).get("healthy") is True
+                and metadata.get("status") == "running"):
+            return {key: metadata[key] for key in ("schema_version", "run_id", "boot_id", "wall_time", "monotonic_time")}
+        return None
+    except Exception:
+        return None
+
+
+def _observe_model_resources(profile):
+    """Current host/provider facts, never an invented shared-client lease."""
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter import detect_model_resource_observation
+    from MAKSIMAR_CORE_LIB.execution_control.admission_models import ModelResourceObservation
+    from urllib.parse import urlsplit
+    hardware = detect_model_resource_observation()
+    ps = ollama_get_json("/api/ps")
+    tags = ollama_get_json("/api/tags")
+    available = ps.get("ok", True) is not False and tags.get("ok", True) is not False and isinstance(ps.get("models"), list) and isinstance(tags.get("models"), list)
+    revision = next((str(m.get("digest", "")) for m in tags.get("models", ())
+                     if isinstance(m, dict) and m.get("name", m.get("model")) == profile.model_id), "")
+    residents = tuple((str(m.get("name", m.get("model", ""))), str(m.get("digest", "")))
+                      for m in ps.get("models", ()) if isinstance(m, dict))
+    local = urlsplit(OLLAMA_BASE_URL).hostname in {"localhost", "127.0.0.1", "::1"}
+    return ModelResourceObservation(
+        observed_monotonic=hardware["observed_monotonic"], backend_id=profile.backend_id,
+        scope_id=hardware["scope_id"], provider_instance_id="", provider_available=available,
+        model_revision=revision, memory_available_bytes=hardware["memory_available_bytes"],
+        accelerator_available_bytes=hardware["accelerator_available_bytes"],
+        cpu_threads=hardware["cpu_threads"], physical_identity_verified=hardware["physical_identity_verified"],
+        scope_confirmed=local and hardware["scope_complete"],
+        ownership_verified=False, ownership_source="", active_concurrency=None,
+        resident_models=residents, complete=hardware["scope_complete"],
+        source=hardware["source"] + ";ollama_metadata_non_atomic")
+
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def _model_effect_admission(url, payload):
+    """Existing provider adapter to the ONE admission owner, including stream."""
+    from urllib.parse import urlsplit
+    from uuid import uuid4
+    from CORE_ROOT.run_context import model_free_startup
+    from MAKSIMAR_CORE_LIB.execution_control.admission_contract import model_admission
+    from MAKSIMAR_CORE_LIB.execution_control.admission_models import AdmissionDecision
+    request_id = "model_acquisition_" + uuid4().hex
+    try:
+        disabled = model_free_startup()
+    except ValueError:
+        disabled = True
+    if disabled:
+        yield AdmissionDecision(request_id, False, "model_free_provider_io_disabled", False)
+        return
+    path = urlsplit(url).path
+    if path == "/api/show":
+        yield None
+        return
+    if path not in {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings"}:
+        yield AdmissionDecision(request_id, False, "unsupported_model_effect", False)
+        return
+    try:
+        profile = resolve_runtime_model_profile(model_id=payload.get("model"))
+        if profile.backend_id != "ollama" or urlsplit(url).netloc != urlsplit(OLLAMA_BASE_URL).netloc:
+            raise ValueError("provider_binding_mismatch")
+        options = payload.get("options", {})
+        if not isinstance(options, dict):
+            raise ValueError("invalid_model_options")
+        context = options.get("num_ctx", resident_context_tokens_for_jarvis_model(profile.model_id))
+        if payload.get("keep_alive") in (0, "0", "0s"):
+            # A bounded inference may ask the backend not to retain its runner.
+            # An empty release request is a separate effect and remains denied.
+            prompt = payload.get("prompt")
+            messages = payload.get("messages")
+            has_input = (isinstance(prompt, str) and bool(prompt)) or (
+                isinstance(messages, list) and any(
+                    isinstance(message, dict) and bool(message.get("content"))
+                    for message in messages))
+            if not has_input:
+                raise ValueError("selective_release_not_authorized")
+    except (KeyError, ValueError, TypeError):
+        yield AdmissionDecision(request_id, False, "model_profile_or_effect_invalid", False)
+        return
+    authority = _model_admission_policy()
+    with model_admission(request_id=request_id, profile=profile,
+            observe=lambda: _observe_model_resources(profile), requested_context=context,
+            policy_allowed=authority is not None, clock=time.monotonic) as decision:
+        if decision.admitted and _model_admission_policy() != authority:
+            from dataclasses import replace
+            decision = replace(decision, admitted=False, policy_checked=False,
+                               reason="model_admission_authority_changed")
+        try:
+            from dataclasses import asdict
+            from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import _CURRENT_TRACE_ID, record_in_flight_trace_event
+            trace_id = _CURRENT_TRACE_ID.get()
+            if trace_id:
+                record_in_flight_trace_event(trace_id, "MODEL_RESOURCE_ADMISSION", "ADMITTED" if decision.admitted else "REJECTED",
+                    resource_admission=asdict(decision))
+        except Exception:
+            pass  # Diagnostic availability never grants admission.
+        yield decision

@@ -851,3 +851,19 @@ def test_exact_accounting_cannot_extend_existing_deadline(monkeypatch):
     result=transport._measured_final_brain_prompt_budget({'messages':[{'role':'user','content':'x'}],
         'options':{'num_ctx':4096,'num_predict':512}},timeout_seconds=1)
     assert result['within_budget'] is False and result['measurement_error']=='request_deadline_exhausted'
+
+
+# Downstream stream units mock external resource facts, never admission itself.
+import pytest as _resource_pytest
+
+@_resource_pytest.fixture(autouse=True)
+def _grounded_stream_resource_facts(request, monkeypatch, tmp_path):
+    if request.node.originalname == "test_final_brain_request_uses_canonical_live_keep_alive":
+        from MAKSIMAR_SERVER.AI_ORCHESTRATION import ollama_transport as transport
+        monkeypatch.setattr(transport, "_local_final_brain_token_count", lambda *a, **k:
+            {"available": False, "reason": "keep_alive unit fixture has no live tokenizer metadata"})
+        return
+    if request.node.originalname not in {'test_exact_admission_keeps_original_sync_stream_payload_without_compaction', 'test_streaming_done_preserves_sanitized_ollama_telemetry', 'test_sync_and_stream_history_publication_never_expose_a_failed_candidate', 'test_sync_stream_grounded_memory_gate_receives_original_obligations_and_withholds_failure'}:
+        return
+    from tests.ai_orchestration.test_model_admission_transport import acquisition
+    acquisition.__wrapped__(monkeypatch, tmp_path)

@@ -32,6 +32,9 @@ class DetectedMemorySnapshot:
     ecc_present: bool
     registered_or_buffered: str
     slot_population: str
+    available_bytes: int | None = None
+    constraint_domains: tuple[tuple[str, int], ...] = ()
+    scope_complete: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +49,8 @@ class DetectedGpuSnapshot:
     vram_free_gb: int
     shared_memory_mode: bool
     gpu_capabilities: tuple[str, ...]
+    gpu_uuid: str = ""
+    pci_bus_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)

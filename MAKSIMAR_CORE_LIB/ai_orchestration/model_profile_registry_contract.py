@@ -5,6 +5,7 @@ from typing import Any
 
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_resource_requirements_contract import (
     ModelResourceRequirement,
+    ModelLoadResourceDemand,
     build_default_model_resource_requirements,
 )
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_role_binding_contract import (
@@ -127,6 +128,8 @@ class JarvisRuntimeModelRoleProfile:
     runtime_start_allowed: bool
     pc_control_allowed: bool
     resident_context_tokens: int | None = None
+    backend_id: str = "ollama"
+    load_resource_demand: ModelLoadResourceDemand | None = None
 
     def __post_init__(self) -> None:
         for field_name in ("role_id", "model_id", "target_model_id", "status", "role", "load_policy"):
@@ -148,9 +151,15 @@ class JarvisRuntimeModelRoleProfile:
         _require_false(self.model_download_allowed, "model_download_allowed")
         _require_false(self.runtime_start_allowed, "runtime_start_allowed")
         _require_false(self.pc_control_allowed, "pc_control_allowed")
+        _require_non_empty(self.backend_id, "backend_id")
+        demand = self.load_resource_demand
+        if demand is not None:
+            if not isinstance(demand, ModelLoadResourceDemand):
+                raise ValueError("load_resource_demand invalid")
+            if (demand.model_id != self.model_id or demand.backend_id != self.backend_id
+                    or demand.context_tokens > self.max_safe_context_tokens):
+                raise ValueError("load_resource_demand profile mismatch")
         if self.role_id == "heavy_coder_model":
-            if self.model_id != "jarvis:coder14b":
-                raise ValueError("heavy_coder_model must use installed jarvis:coder14b wrapper")
             _require_true(self.exclusive_gpu, "exclusive_gpu")
             if self.load_policy != "load_on_demand":
                 raise ValueError("heavy_coder_model must be load_on_demand")
@@ -174,6 +183,8 @@ class JarvisRuntimeModelRoleProfile:
             "runtime_start_allowed": self.runtime_start_allowed,
             "pc_control_allowed": self.pc_control_allowed,
             "resident_context_tokens": self.resident_context_tokens or self.default_context_tokens,
+            "backend_id": self.backend_id,
+            "resource_demand_proven": self.load_resource_demand is not None and self.load_resource_demand.bound_kind == "VERIFIED_UPPER_BOUND",
         }
 
 
@@ -292,16 +303,11 @@ def build_jarvis_live_runtime_model_role_read_model() -> dict[str, Any]:
     return {
         "profile_map_id": "jarvis_live_runtime_model_role_profile_map_v1",
         "profiles": tuple(profile.to_read_model() for profile in profiles),
-        "heavy_coder_model_id": "jarvis:coder14b",
-        "heavy_coder_base_model_id": "qwen2.5-coder:14b",
-        "heavy_coder_load_policy": "load_on_demand",
-        "heavy_coder_exclusive_gpu": True,
-        "installed_ollama_wrappers": (
-            "jarvis:chat8b",
-            "jarvis:helper3b",
-            "jarvis:coder7b",
-            "jarvis:coder14b",
-        ),
+        "heavy_coder_model_id": resolve_runtime_model_profile(role_id="heavy_coder_model").model_id,
+        "heavy_coder_base_model_id": resolve_runtime_model_profile(role_id="heavy_coder_model").target_model_id,
+        "heavy_coder_load_policy": resolve_runtime_model_profile(role_id="heavy_coder_model").load_policy,
+        "heavy_coder_exclusive_gpu": resolve_runtime_model_profile(role_id="heavy_coder_model").exclusive_gpu,
+        "installed_ollama_wrappers": tuple(p.model_id for p in profiles if p.role_id != "heavy_reasoning_model" and p.installed),
         "ollama_model_storage_root": "~/MAKSIMAR_RUNTIME/runtime_models/ollama",
         "missing_future_models_are_planned": False,
         "agents_enabled": False,
@@ -313,6 +319,22 @@ def build_jarvis_live_runtime_model_role_read_model() -> dict[str, Any]:
         "reused_router_surface": "MAKSIMAR_SERVER/AI_ORCHESTRATION/model_router.py",
         "reused_execution_surface": "MAKSIMAR_CORE_LIB/execution_control",
     }
+
+
+def resolve_runtime_model_profile(*, role_id: str | None = None,
+                                  model_id: str | None = None) -> JarvisRuntimeModelRoleProfile:
+    """Resolve exact current configuration; never assign unknown models to primary."""
+    if role_id is None and model_id is None:
+        raise KeyError("model role or identity required")
+    profiles = build_jarvis_live_runtime_model_role_profiles()
+    if (not all(isinstance(p, JarvisRuntimeModelRoleProfile) for p in profiles)
+            or len({p.role_id for p in profiles}) != len(profiles)):
+        raise ValueError("runtime role registry invalid")
+    matches = tuple(p for p in profiles if (role_id is None or p.role_id == role_id)
+                    and (model_id is None or p.model_id == model_id))
+    if len(matches) != 1:
+        raise KeyError("unknown or ambiguous runtime model profile")
+    return matches[0]
 
 
 def context_tokens_for_jarvis_model(model_id: str) -> int:

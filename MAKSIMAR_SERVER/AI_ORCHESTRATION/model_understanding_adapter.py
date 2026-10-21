@@ -206,6 +206,7 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
             deadline=deadline, schema=SOURCE_CANDIDATE_VERDICT_SCHEMA,
             num_predict=REQUEST_UNDERSTANDING_NUM_PREDICT,
             deadline_error="source_candidate_verification_deadline_exceeded", model_id=profile.model_id,
+            keep_alive=0 if profile.load_policy == "load_on_demand" else None,
         )
         verdict = result.get("parsed")
         status = (validate_source_candidate_verdict(verdict, candidate_ids)
@@ -224,7 +225,7 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
         self, *, system_prompt: str, user_prompt: str, deadline: RequestDeadline,
         schema: dict[str, Any], num_predict: int, deadline_error: str,
         model_id: str = PRIMARY_CONVERSATION_MODEL_ID,
-        keep_alive: str | None = None,
+        keep_alive: str | int | None = None,
         num_ctx: int | None = None,
     ) -> dict[str, Any]:
         deadline_remaining = deadline.remaining()
@@ -285,7 +286,7 @@ class ExistingOllamaModelUnderstandingAdapter(ModelUnderstandingPort):
         self, *, system_prompt: str, user_prompt: str, deadline: RequestDeadline,
         schema: dict[str, Any], num_predict: int, deadline_error: str,
         model_id: str = PRIMARY_CONVERSATION_MODEL_ID,
-        keep_alive: str | None = None,
+        keep_alive: str | int | None = None,
         num_ctx: int | None = None,
     ) -> dict[str, Any]:
         """Structured semantic call with host-side schema validation + ONE bounded retry.
