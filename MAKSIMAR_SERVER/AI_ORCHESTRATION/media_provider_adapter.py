@@ -47,6 +47,9 @@ class ExistingFfprobeMediaAdapter:
         receipts: list[ExecutionReceipt] = []
         errors: list[str] = []
         for step in plan.steps:
+            if deadline is not None and deadline.cancelled:
+                errors.append("canonical_request_cancelled_or_expired")
+                break
             if step.capability_id != "media.probe" or step.operation != "probe_media":
                 errors.append(f"{step.operation}:unsupported_operation")
                 continue
@@ -57,10 +60,13 @@ class ExistingFfprobeMediaAdapter:
                 continue
             remaining = deadline.remaining() if deadline is not None else 30.0
             try:
+                if deadline is not None:
+                    deadline.check()
+                    remaining = deadline.remaining(30.0)
                 completed = subprocess.run(
                     [str(FFPROBE), "-v", "error", "-show_format", "-show_streams", "-of", "json", str(media_path)],
                     capture_output=True, text=True, encoding="utf-8", errors="replace",
-                    timeout=min(30.0, max(0.1, remaining)), check=False,
+                    timeout=min(30.0, remaining), check=False,
                 )
                 payload = json.loads(completed.stdout) if completed.returncode == 0 else None
             except (OSError, subprocess.SubprocessError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
@@ -85,6 +91,8 @@ class ExistingFfprobeMediaAdapter:
                 operation_id=step.operation, provider_id=self.provider_id, status="COMPLETE",
                 result="installed ffprobe inspected the existing local media file",
             ))
+        if deadline is not None and deadline.cancelled:
+            errors.append("canonical_request_cancelled_or_expired")
         status = "COMPLETE" if items and not errors else "PARTIAL" if items else "UNAVAILABLE"
         return EvidenceBundle(
             request_id=understanding.request_id, capability_id="media.probe", trace_id=trace_id,

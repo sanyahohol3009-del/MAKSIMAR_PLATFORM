@@ -10,6 +10,8 @@ from typing import Any, Iterator, TypedDict
 
 import httpx
 
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline
+
 from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
     context_tokens_for_jarvis_model,
     resident_context_tokens_for_jarvis_model,
@@ -162,15 +164,31 @@ MODEL_THINK_POLICY_BY_ROLE = {
 }
 
 
+def _request_timeout(timeout_seconds: float) -> float:
+    deadline = RequestDeadline.current()
+    if deadline is None:
+        return timeout_seconds
+    deadline.check()
+    return deadline.remaining(timeout_seconds)
+
+
+def _check_request() -> None:
+    deadline = RequestDeadline.current()
+    if deadline is not None:
+        deadline.check()
+
+
 def ollama_get_json(path: str, timeout_seconds: float = 5.0) -> dict[str, Any]:
     url = path if path.startswith("http") else f"{OLLAMA_BASE_URL}{path}"
     try:
         from CORE_ROOT.run_context import model_free_startup
         if model_free_startup():
             return {"ok": False, "error": "model_free_provider_io_disabled", "model_call_attempted": False}
-        response = httpx.get(url, timeout=timeout_seconds)
+        response = httpx.get(url, timeout=_request_timeout(timeout_seconds))
+        _check_request()
         response.raise_for_status()
         payload = response.json()
+        _check_request()
     except Exception as exc:
         return {"ok": False, "error": type(exc).__name__, "message": str(exc)}
     return payload if isinstance(payload, dict) else {"ok": False, "payload": payload}
@@ -221,6 +239,7 @@ def ollama_post_json(path: str, payload: dict[str, Any], timeout_seconds: float 
     model_effect_started = False
     try:
         from dataclasses import asdict
+        _check_request()
         with _model_effect_admission(url, payload) as admission:
             admission_evidence = asdict(admission) if admission is not None else None
             if admission is not None:
@@ -235,13 +254,16 @@ def ollama_post_json(path: str, payload: dict[str, Any], timeout_seconds: float 
                 return {"ok": False, "error": "model_admission_budget_exhausted",
                         "model_call_attempted": False, "resource_admission": admission_evidence}
             transport_event("OLLAMA_CONNECTION_STARTED", caller="ollama_post_json")
+            effect_timeout = _request_timeout(min(float(timeout_seconds), remaining))
             model_effect_started = True
-            response = httpx.post(url, json=payload, timeout=min(float(timeout_seconds), remaining))
+            response = httpx.post(url, json=payload, timeout=effect_timeout)
+            _check_request()
         transport_event("OLLAMA_RESPONSE_HEADERS_RECEIVED", caller="ollama_post_json", http_status=response.status_code)
         transport_event("OLLAMA_RESPONSE_BODY_RECEIVED", caller="ollama_post_json",
                         response_bytes=len(response.content))
         response.raise_for_status()
         result = response.json()
+        _check_request()
         transport_event("OLLAMA_RESPONSE_PARSED", caller="ollama_post_json",
                         elapsed_ms=round((time.monotonic() - transport_started) * 1000, 3))
         transport_event(
@@ -895,12 +917,13 @@ def grounded_final_brain_call(*, original_text: str, understanding: dict[str, An
                 "model_call_attempted": False, "model_call_succeeded": False,
                 "model_call_used": False, "raw_output_present": False,
                 "done": None, "done_reason": None, "truncation": None, "evidence_used": False}
+    _check_request()
     measurement_clock = time.monotonic()
     measured_deadline = (timeout_truth or {}).get("effective_transport_timeout_seconds",
         timeout_seconds if timeout_seconds is not None else
         timeout_policy_for_model_id(DEFAULT_OLLAMA_MODEL_ID)["total_request_timeout_seconds"])
     prompt_budget = _measured_final_brain_prompt_budget(payload,
-        timeout_seconds=float(measured_deadline), allow_prefill=False)
+        timeout_seconds=_request_timeout(float(measured_deadline)), allow_prefill=False)
     if not prompt_budget["within_budget"]:
         payload = _grounded_final_brain_payload(
             original_text=original_text, understanding=understanding, execution_plan=execution_plan,
@@ -982,6 +1005,28 @@ def grounded_final_brain_call(*, original_text: str, understanding: dict[str, An
 
 
 def grounded_final_brain_stream(
+    *, timeout_seconds: float | None = None, timeout_truth: dict[str, Any] | None = None,
+    **inputs: Any,
+) -> Iterator[dict[str, Any]]:
+    events = _grounded_final_brain_stream_events(
+        timeout_seconds=timeout_seconds, timeout_truth=timeout_truth, **inputs)
+    try:
+        _check_request()
+        for event in events:
+            _check_request()
+            yield event
+    except TimeoutError:
+        deadline = RequestDeadline.current()
+        if deadline is None or not deadline.cancelled:
+            raise
+        yield {"event": "error", "error_kind": "canonical_request_cancelled_or_expired",
+               "response_text": "", "model_call_used": False,
+               "provider_operation_terminated": "UNKNOWN", "residency_released": "UNKNOWN"}
+    finally:
+        events.close()
+
+
+def _grounded_final_brain_stream_events(
     *,
     timeout_seconds: float | None = None,
     timeout_truth: dict[str, Any] | None = None,
@@ -998,12 +1043,13 @@ def grounded_final_brain_stream(
                "response_text": "", "model_call_attempted": False, "model_call_succeeded": False,
                "model_call_used": False, "raw_output_present": False, "done": None, "truncation": None}
         return
+    _check_request()
     measurement_clock = time.monotonic()
     measured_deadline = (timeout_truth or {}).get("effective_transport_timeout_seconds",
         timeout_seconds if timeout_seconds is not None else
         timeout_policy_for_model_id(DEFAULT_OLLAMA_MODEL_ID)["total_request_timeout_seconds"])
     prompt_budget = _measured_final_brain_prompt_budget(payload,
-        timeout_seconds=float(measured_deadline), allow_prefill=False)
+        timeout_seconds=_request_timeout(float(measured_deadline)), allow_prefill=False)
     if not prompt_budget["within_budget"]:
         payload = _grounded_final_brain_payload(**inputs, stream=True, compact=True)
         prompt_budget = _measured_final_brain_prompt_budget(payload,
@@ -1047,6 +1093,7 @@ def grounded_final_brain_stream(
         from dataclasses import asdict
         from contextlib import ExitStack
         with ExitStack() as operation_scope:
+            _check_request()
             admission = operation_scope.enter_context(_model_effect_admission(OLLAMA_CHAT_URL, payload))
             remaining = effective_timeout - (time.monotonic() - started_clock)
             if (admission is not None and not admission.admitted) or remaining <= 0:
@@ -1057,10 +1104,12 @@ def grounded_final_brain_stream(
                        "model_call_used": False, "raw_output_present": False, "done": None,
                        **terminal_runtime_truth()}
                 return
-            timeout = httpx.Timeout(min(effective_timeout, remaining))
+            timeout = httpx.Timeout(_request_timeout(min(effective_timeout, remaining)))
             response = operation_scope.enter_context(httpx.stream("POST", OLLAMA_CHAT_URL, json=payload, timeout=timeout))
+            _check_request()
             response.raise_for_status()
             for line in response.iter_lines():
+                _check_request()
                 if not line:
                     continue
                 item = json.loads(line)
@@ -1130,6 +1179,7 @@ def grounded_final_brain_stream(
                             **terminal_runtime_truth(),
                         }
                         return
+                    _check_request()
                     if typed_history_response:
                         factual_history = _validate_history_publication(content=response_text,
                             inputs=inputs, deadline_at=measurement_clock + float(measured_deadline))
@@ -1718,7 +1768,9 @@ def _local_final_brain_token_count(payload: dict[str, Any], *, timeout_seconds: 
         if not any(item.get("name") == payload["model"] and item.get("digest", "").removeprefix("sha256:") == digest
                 for item in tags.get("models", ()) if isinstance(item, dict)):
             raise ValueError("local_manifest_provider_binding_mismatch")
+        _check_request()
         count = _native_ollama_vocabulary_count(rendered, model_path, library)
+        _check_request()
         if time.monotonic() - started >= timeout_seconds:
             raise ValueError("local_tokenizer_deadline_exhausted")
         return {"available": True, "input_tokens": count, "proof": {
@@ -1733,6 +1785,7 @@ def _local_final_brain_token_count(payload: dict[str, Any], *, timeout_seconds: 
 
 def _measured_final_brain_prompt_budget(payload: dict[str, Any], *, timeout_seconds: float,
                                        allow_prefill: bool = True) -> dict[str, Any]:
+    _check_request()
     budget = _final_brain_prompt_budget(payload)
     if timeout_seconds <= 0:
         return {**budget, "within_budget": False, "measurement_error": "request_deadline_exhausted"}
@@ -1741,7 +1794,8 @@ def _measured_final_brain_prompt_budget(payload: dict[str, Any], *, timeout_seco
     if not {"num_ctx", "available_input_tokens"}.issubset(budget):
         return budget
     accounting_clock = time.monotonic()
-    exact = _local_final_brain_token_count(payload, timeout_seconds=timeout_seconds)
+    exact = _local_final_brain_token_count(payload, timeout_seconds=_request_timeout(timeout_seconds))
+    _check_request()
     remaining = timeout_seconds - (time.monotonic() - accounting_clock)
     if remaining <= 0:
         return {**budget, "within_budget": False, "measurement_error": "request_deadline_exhausted"}

@@ -200,6 +200,9 @@ print(json.dumps(out, ensure_ascii=False, sort_keys=True))
         child_steps: list[dict[str, object]] = []
         valid_steps = []
         for step in plan.steps:
+            if deadline is not None and deadline.cancelled:
+                errors.append("canonical_request_cancelled_or_expired")
+                break
             contract = BROWSER_OPERATION_CONTRACTS.get(step.operation)
             params = dict(step.parameters)
             if contract is None or step.capability_id != BROWSER_CAPABILITY:
@@ -233,9 +236,12 @@ print(json.dumps(out, ensure_ascii=False, sort_keys=True))
             env = dict(os.environ)
             env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2])
             try:
+                if deadline is not None:
+                    deadline.check()
+                    remaining = deadline.remaining(20.0)
                 run = subprocess.run(
                     [str(BROWSER_PYTHON), "-c", self._script(child_steps), json.dumps(child_steps), self._policy_mode],
-                    capture_output=True, text=True, timeout=min(20.0, max(0.1, remaining)), check=False, env=env,
+                    capture_output=True, text=True, timeout=min(20.0, remaining), check=False, env=env,
                 )
                 if run.returncode != 0:
                     raise RuntimeError(run.stderr.strip()[-400:] or "playwright_failed")
@@ -263,6 +269,8 @@ print(json.dumps(out, ensure_ascii=False, sort_keys=True))
                 errors.append(f"playwright:{type(exc).__name__}:{exc}")
         elif not child_steps and not errors:
             errors.append("browser:runtime_or_plan_precondition_required")
+        if deadline is not None and deadline.cancelled:
+            errors.append("canonical_request_cancelled_or_expired")
         status = "COMPLETE" if items and not errors else "PARTIAL" if items else "UNAVAILABLE"
         return EvidenceBundle(
             request_id=understanding.request_id, capability_id=BROWSER_CAPABILITY, trace_id=trace_id,

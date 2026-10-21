@@ -454,3 +454,382 @@ def test_spine_withholds_final_event_after_original_budget_expires(shared_deadli
     events = list(spine.stream_canonical_semantic_turn(**kwargs, total_timeout_seconds=5))
     assert [e["event"] for e in events] == ["accepted", "status", "chunk", "error"]
     assert events[-1]["error_kind"] == "final_brain_deadline_exceeded"
+
+
+# R3 request lifetime acceptance; preserved earlier tests remain unchanged.
+import asyncio,json,threading
+from pathlib import Path
+from types import SimpleNamespace
+import pytest
+def _r3_canonical_result(*, status="COMPLETE", effect="OBSERVE", capability="conversation.respond",
+                     operation="respond", receipt=None):
+    trace_id = "trace_hot_contract"
+    return {
+        "handled": True,
+        "orchestration_path": "canonical_semantic_turn_v2",
+        "trace_id": trace_id,
+        "understanding_schema_version": "request_understanding.v2",
+        "understanding": {
+            "effect_type": effect, "current_topic": "test topic",
+            "required_capabilities": ({"capability_id": capability, "required": True},),
+            "operation_requirements": ({"operation_id": operation, "required": True},),
+        },
+        "selected_capabilities": (capability,),
+        "selected_provider_operation": (operation,),
+        "selection_source": "model_semantic_registry",
+        "fallback_used": False,
+        "fallback_reason": "",
+        "capability_status": "AVAILABLE",
+        "operation_status": status,
+        "response_text": "Непустой grounded ответ.",
+        "permission_decision": {"capability_id": capability, "granted": status == "COMPLETE",
+                                "approval_required": status == "APPROVAL_REQUIRED"},
+        "evidence_bundle": {"trace_id": trace_id, "items": (), "receipts": (receipt,) if receipt else ()},
+        "execution_plan": {"steps": ({"capability_id": capability, "operation": operation},)
+                                      if capability == "pc.control" else ()},
+        "trace": {"trace_id": trace_id, "route": "canonical_semantic_turn_v2"},
+        "project_tools_used": capability == "project.read",
+    }
+
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline
+from MAKSIMAR_SERVER.AI_ORCHESTRATION import ollama_transport as transport
+import CONTROL_PLANE.api_server as api
+
+@pytest.mark.parametrize('stream',[False,True])
+@pytest.mark.parametrize('spec',['2.3','2.4'])
+def test_r3_actual_asgi_disconnect_owns_same_deadline(monkeypatch,stream,spec):
+    monkeypatch.setenv('MAKSIMAR_MODEL_FREE_STARTUP','1')
+    projection=api._semantic_capability_projection()
+    monkeypatch.setattr(api,'_semantic_capability_projection',lambda:projection)
+    trace=[]
+    monkeypatch.setattr(api,'record_in_flight_trace_event',lambda *a,**k:trace.append((a,k)))
+    monkeypatch.setattr(api,'set_in_flight_trace',lambda *a:None)
+    monkeypatch.setattr(api,'CANONICAL_SESSION_CONTEXT',SimpleNamespace(read=lambda *a:{}))
+    monkeypatch.setattr(api,'_selected_registry_projection',lambda *a:{})
+    captures=[];received=[];provided=[];sent=[]
+    monkeypatch.setattr(api,'_capture_canonical_turn_memory',lambda *a:captures.append({'operation_status':a[0].get('operation_status')}) or {'session_event':{'diagnostic':True},'learning_bundle':None})
+    async def scenario():
+        loop=asyncio.get_running_loop();entered=asyncio.Event();gone=asyncio.Event();release=threading.Event();body_sent=False
+        result=_r3_canonical_result()
+        def controlled_turn(**kwargs):
+            provided.append({'deadline_passed':isinstance(kwargs.get('request_deadline'),RequestDeadline), 'token':kwargs.get('request_deadline')})
+            loop.call_soon_threadsafe(entered.set)
+            assert release.wait(2),'controlled fixture not released'
+            return result
+        def controlled_stream(**kwargs):
+            yield {'event':'accepted'}
+            answer=controlled_turn(**kwargs)
+            yield {'event':'done','result':answer,'response_text':answer['response_text']}
+        monkeypatch.setattr(api,'run_canonical_semantic_turn',controlled_turn)
+        monkeypatch.setattr(api,'stream_canonical_semantic_turn',controlled_stream)
+        async def receive():
+            nonlocal body_sent
+            if not body_sent:
+                body_sent=True;received.append('body')
+                return {'type':'http.request','body':json.dumps({'text':'offline fixture','stream':stream,'session_id':'R3-diagnostic'}).encode(),'more_body':False}
+            await gone.wait();received.append('disconnect');return {'type':'http.disconnect'}
+        async def send(message):sent.append({'type':message['type'],'status':message.get('status'),'after_disconnect':gone.is_set()})
+        scope={'type':'http','asgi':{'version':'3.0','spec_version':spec},'http_version':'1.1','method':'POST','scheme':'http','path':'/jarvis-live/hot','raw_path':b'/jarvis-live/hot','query_string':b'','root_path':'','headers':[(b'content-type',b'application/json')],'client':('offline',1),'server':('offline',80)}
+        task=asyncio.create_task(api.app(scope,receive,send))
+        try:
+            await asyncio.wait_for(entered.wait(),2);gone.set();await asyncio.sleep(0.05)
+        finally:release.set()
+        await asyncio.wait_for(task,3)
+    asyncio.run(scenario())
+    row={'mode':'NDJSON' if stream else 'SYNC','api_deadline_forwarded':provided[0]['deadline_passed'],'asgi_disconnect_received':received.count('disconnect'),'memory_capture_after_disconnect':len(captures),'capture_statuses':[x['operation_status'] for x in captures],'response_send_attempts_after_disconnect':sum(x['after_disconnect'] for x in sent),'real_provider_effects':0}
+    assert row['real_provider_effects']==0
+    assert provided and row['api_deadline_forwarded']
+    assert provided[0]['token'].cancelled
+    assert row['asgi_disconnect_received']==1
+    assert not captures
+    assert row['response_send_attempts_after_disconnect']==0
+    cancelled=[metadata for args,metadata in trace if args[1]=='HTTP_REQUEST_CANCELLED']
+    assert cancelled and cancelled[-1]['caller_cancelled'] is True
+    assert cancelled[-1]['provider_operation_terminated']=='UNKNOWN'
+    assert cancelled[-1]['residency_released']=='UNKNOWN'
+
+
+from pathlib import Path
+from types import SimpleNamespace
+import json,pytest
+from CONTROL_PLANE.canonical_semantic_spine import _execute_evidence
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline,PlanStep,ExecutionPlan,EvidenceBundle,IdentityContext
+@pytest.mark.parametrize('pre_cancelled',[False,True])
+def test_r3_canonical_loop_stops_without_losing_completed_receipts(pre_cancelled):
+    deadline=RequestDeadline(2);calls=[]
+    if pre_cancelled:deadline.cancel()
+    class Port:
+        def __init__(self,identity):self.provider_id=identity
+        def collect_evidence(self,understanding,plan,trace_id,token):
+            calls.append({'provider':self.provider_id,'cancelled_before_effect':token.cancelled})
+            if self.provider_id=='first':token.cancel()
+            from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import ExecutionReceipt
+            step=plan.steps[0]
+            receipt=ExecutionReceipt('real-fixture-receipt',understanding.request_id,trace_id,step.step_id,step.capability_id,step.operation,self.provider_id,'COMPLETE','controlled real readback')
+            return EvidenceBundle(understanding.request_id,step.capability_id,trace_id,'COMPLETE',(),(),(receipt,),())
+    def step(sid,cid):return PlanStep(sid,'goal',cid,'observe',('observation',),'OBSERVE','offline_fixture','REVERSIBLE',False,'READ_ONLY')
+    plan=ExecutionPlan('offline-request',(step('first-step','first-cap'),step('second-step','second-cap')))
+    bundle=_execute_evidence(SimpleNamespace(request_id='offline-request'),plan,'offline-trace',IdentityContext('test','offline','unknown',False,False),{},deadline,('first-cap','second-cap'),{'first-cap':Port('first'),'second-cap':Port('second')})
+    row={'pre_cancelled':pre_cancelled,'actual_helper':'canonical_semantic_spine._execute_evidence','controlled_provider_calls':calls,'returned_bundle_status':bundle.status,'real_external_effects':0,'scope':'Already-permitted typed execution plan helper;tests cancellation boundary,not model selection or HOST policy'}
+    assert len(calls)==(0 if pre_cancelled else 1)
+    assert bundle.status!='COMPLETE'
+    assert 'canonical_request_cancelled_or_expired' in bundle.errors
+    assert [r.receipt_id for r in bundle.receipts]==([] if pre_cancelled else ['real-fixture-receipt'])
+
+from pathlib import Path
+from types import SimpleNamespace
+import json,time,subprocess,pytest
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline,PlanStep,ExecutionPlan
+from MAKSIMAR_SERVER.AI_ORCHESTRATION import browser_provider_adapter as browser,media_provider_adapter as media
+@pytest.mark.parametrize('provider',['browser','media'])
+@pytest.mark.parametrize('state',['cancelled_before','expired_before','cancelled_during'])
+def test_r3_existing_provider_zero_predispatch_and_no_late_complete(monkeypatch,tmp_path,provider,state):
+    token=RequestDeadline(1,started_at=time.monotonic()-2 if state=='expired_before' else None)
+    if state=='cancelled_before':token.cancel()
+    calls=[]
+    if provider=='browser':
+        executable=tmp_path/'isolated-browser-python';executable.write_text('never executed')
+        monkeypatch.setattr(browser,'BROWSER_PYTHON',executable)
+        port=browser.ExistingPlaywrightBrowserAdapter(policy_mode='LOCAL_TEST')
+        step=PlanStep('step','goal','browser.web','browser.open_read',('browser_page_opened',),'OBSERVE','localhost_browser_dom','REVERSIBLE',False,'READ_ONLY',parameters=(('url','http://127.0.0.1/fixture'),))
+        output=[{'url':'http://127.0.0.1/fixture','title':'offline fixture','text':'controlled'}]
+    else:
+        port=media.ExistingFfprobeMediaAdapter();artifact=tmp_path/'fixture.media';artifact.write_bytes(b'offline fixture')
+        step=PlanStep('step','goal','media.probe','probe_media',('media_probe',),'OBSERVE','local_media_file','REVERSIBLE',False,'READ_ONLY',parameters=(('path',str(artifact)),));output={'format':{'duration':'1'},'streams':[]}
+    def controlled_run(args,**kw):
+        calls.append({'cancelled_before_effect':token.cancelled,'timeout':kw.get('timeout')})
+        if state=='cancelled_during':token.cancel()
+        return subprocess.CompletedProcess(args,0,json.dumps(output),'')
+    monkeypatch.setattr(subprocess,'run',controlled_run)
+    bundle=port.collect_evidence(SimpleNamespace(request_id='offline-request'),ExecutionPlan('offline-request',(step,)),'offline-trace',token)
+    assert token.cancelled and len(calls)==(1 if state=='cancelled_during' else 0)
+    assert bundle.status!='COMPLETE'
+    assert len(bundle.receipts)==(1 if state=='cancelled_during' else 0)
+
+
+@pytest.mark.parametrize('bad',[object(), {}, 'request'])
+def test_r3_deadline_conflicting_authority_cannot_bind(bad):
+    first=RequestDeadline(2)
+    with first.bind():
+        assert RequestDeadline.current() is first
+        with pytest.raises((ValueError,AttributeError)):
+            with RequestDeadline.bind(bad):
+                pytest.fail('malformed authority accepted')
+        with pytest.raises(ValueError,match='authority_conflict'):
+            with RequestDeadline(2).bind():
+                pass
+        assert RequestDeadline.current() is first
+    assert RequestDeadline.current() is None
+
+
+def test_r3_attempt_policy_bound_once_without_reset():
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import UnderstandingAttemptPolicy
+    token=RequestDeadline(2);expiry=token.expires_at
+    token.bind_attempt_policy(UnderstandingAttemptPolicy(max_model_attempts=1))
+    assert token.reserve_understanding_model_attempt()==1
+    with pytest.raises(ValueError,match='conflict'):
+        token.bind_attempt_policy(UnderstandingAttemptPolicy(max_model_attempts=2))
+    assert token.expires_at==expiry and token.understanding_model_attempt_count==1
+    token.cancel();token.cancel()
+    with pytest.raises(TimeoutError):token.check()
+
+
+def test_r3_native_context_thread_isolation():
+    import anyio
+    async def scenario():
+        first=RequestDeadline(2);second=RequestDeadline(2)
+        async def request(token,cancel):
+            with token.bind():
+                assert await anyio.to_thread.run_sync(RequestDeadline.current) is token
+                if cancel:token.cancel()
+                await anyio.sleep(0)
+                assert token.cancelled is cancel
+        async with anyio.create_task_group() as group:
+            group.start_soon(request,first,True);group.start_soon(request,second,False)
+        assert RequestDeadline.current() is None
+    asyncio.run(scenario())
+
+
+def test_r3_stream_writer_disconnect_closes_same_iterator(monkeypatch):
+    closed=[]
+    def events(payload):
+        try:
+            yield 'first'
+            pytest.fail('advanced after writer disconnect')
+        finally:closed.append(True)
+    monkeypatch.setattr(api,'_hot_stream_lines',events)
+    def writer(line):raise BrokenPipeError('controlled disconnect')
+    assert api.write_hot_stream_to_callable(writer,{}) is False
+    assert closed==[True]
+
+
+@pytest.mark.parametrize('stream',[False,True])
+@pytest.mark.parametrize('spec',['2.3','2.4'])
+def test_r3_actual_asgi_normal_completion_retains_public_contract(monkeypatch,stream,spec):
+    monkeypatch.setenv('MAKSIMAR_MODEL_FREE_STARTUP','1')
+    projection=api._semantic_capability_projection()
+    monkeypatch.setattr(api,'_semantic_capability_projection',lambda:projection)
+    monkeypatch.setattr(api,'record_in_flight_trace_event',lambda *a,**k:{})
+    monkeypatch.setattr(api,'set_in_flight_trace',lambda *a:None)
+    monkeypatch.setattr(api,'CANONICAL_SESSION_CONTEXT',SimpleNamespace(read=lambda *a:{}))
+    monkeypatch.setattr(api,'_selected_registry_projection',lambda *a:{})
+    captures=[];tokens=[];messages=[]
+    monkeypatch.setattr(api,'_capture_canonical_turn_memory',lambda *a:captures.append(a[0]) or {'session_event':{},'learning_bundle':None})
+    def turn(**kw):
+        token=kw['request_deadline'];tokens.append(token)
+        assert RequestDeadline.current() is token and not token.cancelled
+        assert token.understanding_attempt_policy.max_model_attempts==1
+        return _r3_canonical_result()
+    def events(**kw):
+        yield {'event':'accepted'}
+        answer=turn(**kw)
+        yield {'event':'done','result':answer,'response_text':answer['response_text']}
+    monkeypatch.setattr(api,'run_canonical_semantic_turn',turn)
+    monkeypatch.setattr(api,'stream_canonical_semantic_turn',events)
+    async def scenario():
+        delivered=False
+        async def receive():
+            nonlocal delivered
+            if not delivered:
+                delivered=True
+                return {'type':'http.request','body':json.dumps({'text':'offline','stream':stream,'understanding_attempt_policy':{'max_model_attempts':1}}).encode(),'more_body':False}
+            await asyncio.Event().wait()
+        async def send(message):messages.append(message)
+        scope={'type':'http','asgi':{'version':'3.0','spec_version':spec},'http_version':'1.1','method':'POST','scheme':'http','path':'/jarvis-live/hot','raw_path':b'/jarvis-live/hot','query_string':b'','root_path':'','headers':[(b'content-type',b'application/json')],'client':('offline',1),'server':('offline',80)}
+        await asyncio.wait_for(api.app(scope,receive,send),3)
+    asyncio.run(scenario())
+    assert len(tokens)==1 and tokens[0].cancelled and len(captures)==1
+    assert messages[0]['status']==200
+    data=b''.join(m.get('body',b'') for m in messages)
+    if stream:
+        assert [json.loads(line)['event'] for line in data.splitlines()]==['accepted','done']
+    else:assert json.loads(data)['result']['operation_status']=='COMPLETE'
+    assert RequestDeadline.current() is None
+
+
+@pytest.mark.parametrize('field',['request_deadline','deadline','total_timeout_seconds'])
+def test_r3_client_cannot_supply_deadline_authority(monkeypatch,field):
+    monkeypatch.setattr(api,'run_canonical_semantic_turn',lambda **kw:pytest.fail('forged authority dispatched'))
+    with pytest.raises(ValueError,match='authority_forbidden'):
+        api.jarvis_live_hot({'text':'offline',field:999999})
+
+
+def test_r3_stream_close_failure_cancels_token_and_never_advances(monkeypatch):
+    token=RequestDeadline(2);closed=[]
+    def broken_events(payload):
+        try:
+            yield 'accepted'
+            pytest.fail('stream advanced after close')
+        finally:
+            closed.append(True)
+            raise RuntimeError('controlled cleanup failure')
+    monkeypatch.setattr(api,'_hot_stream_events',broken_events)
+    with token.bind():
+        stream=api._hot_stream_lines({'text':'offline'})
+        assert next(stream)=='accepted'
+        with pytest.raises(RuntimeError,match='cleanup failure'):stream.close()
+    assert token.cancelled and closed==[True] and RequestDeadline.current() is None
+
+
+@pytest.mark.parametrize('value',[float('nan'),float('inf'),-1,0,True,'10'])
+def test_r3_malformed_deadline_rejected_before_effect(value):
+    with pytest.raises(ValueError):RequestDeadline(value)
+
+
+def test_r3_actual_asgi_concurrent_disconnect_does_not_cancel_other_session(monkeypatch):
+    monkeypatch.setenv('MAKSIMAR_MODEL_FREE_STARTUP','1')
+    projection=api._semantic_capability_projection()
+    monkeypatch.setattr(api,'_semantic_capability_projection',lambda:projection)
+    monkeypatch.setattr(api,'record_in_flight_trace_event',lambda *a,**k:{})
+    monkeypatch.setattr(api,'set_in_flight_trace',lambda *a:None)
+    monkeypatch.setattr(api,'CANONICAL_SESSION_CONTEXT',SimpleNamespace(read=lambda *a:{}))
+    monkeypatch.setattr(api,'_selected_registry_projection',lambda *a:{})
+    captures=[];tokens={};sent={'first':[],'second':[]};release=threading.Event()
+    monkeypatch.setattr(api,'_capture_canonical_turn_memory',lambda *a:captures.append(a[2]) or {'session_event':{},'learning_bundle':None})
+    async def scenario():
+        loop=asyncio.get_running_loop();entered={'first':asyncio.Event(),'second':asyncio.Event()};gone=asyncio.Event()
+        def turn(**kw):
+            session=kw['session_id'];tokens[session]=kw['request_deadline']
+            assert RequestDeadline.current() is tokens[session]
+            loop.call_soon_threadsafe(entered[session].set)
+            assert release.wait(3)
+            return _r3_canonical_result()
+        monkeypatch.setattr(api,'run_canonical_semantic_turn',turn)
+        async def request(session):
+            delivered=False
+            async def receive():
+                nonlocal delivered
+                if not delivered:
+                    delivered=True
+                    return {'type':'http.request','body':json.dumps({'text':'offline','session_id':session,'trace_id':'same-untrusted-trace'}).encode(),'more_body':False}
+                if session=='first':
+                    await gone.wait();return {'type':'http.disconnect'}
+                await asyncio.Event().wait()
+            async def send(message):sent[session].append(message)
+            scope={'type':'http','asgi':{'version':'3.0','spec_version':'2.4'},'http_version':'1.1','method':'POST','scheme':'http','path':'/jarvis-live/hot','raw_path':b'/jarvis-live/hot','query_string':b'','root_path':'','headers':[(b'content-type',b'application/json')],'client':('offline',1),'server':('offline',80)}
+            await api.app(scope,receive,send)
+        tasks=[asyncio.create_task(request(session)) for session in ('first','second')]
+        try:
+            await asyncio.wait_for(asyncio.gather(*(e.wait() for e in entered.values())),2)
+            gone.set();await asyncio.sleep(.05)
+            assert tokens['first'] is not tokens['second']
+            assert tokens['first'].cancelled and not tokens['second'].cancelled
+            # The controlled provider is still active: caller cancellation is not abort.
+            assert not any(task.done() for task in tasks)
+        finally:release.set()
+        await asyncio.wait_for(asyncio.gather(*tasks),3)
+    asyncio.run(scenario())
+    assert captures==['second'] and not sent['first']
+    assert json.loads(b''.join(m.get('body',b'') for m in sent['second']))['result']['operation_status']=='COMPLETE'
+    assert RequestDeadline.current() is None
+
+
+def test_r3_actual_asgi_disconnect_before_body_has_zero_turn_effects(monkeypatch):
+    calls=[]
+    monkeypatch.setattr(api,'run_canonical_semantic_turn',lambda **kw:calls.append(kw))
+    monkeypatch.setattr(api,'stream_canonical_semantic_turn',lambda **kw:calls.append(kw))
+    async def scenario():
+        async def receive():return {'type':'http.disconnect'}
+        async def send(message):pytest.fail('response sent to already disconnected caller')
+        scope={'type':'http','asgi':{'version':'3.0','spec_version':'2.4'},'http_version':'1.1','method':'POST','scheme':'http','path':'/jarvis-live/hot','raw_path':b'/jarvis-live/hot','query_string':b'','root_path':'','headers':[(b'content-type',b'application/json')],'client':('offline',1),'server':('offline',80)}
+        await asyncio.wait_for(api.app(scope,receive,send),3)
+    asyncio.run(scenario())
+    assert calls==[] and RequestDeadline.current() is None
+
+
+@pytest.mark.parametrize('spec',['2.3','2.4'])
+def test_r3_actual_asgi_send_failure_cancels_only_owned_stream(monkeypatch,spec):
+    tokens=[];closed=[];captured=[];owned=[]
+    original_lines=api._hot_stream_lines
+    def retain_lines(*args,**kwargs):
+        lines=original_lines(*args,**kwargs);owned.append(lines);return lines
+    monkeypatch.setattr(api,'_hot_stream_lines',retain_lines)
+    monkeypatch.setattr(api,'record_in_flight_trace_event',lambda *a,**kw:{})
+    monkeypatch.setattr(api,'CANONICAL_SESSION_CONTEXT',SimpleNamespace(read=lambda *a:{}))
+    monkeypatch.setattr(api,'_semantic_capability_projection',lambda:{})
+    monkeypatch.setattr(api,'_capture_canonical_turn_memory',lambda *a:captured.append(True))
+    def events(**kw):
+        token=kw['request_deadline'];tokens.append(token)
+        try:
+            yield {'event':'accepted'}
+            token.check()
+            pytest.fail('provider advanced after send failure')
+        finally:closed.append(True)
+    monkeypatch.setattr(api,'stream_canonical_semantic_turn',events)
+    async def scenario():
+        delivered=False
+        async def receive():
+            nonlocal delivered
+            if not delivered:
+                delivered=True
+                return {'type':'http.request','body':json.dumps({'text':'offline','stream':True}).encode(),'more_body':False}
+            await asyncio.Event().wait()
+        async def send(message):
+            if message.get('body'):raise OSError('controlled socket failure')
+        scope={'type':'http','asgi':{'version':'3.0','spec_version':spec},'http_version':'1.1','method':'POST','scheme':'http','path':'/jarvis-live/hot','raw_path':b'/jarvis-live/hot','query_string':b'','root_path':'','headers':[(b'content-type',b'application/json')],'client':('offline',1),'server':('offline',80)}
+        await asyncio.wait_for(api.app(scope,receive,send),3)
+    asyncio.run(scenario())
+    assert len(tokens)==1 and tokens[0].cancelled
+    assert closed==[True] and not captured
+    assert owned[0].gi_frame is None
+    assert RequestDeadline.current() is None

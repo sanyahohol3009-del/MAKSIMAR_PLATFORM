@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import UnderstandingAttemptPolicy
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline, UnderstandingAttemptPolicy
 
 import json
+import anyio
+from functools import wraps
+from fastapi.routing import APIRoute
+from starlette.requests import ClientDisconnect
+from starlette.concurrency import run_in_threadpool
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from importlib import import_module
@@ -16,6 +21,7 @@ import time
 from CONTROL_PLANE.health.monitor import take_snapshot
 from CORE_ROOT.run_context import model_free_startup
 from CONTROL_PLANE.canonical_semantic_spine import (
+    CANONICAL_TURN_TIMEOUT_SECONDS,
     CANDIDATE_DISCOVERY_JSON_SCHEMA,
     KIND_DISCOVERY_JSON_SCHEMA,
     REQUEST_UNDERSTANDING_JSON_SCHEMA,
@@ -747,10 +753,117 @@ def _payload_understanding_attempt_policy(payload: dict[str, Any]) -> Understand
 
 
 
-@app.post("/jarvis-live/hot")
+class _HotRequestRoute(APIRoute):
+    """Native lifetime of the existing /hot route; sole upstream receive owner."""
+
+    async def handle(self, scope, receive, send):
+        deadline = RequestDeadline(CANONICAL_TURN_TIMEOUT_SECONDS)
+        tx, rx = anyio.create_memory_object_stream(1)
+        disconnected = False
+
+        async def receive_messages():
+            nonlocal disconnected
+            async with tx:
+                while True:
+                    message = await receive()
+                    if message["type"] == "http.disconnect":
+                        disconnected = True
+                        deadline.cancel()
+                    await tx.send(message)
+                    if message["type"] == "http.disconnect":
+                        return
+
+        async def guarded_send(message):
+            nonlocal disconnected
+            # Empty framing closes a completed stream, it publishes no answer.
+            terminal_frame = (message["type"] == "http.response.body"
+                              and not message.get("body") and not message.get("more_body", False))
+            if disconnected or not terminal_frame:
+                deadline.check()
+            try:
+                await send(message)
+            except OSError:
+                disconnected = True
+                deadline.cancel()
+                raise
+
+        with deadline.bind():
+            try:
+                async with rx, anyio.create_task_group() as tasks:
+                    tasks.start_soon(receive_messages)
+                    try:
+                        await super().handle(scope, rx.receive, guarded_send)
+                    except (OSError, TimeoutError, ClientDisconnect):
+                        if not deadline.cancelled:
+                            raise
+                    finally:
+                        tasks.cancel_scope.cancel()
+            finally:
+                # Local caller cancellation is not provider abort or VRAM release.
+                deadline.cancel()
+
+
+class _HotStreamingResponse(StreamingResponse):
+    """Finalize this response's sync iterator even if ASGI send fails."""
+
+    def __init__(self, lines: Iterable[str], deadline: RequestDeadline):
+        super().__init__(lines, media_type="application/x-ndjson")
+        self._owned_lines = lines
+        self._request_deadline = deadline
+
+    async def __call__(self, scope, receive, send):
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            self._request_deadline.cancel()
+            # Native threadpool calls are joined; do not rely on GC to close
+            # a retained sync generator, or claim that this aborts a backend.
+            with anyio.CancelScope(shield=True), self._request_deadline.bind():
+                try:
+                    close = getattr(self._owned_lines, "close", None)
+                    if callable(close):
+                        await run_in_threadpool(close)
+                finally:
+                    await self.body_iterator.aclose()
+
+
+def _hot_request_deadline(payload: dict[str, Any]) -> RequestDeadline:
+    if set(payload) & {"request_deadline", "deadline", "total_timeout_seconds"}:
+        raise ValueError("client_request_deadline_authority_forbidden")
+    policy = _payload_understanding_attempt_policy(payload)
+    deadline = RequestDeadline.current()
+    if deadline is None:
+        deadline = RequestDeadline(CANONICAL_TURN_TIMEOUT_SECONDS, understanding_attempt_policy=policy)
+    deadline.bind_attempt_policy(policy)
+    deadline.check()
+    return deadline
+
+
+def _hot_request_scope(function):
+    @wraps(function)
+    def scoped(payload):
+        payload = {**payload, "trace_id": str(payload.get("trace_id") or f"trace_{time.time_ns()}")}
+        deadline = _hot_request_deadline(payload)
+        with deadline.bind():
+            try:
+                result = function(payload)
+                deadline.check()
+                return result
+            except TimeoutError:
+                if not deadline.cancelled:
+                    raise
+                record_in_flight_trace_event(payload["trace_id"], "HTTP_REQUEST_CANCELLED", "CANCELLED",
+                    caller_cancelled=True, provider_operation_terminated="UNKNOWN",
+                    residency_released="UNKNOWN", resource_available="UNKNOWN")
+                return {"ok": False, "operation_status": "CANCELLED",
+                        "error_kind": "canonical_request_cancelled_or_expired"}
+    return scoped
+
+
+@_hot_request_scope
 def jarvis_live_hot(payload: dict[str, Any]) -> Any:
     if _payload_stream_requested(payload):
-        return StreamingResponse(_hot_stream_lines(payload), media_type="application/x-ndjson")
+        return _HotStreamingResponse(_hot_stream_lines(payload, RequestDeadline.current()), RequestDeadline.current())
     text = _payload_text(payload)
     session_id = _payload_session_id(payload)
     trace_id = str(payload.get("trace_id") or f"trace_{time.time_ns()}")
@@ -759,7 +872,9 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
     record_in_flight_trace_event(trace_id, "CANONICAL_TURN_STARTED")
     identity = _identity_from_hot_payload(payload, session_id)
     session_context = CANONICAL_SESSION_CONTEXT.read(session_id, identity)
+    RequestDeadline.current().check()
     registry_projection = _semantic_capability_projection()
+    RequestDeadline.current().check()
     canonical = run_canonical_semantic_turn(
         text=text,
         project_port=PROJECT_UNDERSTANDING_ADAPTER,
@@ -772,6 +887,7 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
         input_channel=_payload_input_channel(payload),
         input_quality_metadata=_payload_input_quality_metadata(payload),
         understanding_attempt_policy=_payload_understanding_attempt_policy(payload),
+        request_deadline=RequestDeadline.current(),
         registry_projection=registry_projection,
         trace_id=trace_id,
         provider_ports={
@@ -787,6 +903,7 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
         },
         session_id=session_id,
     )
+    RequestDeadline.current().check()
     record_in_flight_trace_event(trace_id, "CANONICAL_TURN_COMPLETED", status=str(canonical.get("capability_status", "UNKNOWN")))
     expected_capability_id = str(payload.get("expected_capability_id") or "").strip()
     if expected_capability_id:
@@ -811,6 +928,7 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
     sandbox_requirement = requirement_from_semantic_understanding(understanding)
     if sandbox_requirement is not None:
         sandbox_selection = select_sandbox(sandbox_requirement)
+    RequestDeadline.current().check()
     capture = _capture_canonical_turn_memory(canonical, payload, session_id, identity, text, response_text)
     result = {
         "ok": bool(response_text), "route": "CANONICAL_SEMANTIC_TURN",
@@ -883,6 +1001,10 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
         "session_event": result.get("session_event"),
         "pending_approvals": result.get("pending_approvals", ()),
     }
+
+
+app.router.add_api_route("/jarvis-live/hot", jarvis_live_hot, methods=["POST"],
+                         route_class_override=_HotRequestRoute)
 
 
 @app.get("/jarvis-live/approvals/{approval_id}")
@@ -967,12 +1089,46 @@ def _selected_registry_projection(
     }
 
 
-def _hot_stream_lines(payload: dict[str, Any]) -> Iterable[str]:
+def _hot_stream_lines(payload: dict[str, Any], request_deadline: RequestDeadline | None = None) -> Iterable[str]:
+    payload = {**payload, "trace_id": str(payload.get("trace_id") or f"trace_{time.time_ns()}")}
+    if request_deadline is not None:
+        with request_deadline.bind():
+            deadline = _hot_request_deadline(payload)
+    else:
+        deadline = _hot_request_deadline(payload)
+    events = _hot_stream_events(payload)
+    try:
+        while True:
+            # A sync generator can be advanced on different framework threads.
+            # Bind/reset per advance, never across a yield to another context.
+            with deadline.bind():
+                deadline.check()
+                try:
+                    line = next(events)
+                except StopIteration:
+                    return
+                deadline.check()
+            yield line
+    except TimeoutError:
+        if not deadline.cancelled:
+            raise
+        record_in_flight_trace_event(payload["trace_id"], "HTTP_REQUEST_CANCELLED", "CANCELLED",
+            caller_cancelled=True, provider_operation_terminated="UNKNOWN",
+            residency_released="UNKNOWN", resource_available="UNKNOWN")
+    finally:
+        deadline.cancel()
+        with deadline.bind():
+            events.close()
+
+
+def _hot_stream_events(payload: dict[str, Any]) -> Iterable[str]:
     text = _payload_text(payload)
     session_id = _payload_session_id(payload)
     identity = _identity_from_hot_payload(payload, session_id)
     session_context = CANONICAL_SESSION_CONTEXT.read(session_id, identity)
+    RequestDeadline.current().check()
     registry_projection = _semantic_capability_projection()
+    RequestDeadline.current().check()
     events = stream_canonical_semantic_turn(
         trace_id=str(payload.get("trace_id") or f"trace_{time.time_ns()}"),
         session_id=session_id,
@@ -983,6 +1139,7 @@ def _hot_stream_lines(payload: dict[str, Any]) -> Iterable[str]:
         session_context=session_context, input_channel=_payload_input_channel(payload),
         input_quality_metadata=_payload_input_quality_metadata(payload),
         understanding_attempt_policy=_payload_understanding_attempt_policy(payload),
+        request_deadline=RequestDeadline.current(),
         registry_projection=registry_projection,
         provider_ports={
             PROJECT_UNDERSTANDING_ADAPTER.provider_id: PROJECT_UNDERSTANDING_ADAPTER,
@@ -998,6 +1155,7 @@ def _hot_stream_lines(payload: dict[str, Any]) -> Iterable[str]:
     )
     try:
         for event in events:
+            RequestDeadline.current().check()
             public_event = dict(event)
             if public_event.get("event") in {"done", "error"}:
                 result = dict(public_event.get("result", {}))
@@ -1012,18 +1170,28 @@ def _hot_stream_lines(payload: dict[str, Any]) -> Iterable[str]:
                 result["session_event"] = session_event
                 public_event["result"] = result
                 public_event["session_event"] = session_event
+            RequestDeadline.current().check()
             yield json.dumps(public_event, ensure_ascii=False, default=str) + "\n"
     except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, GeneratorExit):
         return
+    finally:
+        close = getattr(events, "close", None)
+        if callable(close):
+            close()
 
 
 def write_hot_stream_to_callable(write_callable: Any, payload: dict[str, Any]) -> bool:
     """Compatibility writer over the canonical /hot stream; disconnect is not fatal."""
+    lines = _hot_stream_lines({**payload, "stream": True})
     try:
-        for line in _hot_stream_lines({**payload, "stream": True}):
+        for line in lines:
             write_callable(line)
     except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
         return False
+    finally:
+        close = getattr(lines, "close", None)
+        if callable(close):
+            close()
     return True
 
 

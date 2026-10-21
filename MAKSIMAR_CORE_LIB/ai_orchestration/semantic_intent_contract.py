@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+from contextlib import contextmanager
+from contextvars import ContextVar
 import threading
+import math
 import time
 from typing import Any
 
@@ -1006,22 +1009,59 @@ class UnderstandingAttemptPolicy:
             raise ValueError("understanding_model_attempt_budget_invalid")
 
 
+_CURRENT_REQUEST_DEADLINE: ContextVar[RequestDeadline | None] = ContextVar("canonical_request_deadline", default=None)
+
+
 class RequestDeadline:
     """Shared monotonic deadline and cooperative cancellation token."""
 
     def __init__(self, timeout_seconds: float, *, started_at: float | None = None,
                  understanding_attempt_policy: UnderstandingAttemptPolicy | None = None) -> None:
-        if timeout_seconds <= 0:
+        if not isinstance(timeout_seconds, (int, float)) or isinstance(timeout_seconds, bool) or not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
         self.started_at = time.monotonic() if started_at is None else started_at
+        if not isinstance(self.started_at, (int, float)) or not math.isfinite(self.started_at):
+            raise ValueError("started_at must be finite monotonic time")
         self.expires_at = self.started_at + float(timeout_seconds)
         self._cancelled = threading.Event()
         self.understanding_attempt_policy = UnderstandingAttemptPolicy() if understanding_attempt_policy is None else understanding_attempt_policy
         if not isinstance(self.understanding_attempt_policy, UnderstandingAttemptPolicy):
             raise ValueError("understanding_attempt_policy_invalid")
         self._understanding_attempt_lock = threading.Lock()
+        self._attempt_policy_bound = understanding_attempt_policy is not None
         self.understanding_model_attempt_count = 0
         self.understanding_model_attempts: list[dict[str, Any]] = []
+
+    @staticmethod
+    def current() -> RequestDeadline | None:
+        return _CURRENT_REQUEST_DEADLINE.get()
+
+    @contextmanager
+    def bind(self):
+        """Carry this same authority through native request/threadpool context."""
+        current = self.current()
+        if current is not None and current is not self:
+            raise ValueError("request_deadline_authority_conflict")
+        binding = _CURRENT_REQUEST_DEADLINE.set(self)
+        try:
+            yield self
+        finally:
+            _CURRENT_REQUEST_DEADLINE.reset(binding)
+
+    def bind_attempt_policy(self, policy: UnderstandingAttemptPolicy) -> None:
+        if not isinstance(policy, UnderstandingAttemptPolicy):
+            raise ValueError("understanding_attempt_policy_invalid")
+        with self._understanding_attempt_lock:
+            if self._attempt_policy_bound or self.understanding_model_attempt_count:
+                if policy != self.understanding_attempt_policy:
+                    raise ValueError("understanding_attempt_policy_conflict")
+            else:
+                self.understanding_attempt_policy = policy
+                self._attempt_policy_bound = True
+
+    def check(self) -> None:
+        if self.cancelled:
+            raise TimeoutError("canonical_request_cancelled_or_expired")
 
     def reserve_understanding_model_attempt(self) -> int:
         with self._understanding_attempt_lock:

@@ -5587,6 +5587,10 @@ def _execute_evidence(understanding: RequestUnderstanding, plan: ExecutionPlan, 
         )
     )
     for capability_id, capability_steps in execution_units:
+        if deadline.cancelled:
+            bundles.append(EvidenceBundle(understanding.request_id, capability_id, trace_id,
+                "UNAVAILABLE", (), (), (), ("canonical_request_cancelled_or_expired",)))
+            break
         prerequisites = tuple(step for step in original_plan.steps if any(
             target.operation in step.declared_prerequisite_for_operation_ids for target in capability_steps
         ))
@@ -5609,6 +5613,10 @@ def _execute_evidence(understanding: RequestUnderstanding, plan: ExecutionPlan, 
         bind_permission = getattr(port, "bind_host_permission", None)
         if callable(bind_permission):
             bind_permission(permissions=tuple(permissions), plan=subplan, trace_id=trace_id)
+        if deadline.cancelled:
+            bundles.append(EvidenceBundle(understanding.request_id, capability_id, trace_id,
+                "UNAVAILABLE", (), (), (), ("canonical_request_cancelled_or_expired",)))
+            break
         if capability_id == "conversation.respond":
             bundle = port.collect_evidence(understanding, subplan, trace_id, identity, session_context, deadline)
             # Context/identity evidence is not execution of the user-visible response.
@@ -5620,6 +5628,12 @@ def _execute_evidence(understanding: RequestUnderstanding, plan: ExecutionPlan, 
                 )
         else:
             bundle = port.collect_evidence(understanding, subplan, trace_id, deadline)
+        if deadline.cancelled:
+            # Preserve real completed receipts; cancellation never undoes effects.
+            bundles.append(EvidenceBundle(bundle.request_id, bundle.capability_id, bundle.trace_id,
+                "PARTIAL", bundle.items, bundle.limitations, bundle.receipts,
+                bundle.errors + ("canonical_request_cancelled_or_expired",), capability_ids=bundle.capability_ids))
+            break
         # Sandbox review is a post-execution gate.  The simulation provider already
         # emitted the typed result/evidence; review consumes that same result before
         # this canonical bundle is finalized.  Keep the import lazy to preserve the

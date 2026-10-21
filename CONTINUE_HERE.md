@@ -1,3 +1,35 @@
+# CURRENT R3 OFFLINE VERIFIED - 2026-10-21
+
+BASE_HEAD 52c51e8a09f56994b7ab2c692873c5724ef89c2d; verified R3 source checkpoint.
+Direct Git approval call_b1f0dd15d8f34c058eba6633acf04997 received; delivery in progress.
+Read owner_20261021_R3_git_delivery.json before retrying any commit/push.
+Read existing audit OWNER_R3_REQUEST_LIFETIME_OFFLINE_REPORT_20261021.md,
+owner_20261021_R3_final_status.json and owner_20261021_R3_git_checkpoint_plan.json.
+Exact final8 production repair approved under call_cd0fe35ab5b3403089ee7a1d6f0d9051.
+Six existing source owners + two test owners repaired; same existing RequestDeadline,
+native /hot ASGI receive/send and response finalization, no new authority/router/endpoint.
+153 tests in scoped two files + original compatibility negative =154focused PASS;
+1135 UNIQUE combined PASS/0FAIL/0ERROR/0SKIP; totals overlap, never add them.
+Final evidence *_focused_verified / *_combined_verified; earlier failures retained.
+Current graph4025files/20578nodes/71720edges;errors/collisions/hashdrift0; route set32->32;
+new production project-import/cycle edges0; original negative tests and config preserved.
+Trust3/signature/pins2/state7/4terminalreceipts/8archives46entries/heavyraw4 preserved.
+JARVIS orderly_stopped,8000free,no tmux;47historical missing preserved; unrelated dirty untouched.
+Rootcounts8internal/6memory retained, not global recount; matrix88rows/7dormant/38groups unchanged.
+No physical provider abort/model load termination/residency/resource release proof.
+Blocking threads/HTTP/child scripts may complete after local cancel; no shared daemon kill.
+No models,live START/REST,restarts,weights,other repos or R4 implementation.
+
+NEXT: finish/verify ONE authorized9path delivery (8source/test + this R3 block).
+Exact direct Git approval is already granted; do not request it again for this batch.
+Prior unpublished checkpoint history stays in worktree; do not stage it wholesale.
+Fresh hashes/remote/ancestry, targeted staging and original hooks remain required.
+Ordinary push and independent remoteSHA only; consumed delivery must not be repeated.
+After delivery follow existing R4 owned-residency/resource roadmap; fresh scoped plan/approval,
+then separately authorized M1. Selfknowledge and natural replay remain frozen/not authorized.
+
+--- Prior local checkpoints retained verbatim below ---
+
 # CURRENT R2 authorized source delivery - 2026-10-21
 
 Direct owner approval call_94527b1a497a4d0e88767fbc3dbc91a2 authorizes ONE exact20-path

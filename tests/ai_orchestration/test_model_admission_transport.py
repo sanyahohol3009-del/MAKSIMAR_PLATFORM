@@ -340,3 +340,77 @@ def test_existing_structured_adapter_primary_heavy_primary_uses_same_admission(a
     assert [a["model_role"] for a in deadline.understanding_model_attempts]==[primary.role_id,heavy.role_id,primary.role_id]
     # Controlled external observations are empty at each acquire; this case does
     # not prove eviction of a previous resident or physical VRAM release.
+
+
+@pytest.mark.parametrize('state',['before','during','expired'])
+def test_r3_post_inherits_same_request_and_withholds_late_success(acquisition,monkeypatch,state):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline
+    import time
+    token=RequestDeadline(2,started_at=time.monotonic()-3 if state=='expired' else None)
+    if state=='before':token.cancel()
+    original=transport.httpx.post
+    def late(*args,**kw):
+        assert 0 < kw['timeout'] <= token.remaining()+0.05
+        response=original(*args,**kw);token.cancel();return response
+    monkeypatch.setattr(transport.httpx,'post',late)
+    payload={'model':acquisition['profile'].model_id,'messages':[{'role':'user','content':'offline controlled'}],'options':{'num_ctx':4096},'stream':False}
+    with token.bind():
+        result=transport.ollama_post_json('/api/chat',payload,timeout_seconds=10)
+    assert result['ok'] is False
+    assert result['model_call_attempted'] is (state=='during')
+    assert len(acquisition['posts'])==(1 if state=='during' else 0)
+    assert RequestDeadline.current() is None
+
+
+@pytest.mark.parametrize('late',[False,True])
+def test_r3_metadata_no_io_before_cancel_no_late_result(acquisition,monkeypatch,late):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline
+    token=RequestDeadline(2);calls=[]
+    if not late:token.cancel()
+    original=transport.httpx.get
+    def response(*a,**k):
+        calls.append(True);out=original(*a,**k);token.cancel();return out
+    monkeypatch.setattr(transport.httpx,'get',response)
+    with token.bind():result=transport.ollama_get_json('/api/tags')
+    assert result['ok'] is False
+    assert len(calls)==int(late)
+
+
+@pytest.mark.parametrize('phase',['before','read','between_chunks','before_done','validation','failure'])
+def test_r3_transport_stream_no_late_publication_and_closes_own_scope(acquisition,monkeypatch,phase):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import RequestDeadline
+    token=RequestDeadline(30);closed=[];calls=[]
+    class Response:
+        def raise_for_status(self):pass
+        def iter_lines(self):
+            if phase=='read':token.cancel()
+            if phase=='failure':raise transport.httpx.ReadError('controlled read failure')
+            yield json.dumps({'model':acquisition['profile'].model_id,'message':{'content':'controlled'},'done':False})
+            if phase=='before_done':token.cancel()
+            yield json.dumps({'model':acquisition['profile'].model_id,'message':{'content':''},'done':True,'done_reason':'stop'})
+    @contextmanager
+    def response(*a,**kw):
+        calls.append(kw)
+        try:yield Response()
+        finally:closed.append(True)
+    monkeypatch.setattr(transport.httpx,'stream',response)
+    if phase=='validation':
+        original=transport._flush_private_reasoning
+        def late(state):token.cancel();return original(state)
+        monkeypatch.setattr(transport,'_flush_private_reasoning',late)
+    if phase=='before':token.cancel()
+    with token.bind():
+        events=transport.grounded_final_brain_stream(timeout_seconds=40,original_text='offline',understanding={},execution_plan={},evidence_bundle={},capability_state={})
+        first=next(events)
+        if phase=='between_chunks':token.cancel()
+        observed=[first,*list(events)]
+    assert not any(e['event']=='done' for e in observed)
+    assert not any(e.get('resources_actually_released') for e in observed)
+    assert len(calls)==(0 if phase=='before' else 1)
+    assert len(closed)==len(calls)
+    if calls:assert calls[0]['timeout'].read <= 30
+    if phase in {'before','read'}:assert not any(e['event']=='chunk' for e in observed)
+    # Closing the local HTTP scope is not independent evidence of backend termination.
+    assert all(e.get('provider_operation_terminated','UNKNOWN')=='UNKNOWN' for e in observed)
+    assert RequestDeadline.current() is None
+    assert transport.ollama_post_json('/api/generate',acquisition['payload'])['resource_admission']['admitted']
