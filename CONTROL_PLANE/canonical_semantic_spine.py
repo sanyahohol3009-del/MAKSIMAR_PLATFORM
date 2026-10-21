@@ -2331,10 +2331,21 @@ def run_canonical_semantic_turn(
     session_id: str = "",
     total_timeout_seconds: float = CANONICAL_TURN_TIMEOUT_SECONDS,
     understanding_attempt_policy: UnderstandingAttemptPolicy | None = None,
+    request_deadline: RequestDeadline | None = None,
 ) -> dict[str, Any]:
     if registry_projection is not None:
         registry_projection = validate_semantic_capability_projection(registry_projection)
-    deadline = RequestDeadline(total_timeout_seconds, understanding_attempt_policy=understanding_attempt_policy)
+    deadline = request_deadline
+    if deadline is None:
+        deadline = RequestDeadline(total_timeout_seconds, understanding_attempt_policy=understanding_attempt_policy)
+    elif not isinstance(deadline, RequestDeadline):
+        raise ValueError("canonical_request_deadline_invalid")
+    elif deadline.expires_at > deadline.started_at + float(total_timeout_seconds):
+        raise ValueError("canonical_request_deadline_exceeds_turn_budget")
+    elif understanding_attempt_policy is not None and deadline.understanding_attempt_policy != understanding_attempt_policy:
+        raise ValueError("canonical_request_deadline_attempt_policy_mismatch")
+    if deadline.cancelled:
+        raise TimeoutError("canonical_turn_deadline_exceeded")
     input_preparation, helper_trace = _prepare_input(
         model_port=model_port, deadline=deadline, original_text=text,
         input_channel=input_channel, input_quality_metadata=dict(input_quality_metadata or {}),
@@ -2363,106 +2374,127 @@ def stream_canonical_semantic_turn(**kwargs: Any) -> Iterator[dict[str, Any]]:
     trace_id = str(kwargs.pop("trace_id", "") or f"trace_{uuid4().hex}")
     request_id = str(kwargs.pop("request_id", "") or f"request_{uuid4().hex}")
     final_brain_port = kwargs["final_brain_port"]
-    yield {"event": "accepted", "status": "accepted", "trace_id": trace_id,
-           "request_id": request_id, "orchestration_path": "canonical_semantic_turn_v2"}
-    try:
-        result = run_canonical_semantic_turn(
-            **kwargs, trace_id=trace_id, request_id=request_id, defer_final_brain=True,
+    deadline = kwargs.pop("request_deadline", None)
+    if deadline is None:
+        deadline = RequestDeadline(
+            kwargs.get("total_timeout_seconds", CANONICAL_TURN_TIMEOUT_SECONDS),
+            understanding_attempt_policy=kwargs.get("understanding_attempt_policy"),
         )
-    except Exception as exc:
-        yield {
-            "event": "error", "trace_id": trace_id, "request_id": request_id,
-            "error_kind": "canonical_semantic_turn_exception",
-            "error_message": type(exc).__name__, "response_text": "",
-        }
-        return
-    yield {
-        "event": "status", "status": "final_brain_pending" if result.get("operation_status") == "FINAL_BRAIN_PENDING" else "blocked",
-        "trace_id": trace_id, "request_id": request_id,
-        "stages": tuple(result.get("trace", {}).get("stages", ())) if isinstance(result.get("trace"), dict) else (),
-        "helper_evidence": {
-            key: result.get(key) for key in (
-                "helper_call_attempted", "helper_call_succeeded", "helper_raw_output_present",
-                "helper_schema_valid", "helper_correction_valid", "helper_call_used",
+    elif not isinstance(deadline, RequestDeadline):
+        raise ValueError("canonical_request_deadline_invalid")
+    try:
+        yield {"event": "accepted", "status": "accepted", "trace_id": trace_id,
+               "request_id": request_id, "orchestration_path": "canonical_semantic_turn_v2"}
+        try:
+            result = run_canonical_semantic_turn(
+                **kwargs, trace_id=trace_id, request_id=request_id, defer_final_brain=True,
+                request_deadline=deadline,
             )
-        },
-        "selected_capabilities": tuple(result.get("selected_capabilities", ())),
-        "selected_provider_operation": tuple(result.get("selected_provider_operation", ())),
-    }
-    if result.get("operation_status") != "FINAL_BRAIN_PENDING":
-        yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
-               "error_kind": str(result.get("operation_status", "CANONICAL_TURN_BLOCKED")),
-               "error_message": str(result.get("degradation", "canonical turn did not reach Final Brain")),
-               "response_text": str(result.get("response_text", "")), "result": result}
-        return
-    stream_answer = getattr(final_brain_port, "stream_answer", None)
-    if not callable(stream_answer):
-        yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
-               "error_kind": "final_brain_stream_unavailable",
-               "error_message": "Final Brain port has no streaming transport", "response_text": "", "result": result}
-        return
-    deadline = RequestDeadline(180.0)
-    emitted_chunk = False
-    for event in stream_answer(deadline=deadline, **dict(result["final_brain_input"])):
-        event_type = str(event.get("event", ""))
-        if event_type == "chunk":
-            chunk = str(event.get("chunk", event.get("text", "")))
-            if not chunk:
-                continue
-            emitted_chunk = True
-            yield {"event": "chunk", "trace_id": trace_id, "request_id": request_id,
-                   "chunk": chunk, "text": chunk}
-            continue
-        if event_type == "done":
-            response_text = str(event.get("response_text", "")).strip()
-            generation_ok = bool(
-                emitted_chunk and response_text
-                and event.get("model_call_attempted") is True
-                and event.get("model_call_succeeded") is True
-                and event.get("raw_output_present") is True
-                and event.get("done") is True
-                and event.get("done_reason") != "length"
-                and event.get("truncation") is False
-            )
-            if not generation_ok:
-                yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
-                       "error_kind": "final_brain_empty_result",
-                       "error_message": "Final Brain returned no visible answer", "response_text": "", "result": result}
-                return
-            result["response_text"] = response_text
-            _record_stream_completed_conversation_response(result)
-            result["generation_completed"] = True
-            result["delivery_completed"] = None
-            result["response_execution_status"] = "GENERATION_COMPLETE_DELIVERY_UNKNOWN"
-            result["operation_status"] = (
-                "PARTIAL_APPROVAL_REQUIRED" if result.get("approval_required_steps")
-                else "PARTIAL_POLICY_DENIED" if result.get("policy_denied_steps")
-                else "PARTIAL_UNAVAILABLE" if result.get("provider_unavailable_steps") else "COMPLETE"
-            )
-            trace = dict(result.get("trace", {}))
-            trace["final_brain_status"] = "COMPLETE"
-            trace["stages"] = tuple(trace.get("stages", ())) + ("final_brain_stream",)
-            result["trace"] = trace
-            telemetry_keys = (
-                "model", "model_id", "done", "done_reason", "prompt_eval_count", "eval_count",
-                "prompt_eval_duration", "eval_duration", "load_duration", "total_duration",
-                "configured_num_ctx", "requested_num_ctx", "observed_context_length",
-                "truncation", "context_authority_source", "prompt_budget",
-            )
-            telemetry = {key: event.get(key) for key in telemetry_keys}
-            result["final_brain_telemetry"] = telemetry
+        except Exception as exc:
             yield {
-                "event": "done", "trace_id": trace_id, "request_id": request_id,
-                "response_text": response_text, "result": result, **telemetry,
+                "event": "error", "trace_id": trace_id, "request_id": request_id,
+                "error_kind": "canonical_semantic_turn_exception",
+                "error_message": type(exc).__name__, "response_text": "",
             }
             return
-        if event_type == "error":
-            yield {**event, "event": "error", "trace_id": trace_id, "request_id": request_id,
-                   "result": result}
+        yield {
+            "event": "status", "status": "final_brain_pending" if result.get("operation_status") == "FINAL_BRAIN_PENDING" else "blocked",
+            "trace_id": trace_id, "request_id": request_id,
+            "stages": tuple(result.get("trace", {}).get("stages", ())) if isinstance(result.get("trace"), dict) else (),
+            "helper_evidence": {
+                key: result.get(key) for key in (
+                    "helper_call_attempted", "helper_call_succeeded", "helper_raw_output_present",
+                    "helper_schema_valid", "helper_correction_valid", "helper_call_used",
+                )
+            },
+            "selected_capabilities": tuple(result.get("selected_capabilities", ())),
+            "selected_provider_operation": tuple(result.get("selected_provider_operation", ())),
+        }
+        if result.get("operation_status") != "FINAL_BRAIN_PENDING":
+            yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+                   "error_kind": str(result.get("operation_status", "CANONICAL_TURN_BLOCKED")),
+                   "error_message": str(result.get("degradation", "canonical turn did not reach Final Brain")),
+                   "response_text": str(result.get("response_text", "")), "result": result}
             return
-    yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
-           "error_kind": "final_brain_stream_incomplete",
-           "error_message": "Final Brain stream ended without terminal event", "response_text": "", "result": result}
+        stream_answer = getattr(final_brain_port, "stream_answer", None)
+        if not callable(stream_answer):
+            yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+                   "error_kind": "final_brain_stream_unavailable",
+                   "error_message": "Final Brain port has no streaming transport", "response_text": "", "result": result}
+            return
+        if deadline.cancelled:
+            yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+                   "error_kind": "final_brain_deadline_exceeded",
+                   "error_message": "Final Brain deadline exceeded", "response_text": "", "result": result}
+            return
+        emitted_chunk = False
+        for event in stream_answer(deadline=deadline, **dict(result["final_brain_input"])):
+            if deadline.cancelled:
+                yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+                       "error_kind": "final_brain_deadline_exceeded",
+                       "error_message": "Final Brain deadline exceeded", "response_text": "", "result": result}
+                return
+            event_type = str(event.get("event", ""))
+            if event_type == "chunk":
+                chunk = str(event.get("chunk", event.get("text", "")))
+                if not chunk:
+                    continue
+                emitted_chunk = True
+                yield {"event": "chunk", "trace_id": trace_id, "request_id": request_id,
+                       "chunk": chunk, "text": chunk}
+                continue
+            if event_type == "done":
+                response_text = str(event.get("response_text", "")).strip()
+                generation_ok = bool(
+                    emitted_chunk and response_text
+                    and event.get("model_call_attempted") is True
+                    and event.get("model_call_succeeded") is True
+                    and event.get("raw_output_present") is True
+                    and event.get("done") is True
+                    and event.get("done_reason") != "length"
+                    and event.get("truncation") is False
+                )
+                if not generation_ok:
+                    yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+                           "error_kind": "final_brain_empty_result",
+                           "error_message": "Final Brain returned no visible answer", "response_text": "", "result": result}
+                    return
+                result["response_text"] = response_text
+                _record_stream_completed_conversation_response(result)
+                result["generation_completed"] = True
+                result["delivery_completed"] = None
+                result["response_execution_status"] = "GENERATION_COMPLETE_DELIVERY_UNKNOWN"
+                result["operation_status"] = (
+                    "PARTIAL_APPROVAL_REQUIRED" if result.get("approval_required_steps")
+                    else "PARTIAL_POLICY_DENIED" if result.get("policy_denied_steps")
+                    else "PARTIAL_UNAVAILABLE" if result.get("provider_unavailable_steps") else "COMPLETE"
+                )
+                trace = dict(result.get("trace", {}))
+                trace["final_brain_status"] = "COMPLETE"
+                trace["stages"] = tuple(trace.get("stages", ())) + ("final_brain_stream",)
+                result["trace"] = trace
+                telemetry_keys = (
+                    "model", "model_id", "done", "done_reason", "prompt_eval_count", "eval_count",
+                    "prompt_eval_duration", "eval_duration", "load_duration", "total_duration",
+                    "configured_num_ctx", "requested_num_ctx", "observed_context_length",
+                    "truncation", "context_authority_source", "prompt_budget",
+                )
+                telemetry = {key: event.get(key) for key in telemetry_keys}
+                result["final_brain_telemetry"] = telemetry
+                yield {
+                    "event": "done", "trace_id": trace_id, "request_id": request_id,
+                    "response_text": response_text, "result": result, **telemetry,
+                }
+                return
+            if event_type == "error":
+                yield {**event, "event": "error", "trace_id": trace_id, "request_id": request_id,
+                       "result": result}
+                return
+        yield {"event": "error", "trace_id": trace_id, "request_id": request_id,
+               "error_kind": "final_brain_stream_incomplete",
+               "error_message": "Final Brain stream ended without terminal event", "response_text": "", "result": result}
+    finally:
+        deadline.cancel()
 
 
 def _record_stream_completed_conversation_response(result: dict[str, Any]) -> None:

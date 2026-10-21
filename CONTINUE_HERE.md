@@ -1,10 +1,80 @@
+# Current resource lifecycle R1 checkpoint - 2026-10-21
+
+PERSONAL_JARVIS_RECOVERY / P2 Phase1B PENDING. No P3.
+ROOT /home/aleksandr/MAKSIMAR_PLATFORM.
+HEAD 198a018e482d1f995635933553dc2f9d3138b379; branch deflation/live-hotpath-reset-v1.
+Previously published A/B are unchanged. Do not recreate them.
+
+LATEST MISSION: RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/OWNER_RESOURCE_MODEL_LIFECYCLE_MISSION_20261021.txt
+Direct owner approval call_4a5d78e99c56408b81d87ff189c83cec authorizes R1 repair ONLY:
+CONTROL_PLANE/canonical_semantic_spine.py and existing tests
+ tests/control_plane/test_phase_1b_semantic_hardening.py
+ tests/jarvis_live_runtime/test_source_goalframe_completeness.py.
+
+R1 APPLIED AND OFFLINE PASS: optional existing server-owned RequestDeadline in run;
+stream creates/reuses the same token before accepted and shares it through deferred
+turn and FinalBrain. Removed fresh180s deadline. Expired/cancelled token fails closed;
+late stream events withheld; iterator cleanup cancels this request, not another.
+No physical Ollama abort/release claim; no new production definitions/imports/authority.
+Model, context, timeout policy, retries, roles, factual and completeness contracts unchanged.
+
+Focused118PASS; combined787PASS/0FAIL/0ERROR/0SKIP (overlapping, do not sum).
+15new cases. Controlled fake effects only, no unexpected network/process effects.
+Existing graph4023files/20463nodes/70047edges, source hashes current, errors/collisions0.
+Fresh strict observation orderly_stopped;8000free. Trust3/signature/pins2 unchanged;
+state7/receipts4/8archives46entries unchanged;47historical missing retained.
+Native status before this documentation update80M/47D/138collapsed untracked entries.
+No models, WORK/REST, real reconciliation, runtime restart or Git commit/push.
+
+Canonical proof under RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011:
+- OWNER_RESOURCE_MODEL_LIFECYCLE_R1_REPORT_20261021.md
+- owner_20261021_resource_lifecycle_R1_final_status.json
+- owner_20261021_resource_lifecycle_owner_map.json (18 mechanisms, full owner/caller map)
+- owner_20261021_resource_lifecycle_A_J_matrix.json
+- owner_20261021_resource_lifecycle_repair_decisions.json (historical pre-edit decisions)
+- owner_20261021_resource_lifecycle_R1_owner_approval.json
+- owner_20261021_resource_lifecycle_R1_combined_summary.json and .xml/.log
+- owner_20261021_resource_lifecycle_R1_security_source_review.json
+- owner_20261021_resource_lifecycle_R1_codegraph_delta/generation_proof.json
+- owner_20261021_resource_lifecycle_R1_integrity.json
+Raw counterexamples and originals preserved. Existing INTERNAL_DEBT_LEDGER.json
+has current child proof; root counts8internal/6memory retained, no global recount.
+
+NEXT EXACT ACTION:
+1. Complete the approved exact four-file R1 Git checkpoint:
+   the three R1 source/tests above plus CONTINUE_HERE.md (including valid prior B final doc).
+   Direct owner Git approval call_420ac6f0b5d64b3e83068b6fc16b98e1 received for these four files. Index empty before staging. Target existing upstream only,
+   normal hooks, fresh ancestry/remote proof, no force. Do not include audit/private state.
+   Approval/preflight: owner_20261021_resource_lifecycle_R1_git_owner_approval_and_preflight.json.
+   After delivery read owner_20261021_resource_lifecycle_R1_remote_verification.json
+   and final_status.json for exact new HEAD; do not recreate a remotely verified commit.
+2. Resource admission remains HOLD: existing admission_contract is declarative/sample,
+   no actual pre-provider enforcement. Existing hardware detector/free-headroom and
+   model capacity profiles do not prove context/KV/workspace peak or atomic shared ownership.
+   Do not invent thresholds or assume host+WSL budgets additive.
+3. R2 needs exact existing-owner contract/file plan and approval. Missing model working-set
+   bound provenance, Windows/WSL relationship and shared-provider ownership/coexistence
+   policy must be explicit; no safe primary load PASS without them. Existing GPU merge
+   also collapses distinct same-model devices; no inflated multi-node capacity claim.
+4. R3 needs separately approved API/transport/warmup containment: disconnect during a
+   deferred call and REST during warmup do not currently terminate owned in-flight I/O.
+   Distinguish stopped-waiting, provider-terminated and resources-released evidence.
+   No verified cross-client model lease: no foreign unload, daemon restart or global kill.
+5. No M1/M2, natural replay or selfknowledge approval. Full model-enabled gate HOLD.
+   Heavy startup underlying cause UNKNOWN; OOM not proven; prior raw evidence retained.
+
+Previous checkpoint retained verbatim below. Old NEXT/ACTIVE statements are historical
+where they conflict with this block. Backup owner_20261021_continue_before_resource_R1_checkpoint.md.
+
+--- Historical checkpoint below ---
+
 # Current cancellation response gate checkpoint - 2026-10-21
 
 PERSONAL_JARVIS_RECOVERY / P2 Phase1B PENDING. No P3.
 ROOT /home/aleksandr/MAKSIMAR_PLATFORM.
-HEAD 31656b87da0c5ae19fd814b12adea5fbe2e4a25b, branch deflation/live-hotpath-reset-v1.
+HEAD 198a018e482d1f995635933553dc2f9d3138b379, branch deflation/live-hotpath-reset-v1.
 WORK/warmup batch A is committed and remotely verified; do not recreate it.
-Cancellation batch B exact six-file commit/ordinary push APPROVED by owner call_b1af2688f4a24e81bf68e3f49da793d1. Read current Git/report for delivery SHA; do not recreate delivery. Index was empty before staging.
+Cancellation batch B DELIVERED in 198a018e482d1f995635933553dc2f9d3138b379 after exact owner approval call_b1af2688f4a24e81bf68e3f49da793d1. Independent remote SHA matches; ahead/behind0/0; index empty. This final post-publication checkpoint edit is intentionally local/uncommitted; no second commit approved.
 
 Latest owner approval call_a9f0a157840d48c293e6cbcf73239381 covers exactly two
 existing production adapters and two existing test files. Post-provider cancellation
@@ -41,10 +111,10 @@ can precede final output persistence; synthetic harness identity is not API auth
 Do not execute its real-model CLI or rewrite this old harness to force acceptance.
 
 NEXT EXACT ACTION:
-1. Candidate dependency-closed Git batch is two adapters, two existing tests,
-   existing phase_1b_model_acceptance.py and CONTINUE_HERE.md (six paths), recorded in
-   owner_20261021_cancellation_reviewed_git_candidate.json. Obtain separate exact
-   owner commit/push approval was received. Execute only this batch; keep hooks, fresh ancestry and ordinary push. After delivery verify report/status and remote SHA; do not recommit.
+1. Git delivery COMPLETE: exact six-file commit198a018 is remote verified. Do not
+   recreate the commit/push, re-stage unrelated dirt or run acceptance without approval.
+   owner_20261021_cancellation_commit_proof.json, push_proof.json and remote_verification.json
+   contain publication proof. Local final checkpoint-document delta is intentionally dirty.
 2. Continue existing-owner scoped design for actual resource admission, physical owned
    cancellation/release and shared end-to-end stream deadline. No new scheduler/authority.
 3. Resource capacity vs free-headroom policy and shared daemon ownership are unresolved;

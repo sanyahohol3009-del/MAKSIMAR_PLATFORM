@@ -363,3 +363,31 @@ def test_helper_direct_correction_preserves_same_cancellation_boundary(monkeypat
             assert retained["content"] == raw and retained["raw_model_result"]["content"] == raw
     assert len(calls) == (0 if end_state == "before" else 1)
     assert all(call["model"] == adapter.HELPER_INPUT_CORRECTION_MODEL_ID for call in calls)
+
+
+def test_real_goalframe_stream_uses_one_request_token_and_retains_raw_failures(monkeypatch):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import IdentityContext
+    from MAKSIMAR_CORE_LIB.security_layer.semantic_policy import SemanticPolicyEvaluator
+    port, calls = install(monkeypatch, verdicts=[verdict("INVALID")])
+    token = RequestDeadline(60)
+    seen = []
+    single = port._single_model_call
+    def observe(**kwargs):
+        seen.append(kwargs["deadline"])
+        return single(**kwargs)
+    monkeypatch.setattr(port, "_single_model_call", observe)
+    class NoDownstream:
+        def __getattr__(self, name):
+            raise AssertionError("invalid source verdict reached downstream: " + name)
+    events = list(spine.stream_canonical_semantic_turn(text=SOURCE, model_port=port,
+        project_port=NoDownstream(), conversation_port=NoDownstream(), final_brain_port=NoDownstream(),
+        permission_port=SemanticPolicyEvaluator(), identity=IdentityContext("fixture", "offline", "owner", True, True),
+        registry_projection=build_semantic_capability_registry_projection(), input_channel="typed",
+        request_deadline=token))
+    assert len(calls) == 2 and seen == [token, token]
+    assert token.cancelled and token.understanding_model_attempt_count == 2
+    assert len(token.understanding_model_attempts) == 2
+    assert all(a["raw_response"] and not a["user_memory"] and not a["training_eligible"]
+               for a in token.understanding_model_attempts)
+    assert not any(event["event"] in {"chunk", "done"} for event in events)
+    assert events[-1]["result"]["operation_status"] == "UNDERSTANDING_UNAVAILABLE"

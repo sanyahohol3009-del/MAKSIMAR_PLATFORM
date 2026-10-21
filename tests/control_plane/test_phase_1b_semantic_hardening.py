@@ -336,3 +336,121 @@ def test_final_brain_uncancelled_result_and_provider_failure_preserved(monkeypat
             list(port.stream_answer(deadline=RequestDeadline(60)))
         else:
             port.answer(deadline=RequestDeadline(60))
+
+
+@pytest.fixture
+def shared_deadline_turn(monkeypatch):
+    import time
+    from CONTROL_PLANE import canonical_semantic_spine as spine
+    clock = {"now": 100.0, "work": 0.0}
+    seen = {"prepare": [], "execution": [], "final": []}
+    monkeypatch.setattr(time, "monotonic", lambda: clock["now"])
+    def prepare(**kwargs):
+        seen["prepare"].append(kwargs["deadline"])
+        return {}, {}
+    def execution(**kwargs):
+        seen["execution"].append(kwargs["request_deadline"])
+        clock["now"] += clock["work"]
+        return {"operation_status": "FINAL_BRAIN_PENDING", "final_brain_input": {}}
+    class Final:
+        def stream_answer(self, *, deadline, **kwargs):
+            seen["final"].append((deadline, deadline.remaining()))
+            yield {"event": "chunk", "text": "controlled fixture"}
+            yield {"event": "error", "error_kind": "controlled_terminal", "response_text": ""}
+    monkeypatch.setattr(spine, "_prepare_input", prepare)
+    monkeypatch.setattr(spine, "_run_canonical_semantic_turn_after_input", execution)
+    kwargs = dict(text="fixture", project_port=None, conversation_port=None, model_port=None,
+                  final_brain_port=Final(), permission_port=None, identity=None)
+    return spine, clock, seen, kwargs
+
+
+@pytest.mark.parametrize("spent,expected_final", [(2.0, True), (5.0, False), (6.0, False)])
+def test_stream_spends_original_turn_budget_without_new_final_deadline(shared_deadline_turn, spent, expected_final):
+    spine, clock, seen, kwargs = shared_deadline_turn
+    clock["work"] = spent
+    events = list(spine.stream_canonical_semantic_turn(**kwargs, total_timeout_seconds=5))
+    token = seen["prepare"][0]
+    assert seen["execution"] == [token]
+    if expected_final:
+        assert seen["final"] == [(token, 5.0 - spent)]
+        assert [e["event"] for e in events] == ["accepted", "status", "chunk", "error"]
+    else:
+        assert not seen["final"]
+        assert events[-1]["error_kind"] == "final_brain_deadline_exceeded"
+        assert not any(e["event"] in {"chunk", "done"} for e in events)
+    assert token.cancelled
+
+
+@pytest.mark.parametrize("end_state", ["cancelled", "expired"])
+def test_slow_or_cancelled_stream_before_turn_never_calls_understanding(shared_deadline_turn, end_state):
+    spine, clock, seen, kwargs = shared_deadline_turn
+    token = RequestDeadline(5)
+    stream = spine.stream_canonical_semantic_turn(**kwargs, request_deadline=token, total_timeout_seconds=5)
+    assert next(stream)["event"] == "accepted"
+    if end_state == "cancelled":
+        token.cancel()
+    else:
+        clock["now"] += 6
+    events = list(stream)
+    assert events[-1]["event"] == "error"
+    assert not seen["prepare"] and not seen["execution"] and not seen["final"]
+
+
+@pytest.mark.parametrize("stage", ["accepted", "status", "chunk"])
+def test_stream_close_cancels_only_its_own_request(shared_deadline_turn, stage):
+    spine, _, seen, kwargs = shared_deadline_turn
+    first, second = RequestDeadline(5), RequestDeadline(5)
+    stream = spine.stream_canonical_semantic_turn(**kwargs, request_deadline=first, total_timeout_seconds=5)
+    while next(stream)["event"] != stage:
+        pass
+    stream.close()
+    assert first.cancelled and not second.cancelled
+    if stage == "accepted":
+        assert not seen["prepare"]
+
+
+@pytest.mark.parametrize("mode", ["sync", "deferred"])
+def test_direct_canonical_turn_reuses_supplied_token_and_attempt_policy(shared_deadline_turn, mode):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import UnderstandingAttemptPolicy
+    spine, _, seen, kwargs = shared_deadline_turn
+    policy = UnderstandingAttemptPolicy(max_model_attempts=3)
+    token = RequestDeadline(5, understanding_attempt_policy=policy)
+    result = spine.run_canonical_semantic_turn(**kwargs, request_deadline=token,
+        total_timeout_seconds=5, understanding_attempt_policy=policy, defer_final_brain=mode == "deferred")
+    assert seen["prepare"] == seen["execution"] == [token]
+    assert token.understanding_attempt_policy is policy
+    assert not token.cancelled and result["understanding_model_attempt_count"] == 0
+
+
+@pytest.mark.parametrize("mutation,error", [("type", "canonical_request_deadline_invalid"),
+    ("extended", "canonical_request_deadline_exceeds_turn_budget"),
+    ("policy", "canonical_request_deadline_attempt_policy_mismatch")])
+def test_invalid_or_extended_shared_deadline_fails_before_effects(shared_deadline_turn, mutation, error):
+    from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import UnderstandingAttemptPolicy
+    spine, _, seen, kwargs = shared_deadline_turn
+    token = RequestDeadline(100 if mutation == "extended" else 5)
+    extra = {}
+    if mutation == "type":
+        token = object()
+    elif mutation == "policy":
+        extra["understanding_attempt_policy"] = UnderstandingAttemptPolicy(max_model_attempts=1)
+    with pytest.raises(ValueError, match=error):
+        spine.run_canonical_semantic_turn(**kwargs, request_deadline=token, total_timeout_seconds=5, **extra)
+    assert not seen["prepare"] and not seen["execution"] and not seen["final"]
+
+
+def test_spine_withholds_final_event_after_original_budget_expires(shared_deadline_turn, monkeypatch):
+    spine, clock, seen, kwargs = shared_deadline_turn
+    class Final:
+        def stream_answer(self, *, deadline, **payload):
+            seen["final"].append(deadline)
+            yield {"event": "chunk", "text": "already emitted"}
+            clock["now"] += 6
+            yield {"event": "done", "response_text": "must not escape"}
+    kwargs["final_brain_port"] = Final()
+    def forbidden(*args):
+        pytest.fail("expired completion was recorded")
+    monkeypatch.setattr(spine, "_record_stream_completed_conversation_response", forbidden)
+    events = list(spine.stream_canonical_semantic_turn(**kwargs, total_timeout_seconds=5))
+    assert [e["event"] for e in events] == ["accepted", "status", "chunk", "error"]
+    assert events[-1]["error_kind"] == "final_brain_deadline_exceeded"
