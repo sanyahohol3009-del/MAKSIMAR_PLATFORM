@@ -170,6 +170,25 @@ wait_for_control_plane_health() {
   done
 }
 
+warm_canonical_chat_model() {
+  if (( MODEL_FREE_STARTUP )); then
+    log "model-free startup: skipping model warmup probe"
+    return 0
+  fi
+  if [[ -e "$RUNTIME_STATE_DIR/degraded_mode.flag" ]]; then
+    log "model warmup withheld: canonical StopGate degradation remains active"
+    return 0
+  fi
+  log "warming canonical chat model for latency-sensitive JARVIS Live..."
+  mkdir -p "$RUNTIME_STATE_DIR"
+  if PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+      "$CANONICAL_PYTHON" "$ROOT/tools/jarvis_live_runtime/model_warmup_probe.py" \
+      --warm --primary-only | tee "$MODEL_READINESS_FILE"; then
+    log "canonical chat model readiness=ready"
+  else
+    log "canonical chat model readiness=not_ready"
+  fi
+}
 
 start_guard() {
   log "starting supervisor guard..."
@@ -338,6 +357,8 @@ main() {
 
   wait_for_guard_chain || abort "guard chain heartbeat timeout"
   recover_previous_run_degradation
+  warm_canonical_chat_model
+  wait_for_guard_chain || abort "guard chain lost during model warmup"
 
   open_dashboard_windows || abort "dashboard windows open failed"
 

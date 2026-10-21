@@ -1,3 +1,72 @@
+# Current model-enabled activation checkpoint — 2026-10-21
+
+Track PERSONAL_JARVIS_RECOVERY; P2/Phase1B PENDING. No P3.
+Root /home/aleksandr/MAKSIMAR_PLATFORM.
+HEAD72bb99c7ab21a2bc46e85a3bc7e8d4b584b12fef; branch deflation/live-hotpath-reset-v1.
+Four prior published commits are verified; do not recreate or repush that delivery.
+
+Latest owner mission:
+RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/OWNER_MODEL_ENABLED_ACTIVATION_MISSION_20261021.txt
+Attachment47568844 repeats the same mission as5466b80f, not a new live allowance.
+
+Owner explicitly approved ONLY the scoped WORK/warmup repair and three existing test files:
+tools/work
+tools/jarvis_live_runtime/model_warmup_probe.py
+tests/runtime/test_work_model_free_startup.py
+tests/runtime/test_root_start_canonical_lifecycle.py
+tests/jarvis_live_runtime/test_model_warmup_probe_smoke.py
+
+Implemented: guards and strict chain before warmup; active degradation withholds load;
+post-warmup strict chain; malformed/conflicting flags reject before provider I/O.
+Recoverable warmup failures remain not_ready without automatically stopping healthy infrastructure.
+Negative model-free/policy/identity/evidence tests preserved. Prior wrong positive order assertion
+migrated to guard-before-load, with original source/evidence retained.
+No production module/authority added; no model/context/deadline/GPU/daemon/trust changes.
+
+Current proof:
+78 pre-repair baseline PASS;113 focused repair PASS.
+707 unique combined PASS/0FAIL/0ERROR/0SKIP,90pytest arguments, no unexpected external effects.
+Reproduction:
+.venv/bin/python -B RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/owner_20261020_model_activation_combined_runner.py
+Logs open exclusively: a deliberate repeat must use new artifact names.
+Existing cached Codegraph refresh PASS4023files/20446nodes/69832edges; hashes/errors/collisions0.
+First refresh scope assertion failed BEFORE extraction because one existing WORK test was
+absent from old manifest; retained evidence, then added only that test to the finite scope.
+
+Read current canonical report/status (20261021 model activation), plus:
+owner_20261020_model_activation_combined_repair_summary.json
+owner_20261020_model_activation_codegraph_delta_v2/generation_proof.json
+owner_20261021_model_activation_integrity_readback.json
+OWNER_MODEL_ACTIVATION_APP_API_HANDOFF_20261020.md
+
+Runtime currently strict ORDERLY_STOPPED;4terminal receipts,3public trust artifacts,2signed
+BOOT/core pins and8archives/46entries unchanged. All unrelated modified bytes and47historical
+missing paths preserved. No new runtime/model/inference/natural/selfknowledge actions.
+
+NEXT:
+1. Exact reviewed Git batch is the five approved files above plus this CONTINUE_HERE.md.
+   New local commit and ordinary push are NOT authorized yet. Keep index empty until approval.
+   Do not amend existing four published commits or stage unrelated dirt/audits/deletions.
+2. Resource admission, ownership/cancellation/provider release remain HOLD; no fake full offline PASS.
+   Existing hardware_detection_adapter can observe local resources; declared AdmissionContract/profile
+   is not demonstrated pre-load enforcement. Shared Ollama ownership cannot be inferred from tag/PID.
+   REST does not prove cancellation of WORK-owned warmup or provider load.
+3. Separate minimal existing-owner patch gate for admission/cancellation/readiness after exact design
+   and explicit approval. Existing transport/RequestDeadline/WORK/REST owners; no new manager.
+   Streaming currently creates a new180s FinalBrain deadline; keep this finding visible, do not silently
+   modify Semantic Spine. Heavy startup underlying trigger UNKNOWN; OOM not proven.
+4. M1 primary-stage and M2 full natural-stage each require fresh explicit owner live approval.
+   Neither is currently authorized or physically accepted. Primary-only is never M2.
+5. Existing API handoff is source/offline proof, not app live acceptance. No dependent repo changes.
+
+Memory self-readability FAIL_FROZEN; integration FAIL; historical ledger8internal/6memory roots
+retained, not recounted or closed by this repair. Full-platform activation remains PENDING.
+
+Complete pre-update checkpoint retained:
+RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/owner_20261021_continue_before_model_activation_checkpoint.md
+
+--- Previous published checkpoint below is historical where inconsistent with the current block ---
+
 # MAKSIMAR / JARVIS continuation checkpoint — 2026-10-20
 
 Track: PERSONAL_JARVIS_RECOVERY. P2 / Phase 1B remains pending; no P3.
