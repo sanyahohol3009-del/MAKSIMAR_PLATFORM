@@ -1,3 +1,36 @@
+# CURRENT R4-B OFFLINE VERIFIED / EXACT GIT APPROVAL PENDING - 2026-10-22
+
+HEAD efc69c966d614f61b2dbd5cc53374acc5f0096a0;deflation/live-hotpath-reset-v1.
+R4-A delivered. R4-B directly approved in call_23e0aafa139a4b29b2c95f5dae3d85d2;
+7existing source +5tests plus2separately approved test-only fixture owners;14source/test paths.
+Read OWNER_R4B_CANONICAL_LIFECYCLE_OFFLINE_REPORT_20261022.md,
+owner_20261022_R4B_final_status.json and owner_20261022_R4B_git_checkpoint_plan.json.
+Do not repeat repair or tests. Originals retained in owner_20261022_R4B_source_before/.
+REST holds SAME startup reservation through controllers and independent current-run readback;
+all direct START/STOP paths verify same FD/inode. Busy WORK => bounded STOP INCOMPLETE,
+no signals/provider abort; refused STOP does not stop WORK. Accepted completed STOP fences old
+startup continuation; NEW subsequent START allowed. Strict4receipts/current-run/noowners proof;
+existing historical restartability and guard/PID/StopGate contracts unchanged.
+258focusedPASS;1297UNIQUEcombinedPASS/0FAIL/ERROR/SKIP;actualunexpected effects0.
+All1198R4-A IDs retained+44newR4-B cases+55existing prerequisite cases;do not sum suites.
+24required offline scenarios mapped;original assertions retained. Failed fixture rounds and
+pre-execution quoting error retained with resolutions.3query functions inside existing preflight;
+6launcher-local FD helpers, no manager/store/lock/authority/model changes.
+Current finite graph4025files/20605nodes/71952edges;errors/collisions/hashdrift0.
+Trust3/signature/pins2/state7/8archives46entries/heavyraw4 preserved;4same-run stopped receipts;
+actual canonical process scans empty,8000free,no tmux. No real START/STOP/model acceptance.
+Existing88coverage rows/80base/46execution/42other/5roles/7dormant/38groups preserved;
+8internal/6memory roots retained,not global recount. FullR4,M1/M2,memory/platform remainHOLD.
+NEXT: exact15path commit/push approval REQUIRED:14reviewed source/test files +ONLYthis new
+checkpoint block on published HEAD checkpoint. Candidate stored in audit;do not stage whole
+local CONTINUE_HERE history. No Git permission yet. Preserve hooks/fresh remote/hash checks.
+After source delivery use owner_20261022_R4C_existing_owner_next_plan.json;resource provenance,
+Windows/WSL budget and shared-provider policy remain unproven. No new resource manager.
+NO actual WORK/REST,load/inference/unload/provider restart,weights,natural/selfknowledge,
+trust/signed edits,other repos,P3/Godot authorized. Preserve every earlier checkpoint below.
+
+--- Previous published checkpoints retained verbatim ---
+
 # CURRENT R4-A OFFLINE VERIFIED / GIT APPROVAL PENDING - 2026-10-22
 
 HEAD f6167b21dff8b7886fe0e91f6ec304fe4361f5de, branch deflation/live-hotpath-reset-v1.

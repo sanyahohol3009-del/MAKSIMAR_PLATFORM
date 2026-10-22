@@ -109,7 +109,9 @@ def test_service_tmux_creation_does_not_inherit_startup_reservation(tmp_path):
     for name in ("ctl","guard_ctl","core_guard_ctl","kernel_guard_ctl"):
         text=(ROOT/"tools"/name).read_text()
         block=next(b for b in re.findall(r"<<'PY'\n(.*?)\nPY",text,re.S) if "tmux" in b and "subprocess.run" in b)
-        with (tmp_path/(name+".lock")).open("w") as lock:
+        canonical = tmp_path/"MAKSIMAR_PLATFORM/RUNTIME/state/startup_reservation.lock"
+        canonical.parent.mkdir(parents=True,exist_ok=True)
+        with canonical.open("w") as lock:
             os.set_inheritable(lock.fileno(),True)
             env={**os.environ,"HOME":str(tmp_path),"PATH":str(bin_dir)+":"+os.environ["PATH"],"PYTHONPATH":str(ROOT),"MAKSIMAR_STARTUP_FD":str(lock.fileno()),"TEST_LOCK_FD":str(lock.fileno())}
             result=subprocess.run(["bash","-c",'exec "$TEST_PYTHON" - session "$HOME" command',],input=block,env={**env,"TEST_PYTHON":sys.executable},pass_fds=(lock.fileno(),),capture_output=True,text=True,timeout=5)
@@ -130,3 +132,88 @@ def test_work_observers_do_not_inherit_startup_descriptor(tmp_path):
     env={**os.environ,"HOME":str(tmp_path),"PATH":str(bin_dir)+":"+os.environ["PATH"],"TEST_BIN":str(bin_dir)}
     result=subprocess.run(["bash","-c",script],env=env,capture_output=True,text=True,timeout=5)
     assert result.returncode==0,result.stdout+result.stderr
+
+
+# Whole REST transaction with actual run_context/preflight queries and simulated
+# terminal writers/OS observations, never the owner's active runtime.
+def r4b_rest_world(tmp_path):
+    import json
+    root=tmp_path/"MAKSIMAR_PLATFORM";state=root/"RUNTIME/state";state.mkdir(parents=True)
+    tools=root/"tools";tools.mkdir();shutil.copyfile(ROOT/"tools/rest",tools/"rest")
+    for package in ("CORE_ROOT","SUPERVISOR"):(root/package).symlink_to(ROOT/package,target_is_directory=True)
+    meta={"schema_version":1,"run_id":"OFFLINE_STOP","boot_id":"OFFLINE_BOOT","wall_time":time.time()-20,"monotonic_time":time.monotonic()-20,"status":"shutdown"}
+    (state/"run_metadata.json").write_text(json.dumps(meta))
+    from SUPERVISOR.runtime_preflight import EXPECTED_HEARTBEATS
+    names=["heartbeat_state.json","guard_heartbeat_state.json","core_guard_heartbeat_state.json","kernel_heartbeat_state.json"]
+    for i,((scope,(source,_)),name) in enumerate(zip(EXPECTED_HEARTBEATS.items(),names)):
+        data={"schema_version":1,"source":source,"status":"stopped","pid":880000+i,"process_start_ticks":str(500+i),"ts":time.time()-1,"monotonic_ts":time.monotonic()-1,"run_id":meta["run_id"],"boot_id":meta["boot_id"],"run_monotonic_time":meta["monotonic_time"]}
+        (state/name).write_text(json.dumps(data))
+    python=root/".venv/bin/python";python.parent.mkdir(parents=True)
+    python.write_text("#!"+sys.executable+"\n"+r'''import sys,os
+from pathlib import Path
+sys.path.insert(0,str(Path.home()/"MAKSIMAR_PLATFORM"))
+from SUPERVISOR import runtime_preflight as pf
+pf._tmux_snapshot=lambda:{"available":True,"sessions":[],"error":""}
+pf._port_snapshot=lambda:{"listening":False,"owner_pids":[],"owner_identities":[],"error":""}
+pf._health_snapshot=lambda:{"ok":False,"status":None}
+pf._process_identity=lambda pid,**kw:{"pid":pid,"alive":False}
+pf.heartbeat_process_alive=lambda *a,**k:False
+pf._prestart_owned_processes=lambda:{"canonical":()}
+if sys.argv[1]=="-":
+    exec(compile(sys.stdin.read(),"actual-reservation","exec"),{"__name__":"__main__"})
+elif sys.argv[1].endswith("runtime_preflight.py"):
+    sys.argv=sys.argv[1:];pf.main()
+else:raise AssertionError("unexpected provider/python effect")
+''')
+    python.chmod(0o755)
+    for name in ["kernel_guard_ctl","core_guard_ctl","guard_ctl","ctl","oob_dashboard_ctl","dashboard"]:
+        f=tools/name;f.write_text(r'''#!/bin/bash
+printf '%s:%s\n' "${0##*/}" "$*" >> "$TEST_CALLS"
+if [[ "${0##*/}" == kernel_guard_ctl && "${PAUSE_REST:-0}" == 1 ]]; then
+  touch "$WAIT_MARKER"
+  while [[ ! -f "$RELEASE_MARKER" ]]; do /bin/sleep .01; done
+fi
+exit 0
+''');f.chmod(0o755)
+    binaries=tmp_path/"bin";binaries.mkdir()
+    (binaries/"python3").symlink_to(python)
+    tmux=binaries/"tmux";tmux.write_text('#!/bin/bash\nif [[ "$1" == has-session ]]; then exit 1; fi\necho FORBIDDEN_TMUX >> "$TEST_CALLS";exit 9\n');tmux.chmod(0o755)
+    env={**os.environ,"HOME":str(tmp_path),"PATH":str(binaries)+":"+os.environ["PATH"],"TEST_CALLS":str(tmp_path/"calls"),"WAIT_MARKER":str(tmp_path/"wait"),"RELEASE_MARKER":str(tmp_path/"release"),"PYTHONDONTWRITEBYTECODE":"1"}
+    env.pop("MAKSIMAR_STARTUP_FD",None)
+    return root,state,env
+
+
+def test_r4b_whole_rest_fences_all_direct_starts_and_second_stop(tmp_path):
+    root,state,env=r4b_rest_world(tmp_path);env["PAUSE_REST"]="1"
+    before={p:p.read_bytes() for p in state.glob("*.json")}
+    first=subprocess.Popen(["bash",str(root/"tools/rest")],env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+    try:
+        limit=time.monotonic()+5
+        while not Path(env["WAIT_MARKER"]).exists():
+            assert first.poll() is None and time.monotonic()<limit
+            time.sleep(.01)
+        # STOP owns the same real inode before its first controller completes.
+        for name in ["ctl","guard_ctl","core_guard_ctl","kernel_guard_ctl","work","rest"]:
+            candidate=root/"tools"/("actual_"+name);shutil.copyfile(ROOT/"tools"/name,candidate)
+            args=["start"] if name not in ["work","rest"] else (["--model-free"] if name=="work" else [])
+            result=subprocess.run(["bash",str(candidate),*args],env=env,capture_output=True,text=True,timeout=2)
+            assert result.returncode==1 and "reservation; incomplete" in result.stdout,(name,result.stdout,result.stderr)
+        assert Path(env["TEST_CALLS"]).read_text().splitlines()==["kernel_guard_ctl:stop"]
+    finally:
+        Path(env["RELEASE_MARKER"]).touch();out,err=first.communicate(timeout=8)
+    assert first.returncode==0 and '"complete": true' in out,out+err
+    calls=Path(env["TEST_CALLS"]).read_bytes();time.sleep(.05)
+    assert Path(env["TEST_CALLS"]).read_bytes()==calls
+    assert all(p.read_bytes()==b for p,b in before.items())
+
+
+def test_r4b_repeated_rest_requires_complete_terminal_cohort_and_preserves_evidence(tmp_path):
+    root,state,env=r4b_rest_world(tmp_path);before={p:p.read_bytes() for p in state.glob("*.json")}
+    for _ in range(2):
+        result=subprocess.run(["bash",str(root/"tools/rest")],env=env,capture_output=True,text=True,timeout=5)
+        assert result.returncode==0 and '"complete": true' in result.stdout,result.stdout+result.stderr
+    assert all(p.read_bytes()==b for p,b in before.items())
+    receipt=state/"guard_heartbeat_state.json";d=json.loads(receipt.read_text());d["status"]="alive";receipt.write_text(json.dumps(d));raw=receipt.read_bytes()
+    result=subprocess.run(["bash",str(root/"tools/rest")],env=env,capture_output=True,text=True,timeout=5)
+    assert result.returncode==1 and "readback incomplete" in result.stdout
+    assert receipt.read_bytes()==raw and not (state/"preflight_result.json").exists()

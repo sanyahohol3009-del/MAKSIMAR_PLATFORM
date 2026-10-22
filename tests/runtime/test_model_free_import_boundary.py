@@ -142,8 +142,11 @@ def test_supervisor_passes_mode_to_existing_api_environment(monkeypatch,mode):
 def test_real_ctl_start_pins_mode_in_tmux_command_only_in_tmp(tmp_path,mode):
     root=Path(__file__).resolve().parents[2]
     text=(root/'tools/ctl').read_text();start=text[text.index('start() {'):text.index('\nstop() {')]
+    reserve=text[text.index('reserve_lifecycle() {'):text.index('\nstart() {')]
+    fixture_root=tmp_path/'MAKSIMAR_PLATFORM';fixture_root.mkdir()
+    (fixture_root/'CORE_ROOT').symlink_to(root/'CORE_ROOT',target_is_directory=True)
     fake=tmp_path/'python';capture=tmp_path/'capture';flag=tmp_path/'started'
-    fake.write_text('#!/bin/bash\nif [[ "$1" == - ]]; then printf "%s\\n" "$4" > "$CAPTURE"; cat >/dev/null; touch "$STARTED"; fi\nexit 0\n');fake.chmod(0o755)
+    fake.write_text('#!/bin/bash\nif [[ "$1" == - && $# == 1 ]]; then exec "$TEST_REAL_PYTHON" -B "$@"; fi\nif [[ "$1" == - ]]; then printf "%s\\n" "$4" > "$CAPTURE"; cat >/dev/null; touch "$STARTED"; fi\nexit 0\n');fake.chmod(0o755)
     script=tmp_path/'ctl_fixture.sh'
     setup = """#!/bin/bash
 set -euo pipefail
@@ -162,8 +165,8 @@ remove_pid_file() { :; }
 status() { :; }
 sleep() { :; }
 """
-    script.write_text(setup+start+'\nstart\n')
-    env={**os.environ,'FIXTURE_ROOT':str(tmp_path),'FIXTURE_PYTHON':str(fake),'CAPTURE':str(capture),'STARTED':str(flag),'MAKSIMAR_MODEL_FREE_STARTUP':mode}
+    script.write_text(setup+reserve+start+'\nstart\n')
+    env={**os.environ,'FIXTURE_ROOT':str(fixture_root),'HOME':str(tmp_path),'TEST_REAL_PYTHON':__import__('sys').executable,'FIXTURE_PYTHON':str(fake),'CAPTURE':str(capture),'STARTED':str(flag),'MAKSIMAR_MODEL_FREE_STARTUP':mode}
     env.pop('MAKSIMAR_STARTUP_FD',None)
     result=subprocess.run(['bash',str(script)],cwd=tmp_path,env=env,capture_output=True,text=True,timeout=8)
     if mode=='invalid':

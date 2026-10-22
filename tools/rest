@@ -14,6 +14,16 @@ PREFLIGHT_RESULT_FILE="$RUNTIME_STATE_DIR/preflight_result.json"
 DASHBOARD_SESSION="maksimar_dashboard"
 DASHBOARD_OWNERSHIP_FILE="$RUNTIME_STATE_DIR/dashboard_session_ownership.env"
 
+CANONICAL_PYTHON=""
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/.venv/bin/python"
+elif [[ -x "$ROOT/venv/bin/python" ]]; then
+  CANONICAL_PYTHON="$ROOT/venv/bin/python"
+else
+  echo "[rest] canonical python unavailable; stop incomplete"
+  exit 1
+fi
+
 log() {
   echo "[rest] $1"
 }
@@ -53,7 +63,25 @@ stop_runtime_dashboard_session() {
   log "registered runtime dashboard cleanup complete"
 }
 
+reserve_lifecycle() {
+  mkdir -p "$ROOT/RUNTIME/state"
+  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
+    exec 8>>"$ROOT/RUNTIME/state/startup_reservation.lock"
+    flock -n 8 || { log "another canonical startup/stop owns the reservation; incomplete"; return 1; }
+    export MAKSIMAR_STARTUP_FD=8
+  fi
+  # The environment is not proof: verify the actual canonical inode/lock FD.
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - <<'PY'
+from CORE_ROOT.run_context import startup_reservation
+with startup_reservation():
+    pass
+PY
+}
+
 main() {
+  reserve_lifecycle || return 1
+  local expected_run
+  expected_run="$(PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" --capture-stop-run)" || { log "stop run identity unavailable; incomplete"; return 1; }
   log "stopping kernel watchdog..."
   "$TOOLS_DIR/kernel_guard_ctl" stop || { log "kernel_guard_ctl stop incomplete; retained diagnostics"; return 1; }
 
@@ -74,6 +102,8 @@ main() {
   close_dashboard_windows
   stop_runtime_dashboard_session
 
+  # This query writes no receipts, reports or reconciliation state.
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" "$ROOT/SUPERVISOR/runtime_preflight.py" --verify-current-stop "$expected_run" || { log "independent stop readback incomplete; evidence retained"; return 1; }
   log "done"
 }
 

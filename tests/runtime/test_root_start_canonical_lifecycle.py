@@ -34,6 +34,7 @@ def test_real_work_launcher_has_no_recursive_startup_in_isolated_toolchain(tmp_p
     tools.mkdir(parents=True)
     state = root / "RUNTIME" / "state"
     state.mkdir(parents=True)
+    (root / "CORE_ROOT").symlink_to(pathlib.Path("CORE_ROOT").resolve(), target_is_directory=True)
     calls = tmp_path / "calls"
     for name in ("start_maksimar.sh", "tools/work"):
         target = root / name

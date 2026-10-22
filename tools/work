@@ -300,6 +300,21 @@ recover_previous_run_degradation() {
     || log "degradation remains active: current-run incident or incomplete recovery evidence"
 }
 
+reserve_lifecycle() {
+  mkdir -p "$ROOT/RUNTIME/state"
+  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
+    exec 8>>"$ROOT/RUNTIME/state/startup_reservation.lock"
+    flock -n 8 || { log "another canonical startup/stop owns the reservation; incomplete"; return 1; }
+    export MAKSIMAR_STARTUP_FD=8
+  fi
+  # The environment is not proof: verify the actual canonical inode/lock FD.
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" "$CANONICAL_PYTHON" - <<'PY'
+from CORE_ROOT.run_context import startup_reservation
+with startup_reservation():
+    pass
+PY
+}
+
 main() {
   if (( $# )); then
     if [[ $# -ne 1 || "$1" != "--model-free" ]]; then
@@ -314,12 +329,7 @@ main() {
   # Explicit per-launch context; ordinary WORK clears any inherited suppression.
   export MAKSIMAR_MODEL_FREE_STARTUP="$MODEL_FREE_STARTUP"
 
-  mkdir -p "$RUNTIME_STATE_DIR"
-  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
-    exec 8>>"$RUNTIME_STATE_DIR/startup_reservation.lock"
-    flock -n 8 || { log "another canonical startup owns the reservation"; return 1; }
-    export MAKSIMAR_STARTUP_FD=8
-  fi
+  reserve_lifecycle || return 1
   mkdir -p "$RUNTIME_STATE_DIR" "$LOGS_DIR"
 
   if ! run_preflight; then

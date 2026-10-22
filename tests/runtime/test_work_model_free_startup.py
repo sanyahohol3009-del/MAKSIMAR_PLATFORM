@@ -30,6 +30,7 @@ def shell_world(tmp_path):
     for name in ("degraded_mode.flag", "stop_gate_trigger.txt", "last_degraded_reason.txt", "incident_history.jsonl"):
         (state / name).write_text("preserve " + name)
     original_markers = {p.name: p.read_bytes() for p in state.iterdir()}
+    (root / "CORE_ROOT").symlink_to(ROOT / "CORE_ROOT", target_is_directory=True)
     fake_python = root / ".venv/bin/python"
     fake_python.parent.mkdir(parents=True)
     fake_python.write_text(r'''#!/bin/bash
@@ -45,6 +46,10 @@ case "$1" in
     printf '{"model_ready":%s}\n' "${WARMUP_MODEL_READY:-true}"
     if [[ "${LOST_CHAIN_DURING_WARMUP:-0}" == 1 ]]; then
       touch "$HOME/MAKSIMAR_PLATFORM/RUNTIME/state/test_chain_failed"
+    fi
+    if [[ "${R4B_PAUSE_AT:-}" == warmup_* ]]; then
+      touch "$R4B_WAIT"
+      while [[ ! -f "$R4B_RELEASE" ]]; do /bin/sleep 0.01; done
     fi
     exit "${WARMUP_STATUS:-0}";;
   -c)
@@ -65,6 +70,10 @@ exec "$TEST_REAL_PYTHON" -B "$@"
         target.write_text(r'''#!/bin/bash
 name="${0##*/}"
 echo "$name:$*" >> "$TEST_CALLS"
+if [[ "$name" == "${R4B_PAUSE_AT:-none}" && ( "$1" == start || "$name" == dashboards_open ) ]]; then
+  touch "$R4B_WAIT"
+  while [[ ! -f "$R4B_RELEASE" ]]; do /bin/sleep 0.01; done
+fi
 if [[ "$name" == ctl && "$1" == start ]]; then
   touch "$HOME/MAKSIMAR_PLATFORM/RUNTIME/state/heartbeat_state.json"
 fi
@@ -114,6 +123,7 @@ fi
         assert all((state / name).read_bytes() == value for name, value in expected_markers.items())
         assert not (state / "run_metadata.json").exists()
         return result, observed
+    run.env=env;run.root=root;run.calls=calls
     return run
 
 
@@ -247,3 +257,59 @@ def test_post_warmup_chain_loss_aborts_through_existing_rest(shell_world):
     assert "guard chain lost during model warmup" in result.stdout
     assert "rest:" in calls
     assert not any(c.startswith("dashboards_open:") for c in calls)
+
+
+@pytest.mark.parametrize("stage",["ctl","guard_ctl","core_guard_ctl","kernel_guard_ctl","warmup_wait","warmup_failure","warmup_success"])
+def test_r4b_busy_stop_during_each_actual_work_stage_is_incomplete(shell_world,tmp_path,stage):
+    import time
+    root=shell_world.root;shutil.copyfile(ROOT/"tools/rest",root/"tools/rest")
+    (root/"RUNTIME/state/degraded_mode.flag").unlink()
+    wait=tmp_path/"r4b_wait";release=tmp_path/"r4b_release"
+    env={**shell_world.env,"R4B_PAUSE_AT":"dashboards_open" if stage=="warmup_success" else stage,"R4B_WAIT":str(wait),"R4B_RELEASE":str(release),"WARMUP_STATUS":"7" if stage=="warmup_failure" else "0"}
+    first=subprocess.Popen(["bash",str(root/"tools/work")],env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+    try:
+        limit=time.monotonic()+5
+        while not wait.exists():
+            assert first.poll() is None and time.monotonic()<limit
+            time.sleep(.01)
+        before=shell_world.calls.read_text()
+        if stage=="warmup_success":
+            # This pause is AFTER the probe exited0 and the post-warmup chain check.
+            assert "WARMUP:" in before and before.splitlines().count("CHAIN_PREFLIGHT")==2
+            assert json.loads((root/"RUNTIME/state/model_readiness.json").read_text())["model_ready"] is True
+        stopped=subprocess.run(["bash",str(root/"tools/rest")],env=env,capture_output=True,text=True,timeout=2)
+        assert stopped.returncode==1 and "reservation; incomplete" in stopped.stdout
+        assert first.poll() is None and shell_world.calls.read_text()==before
+    finally:
+        release.touch();out,err=first.communicate(timeout=8)
+    assert first.returncode==0,out+err
+    assert not any(":stop" in line for line in shell_world.calls.read_text().splitlines())
+
+
+def test_r4b_invalid_borrowed_work_descriptor_never_reaches_preflight(shell_world,tmp_path):
+    foreign=tmp_path/"foreign_lock"
+    (shell_world.root/"RUNTIME/state/startup_reservation.lock").touch()
+    command='exec 8>"$FOREIGN_LOCK";export MAKSIMAR_STARTUP_FD=8;exec bash "$HOME/MAKSIMAR_PLATFORM/tools/work" --model-free'
+    result=subprocess.run(["bash","-c",command],env={**shell_world.env,"FOREIGN_LOCK":str(foreign)},capture_output=True,text=True,timeout=3)
+    assert result.returncode!=0 and "canonical inode" in result.stderr
+    assert not shell_world.calls.exists()
+
+
+def test_r4b_parent_death_retains_transient_warmup_reservation(shell_world,tmp_path):
+    import time
+    root=shell_world.root;shutil.copyfile(ROOT/"tools/rest",root/"tools/rest")
+    (root/"RUNTIME/state/degraded_mode.flag").unlink()
+    wait=tmp_path/"r4b_wait";release=tmp_path/"r4b_release"
+    env={**shell_world.env,"R4B_PAUSE_AT":"warmup_wait","R4B_WAIT":str(wait),"R4B_RELEASE":str(release)}
+    first=subprocess.Popen(["bash",str(root/"tools/work")],env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+    try:
+        limit=time.monotonic()+5
+        while not wait.exists():
+            assert first.poll() is None and time.monotonic()<limit
+            time.sleep(.01)
+        first.terminate();first.wait(timeout=2)
+        stopped=subprocess.run(["bash",str(root/"tools/rest")],env=env,capture_output=True,text=True,timeout=2)
+        assert stopped.returncode==1 and "reservation; incomplete" in stopped.stdout
+    finally:
+        release.touch();first.communicate(timeout=5)
+    assert not any(":stop" in line for line in shell_world.calls.read_text().splitlines())

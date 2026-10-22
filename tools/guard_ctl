@@ -134,7 +134,23 @@ remove_stopped_pid_hint(sys.argv[1])
 PY
 }
 
+reserve_lifecycle() {
+  mkdir -p "$ROOT/RUNTIME/state"
+  if [[ "${MAKSIMAR_STARTUP_FD:-}" != 8 ]]; then
+    exec 8>>"$ROOT/RUNTIME/state/startup_reservation.lock"
+    flock -n 8 || { log "another canonical startup/stop owns the reservation; incomplete"; return 1; }
+    export MAKSIMAR_STARTUP_FD=8
+  fi
+  # The environment is not proof: verify the actual canonical inode/lock FD.
+  PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - <<'PY'
+from CORE_ROOT.run_context import startup_reservation
+with startup_reservation():
+    pass
+PY
+}
+
 start() {
+  reserve_lifecycle || return 1
   if guard_truth; then
     log "already running (truthful)"
     status
@@ -152,10 +168,10 @@ start() {
   log "starting guard tmux session: $SESSION_NAME"
   PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$SESSION_NAME" "$ROOT" "cd '$ROOT' && python3 -m CORE_ROOT.stop_gate_watcher 2>&1 | tee -a '$LOG_FILE'" <<'PY'
 import os, subprocess, sys
-from CORE_ROOT.run_context import runtime_mutation
+from CORE_ROOT.run_context import runtime_mutation, startup_reservation
 env = dict(os.environ)
 env.pop("MAKSIMAR_STARTUP_FD", None)
-with runtime_mutation():
+with startup_reservation(), runtime_mutation():
     subprocess.run(["tmux", "new-session", "-d", "-s", sys.argv[1], "-c", sys.argv[2]], check=True, close_fds=True, env=env)
     subprocess.run(["tmux", "send-keys", "-t", sys.argv[1], sys.argv[3], "C-m"], check=True, close_fds=True, env=env)
 PY
@@ -174,6 +190,7 @@ PY
 }
 
 stop() {
+  reserve_lifecycle || return 1
   log "stopping verified guard..."
   local session_id=""
   if session_exists; then

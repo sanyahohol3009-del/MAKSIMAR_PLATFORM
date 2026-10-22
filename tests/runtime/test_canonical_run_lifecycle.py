@@ -347,6 +347,11 @@ def test_cli_same_pid_reconciliation_preserves_current_marker_epoch(tmp_path):
 def test_rest_runtime_stop_failure_preserves_receipts_before_cleanup(tmp_path):
     root=tmp_path/'MAKSIMAR_PLATFORM';(root/'tools').mkdir(parents=True)
     state=root/'RUNTIME/state';state.mkdir(parents=True)
+    import sys
+    (root/'.venv/bin').mkdir(parents=True)
+    (root/'.venv/bin/python').symlink_to(sys.executable)
+    for package in ('CORE_ROOT','SUPERVISOR'):(root/package).symlink_to(Path.cwd()/package,target_is_directory=True)
+    (state/'run_metadata.json').write_text(json.dumps({'schema_version':1,'run_id':'OFFLINE','boot_id':'BOOT','wall_time':1.0,'monotonic_time':1.0,'status':'running'}))
     receipt=state/'heartbeat_state.json';receipt.write_text('original failure evidence')
     calls=tmp_path/'calls'
     for name in ('kernel_guard_ctl','core_guard_ctl','guard_ctl','ctl'):
@@ -382,6 +387,7 @@ def test_actual_work_entrypoint_preserves_idempotency_and_full_chain_gate(tmp_pa
     import sys
     home=tmp_path/'home';root=home/'MAKSIMAR_PLATFORM';(root/'.venv/bin').mkdir(parents=True)
     (root/'.venv/bin/python').symlink_to(sys.executable);(root/'tools').mkdir()
+    (root/'CORE_ROOT').symlink_to(Path.cwd()/'CORE_ROOT',target_is_directory=True)
     for name in ('ctl','ui_open','rest'):
         path=root/'tools'/name;path.write_text('#!/bin/bash\necho FAKE_'+name+'\n');path.chmod(0o755)
     script=Path('tools/work').read_text().rsplit('main "$@"',1)[0]

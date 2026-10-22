@@ -175,6 +175,7 @@ SESSION_NAME=fixture
 PID_FILE=/OFFLINE/pid
 HEARTBEAT_FILE=/OFFLINE/hb
 log() { :; }
+reserve_lifecycle() { :; }
 session_exists() { return 0; }
 tmux() { if [[ "$1" == display-message ]]; then echo '$42'; else echo "tmux:$*" >> "$TRACE"; fi; }
 """+function+"\nstop\n")
@@ -185,6 +186,12 @@ tmux() { if [[ "$1" == display-message ]]; then echo '$42'; else echo "tmux:$*" 
 @pytest.mark.parametrize("failed",["kernel_guard_ctl","core_guard_ctl","guard_ctl"])
 def test_rest_propagates_guard_failure_and_preserves_dependency_order(tmp_path,failed):
     home=tmp_path/"home";tools=home/"MAKSIMAR_PLATFORM/tools";tools.mkdir(parents=True);trace=tmp_path/"trace"
+    root=tools.parent
+    (root/".venv/bin").mkdir(parents=True)
+    (root/".venv/bin/python").symlink_to(sys.executable)
+    for package in ("CORE_ROOT","SUPERVISOR"):(root/package).symlink_to(Path.cwd()/package,target_is_directory=True)
+    state=root/"RUNTIME/state";state.mkdir(parents=True)
+    (state/"run_metadata.json").write_text(json.dumps({"schema_version":1,"run_id":"OFFLINE","boot_id":"BOOT","wall_time":1.0,"monotonic_time":1.0,"status":"running"}))
     names=["kernel_guard_ctl","core_guard_ctl","guard_ctl","ctl"]
     for n in names:
         p=tools/n;p.write_text("#!/bin/bash\necho "+n+" >> \"$TRACE\"\nexit "+("7" if n==failed else "0")+"\n");p.chmod(0o700)

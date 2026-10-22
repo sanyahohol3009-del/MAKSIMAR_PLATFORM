@@ -796,6 +796,65 @@ def prepare_clean_start():
                 "error": type(exc).__name__ + ":" + str(exc),
                 "archive_path": archive["archive_path"] if archive else None}
 
+def _stop_run_identity(payload):
+    """Validate/project the existing immutable run identity, never create one."""
+    from CORE_ROOT import run_context
+    if (not isinstance(payload, dict)
+            or type(payload.get("schema_version")) is not int
+            or payload["schema_version"] != RUN_METADATA_SCHEMA_VERSION
+            or not all(isinstance(payload.get(k), str) and payload[k] for k in ("run_id", "boot_id"))
+            or not all(_finite_number(payload.get(k)) and payload[k] >= 0 for k in ("wall_time", "monotonic_time"))):
+        raise RuntimeError("stop run identity missing or invalid")
+    keys = ("schema_version", "run_id", "boot_id", "wall_time", "monotonic_time")
+    return dict(zip(keys, run_context._identity(payload)))
+
+
+def capture_stop_run_identity():
+    """Pin request-local identity while borrowing the existing reservation."""
+    from CORE_ROOT import run_context
+    with run_context.startup_reservation():
+        if RUN_METADATA_FILE.is_symlink():
+            raise RuntimeError("stop metadata symlink refused")
+        meta = safe_read_json(RUN_METADATA_FILE)
+        identity = _stop_run_identity(meta)
+        if meta.get("status") not in run_context.ALLOWED_RUN_STATUSES:
+            raise RuntimeError("stop run status invalid")
+        return identity
+
+
+def verify_current_stop_completion(expected_run):
+    """Independent current-cohort STOP proof; historical restartability is separate."""
+    from CORE_ROOT import run_context
+    expected = _stop_run_identity(expected_run)
+    # Coordination only: no prepare_clean_start, report writer or reconciliation.
+    with run_context.prestart_mutation():
+        paths = _prestart_receipt_paths()
+        if any(p.is_symlink() for pair in paths.values() for p in pair) or RUN_METADATA_FILE.is_symlink():
+            raise RuntimeError("stop symlink evidence refused")
+        for _ in range(2):
+            observed = inspect_runtime_state()
+            meta = observed.get("run_metadata")
+            if _stop_run_identity(meta) != expected or meta.get("status") != "shutdown":
+                raise RuntimeError("stop current run shutdown identity not proven")
+            _require_historical_stale(observed, paths)
+            for scope, (_, path) in paths.items():
+                receipt = safe_read_json(path)
+                if (not isinstance(receipt, dict) or receipt.get("status") != "stopped"
+                        or receipt.get("run_id") != expected["run_id"]
+                        or receipt.get("boot_id") != expected["boot_id"]
+                        or receipt.get("run_monotonic_time") != expected["monotonic_time"]
+                        or type(receipt.get("run_monotonic_time")) not in (int, float)
+                        or receipt.get("monotonic_ts", float("inf")) > observed["observed_monotonic_time"]):
+                    raise RuntimeError("stop terminal cohort incomplete: " + scope)
+                if any(observed["heartbeats"][scope].get(k) != receipt.get(k) for k in (
+                        "schema_version", "source", "status", "pid", "process_start_ticks",
+                        "ts", "monotonic_ts", "run_id", "boot_id", "run_monotonic_time")):
+                    raise RuntimeError("stop receipt changed during readback: " + scope)
+            if safe_read_json(RUN_METADATA_FILE) != meta:
+                raise RuntimeError("stop metadata changed during readback")
+        return {"status": "ORDERLY_STOPPED", "complete": True, "run_id": expected["run_id"]}
+
+
 def main() -> None:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description="Run runtime preflight validation.")
@@ -805,7 +864,21 @@ def main() -> None:
         help="Exit non-zero if stale runtime artifacts are present.",
     )
     parser.add_argument("--prepare-clean-start", action="store_true", help="Preserve and reconcile proven historical receipts under canonical coordination.")
+    stop_query = parser.add_mutually_exclusive_group()
+    stop_query.add_argument("--capture-stop-run", action="store_true")
+    stop_query.add_argument("--verify-current-stop", metavar="PINNED_RUN_JSON")
     args = parser.parse_args()
+    if args.capture_stop_run or args.verify_current_stop is not None:
+        if args.strict or args.prepare_clean_start:
+            parser.error("stop readback cannot be combined with prestart/report mutation")
+        try:
+            result = (capture_stop_run_identity() if args.capture_stop_run else
+                      verify_current_stop_completion(json.loads(args.verify_current_stop)))
+        except (OSError, RuntimeError, ValueError, TypeError, KeyError) as exc:
+            print(json.dumps({"status": "INCOMPLETE", "complete": False, "error": str(exc)}))
+            raise SystemExit(1)
+        print(json.dumps(result))
+        return
 
     ensure_runtime_layout()
     preparation = prepare_clean_start() if args.prepare_clean_start else None
