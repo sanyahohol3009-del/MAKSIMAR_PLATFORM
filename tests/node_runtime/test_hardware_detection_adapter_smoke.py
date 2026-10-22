@@ -96,3 +96,99 @@ def test_real_nvidia_adapter_keeps_device_uuid_and_pci_aliases(monkeypatch):
     snapshot=adapter.detect_model_resource_observation()
     assert len(snapshot["accelerator_available_bytes"])==2 and snapshot["physical_identity_verified"]
     assert all(size==70*1024**3 for _,size in snapshot["accelerator_available_bytes"])
+
+
+# R4-C: real host parser/constraint composition with fixed external observations.
+import json
+_R4C_REAL_RUN_COMMAND = adapter._run_command
+
+
+def _r4c_host_payload(**changes):
+    values = {'schema_version': 1, 'source': 'windows_parent_cim_v1', 'platform': 'Win32NT',
+              'total_physical_bytes': 32 * 1024**3, 'available_physical_bytes': 12 * 1024**3,
+              'commit_limit_bytes': 64 * 1024**3, 'committed_bytes': 24 * 1024**3}
+    values.update(changes)
+    return json.dumps(values)
+
+
+def test_r4c_local_host_snapshot_keeps_separate_constraints_and_provenance(monkeypatch, controlled_hardware_effects):
+    controlled_hardware_effects['/proc/sys/kernel/osrelease'] = 'fixture-microsoft-WSL2'
+    calls = []
+    def command(argv):
+        calls.append(argv)
+        return _r4c_host_payload()
+    monkeypatch.setattr(adapter, '_run_command', command)
+    # Keep GPU probe doubles from generating unrelated command entries.
+    monkeypatch.setattr(adapter, '_detect_nvidia_gpus', lambda: ((), ()))
+    monkeypatch.setattr(adapter, '_detect_generic_gpus', lambda: ((), ()))
+    result = adapter.detect_model_resource_observation()
+    assert result['scope_complete'] is True
+    assert dict(result['memory_available_bytes']) == {'execution_environment': 16*1024**3,
+        'windows_parent_physical': 12*1024**3, 'windows_parent_commit': 40*1024**3}
+    assert len(calls) == 1 and calls[0][:4] == ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command']
+    assert calls[0][4] == adapter._WINDOWS_PARENT_MEMORY_COMMAND
+    assert result['host_memory_observation']['association'] == 'local_windows_interop'
+    assert result['host_memory_observation']['observed_monotonic'] <= result['host_memory_observation']['completed_monotonic']
+    assert 'windows_parent_cim_v1' in result['source']
+
+
+@pytest.mark.parametrize('changes', [
+    {'schema_version': True}, {'schema_version': 2}, {'source': 'foreign'}, {'platform': 'Unix'},
+    {'available_physical_bytes': True}, {'available_physical_bytes': 2.5},
+    {'available_physical_bytes': -1}, {'total_physical_bytes': 0},
+    {'available_physical_bytes': 33*1024**3}, {'commit_limit_bytes': 0},
+    {'committed_bytes': 65*1024**3}, {'committed_bytes': None},
+])
+def test_r4c_invalid_host_fields_never_become_capacity(changes):
+    assert adapter._parse_windows_parent_memory(_r4c_host_payload(**changes), started=10., finished=11.) is None
+
+
+@pytest.mark.parametrize('raw', ['', 'not-json', '[]', 'null', '{}'])
+def test_r4c_missing_or_partial_host_snapshot_unknown(raw):
+    assert adapter._parse_windows_parent_memory(raw, started=10., finished=11.) is None
+
+
+@pytest.mark.parametrize('started,finished', [(10.,9.), (10.,16.), (float('nan'),11.), (10.,float('inf')), (True,2.)])
+def test_r4c_bad_acquisition_timing_is_unknown(started, finished):
+    assert adapter._parse_windows_parent_memory(_r4c_host_payload(), started=started, finished=finished) is None
+
+
+def test_r4c_known_zero_capacity_not_invented_unknown_or_positive():
+    host = adapter._parse_windows_parent_memory(_r4c_host_payload(available_physical_bytes=0,
+        committed_bytes=64*1024**3), started=10., finished=11.)
+    assert host is not None and host['constraint_domains'] == (('windows_parent_physical',0),('windows_parent_commit',0))
+
+
+def test_r4c_missing_host_preserves_guest_and_parent_constraints(monkeypatch, controlled_hardware_effects):
+    f=controlled_hardware_effects; f['/proc/sys/kernel/osrelease']='fixture-microsoft-WSL2'
+    f['/sys/fs/cgroup/memory.max']=str(10*1024**3); f['/sys/fs/cgroup/memory.current']=str(9*1024**3)
+    monkeypatch.setattr(adapter, '_run_command', lambda argv: '')
+    result=adapter.detect_model_resource_observation()
+    assert result['scope_complete'] is False and result['host_memory_observation'] is None
+    assert min(v for _,v in result['memory_available_bytes']) == 1024**3
+
+
+def test_r4c_host_success_cannot_hide_missing_ancestor(monkeypatch, controlled_hardware_effects):
+    f=controlled_hardware_effects; f['/proc/sys/kernel/osrelease']='fixture-microsoft-WSL2'
+    f.pop('/sys/fs/cgroup/memory.max')
+    monkeypatch.setattr(adapter, '_run_command', lambda argv: _r4c_host_payload())
+    result=adapter.detect_model_resource_observation()
+    assert result['host_memory_observation'] is not None and result['scope_complete'] is False
+
+
+def test_r4c_native_linux_never_queries_windows(monkeypatch):
+    calls=[]
+    monkeypatch.setattr(adapter, '_run_command', lambda argv: calls.append(argv) or '')
+    assert adapter._detect_windows_parent_memory() is None and not calls
+
+
+def test_r4c_existing_command_timeout_remains_five_seconds(monkeypatch):
+    import subprocess
+    monkeypatch.setattr(adapter.shutil,'which',lambda name:'/fixture/'+name)
+    calls=[]
+    def timeout(argv,**kwargs):
+        calls.append(kwargs['timeout'])
+        raise subprocess.TimeoutExpired(argv,kwargs['timeout'])
+    monkeypatch.setattr(adapter.subprocess,'run',timeout)
+    assert _R4C_REAL_RUN_COMMAND(['powershell.exe','-NoProfile']) == ''
+    assert calls == [5]

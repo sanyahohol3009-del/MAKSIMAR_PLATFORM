@@ -501,3 +501,54 @@ def test_r4a_resolved_nonretention_never_grants_admission(acquisition, monkeypat
         options={'num_ctx': profile.resident_context_tokens or profile.default_context_tokens})
     assert result['ok'] is False and result['model_call_attempted'] is False
     assert not state['posts']
+
+
+# R4-C: real hardware -> real observer -> SAME admission, with external facts only doubled.
+@pytest.mark.parametrize('host_free,commit_free,expected', [(2*G,24*G,False),(16*G,2*G,False),(16*G,24*G,True)])
+def test_r4c_host_constraints_reach_existing_transport_without_addition(acquisition,monkeypatch,host_free,commit_free,expected):
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter_models import DetectedGpuSnapshot
+    files={'/proc/meminfo':'MemAvailable: 33554432 kB\n','/proc/self/cgroup':'0::/\n',
+        '/sys/fs/cgroup/memory.max':'max','/sys/fs/cgroup/memory.current':'0',
+        '/proc/sys/kernel/osrelease':'fixture-microsoft-WSL2'}
+    monkeypatch.setattr(hardware,'_read_text_file',lambda path:files.get(path,''))
+    host={'schema_version':1,'source':'windows_parent_cim_v1','platform':'Win32NT',
+        'total_physical_bytes':32*G,'available_physical_bytes':host_free,
+        'commit_limit_bytes':64*G,'committed_bytes':64*G-commit_free}
+    monkeypatch.setattr(hardware,'_run_command',lambda argv:json.dumps(host))
+    gpu=DetectedGpuSnapshot(0,'fixture','fixture','discrete_gpu',80,70,False,('compute',),'fixture-gpu','0000:01:00.0')
+    monkeypatch.setattr(hardware,'_detect_nvidia_gpus',lambda:((gpu,),()))
+    monkeypatch.setattr(hardware,'_detect_generic_gpus',lambda:((),()))
+    original_get=transport.httpx.get
+    def get(url,**kw):
+        response=original_get(url,**kw)
+        if urlsplit(url).path=='/api/ps':response.payload={'models':[]}
+        return response
+    monkeypatch.setattr(transport.httpx,'get',get)
+    observed=acquisition['real_observe'](acquisition['profile'])
+    assert observed.complete and observed.scope_confirmed
+    assert dict(observed.memory_available_bytes)['windows_parent_physical']==host_free
+    assert dict(observed.memory_available_bytes)['windows_parent_commit']==commit_free
+    assert 'windows_parent_cim_v1' in observed.source
+    # Hardware success never fabricates a provider instance, concurrency or lease.
+    assert observed.provider_instance_id=='' and not observed.ownership_verified and observed.active_concurrency is None
+    from MAKSIMAR_CORE_LIB.execution_control.admission_contract import evaluate_model_admission
+    unchanged=evaluate_model_admission(request_id='offline',profile=acquisition['profile'],observation=observed,
+        requested_context=4096,policy_allowed=True,now_monotonic=time.monotonic(),locally_serialized=True)
+    assert not unchanged.admitted and unchanged.reason=='resource_scope_unproven'
+    # Independent provider facts are synthetic fixtures, not claimed actual ownership.
+    acquisition['next_observation']=replace(observed,provider_instance_id='fixture-provider',
+        ownership_verified=True,ownership_source='fixture independent provider proof',active_concurrency=0)
+    result=transport.ollama_post_json('/api/generate',acquisition['payload'])
+    assert result['resource_admission']['admitted'] is expected
+    assert len(acquisition['posts'])==int(expected)
+    if not expected:assert result['resource_admission']['reason']=='insufficient_available_memory'
+
+
+def test_r4c_model_free_never_reaches_host_or_provider_probe(acquisition,monkeypatch):
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    monkeypatch.setenv('MAKSIMAR_MODEL_FREE_STARTUP','1')
+    monkeypatch.setattr(hardware,'detect_model_resource_observation',lambda:pytest.fail('model-free reached host probe'))
+    result=transport.ollama_post_json('/api/generate',acquisition['payload'])
+    assert result['model_call_attempted'] is False
+    assert not acquisition['observations'] and not acquisition['gets'] and not acquisition['posts']

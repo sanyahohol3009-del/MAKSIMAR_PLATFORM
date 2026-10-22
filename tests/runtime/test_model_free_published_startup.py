@@ -19,6 +19,7 @@ def launcher(tmp_path):
     state.mkdir(parents=True)
     tools = root / "tools"
     tools.mkdir()
+    (root / "CORE_ROOT").symlink_to(ROOT / "CORE_ROOT", target_is_directory=True)
     for name in ("tools/work", "start_maksimar.sh"):
         target = root / name
         # This fixture verifies published source, while test_work_model_free_startup

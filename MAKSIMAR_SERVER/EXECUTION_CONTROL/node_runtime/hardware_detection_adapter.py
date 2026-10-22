@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import json
 import os
 import platform
 import re
@@ -440,7 +441,64 @@ def _normalize_pci_identity(value: str) -> str:
     return ""
 
 
-def _memory_constraint_domains(available_bytes):
+# The existing hardware adapter owns this bounded, read-only local host query.
+# No remote ComputerName, credentials, state writes, model/provider calls or cache.
+_WINDOWS_PARENT_MEMORY_COMMAND = (
+    "$ErrorActionPreference='Stop';"
+    "$os=Get-CimInstance Win32_OperatingSystem;"
+    "$memory=Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory;"
+    "[PSCustomObject]@{schema_version=1;source='windows_parent_cim_v1';"
+    "platform=[Environment]::OSVersion.Platform.ToString();"
+    "total_physical_bytes=([uint64]$os.TotalVisibleMemorySize*1024);"
+    "available_physical_bytes=[uint64]$memory.AvailableBytes;"
+    "commit_limit_bytes=[uint64]$memory.CommitLimit;"
+    "committed_bytes=[uint64]$memory.CommittedBytes} | ConvertTo-Json -Compress"
+)
+
+
+def _parse_windows_parent_memory(raw, *, started, finished):
+    # Validate a local acquisition; never accept partial/guessed capacities.
+    try:
+        payload = json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+    if (not isinstance(payload, dict)
+            or type(payload.get("schema_version")) is not int
+            or payload["schema_version"] != 1
+            or payload.get("source") != "windows_parent_cim_v1"
+            or payload.get("platform") != "Win32NT"):
+        return None
+    fields = ("total_physical_bytes", "available_physical_bytes",
+              "commit_limit_bytes", "committed_bytes")
+    if any(type(payload.get(name)) is not int or payload[name] < 0 for name in fields):
+        return None
+    total, free, limit, committed = (payload[name] for name in fields)
+    if total <= 0 or limit <= 0 or free > total or committed > limit:
+        return None
+    if (type(started) not in (int, float) or type(finished) not in (int, float)
+            or not math.isfinite(started) or not math.isfinite(finished)
+            or not 0 <= finished - started <= 5):
+        return None
+    return {"source": "windows_parent_cim_v1", "association": "local_windows_interop",
+            "observed_monotonic": started, "completed_monotonic": finished,
+            "total_physical_bytes": total, "available_physical_bytes": free,
+            "commit_limit_bytes": limit, "committed_bytes": committed,
+            "constraint_domains": (("windows_parent_physical", free),
+                                   ("windows_parent_commit", limit - committed))}
+
+
+def _detect_windows_parent_memory():
+    # Use the existing five-second command owner; unavailable interop is unknown.
+    import time
+    if "microsoft" not in _read_text_file("/proc/sys/kernel/osrelease").lower():
+        return None
+    started = time.monotonic()
+    raw = _run_command(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                        _WINDOWS_PARENT_MEMORY_COMMAND])
+    return _parse_windows_parent_memory(raw, started=started, finished=time.monotonic())
+
+
+def _memory_constraint_domains(available_bytes, *, host_observation=None):
     """Intersect environment/cgroup budgets; unsupported host scope stays unknown."""
     if type(available_bytes) is not int or available_bytes <= 0:
         return (), False
@@ -479,11 +537,16 @@ def _memory_constraint_domains(available_bytes):
                 complete = False
     if not cgroups:
         complete = False
-    # WSL exposes guest memory, not an independent Windows physical headroom.
-    # No host bridge observation exists here, so never claim a complete host view.
+    # Guest/host/commit constrain the same worst-case incremental allocation.
+    # They are never added; missing cgroup ancestors remain incomplete.
     kernel = _read_text_file("/proc/sys/kernel/osrelease").lower()
-    if not kernel or "microsoft" in kernel:
+    if not kernel:
         complete = False
+    elif "microsoft" in kernel:
+        if host_observation is None:
+            complete = False
+        else:
+            domains.extend(host_observation["constraint_domains"])
     return tuple(domains), complete
 
 
@@ -494,7 +557,8 @@ def detect_model_resource_observation() -> dict:
     # Avoid dmidecode/capacity projection work on the load path.
     raw = _read_text_file("/proc/meminfo")
     available = _parse_meminfo_value_kb(raw, "MemAvailable") * 1024
-    domains, complete = _memory_constraint_domains(available or None)
+    host = _detect_windows_parent_memory()
+    domains, complete = _memory_constraint_domains(available or None, host_observation=host)
     primary, _ = _detect_nvidia_gpus()
     secondary, _ = _detect_generic_gpus()
     gpus = _merge_gpu_snapshots(primary, secondary)
@@ -514,7 +578,9 @@ def detect_model_resource_observation() -> dict:
             "accelerator_available_bytes": tuple(accelerator_values),
             "physical_identity_verified": identities_verified,
             "cpu_threads": threads, "scope_complete": complete,
-            "scope_id": "local_execution_environment", "source": __name__}
+            "scope_id": "local_execution_environment",
+            "source": (__name__ + ";windows_parent_cim_v1;local_windows_interop" if host else __name__),
+            "host_memory_observation": host}
 
 
 def detect_node_hardware(node_id: CanonicalNodeId) -> NodeHardwareDetectionContract:

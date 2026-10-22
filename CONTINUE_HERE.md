@@ -1,3 +1,21 @@
+# CURRENT R4-C SCOPED HOST OBSERVATION REPAIR - 2026-10-22
+
+HEAD and independently read-only verified remote: d449517d79fc2654f657709feef492521be1befe; branch deflation/live-hotpath-reset-v1; index EMPTY; no Git authority consumed/created in R4C.
+
+Read A=RUNTIME/audits/WSL_RECOVERY_ACTIVATION_20261011/OWNER_R4C_RESOURCE_FEASIBILITY_AND_SCOPED_HOST_REPAIR_REPORT_20261022.md and owner_20261022_R4C_final_status.json first. Current instruction: OWNER_R4C_RESOURCE_FEASIBILITY_MISSION_20261022.txt.
+
+Owner exact3 production approval call_9d5ec33b32a54ecbaedcd44dbb78fbe2 applied only to existing hardware_detection_adapter.py and two approved test owners. Two internal host read/parse helpers, no new module/authority. Windows physical RAM/commit headroom become separate constraints via same detector/transport/admission; no addition with guest/swap. Native Linux/GPU logic and five-second command timeout unchanged. Existing old tests preserved.
+
+Proof:225 UNIQUE focused PASS/0FAIL/0ERROR/0SKIP, including22 audit scenarios and32 new existing-owner cases; full1297 NOT rerun. Codegraph4025files/20619nodes/72067edges;errors/collisions/hash drift0. Trust3+signed pins2/state7/archives8x46/heavy raw4 preserved; current orderly_stopped,5canonical process scans empty,8000free,no tmux,4same-run stopped receipts.
+
+Real read-only repaired hardware readback3.896s captured Windows parent physical5453529088bytes/commit28581421056bytes and WSL9767596032bytes as separate constraints. These are historical snapshots, not future admission permission. scope_complete remainsFALSE because current cgroup ancestor view unresolved. Provider metadata GETs3 only; no model effects. Current service startup parallel1/max_loaded2/max_queue512 is not Supervisor child default1 and not a global client lease. Five profiles have no validated load demand; shared provider identity/concurrency still unproven. SAFE_BOUNDED_PROVIDER_MODE=NOT_PROVEN;do not assert impossible universal exclusivity.
+
+NEXT: Do not repeat discovery/225tests or R4B delivery. First inspect exact current cgroup mount/ancestor scope with existing detector contract and existing model-demand/provider evidence sources, read-only. Preserve M1/M2 HOLD until evidence-bound resource demand and truthful shared-provider contract exist. No speculative bounds from tag size/old fit prediction. Separate owner review needed for any further production scope or bounded physical measurement; no R2 bypass,model load,natural/self-knowledge,WORK/REST,daemon changes or Git authority.
+
+Unpublished exact3 source/test hashes and checkpoint-only candidate in owner_20261022_R4C_git_preparation_manifest.json;NOT_AUTHORIZED_TO_STAGE_COMMIT_PUSH. Preserve all older local checkpoint blocks outside any future staged candidate. Runtime/model/weight/other-repo actions0. Debt8internal/6memory unchanged;full R4C/M1/memory/platform NOT PASS. All failed rounds retained.
+
+--- Prior checkpoints retained verbatim below ---
+
 # CURRENT R4-B OFFLINE VERIFIED / EXACT GIT APPROVAL PENDING - 2026-10-22
 
 HEAD efc69c966d614f61b2dbd5cc53374acc5f0096a0;deflation/live-hotpath-reset-v1.
