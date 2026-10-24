@@ -12,9 +12,7 @@ from textual.reactive import reactive
 from textual.widgets import Footer, Header, Input, Static, TextArea
 
 
-PROJECT_ROOT = Path.home() / "MAKSIMAR_PLATFORM"
-RUNTIME_STATE_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "RUNTIME" / "state"
-LOGS_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "logs"
+from CORE_ROOT.runtime_paths import ROOT as PROJECT_ROOT, RUNTIME_STATE_DIR, LOGS_DIR
 DOCS_DIR = PROJECT_ROOT / "docs"
 CONCURRENCY_DOCS_DIR = DOCS_DIR / "concurrency_governance"
 CODE_DRAFT_PATH = (
@@ -43,13 +41,9 @@ def _read_text_if_exists(path: Path) -> str:
 
 
 def _tail_lines(path: Path, max_lines: int = 6) -> list[str]:
-    """Return last lines from a log file."""
-    if not path.exists():
-        return []
-    try:
-        return path.read_text(encoding="utf-8", errors="replace").splitlines()[-max_lines:]
-    except OSError:
-        return []
+    """Reuse the existing bounded OOB log-tail reader."""
+    from tools.monitor.oob_foundation_monitor import tail_log
+    return tail_log(path, max_lines)
 
 
 def _count_files(directory: Path, suffix: str = ".md") -> int:
@@ -96,9 +90,9 @@ def build_system_overview_text() -> str:
     return (
         "SYSTEM OVERVIEW\n"
         "--------------\n"
-        "CPU Budget: bounded\n"
-        "Memory Budget: bounded\n"
-        "Pressure: nominal\n"
+        "CPU Budget: UNMEASURED\n"
+        "Memory Budget: UNMEASURED\n"
+        "Pressure: UNMEASURED\n"
         f"Load(1/5/15): {load_text}\n"
     )
 
@@ -145,11 +139,15 @@ def build_worker_text() -> str:
             lines.append(f"gw{index - 1}: PROCESSING | {line[:70]}")
         return "\n".join(lines)
 
+    from SUPERVISOR.runtime_preflight import inspect_runtime_state
+    observation = inspect_runtime_state()
+    decision = observation["decision"]
+    guard = observation["heartbeats"]["guard"]
     return (
         "WORKER EXECUTION PULSE\n"
         "----------------------\n"
-        "core: ACTIVE\n"
-        "guard: ACTIVE\n"
+        f"core: {decision['classification']} (healthy={decision['healthy']})\n"
+        f"guard: {guard.get('status', 'unknown')} (fresh={guard.get('fresh', False)})\n"
         "pytest workers: none detected\n"
     )
 

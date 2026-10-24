@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from MAKSIMAR_CORE_LIB.action_library_adapters.computer_use_worker_contract import (
-    build_action_request_from_intent,
+    resolve_computer_use_action_request,
 )
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import PlanStep
 from MAKSIMAR_SERVER.WORKERS.action_recording_runtime import build_action_recording
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
+from MAKSIMAR_CORE_LIB.security_layer.owner_identity_claim import OwnerIdentityClaim
 
 
 def test_action_recording_required_smoke() -> None:
-    request = build_action_request_from_intent(
-        "open browser",
+    request = resolve_computer_use_action_request(
+        PlanStep("step", "goal", "pc.control", "open_browser", ("execution_receipt",), "MUTATE", "local_pc", "REVERSIBLE", True, "MUTATION"),
+        target="default_browser",
         input_channel="text",
         owner_identity_claim=OwnerIdentityClaim(
             claim_id="action_recording_owner_v1",

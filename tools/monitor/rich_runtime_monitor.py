@@ -11,9 +11,7 @@ from rich.table import Table
 from rich.text import Text
 
 
-PROJECT_ROOT = Path.home() / "MAKSIMAR_PLATFORM"
-RUNTIME_STATE_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "RUNTIME" / "state"
-LOGS_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "logs"
+from CORE_ROOT.runtime_paths import ROOT as PROJECT_ROOT, RUNTIME_STATE_DIR, LOGS_DIR
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,37 +34,33 @@ def _read_json_if_exists(path: Path) -> dict[str, Any]:
 
 
 def _tail_lines(path: Path, max_lines: int = 5) -> list[str]:
-    """Return last lines from a log file if it exists."""
-    if not path.exists():
-        return []
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-        return lines[-max_lines:]
-    except OSError:
-        return []
+    """Reuse the existing bounded OOB log-tail reader."""
+    from tools.monitor.oob_foundation_monitor import tail_log
+    return tail_log(path, max_lines)
 
 
 def build_status_cards() -> list[MonitorStatusCard]:
     """Build read-only monitor cards from canonical file paths."""
-    preflight = _read_json_if_exists(RUNTIME_STATE_DIR / "preflight_snapshot.json")
-    incident = _read_json_if_exists(RUNTIME_STATE_DIR / "last_incident.json")
-    degraded = _read_json_if_exists(RUNTIME_STATE_DIR / "degraded_flags.json")
-
+    from CORE_ROOT import runtime_paths
+    preflight = _read_json_if_exists(runtime_paths.PREFLIGHT_RESULT_FILE)
+    incident = _read_json_if_exists(runtime_paths.INCIDENT_SNAPSHOT_FILE)
+    state_present = runtime_paths.RUNTIME_STATE_DIR.is_dir()
+    degraded_present = runtime_paths.DEGRADED_MODE_FILE.exists()
     return [
         MonitorStatusCard(
             title="Preflight",
-            value="present" if preflight else "missing",
-            detail="canonical startup snapshot",
+            value=("passed" if preflight.get("ok") is True else "failed" if preflight.get("ok") is False else "unknown") if preflight else "missing",
+            detail="retained startup observation; not current runtime readiness",
         ),
         MonitorStatusCard(
             title="Incident",
-            value="present" if incident else "none",
-            detail="last incident snapshot",
+            value="present" if incident else "unavailable",
+            detail="retained last incident snapshot; absence is not incident-free proof",
         ),
         MonitorStatusCard(
             title="Degraded",
-            value="active" if degraded else "clear",
-            detail="degraded flag state",
+            value="active" if degraded_present else "flag_absent" if state_present else "unknown",
+            detail="canonical degraded flag presence; not whole-runtime health",
         ),
     ]
 

@@ -8,9 +8,9 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.system_status_panel_content_contract import
 )
 
 
-def build_system_status_panel_payload() -> dict[str, Any]:
+def build_system_status_panel_payload(observation: dict | None = None) -> dict[str, Any]:
     """Build canonical payload for the system-status panel."""
-    contract = build_system_status_panel_content_contract()
+    contract = build_system_status_panel_content_contract(observation=observation)
     entry = contract.entries[0]
 
     return {

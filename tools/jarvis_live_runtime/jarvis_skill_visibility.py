@@ -7,7 +7,7 @@ from typing import Any
 from MAKSIMAR_CORE_LIB.action_library_adapters.action_capability_inventory_read_model import (
     build_action_capability_inventory_read_model,
 )
-from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import (
     build_jarvis_external_adapter_visibility_read_model,
 )
 from MAKSIMAR_CORE_LIB.runtime_activation import build_default_capability_activation_matrix
@@ -410,28 +410,8 @@ def select_skills_for_tools(selected_tools: tuple[str, ...], selected_agent_role
 
 
 def load_automation_n8n_private_skill_context(selected_skill_ids: tuple[str, ...]) -> dict[str, Any]:
-    """Read only the bounded official skills selected for the Automation Organ."""
-    allowed = {
-        "using-n8n-skills-official",
-        "n8n-workflow-lifecycle-official",
-        "n8n-node-configuration-official",
-        "n8n-agents-official",
-        "n8n-extending-mcp-official",
-    }
-    entries = []
-    root = PROJECT_ROOT / "RUNTIME/n8n/authoring/.agents/skills"
-    for skill_id in dict.fromkeys(selected_skill_ids):
-        if skill_id not in allowed:
-            continue
-        path = root / skill_id / "SKILL.md"
-        if not path.is_file():
-            continue
-        text = path.read_text(encoding="utf-8")
-        entries.append({"skill_id": skill_id, "path": str(path.relative_to(PROJECT_ROOT)), "content": text[:800]})
-    return {
-        "organ_id": "automation",
-        "skill_ids": tuple(item["skill_id"] for item in entries),
-        "entries": tuple(entries),
-        "provider_policy_evidence_owned_by_host": True,
-        "direct_execution_allowed": False,
-    }
+    """Compatibility entrypoint; the Automation Organ owns the single reader."""
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.n8n_adapter import (
+        load_automation_n8n_private_skill_context as canonical_reader,
+    )
+    return canonical_reader(selected_skill_ids)

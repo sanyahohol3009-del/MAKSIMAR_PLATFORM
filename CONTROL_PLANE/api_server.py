@@ -19,7 +19,7 @@ from pathlib import Path
 import time
 
 from CONTROL_PLANE.health.monitor import take_snapshot
-from CORE_ROOT.run_context import model_free_startup
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_provider_observation_context
 from CONTROL_PLANE.canonical_semantic_spine import (
     CANONICAL_TURN_TIMEOUT_SECONDS,
     CANDIDATE_DISCOVERY_JSON_SCHEMA,
@@ -463,7 +463,7 @@ def jarvis_live_memory() -> dict[str, Any]:
 
 @app.get("/jarvis-live/models")
 def jarvis_live_models() -> dict[str, Any]:
-    if model_free_startup():
+    if build_provider_observation_context()["model_free_startup"]:
         raise HTTPException(status_code=503, detail={
             "status": "UNAVAILABLE", "reason": "model_free_startup",
         })
@@ -930,6 +930,57 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
         sandbox_selection = select_sandbox(sandbox_requirement)
     RequestDeadline.current().check()
     capture = _capture_canonical_turn_memory(canonical, payload, session_id, identity, text, response_text)
+    # Project only public turn contracts; keep author diagnostics in canonical.
+    final = canonical.get("final_brain_result")
+    final_failed = canonical.get("generation_completed") is False or (
+        isinstance(final, dict) and final.get("ok") is False
+    )
+    if final_failed:
+        public_keys = (
+            "handled", "orchestration_path", "trace_id", "understanding_schema_version",
+            "understanding", "selected_capabilities", "selected_provider_operation",
+            "selection_source", "fallback_used", "fallback_reason", "capability_status",
+            "operation_status", "missing_evidence", "degradation", "response_text",
+            "permission_decision", "safety_validation", "identity", "evidence_bundle",
+            "execution_plan", "trace", "project_tools_used", "capability_truth",
+            "generation_completed", "delivery_completed", "response_execution_status",
+            "pending_approvals", "approval_required_steps", "policy_denied_steps",
+            "provider_unavailable_steps", "expected_capability_validation",
+        )
+        public_canonical = {key: canonical[key] for key in public_keys if key in canonical}
+    else:
+        public_canonical = {key: value for key, value in canonical.items() if key not in (
+            "final_brain_input", "helper_raw_result", "final_brain_result", "main_model_attempts",
+            "raw_response_text", "raw_model_result", "goalframe_understanding_attempts",
+        )}
+    if isinstance(public_canonical.get("trace"), dict):
+        public_canonical["trace"] = {
+            key: public_canonical["trace"][key] for key in (
+                "trace_id", "request_id", "route", "stages", "selected_capabilities",
+                "selected_providers", "policy_result", "evidence_status", "final_brain_status",
+                "rollback_reason", "schema_version",
+            ) if key in public_canonical["trace"]
+        }
+    if "understanding_model_attempts" in canonical:
+        # Reuse UNDERSTANDING_ATTEMPT.safe_structure metadata; raw stays internal.
+        public_attempts = []
+        for attempt in canonical["understanding_model_attempts"]:
+            audit = {key: attempt[key] for key in (
+                    "attempt_index", "request_model_attempt", "model", "model_role", "timestamp",
+                    "response_received", "schema_valid", "validation_error", "retry_decision",
+                    "retry_reason", "diagnostic_only", "user_memory", "training_eligible",
+                ) if key in attempt}
+            if "validation_error" in audit:
+                # jsonschema messages may quote rejected author values; retain the code.
+                audit["validation_error"] = str(audit["validation_error"]).partition(":")[0]
+            public_attempts.append(audit)
+        public_canonical["understanding_model_attempts"] = public_attempts
+        public_trace = dict(public_canonical.get("trace", {}))
+        public_trace["understanding_model_attempts"] = public_attempts
+        if "understanding_model_attempt_count" in canonical:
+            public_canonical["understanding_model_attempt_count"] = canonical["understanding_model_attempt_count"]
+            public_trace["understanding_model_attempt_count"] = canonical["understanding_model_attempt_count"]
+        public_canonical["trace"] = public_trace
     result = {
         "ok": bool(response_text), "route": "CANONICAL_SEMANTIC_TURN",
         "intent_family": "GENERAL_SEMANTIC_TURN", "llm_response": response_text,
@@ -941,12 +992,14 @@ def jarvis_live_hot(payload: dict[str, Any]) -> Any:
         "error_kind": "" if canonical.get("operation_status") == "COMPLETE" else canonical.get("operation_status", ""),
         "learning_bundle": capture.get("learning_bundle"),
         "sandbox_selection": sandbox_selection,
-        "session_event": capture["session_event"], **canonical, **pc_truth,
+        "session_event": capture["session_event"], **public_canonical, **pc_truth,
     }
     result.update(capture)
     result.update(_selected_registry_projection(canonical, registry_projection))
+    if final_failed:
+        result["ok"] = False
     return {
-        "ok": True,
+        "ok": not final_failed,
         "surface": "CONTROL_PLANE/api_server.py",
         "streaming": False,
         "legacy_command_path_used": False,
@@ -1156,18 +1209,72 @@ def _hot_stream_events(payload: dict[str, Any]) -> Iterable[str]:
     try:
         for event in events:
             RequestDeadline.current().check()
-            public_event = dict(event)
+            public_event = {key: value for key, value in event.items()
+                            if key not in {"raw_response_text", "raw_model_result"}}
+            if event.get("event") == "error":
+                # Error diagnostics can contain rejected author text at any depth.
+                # Publish typed correlation/status indicators, never diagnostic payloads.
+                public_event = {key: event[key] for key in (
+                    "event", "trace_id", "request_id", "error_kind", "model_call_attempted",
+                    "model_call_succeeded", "model_call_used", "raw_output_present", "truncation",
+                ) if key in event}
+                public_event["error_message"] = "Final Brain did not publish a validated response."
+                public_event["response_text"] = ""
             if public_event.get("event") in {"done", "error"}:
-                result = dict(public_event.get("result", {}))
+                result = dict(event.get("result", {}))
                 response_text = str(public_event.get("response_text", result.get("response_text", ""))).strip()
                 result.setdefault("trace_id", str(public_event.get("trace_id", "")))
                 capture = _capture_canonical_turn_memory(result, payload, session_id, identity, text, response_text)
                 result.update(capture)
                 session_event = capture["session_event"]
-                for private_key in ("final_brain_input", "helper_raw_result", "final_brain_result", "main_model_attempts"):
+                for private_key in ("final_brain_input", "helper_raw_result", "final_brain_result", "main_model_attempts", "goalframe_understanding_attempts"):
                     result.pop(private_key, None)
                 result.update(_selected_registry_projection(result, registry_projection))
                 result["session_event"] = session_event
+                if event.get("event") == "error":
+                    public_keys = (
+                        "handled", "orchestration_path", "trace_id", "understanding_schema_version",
+                        "understanding", "selected_capabilities", "selected_provider_operation",
+                        "selection_source", "fallback_used", "fallback_reason", "capability_status",
+                        "operation_status", "missing_evidence", "degradation", "response_text",
+                        "permission_decision", "safety_validation", "identity", "evidence_bundle",
+                        "execution_plan", "trace", "project_tools_used", "capability_truth",
+                        "generation_completed", "delivery_completed", "response_execution_status",
+                        "pending_approvals", "approval_required_steps", "policy_denied_steps",
+                        "provider_unavailable_steps", "expected_capability_validation",
+                        "session_event", "learning_bundle", "selected_capability_id",
+                        "selected_capability_kind", "selected_tool_id", "selected_skill_id",
+                        "selected_agent_id", "selected_memory_tool_id", "selected_retrieval_tool_id",
+                    )
+                    result = {key: result[key] for key in public_keys if key in result}
+                if isinstance(result.get("trace"), dict):
+                    result["trace"] = {
+                        key: result["trace"][key] for key in (
+                            "trace_id", "request_id", "route", "stages", "selected_capabilities",
+                            "selected_providers", "policy_result", "evidence_status", "final_brain_status",
+                            "rollback_reason", "schema_version",
+                        ) if key in result["trace"]
+                    }
+                internal_result = event.get("result", {})
+                if "understanding_model_attempts" in internal_result:
+                    # Same existing stage metadata as sync; never publish raw diagnostics.
+                    public_attempts = []
+                    for attempt in internal_result["understanding_model_attempts"]:
+                        audit = {key: attempt[key] for key in (
+                            "attempt_index", "request_model_attempt", "model", "model_role", "timestamp",
+                            "response_received", "schema_valid", "validation_error", "retry_decision",
+                            "retry_reason", "diagnostic_only", "user_memory", "training_eligible",
+                        ) if key in attempt}
+                        if "validation_error" in audit:
+                            audit["validation_error"] = str(audit["validation_error"]).partition(":")[0]
+                        public_attempts.append(audit)
+                    result["understanding_model_attempts"] = public_attempts
+                    public_trace = dict(result.get("trace", {}))
+                    public_trace["understanding_model_attempts"] = public_attempts
+                    if "understanding_model_attempt_count" in internal_result:
+                        result["understanding_model_attempt_count"] = internal_result["understanding_model_attempt_count"]
+                        public_trace["understanding_model_attempt_count"] = internal_result["understanding_model_attempt_count"]
+                    result["trace"] = public_trace
                 public_event["result"] = result
                 public_event["session_event"] = session_event
             RequestDeadline.current().check()

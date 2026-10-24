@@ -7,7 +7,9 @@ def test_final_memory_map_ready_smoke() -> None:
     acceptance = build_final_memory_acceptance()
 
     assert acceptance["acceptance_ready"] is True
-    assert acceptance["project_fully_visible_in_memory"] is True
+    assert acceptance["project_fully_visible_in_memory"] is False
+    assert acceptance["inventory_coverage"] == "REGISTERED_NATIVE_SURFACES_ONLY"
+    assert acceptance["whole_organism_inventory_complete"] is False
     assert acceptance["dashboard_read_only"] is True
     assert acceptance["canonical_write_allowed"] is False
     assert acceptance["runtime_mutation_allowed"] is False

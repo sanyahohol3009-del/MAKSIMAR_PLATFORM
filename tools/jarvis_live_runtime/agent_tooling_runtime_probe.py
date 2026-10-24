@@ -1,8 +1,8 @@
-"""Compatibility import and CLI forwarding to the existing Core probe owner."""
+"""Compatibility import and CLI forwarding to the existing server probe composition owner."""
 from __future__ import annotations
 
 import sys
-from MAKSIMAR_CORE_LIB.action_library_adapters import agent_tooling_runtime_probe as _canonical
+from MAKSIMAR_SERVER.AI_ORCHESTRATION import jarvis_live_read_models as _canonical
 
 if __name__ == "__main__":
     raise SystemExit(_canonical.main())

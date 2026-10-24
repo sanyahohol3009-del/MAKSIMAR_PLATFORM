@@ -58,6 +58,7 @@ class ChatMemorySyncDecision:
             raise ValueError("chat memory runtime accepts only chat_memory envelopes")
         if self.cursor.memory_domain != "chat_memory":
             raise ValueError("chat memory runtime requires chat_memory cursor")
+        self.session.validate_reference_binding(self.envelope, self.cursor)
         if self.envelope.policy_ref != self.policy.policy_ref:
             raise ValueError("envelope policy_ref must match runtime policy")
         if self.session.policy.policy_ref != self.policy.policy_ref:

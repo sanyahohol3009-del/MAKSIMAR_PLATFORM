@@ -1,4 +1,5 @@
 from __future__ import annotations
+from tests.ai_orchestration.test_model_admission_transport import acquisition
 
 import json
 import inspect
@@ -3197,10 +3198,33 @@ def test_family_profiles_receive_the_same_semantic_registry_brain():
 
 
 def test_hot_negotiates_streaming_without_a_second_endpoint(monkeypatch):
-    monkeypatch.setattr(api_server, "_hot_stream_lines", lambda payload: iter((json.dumps({"event": "accepted"}) + "\n",)))
-    response = api_server.jarvis_live_hot({"text": "hello", "stream": True})
+    import asyncio
+    from starlette.requests import ClientDisconnect
+
+    deadlines = []
+    def stream_lines(payload, request_deadline):
+        deadlines.append(request_deadline)
+        return iter((json.dumps({"event": "accepted"}) + "\n",))
+    monkeypatch.setattr(api_server, "_hot_stream_lines", stream_lines)
+    deadline, other_request = RequestDeadline(10), RequestDeadline(10)
+    with deadline.bind():
+        response = api_server.jarvis_live_hot({"text": "hello", "stream": True})
     assert response.media_type == "application/x-ndjson"
     assert api_server._payload_stream_requested({"response_mode": "stream"}) is True
+    assert deadlines == [deadline] and response._request_deadline is deadline
+    assert not deadline.cancelled
+
+    async def receive():
+        pytest.fail("ASGI 2.4 response must not poll a separate disconnect task")
+    async def send(message):
+        if message.get("body"):
+            raise OSError("synthetic stream disconnect")
+    scope = {"type": "http", "asgi": {"spec_version": "2.4"}}
+    with pytest.raises(ClientDisconnect):
+        asyncio.run(response(scope, receive, send))
+    assert deadline.cancelled and deadlines[0].cancelled
+    assert not other_request.cancelled
+    assert RequestDeadline.current() is None
 
 
 def test_canonical_hot_writer_treats_broken_pipe_as_disconnect(monkeypatch):
@@ -3213,7 +3237,8 @@ def test_canonical_hot_writer_treats_broken_pipe_as_disconnect(monkeypatch):
     assert calls == ["one\n"]
 
 
-def test_transport_streams_visible_chunks_and_suppresses_thinking(monkeypatch):
+def test_transport_streams_visible_chunks_and_suppresses_thinking(monkeypatch, acquisition):
+    monkeypatch.setattr(transport, "_measured_final_brain_prompt_budget", lambda *a, **k: {"within_budget": True})
     captured = {}
     class Response:
         def __enter__(self): return self
@@ -3221,9 +3246,9 @@ def test_transport_streams_visible_chunks_and_suppresses_thinking(monkeypatch):
         def raise_for_status(self): return None
         def iter_lines(self):
             return iter((
-                json.dumps({"model": "jarvis:chat8b", "message": {"thinking": "private", "content": "Готов"}}),
+                json.dumps({"model": acquisition['profile'].model_id, "message": {"thinking": "private", "content": "Готов"}}),
                 json.dumps({
-                    "model": "jarvis:chat8b", "message": {"content": "о."},
+                    "model": acquisition['profile'].model_id, "message": {"content": "о."},
                     "done": True, "done_reason": "stop",
                 }),
             ))

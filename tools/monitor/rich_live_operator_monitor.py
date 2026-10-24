@@ -19,9 +19,7 @@ from rich.text import Text
 from rich.tree import Tree
 
 
-PROJECT_ROOT = Path.home() / "MAKSIMAR_PLATFORM"
-RUNTIME_STATE_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "RUNTIME" / "state"
-LOGS_DIR = PROJECT_ROOT / "MAKSIMAR_SERVER" / "logs"
+from CORE_ROOT.runtime_paths import ROOT as PROJECT_ROOT, RUNTIME_STATE_DIR, LOGS_DIR
 DOCS_DIR = PROJECT_ROOT / "docs"
 CONCURRENCY_DOCS_DIR = DOCS_DIR / "concurrency_governance"
 CODE_DRAFT_PATH = (
@@ -50,14 +48,9 @@ def _read_text_if_exists(path: Path) -> str:
 
 
 def _tail_lines(path: Path, max_lines: int = 4) -> list[str]:
-    """Read tail lines from a log file if it exists."""
-    if not path.exists():
-        return []
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-        return lines[-max_lines:]
-    except OSError:
-        return []
+    """Reuse the existing bounded OOB log-tail reader."""
+    from tools.monitor.oob_foundation_monitor import tail_log
+    return tail_log(path, max_lines)
 
 
 def _run_shell_lines(command: list[str]) -> list[str]:
@@ -117,9 +110,9 @@ def _build_system_overview_table() -> Table:
 
     load1, load5, load15 = _get_load_triplet()
     metrics = [
-        ("CPU Budget", "bounded", _build_bar(72)),
-        ("Memory Budget", "bounded", _build_bar(61)),
-        ("Pressure", "nominal", _build_bar(24)),
+        ("CPU Budget", "UNMEASURED", ""),
+        ("Memory Budget", "UNMEASURED", ""),
+        ("Pressure", "UNMEASURED", ""),
         ("Load 1m", load1, ""),
         ("Load 5m", load5, ""),
         ("Load 15m", load15, ""),
@@ -200,15 +193,19 @@ def _build_worker_table() -> Table:
         for index, line in enumerate(workers, start=1):
             table.add_row(
                 f"gw{index - 1}",
-                "[green]PROCESSING[/green]",
-                str(index * 3),
-                f"{20 + index * 3:.2f}",
+                "PROCESS_PRESENT",
+                "unknown",
+                "unknown",
                 line[:42],
             )
         return table
 
-    table.add_row("core", "ACTIVE", "n/a", "n/a", "no pytest workers detected")
-    table.add_row("guard", "ACTIVE", "n/a", "n/a", "read-only monitor mode")
+    from SUPERVISOR.runtime_preflight import inspect_runtime_state
+    observation = inspect_runtime_state()
+    decision = observation["decision"]
+    guard = observation["heartbeats"]["guard"]
+    table.add_row("core", str(decision["classification"]), "n/a", "n/a", f"healthy={decision['healthy']}")
+    table.add_row("guard", str(guard.get("status", "unknown")), "n/a", "n/a", f"fresh={guard.get('fresh', False)}")
     return table
 
 
@@ -257,7 +254,7 @@ def _build_code_panel() -> Panel:
 def _build_header_panel() -> Panel:
     """Build top header/status panel."""
     header_text = Group(
-        Align.left(Text("MAKSIMAR OPERATOR INTERFACE [ACTIVE]", style="bold cyan")),
+        Align.left(Text("MAKSIMAR OPERATOR INTERFACE [READ ONLY]", style="bold cyan")),
         Text(f"Project: {PROJECT_ROOT.name}", style="white"),
         Text(f"Wall clock: {time.strftime('%Y-%m-%d %H:%M:%S')}", style="white"),
         Text(

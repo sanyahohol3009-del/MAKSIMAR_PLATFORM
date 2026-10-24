@@ -3,7 +3,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from MAKSIMAR_SERVER.WORKERS.sandboxed_action_worker_runtime import SandboxedActionWorkerDecision
+from typing import Protocol
+
+
+class SandboxedActionWorkerDecision(Protocol):
+    decision_id: str
+    capability_id: str
+    action_name: str
+    accepted: bool
+    would_execute: bool
+    executed: bool
+    denial_reason: str
+
+    def to_read_model(self) -> dict:
+        ...
 
 
 @dataclass(frozen=True, slots=True)

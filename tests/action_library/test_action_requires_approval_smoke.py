@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from MAKSIMAR_CORE_LIB.action_library_adapters.computer_use_worker_contract import (
-    build_action_request_from_intent,
+    resolve_computer_use_action_request,
 )
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import PlanStep
 from MAKSIMAR_SERVER.WORKERS.sandboxed_action_worker_runtime import run_sandboxed_action_worker
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
+from MAKSIMAR_CORE_LIB.security_layer.owner_identity_claim import OwnerIdentityClaim
 
 
 def test_action_requires_approval_smoke() -> None:
-    request = build_action_request_from_intent(
-        "git push origin main",
+    request = resolve_computer_use_action_request(
+        PlanStep("step", "goal", "pc.control", "mutating_shell_request", ("execution_receipt",), "MUTATE", "repository", "REVERSIBLE", True, "DANGEROUS"),
+        target="origin/main",
         input_channel="text",
         owner_identity_claim=OwnerIdentityClaim(
             claim_id="action_approval_owner_v1",

@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.system_status_panel_payload_builder import (  # noqa: E402
+from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import (  # noqa: E402
     build_system_status_panel_payload,
 )
 

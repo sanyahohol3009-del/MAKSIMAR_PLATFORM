@@ -3,14 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_live_historical_state_split_view import (
-    build_foundation_live_historical_state_split_view,
-)
 from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_view import (
     build_foundation_truth_consistency_view,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_unified_dashboard_view import (
-    build_foundation_unified_dashboard_view,
 )
 
 TopologyPanelState = Literal[
@@ -181,34 +175,33 @@ class TopologyPanelContentContract:
 
 
 def _derive_topology_panel_state(
-    total_entries: int,
-    broken_nodes: int,
-    dead_nodes: int,
-    degraded_nodes: int,
-    truth_mismatch_nodes: int,
-    historical_only_nodes: int,
-    warming_up_nodes: int,
+    total_entries: int, broken_nodes: int, dead_nodes: int, degraded_nodes: int,
+    truth_mismatch_nodes: int, historical_only_nodes: int, warming_up_nodes: int,
+    *, unknown_nodes: int = 0, partial_nodes: int = 0,
+    alive_nodes: int = 0, consistent_nodes: int = 0,
 ) -> TopologyPanelState:
-    if total_entries == 0:
-        return "empty"
-    if warming_up_nodes > 0:
-        return "loading"
     if broken_nodes > 0 or dead_nodes > 0:
         return "incident"
+    if total_entries == 0:
+        return "empty"
     if truth_mismatch_nodes > 0:
         return "stale"
-    if degraded_nodes > 0 or historical_only_nodes > 0:
+    if (total_entries != 4 or unknown_nodes > 0 or partial_nodes > 0
+            or degraded_nodes > 0 or historical_only_nodes > 0):
         return "degraded"
-    return "normal"
+    if warming_up_nodes > 0:
+        return "loading"
+    return "normal" if alive_nodes == total_entries == consistent_nodes else "degraded"
 
 
-def build_topology_panel_content_contract() -> TopologyPanelContentContract:
+def build_topology_panel_content_contract(observation: dict | None = None) -> TopologyPanelContentContract:
     """Build canonical content contract for the topology panel."""
-    unified_dashboard_view = build_foundation_unified_dashboard_view()
-    live_historical_view = build_foundation_live_historical_state_split_view()
-    truth_consistency_view = build_foundation_truth_consistency_view()
+    truth_consistency_view = build_foundation_truth_consistency_view(observation=observation)
+    statuses = [item.derived_status for item in truth_consistency_view.entries]
+    historical = (4 if isinstance(observation, dict) and observation.get("historical_only") is True else 0)
+    current_visible = sum(value != "UNKNOWN" for value in statuses) if not historical else 0
 
-    scopes = tuple(panel.truth_scope for panel in unified_dashboard_view.panels)
+    scopes = tuple(item.truth_scope for item in truth_consistency_view.entries)
     runtime_nodes = sum(1 for scope in scopes if scope == "runtime")
     guard_nodes = sum(1 for scope in scopes if scope == "guard")
     core_guard_nodes = sum(1 for scope in scopes if scope == "core_guard")
@@ -221,12 +214,16 @@ def build_topology_panel_content_contract() -> TopologyPanelContentContract:
         panel_id="topology",
         panel_state=_derive_topology_panel_state(
             total_entries=total_topology_entries,
-            broken_nodes=unified_dashboard_view.broken_panels,
-            dead_nodes=unified_dashboard_view.dead_panels,
-            degraded_nodes=unified_dashboard_view.degraded_panels,
+            broken_nodes=statuses.count("BROKEN"),
+            dead_nodes=statuses.count("DEAD"),
+            degraded_nodes=statuses.count("DEGRADED"),
             truth_mismatch_nodes=truth_consistency_view.mismatch_entries,
-            historical_only_nodes=live_historical_view.historical_only_entries,
-            warming_up_nodes=unified_dashboard_view.warming_up_panels,
+            historical_only_nodes=historical,
+            warming_up_nodes=statuses.count("WARMING_UP"),
+            unknown_nodes=statuses.count("UNKNOWN"),
+            partial_nodes=truth_consistency_view.partial_entries,
+            alive_nodes=statuses.count("ALIVE"),
+            consistent_nodes=truth_consistency_view.consistent_entries,
         ),
         total_topology_entries=total_topology_entries,
         runtime_nodes=runtime_nodes,
@@ -234,23 +231,23 @@ def build_topology_panel_content_contract() -> TopologyPanelContentContract:
         core_guard_nodes=core_guard_nodes,
         kernel_guard_nodes=kernel_guard_nodes,
         topology_relationships=topology_relationships,
-        alive_nodes=unified_dashboard_view.alive_panels,
-        degraded_nodes=unified_dashboard_view.degraded_panels,
-        broken_nodes=unified_dashboard_view.broken_panels,
-        dead_nodes=unified_dashboard_view.dead_panels,
+        alive_nodes=statuses.count("ALIVE"),
+        degraded_nodes=statuses.count("DEGRADED"),
+        broken_nodes=statuses.count("BROKEN"),
+        dead_nodes=statuses.count("DEAD"),
         truth_consistent_nodes=truth_consistency_view.consistent_entries,
         truth_partial_nodes=truth_consistency_view.partial_entries,
         truth_mismatch_nodes=truth_consistency_view.mismatch_entries,
-        historical_only_nodes=live_historical_view.historical_only_entries,
-        current_live_visible_nodes=live_historical_view.current_live_visible_entries,
-        startup_order_valid=unified_dashboard_view.startup_order_valid,
+        historical_only_nodes=historical,
+        current_live_visible_nodes=current_visible,
+        startup_order_valid=scopes == EXPECTED_TOPOLOGY_SCOPES,
         visible_in_main_dashboard=True,
         visible_in_oob_dashboard=True,
         read_only=True,
         operator_visible=True,
         description=(
             "Canonical topology panel content contract derived from "
-            "foundation unified dashboard view, foundation live/historical split view, "
+            "one canonical observation and "
             "and foundation truth consistency view."
         ),
     )

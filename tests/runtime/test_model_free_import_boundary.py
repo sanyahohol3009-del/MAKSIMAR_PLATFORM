@@ -9,7 +9,7 @@ import subprocess
 from types import SimpleNamespace
 import pytest
 from CORE_ROOT import run_context
-from MAKSIMAR_CORE_LIB.action_library_adapters import agent_tooling_runtime_probe as probe
+from MAKSIMAR_SERVER.AI_ORCHESTRATION import jarvis_live_read_models as probe
 from MAKSIMAR_CORE_LIB.action_library_adapters import external_tool_library_adapter as consumer
 
 

@@ -56,3 +56,13 @@ def test_system_status_panel_payload_builder_exposes_visibility_semantics() -> N
     assert visibility["visible_in_oob_dashboard"] is True
     assert visibility["read_only"] is True
     assert visibility["operator_visible"] is True
+
+
+def test_system_status_pure_payload_without_observation_cannot_claim_normal(monkeypatch):
+    from MAKSIMAR_CORE_LIB.oob_dashboard import foundation_live_status_adapter as legacy
+    def forbidden(*args, **kwargs):
+        raise AssertionError("pure payload must not collect physical status")
+    monkeypatch.setattr(legacy, "_run_status_command", forbidden)
+    payload = build_system_status_panel_payload(observation={})
+    assert payload["panel_state"] == "degraded"
+    assert payload["visibility"]["read_only"] is True

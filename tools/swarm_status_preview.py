@@ -7,14 +7,20 @@ from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_observability_runtime impo
     build_swarm_observability_read_model,
 )
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_task_router import route_swarm_task
-from tools.jarvis_live_runtime.owner_identity_claim import build_owner_identity_claim_for_terminal
+from MAKSIMAR_CORE_LIB.swarm_coordination import SwarmTaskContract
 
 
 def build_swarm_status_preview() -> dict[str, object]:
     route = route_swarm_task(
-        "Джарвис, pytest упал, проверь ошибку",
-        input_channel="text",
-        owner_identity_claim=build_owner_identity_claim_for_terminal(),
+        SwarmTaskContract(
+            task_id="swarm_status_preview", user_text="typed task from Semantic Spine", input_channel="text",
+            normalized_intent="code_debug", selected_model_role_id="coder_model",
+            selected_model_id="jarvis:coder7b", selected_tools=("pytest_report_read",),
+            candidate_agent_roles=("project_coder_agent",), task_complexity="medium",
+            heavy_model_requested=False, risk_gate_required=False,
+            safe_direct_action_candidate=False, read_only_discovery_only=True,
+            owner_identity_source="local_terminal_session", direct_execution_requested=False,
+        ),
     )
     conflict_report = detect_swarm_conflicts((route,))
     return build_swarm_observability_read_model(route, conflict_report)

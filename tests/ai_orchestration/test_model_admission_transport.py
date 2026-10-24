@@ -31,6 +31,8 @@ def acquisition(monkeypatch, tmp_path):
     monkeypatch.setattr(runtime_paths, "DEGRADED_MODE_FILE", tmp_path / "degraded")
     state = {"profile": profile, "configured": configured, "runtime": runtime,
              "posts": [], "gets": [], "streams": [], "observations": [], "next_observation": None, "real_observe": transport._observe_model_resources}
+    state["real_identity"] = transport._observe_provider_process_identity
+    monkeypatch.setattr(transport, "_observe_provider_process_identity", lambda: {"status":"UNKNOWN", "reason":"offline_unbound_provider_fixture"})
     def observe(selected):
         state["observations"].append(selected.model_id)
         return state["next_observation"] or ModelResourceObservation(time.monotonic(), selected.backend_id,
@@ -508,10 +510,26 @@ def test_r4a_resolved_nonretention_never_grants_admission(acquisition, monkeypat
 def test_r4c_host_constraints_reach_existing_transport_without_addition(acquisition,monkeypatch,host_free,commit_free,expected):
     from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
     from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter_models import DetectedGpuSnapshot
-    files={'/proc/meminfo':'MemAvailable: 33554432 kB\n','/proc/self/cgroup':'0::/\n',
-        '/sys/fs/cgroup/memory.max':'max','/sys/fs/cgroup/memory.current':'0',
+    files={'/proc/meminfo':'MemAvailable: 33554432 kB\n','/proc/self/cgroup':'0::/fixture\n',
+        '/sys/fs/cgroup/fixture/memory.max':'max','/sys/fs/cgroup/fixture/memory.current':'0',
         '/proc/sys/kernel/osrelease':'fixture-microsoft-WSL2'}
+    files['/proc/self/mountinfo']='120 111 0:23 / /sys/fs/cgroup rw - cgroup2 cgroup2 rw\n'
+    files['/sys/fs/cgroup/cgroup.controllers']='cpu memory pids'
+    monkeypatch.setattr(hardware.os,'readlink',lambda path:{'/proc/self/ns/cgroup':'cgroup:[100]',
+        '/proc/self/ns/mnt':'mnt:[200]'}[path])
+    monkeypatch.setattr(hardware,'_cgroup_interface_state',lambda path:'PRESENT' if path in files else 'ABSENT')
     monkeypatch.setattr(hardware,'_read_text_file',lambda path:files.get(path,''))
+    # Proven provider identity is independent of ownership; read its own view.
+    for key,value in list(files.items()):
+        if key.startswith('/sys/'):
+            files['/proc/881/root'+key]=value
+    files['/proc/881/cgroup']=files['/proc/self/cgroup']
+    files['/proc/881/mountinfo']=files['/proc/self/mountinfo']
+    monkeypatch.setattr(hardware.os,'readlink',lambda path:{'/proc/self/ns/cgroup':'cgroup:[100]',
+        '/proc/881/ns/cgroup':'cgroup:[100]','/proc/881/ns/mnt':'mnt:[201]'}[str(path)])
+    monkeypatch.setattr(hardware.os,'sched_getaffinity',lambda pid:{0,1,2,3})
+    monkeypatch.setattr(transport,'_observe_provider_process_identity',lambda:{'status':'PROVEN',
+        'provider_instance_id':'fixture-verified-provider','identity':{'pid':881},'management_authority':'NONE'})
     host={'schema_version':1,'source':'windows_parent_cim_v1','platform':'Win32NT',
         'total_physical_bytes':32*G,'available_physical_bytes':host_free,
         'commit_limit_bytes':64*G,'committed_bytes':64*G-commit_free}
@@ -531,11 +549,11 @@ def test_r4c_host_constraints_reach_existing_transport_without_addition(acquisit
     assert dict(observed.memory_available_bytes)['windows_parent_commit']==commit_free
     assert 'windows_parent_cim_v1' in observed.source
     # Hardware success never fabricates a provider instance, concurrency or lease.
-    assert observed.provider_instance_id=='' and not observed.ownership_verified and observed.active_concurrency is None
+    assert observed.provider_instance_id=='fixture-verified-provider' and not observed.ownership_verified and observed.active_concurrency is None
     from MAKSIMAR_CORE_LIB.execution_control.admission_contract import evaluate_model_admission
     unchanged=evaluate_model_admission(request_id='offline',profile=acquisition['profile'],observation=observed,
         requested_context=4096,policy_allowed=True,now_monotonic=time.monotonic(),locally_serialized=True)
-    assert not unchanged.admitted and unchanged.reason=='resource_scope_unproven'
+    assert not unchanged.admitted and unchanged.reason=='shared_provider_ownership_unknown'
     # Independent provider facts are synthetic fixtures, not claimed actual ownership.
     acquisition['next_observation']=replace(observed,provider_instance_id='fixture-provider',
         ownership_verified=True,ownership_source='fixture independent provider proof',active_concurrency=0)
@@ -552,3 +570,185 @@ def test_r4c_model_free_never_reaches_host_or_provider_probe(acquisition,monkeyp
     result=transport.ollama_post_json('/api/generate',acquisition['payload'])
     assert result['model_call_attempted'] is False
     assert not acquisition['observations'] and not acquisition['gets'] and not acquisition['posts']
+
+
+# R4-D: socket/executable/process identity and before/after scope binding.
+@pytest.fixture
+def provider_process_world(acquisition, monkeypatch, tmp_path):
+    import os
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    root=tmp_path/'proc'; proc=root/'881'
+    for path in [root/'sys/kernel/random', root/'self/ns', proc/'ns', proc/'fd']:
+        path.mkdir(parents=True,exist_ok=True)
+    executable=tmp_path/'bin/provider'; executable.parent.mkdir(); executable.write_text('harmless fixture')
+    (proc/'exe').symlink_to(executable)
+    (root/'sys/kernel/random/boot_id').write_text('11111111-2222-4333-8444-555555555555')
+    (proc/'stat').write_text('881 (fixture provider) S '+'0 '*18+'12345 '+'0 '*5)
+    (proc/'cgroup').write_text('0::/provider/worker\n')
+    (proc/'mountinfo').write_text('120 111 0:23 / /sys/fs/cgroup rw - cgroup2 cgroup2 rw\n')
+    (proc/'fd/3').symlink_to('socket:[900]')
+    for name,value in [('net','300'),('cgroup','100'),('mnt','201')]:
+        (proc/'ns'/name).symlink_to(name+':['+value+']')
+        if name!='mnt':(root/'self/ns'/name).symlink_to(name+':['+value+']')
+    state={'root':root,'proc':proc,'executable':executable,'listener':'LISTEN 0 128 127.0.0.1:11434 0.0.0.0:* users:(("fixture",pid=881,fd=3)) ino:900\n','commands':[]}
+    def read(path):
+        try:return __import__('pathlib').Path(path).read_text()
+        except OSError:return ''
+    def command(argv):
+        state['commands'].append(argv)
+        assert argv==['ss','-H','-ltnpe','sport = :11434']
+        return state['listener']
+    monkeypatch.setattr(hardware,'_read_text_file',read)
+    monkeypatch.setattr(hardware,'_run_command',command)
+    monkeypatch.setattr(hardware.shutil,'which',lambda name:str(executable) if name=='ollama' else None)
+    for name in ('HTTP_PROXY','HTTPS_PROXY','ALL_PROXY','http_proxy','https_proxy','all_proxy'):
+        monkeypatch.delenv(name,raising=False)
+    monkeypatch.setattr(transport,'OLLAMA_BASE_URL','http://127.0.0.1:11434')
+    state['identity']=lambda:acquisition['real_identity'](proc_root=root)
+    return state
+
+
+def test_r4d_unique_listener_socket_executable_boot_start_proven_without_authority(provider_process_world,acquisition):
+    w=provider_process_world;x=w['identity']()
+    assert x['status']=='PROVEN' and x['identity']['pid']==881
+    assert x['identity']['process_start_ticks']=='12345'
+    assert x['identity']['socket_inode']=='900'
+    assert x['identity']['cgroup_membership']=='0::/provider/worker'
+    assert x['identity']['namespaces']['mnt']=='mnt:[201]'
+    assert x['management_authority']=='NONE' and x['provider_instance_id'].startswith('linux_listener:')
+    assert not acquisition['posts'] and not acquisition['gets']
+
+
+@pytest.mark.parametrize('case',['two_pids','two_listeners','missing_pid','bad_inode','wrong_socket','wrong_executable',
+    'missing_stat','missing_mountinfo','missing_cgroup','bad_boot','bad_start','foreign_net_ns','foreign_cgroup_ns','missing_ns','proxy','port_zero'])
+def test_r4d_unknown_process_identity_never_promoted(provider_process_world,acquisition,monkeypatch,case):
+    w=provider_process_world;p=w['proc']
+    if case=='two_pids':w['listener']=w['listener'].replace('pid=881,fd=3','pid=881,fd=3),("other",pid=882,fd=4')
+    elif case=='two_listeners':w['listener']*=2
+    elif case=='missing_pid':w['listener']=w['listener'].replace('pid=881,fd=3','hidden')
+    elif case=='bad_inode':w['listener']=w['listener'].replace('ino:900','ino:901')
+    elif case=='wrong_socket':(p/'fd/3').unlink();(p/'fd/3').symlink_to('socket:[999]')
+    elif case=='wrong_executable':
+        other=p/'other';other.write_text('other');(p/'exe').unlink();(p/'exe').symlink_to(other)
+    elif case.startswith('missing_') and case!='missing_pid':
+        target=p/({'missing_stat':'stat','missing_mountinfo':'mountinfo','missing_cgroup':'cgroup','missing_ns':'ns/net'}[case]);target.unlink()
+    elif case=='bad_boot':(w['root']/'sys/kernel/random/boot_id').write_text('not-boot-id')
+    elif case=='bad_start':(p/'stat').write_text('bad')
+    elif case.startswith('foreign_'):
+        name='net' if case=='foreign_net_ns' else 'cgroup';(p/'ns'/name).unlink();(p/'ns'/name).symlink_to(name+':[999]')
+    elif case=='proxy':monkeypatch.setenv('HTTP_PROXY','http://fixture.invalid')
+    elif case=='port_zero':monkeypatch.setattr(transport,'OLLAMA_BASE_URL','http://127.0.0.1:0')
+    x=w['identity']();assert x['status']=='UNKNOWN' and not x.get('provider_instance_id')
+    assert not acquisition['posts']
+
+
+@pytest.mark.parametrize('case',['pid_reuse','boot_change','process_disappears','mount_change','cgroup_move'])
+def test_r4d_identity_rechecked_after_resources_rejects_restart(provider_process_world,acquisition,monkeypatch,case):
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    w=provider_process_world;calls=[]
+    def identity():
+        calls.append('identity')
+        if len(calls)==2:
+            if case=='pid_reuse':(w['proc']/'stat').write_text('881 (replacement) S '+'0 '*18+'99999 '+'0 '*5)
+            elif case=='boot_change':(w['root']/'sys/kernel/random/boot_id').write_text('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee')
+            elif case=='process_disappears':(w['proc']/'stat').unlink()
+            elif case=='mount_change':(w['proc']/'mountinfo').write_text('changed mount metadata')
+            else:(w['proc']/'cgroup').write_text('0::/different')
+        return w['identity']()
+    seen=[]
+    def resources(*,provider_pid):
+        seen.append(provider_pid)
+        return {'observed_monotonic':time.monotonic(),'scope_id':'provider_process:881','scope_complete':True,
+            'memory_available_bytes':(('execution_environment',32*G),('provider_cgroup:/provider',16*G)),
+            'accelerator_available_bytes':(('fixture-gpu',80*G),),'cpu_threads':8,'physical_identity_verified':True,'source':'fixture provider scope'}
+    monkeypatch.setattr(transport,'_observe_provider_process_identity',identity)
+    monkeypatch.setattr(hardware,'detect_model_resource_observation',resources)
+    result=acquisition['real_observe'](acquisition['profile'])
+    assert seen==[881] and len(calls)==2
+    assert not result.complete and not result.scope_confirmed and result.provider_instance_id==''
+    assert not result.ownership_verified and result.active_concurrency is None and not acquisition['posts']
+
+
+def test_r4d_bound_resources_do_not_grant_management_or_admission(provider_process_world,acquisition,monkeypatch):
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    w=provider_process_world;seen=[]
+    def resources(*,provider_pid):
+        seen.append(provider_pid)
+        return {'observed_monotonic':time.monotonic(),'scope_id':'provider_process:881','scope_complete':True,
+            'memory_available_bytes':(('execution_environment',32*G),('provider_cgroup:/provider',16*G)),
+            'accelerator_available_bytes':(('fixture-gpu',80*G),),'cpu_threads':8,'physical_identity_verified':True,'source':'fixture provider scope'}
+    monkeypatch.setattr(transport,'_observe_provider_process_identity',w['identity'])
+    monkeypatch.setattr(hardware,'detect_model_resource_observation',resources)
+    x=acquisition['real_observe'](acquisition['profile'])
+    assert x.complete and x.scope_confirmed and x.provider_instance_id and seen==[881]
+    assert x.memory_available_bytes[1]==('provider_cgroup:/provider',16*G)
+    assert not x.ownership_verified and x.ownership_source=='' and x.active_concurrency is None
+    from MAKSIMAR_CORE_LIB.execution_control.admission_contract import evaluate_model_admission
+    decision=evaluate_model_admission(request_id='offline',profile=acquisition['profile'],observation=x,
+        requested_context=4096,policy_allowed=True,now_monotonic=time.monotonic(),locally_serialized=True)
+    assert not decision.admitted and decision.reason=='shared_provider_ownership_unknown'
+    assert not acquisition['posts']
+
+
+def test_r4d_unknown_listener_never_uses_client_resources(acquisition,monkeypatch):
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    monkeypatch.setattr(hardware,'detect_model_resource_observation',lambda **kw:pytest.fail('unbound client resources used'))
+    x=acquisition['real_observe'](acquisition['profile'])
+    assert not x.complete and not x.scope_confirmed and x.provider_instance_id==''
+    assert x.memory_available_bytes==() and x.cpu_threads==0 and not acquisition['posts']
+
+
+def test_r4d_unreadable_provider_proc_stays_unknown(provider_process_world,monkeypatch):
+    from pathlib import Path
+    w=provider_process_world;real_stat=Path.stat
+    def stat(path,*args,**kwargs):
+        if str(path)==str(w['proc']/'exe'):raise PermissionError('fixture denied')
+        return real_stat(path,*args,**kwargs)
+    monkeypatch.setattr(Path,'stat',stat)
+    assert w['identity']()['status']=='UNKNOWN'
+
+
+def test_r4d_process_fd_disappears_during_identity_read(provider_process_world,monkeypatch):
+    w=provider_process_world;real_readlink=transport.os.readlink;calls=[]
+    def readlink(path,*args,**kwargs):
+        if str(path)==str(w['proc']/'fd/3'):
+            calls.append(path)
+            if len(calls)>1:raise FileNotFoundError('fixture exited')
+        return real_readlink(path,*args,**kwargs)
+    monkeypatch.setattr(transport.os,'readlink',readlink)
+    assert w['identity']()['status']=='UNKNOWN' and len(calls)==2
+@pytest.mark.parametrize("identity", ({"status": "UNKNOWN"}, {"status": "PROVEN", "identity": {"pid": 0}},
+    {"status": "PROVEN", "identity": {"pid": True}}))
+def test_observability_hardware_port_rejects_unproven_provider(monkeypatch, identity):
+    from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live import jarvis_live_observability_read_model as obs
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    monkeypatch.setattr(hardware, "detect_model_resource_observation", lambda **kwargs: pytest.fail("unproven provider probe"))
+    with pytest.raises(ValueError):
+        obs.observe_model_provider_hardware(identity, check_request=lambda: None)
+
+
+def test_observability_ports_preserve_shared_request_check_and_physical_owner(monkeypatch):
+    from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live import jarvis_live_observability_read_model as obs
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime import hardware_detection_adapter as hardware
+    calls = []
+    check = lambda: calls.append("check")
+    def identity(endpoint, *, check_request, proc_root):
+        assert endpoint == "http://127.0.0.1:11434" and check_request is check and proc_root == "fixture-proc"
+        return {"status": "UNKNOWN"}
+    monkeypatch.setattr(hardware, "observe_provider_process_identity", identity)
+    assert obs.observe_model_provider_identity("http://127.0.0.1:11434", check_request=check,
+        proc_root="fixture-proc")["status"] == "UNKNOWN"
+    observed = {"physical_identity_verified": False}
+    def collect(*, provider_pid):
+        assert provider_pid == 123
+        calls.append("physical")
+        return observed
+    monkeypatch.setattr(hardware, "detect_model_resource_observation", collect)
+    assert obs.observe_model_provider_hardware({"status": "PROVEN", "identity": {"pid": 123}},
+        check_request=check) is observed
+    assert calls == ["check", "physical", "check"]
+    def cancelled():
+        raise TimeoutError("shared deadline cancelled")
+    with pytest.raises(TimeoutError, match="shared deadline cancelled"):
+        obs.observe_model_provider_hardware({"status": "PROVEN", "identity": {"pid": 123}}, check_request=cancelled)
+    assert calls == ["check", "physical", "check"]

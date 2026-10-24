@@ -54,9 +54,9 @@ _SCOPE_TO_TITLE = {
 }
 
 
-def build_foundation_truth_consistency_view() -> FoundationTruthConsistencyView:
+def build_foundation_truth_consistency_view(observation: dict | None = None) -> FoundationTruthConsistencyView:
     """Build read-only dashboard view from foundation truth consistency contract."""
-    contract = build_foundation_truth_consistency_contract()
+    contract = build_foundation_truth_consistency_contract(observation=observation)
 
     entries = tuple(
         FoundationTruthConsistencyViewEntry(

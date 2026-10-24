@@ -2676,10 +2676,10 @@ def _model_admission_policy() -> dict | None:
     try:
         from CORE_ROOT.run_context import model_free_startup
         from CORE_ROOT.runtime_paths import DEGRADED_MODE_FILE
-        from SUPERVISOR.runtime_preflight import inspect_runtime_state
+        from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import observe_runtime_preflight
         if model_free_startup() or DEGRADED_MODE_FILE.exists():
             return None
-        observation = inspect_runtime_state()
+        observation = observe_runtime_preflight()
         metadata = observation.get("run_metadata", {})
         if (observation.get("decision", {}).get("healthy") is True
                 and metadata.get("status") == "running"):
@@ -2689,30 +2689,43 @@ def _model_admission_policy() -> dict | None:
         return None
 
 
+def _observe_provider_process_identity(*, proc_root=None):
+    """Read the endpoint-bound process observation through runtime observability."""
+    from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import observe_model_provider_identity
+    return observe_model_provider_identity(OLLAMA_BASE_URL, check_request=_check_request, proc_root=proc_root)
+
+
 def _observe_model_resources(profile):
-    """Current host/provider facts, never an invented shared-client lease."""
-    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter import detect_model_resource_observation
+    """Bind resources to the verified provider process, not the client cgroup."""
+    from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import observe_model_provider_hardware
     from MAKSIMAR_CORE_LIB.execution_control.admission_models import ModelResourceObservation
-    from urllib.parse import urlsplit
-    hardware = detect_model_resource_observation()
+    before = _observe_provider_process_identity()
+    proven = before.get("status") == "PROVEN"
+    hardware = (observe_model_provider_hardware(before, check_request=_check_request) if proven else
+                {"observed_monotonic": time.monotonic(), "scope_id": "", "scope_complete": False,
+                 "memory_available_bytes": (), "accelerator_available_bytes": (), "cpu_threads": 0,
+                 "physical_identity_verified": False, "source": __name__ + ";provider_resources_UNKNOWN"})
     ps = ollama_get_json("/api/ps")
     tags = ollama_get_json("/api/tags")
+    after = _observe_provider_process_identity() if proven else before
+    stable = proven and after == before
     available = ps.get("ok", True) is not False and tags.get("ok", True) is not False and isinstance(ps.get("models"), list) and isinstance(tags.get("models"), list)
     revision = next((str(m.get("digest", "")) for m in tags.get("models", ())
                      if isinstance(m, dict) and m.get("name", m.get("model")) == profile.model_id), "")
     residents = tuple((str(m.get("name", m.get("model", ""))), str(m.get("digest", "")))
                       for m in ps.get("models", ()) if isinstance(m, dict))
-    local = urlsplit(OLLAMA_BASE_URL).hostname in {"localhost", "127.0.0.1", "::1"}
+    _check_request()
     return ModelResourceObservation(
         observed_monotonic=hardware["observed_monotonic"], backend_id=profile.backend_id,
-        scope_id=hardware["scope_id"], provider_instance_id="", provider_available=available,
+        scope_id=hardware["scope_id"], provider_instance_id=before["provider_instance_id"] if stable else "", provider_available=available,
         model_revision=revision, memory_available_bytes=hardware["memory_available_bytes"],
         accelerator_available_bytes=hardware["accelerator_available_bytes"],
         cpu_threads=hardware["cpu_threads"], physical_identity_verified=hardware["physical_identity_verified"],
-        scope_confirmed=local and hardware["scope_complete"],
+        scope_confirmed=stable and hardware["scope_complete"],
         ownership_verified=False, ownership_source="", active_concurrency=None,
-        resident_models=residents, complete=hardware["scope_complete"],
-        source=hardware["source"] + ";ollama_metadata_non_atomic")
+        resident_models=residents, complete=stable and hardware["scope_complete"],
+        source=hardware["source"] + ";ollama_metadata_non_atomic;provider_binding="
+               + json.dumps({"before": before, "after": after, "stable": stable}, sort_keys=True, separators=(",", ":")))
 
 
 from contextlib import contextmanager

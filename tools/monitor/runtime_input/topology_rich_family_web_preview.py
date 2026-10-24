@@ -10,6 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import observe_foundation_consistency
 from MAKSIMAR_CORE_LIB.oob_dashboard.dashboard_execution_shell_contract import (  # noqa: E402
     build_dashboard_execution_panels_shell_contract,
 )
@@ -29,7 +30,7 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.topology_panel_content_contract import (  #
 
 def main() -> None:
     payload = {
-        "topology_panel_content_contract": build_topology_panel_content_contract().total_entries,
+        "topology_panel_content_contract": build_topology_panel_content_contract(observation=observe_foundation_consistency()).total_entries,
         "node_topology_panel_contract": build_node_topology_panel_contract().total_entries,
         "data_flow_panel_contract": build_data_flow_panel_contract().total_entries,
         "dependency_map_panel_contract": build_dependency_map_panel_contract().total_entries,

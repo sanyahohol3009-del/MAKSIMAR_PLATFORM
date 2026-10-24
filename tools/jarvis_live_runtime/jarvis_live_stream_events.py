@@ -1,42 +1,13 @@
 from __future__ import annotations
 
-import json
 import os
 from typing import Any, Iterator
 
-from MAKSIMAR_CORE_LIB.ai_orchestration.model_profile_registry_contract import (
-    build_jarvis_live_runtime_model_role_read_model,
-    select_jarvis_live_model_role,
-)
-from tools.jarvis_live_runtime.jarvis_live_request_planner import _route_mode
-from tools.jarvis_live_runtime.memory_context_builder import (
-    JarvisBrainContext,
-    RUNTIME_HISTORY_STORE,
-    build_jarvis_live_memory_federation_status,
-)
-from tools.jarvis_live_runtime.ollama_transport import (
-    BASE_HEAVY_CODER_MODEL_ID,
-    DEFAULT_OLLAMA_MODEL_ID,
-    FALLBACK_OLLAMA_MODEL_ID,
-    HEAVY_CODER_MODEL_ID,
-    timeout_policy_for_model_role,
-)
-from tools.jarvis_live_runtime.session_memory_store import (
-    DANGEROUS_MEMORY_FLAGS,
-    SESSION_STATE_PATH,
-    _memory_truth_contract,
-    _session_turn_log_path,
-)
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_brain_loop_server_adapter import write_stream_event_safely
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.ollama_transport import timeout_policy_for_model_role
 from tools.jarvis_live_runtime.voice_response_cleaner import strip_reasoning_blocks
 
 
-def write_stream_event_safely(write_callable: Any, event: dict[str, Any]) -> bool:
-    try:
-        write_callable(json.dumps(event, ensure_ascii=False) + "\n")
-    except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-        print("[WARNING] Client disconnected before receiving response")
-        return False
-    return True
 
 
 def _command_timeout_seconds(value: float | None, selected_model_role_id: str = "jarvis_chat_model") -> float:
@@ -51,70 +22,6 @@ def _command_timeout_seconds(value: float | None, selected_model_role_id: str = 
     except ValueError:
         return float(timeout_policy_for_model_role(selected_model_role_id)["total_request_timeout_seconds"])
     return max(1.0, parsed)
-
-
-def _command_error_payload(user_text: str, error_kind: str) -> dict[str, Any]:
-    selected = select_jarvis_live_model_role(user_text)
-    memory = build_jarvis_live_memory_federation_status()
-    return {
-        "event": "done",
-        "response_text": "JARVIS command runtime не успел вернуть модельный ответ. Запрос не выполнен как действие; можно повторить или проверить Ollama статус.",
-        "ollama_model_used": "",
-        "route_mode": _route_mode(user_text),
-        "stream_chunk_count": 0,
-        "retrieved_snippet_count": 0,
-        "retrieval_surfaces_used": (),
-        "memory_federation_available": memory["memory_federation_available"],
-        "mempalace_status": memory["mempalace_status"],
-        "selected_model_role": selected["selected_model_role"],
-        "selected_model_id": selected["model_id"],
-        "selected_model_status": selected["status"],
-        "admission_allowed": False,
-        "resource_gate_surface": "MAKSIMAR_CORE_LIB/execution_control/admission_contract.py",
-        "session_memory_path": str(SESSION_STATE_PATH),
-        "local_chat_memory_path": str(_session_turn_log_path()),
-        "runtime_history_store_path": str(RUNTIME_HISTORY_STORE),
-        "runtime_history_store_exists": RUNTIME_HISTORY_STORE.exists(),
-        "memory_truth_contract": _memory_truth_contract(),
-        "dangerous_mutation_flags": dict(DANGEROUS_MEMORY_FLAGS),
-        "error_kind": error_kind,
-        "canonical_memory_write_allowed": False,
-        "pc_control_allowed": False,
-    }
-
-
-def _candidate_model_ids_for_context(context: JarvisBrainContext) -> tuple[str, ...]:
-    selected_model_id = str(context.selected_model_role["model_id"])
-    role_id = context.selected_model_role["selected_model_role"]
-    candidates = [selected_model_id]
-    if context.route_mode == "FAST" and os.environ.get("JARVIS_LIVE_FAST_FALLBACK_ENABLED") != "1":
-        return tuple(candidates)
-    if role_id == "heavy_coder_model":
-        candidates.extend((HEAVY_CODER_MODEL_ID, BASE_HEAVY_CODER_MODEL_ID, FALLBACK_OLLAMA_MODEL_ID))
-    elif role_id == "daily_coder_model":
-        candidates.extend(("jarvis:coder7b", FALLBACK_OLLAMA_MODEL_ID))
-    elif role_id == "helper_classifier_model":
-        candidates.extend(("jarvis:helper3b", DEFAULT_OLLAMA_MODEL_ID))
-    else:
-        candidates.extend((DEFAULT_OLLAMA_MODEL_ID, FALLBACK_OLLAMA_MODEL_ID))
-    return tuple(dict.fromkeys(candidates))
-
-
-def _build_admission_status(selected_model_role: dict[str, Any]) -> dict[str, Any]:
-    role_id = str(selected_model_role["selected_model_role"])
-    exclusive_gpu_required = role_id == "heavy_coder_model"
-    return {
-        "admission_allowed": True,
-        "enqueue_required": True,
-        "queue_surface": "MAKSIMAR_CORE_LIB/execution_control",
-        "resource_gate_surface": "MAKSIMAR_CORE_LIB/execution_control/admission_contract.py",
-        "worker_registry_surface": "MAKSIMAR_CORE_LIB/workers_registry",
-        "exclusive_gpu_required": exclusive_gpu_required,
-        "concurrent_heavy_jobs_allowed": False,
-        "agents_enabled": False,
-        "agents_may_call_14b_directly": False,
-        "pc_control_allowed": False,
-    }
 
 
 def _sanitize_model_output(text: str) -> str:

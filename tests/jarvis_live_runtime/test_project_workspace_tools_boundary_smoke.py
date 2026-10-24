@@ -4,18 +4,18 @@ import inspect
 from pathlib import Path
 
 from tools.jarvis_live_runtime import jarvis_live_brain_loop
-from tools.jarvis_live_runtime import project_workspace_tools
+from MAKSIMAR_SERVER.AI_ORCHESTRATION import project_workspace_tools
 
 
 def test_brain_loop_uses_extracted_project_workspace_module() -> None:
     assert inspect.getmodule(jarvis_live_brain_loop.repo_git_status).__name__ == (
-        "tools.jarvis_live_runtime.project_workspace_tools"
+        "MAKSIMAR_SERVER.AI_ORCHESTRATION.project_workspace_tools"
     )
     assert inspect.getmodule(jarvis_live_brain_loop.repo_search).__name__ == (
-        "tools.jarvis_live_runtime.project_workspace_tools"
+        "MAKSIMAR_SERVER.AI_ORCHESTRATION.project_workspace_tools"
     )
     assert inspect.getmodule(jarvis_live_brain_loop._project_tree_summary).__name__ == (
-        "tools.jarvis_live_runtime.project_workspace_tools"
+        "MAKSIMAR_SERVER.AI_ORCHESTRATION.project_workspace_tools"
     )
 
 

@@ -3,14 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_live_historical_state_split_view import (
-    build_foundation_live_historical_state_split_view,
-)
 from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_view import (
     build_foundation_truth_consistency_view,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_unified_dashboard_view import (
-    build_foundation_unified_dashboard_view,
 )
 
 SystemStatusPanelState = Literal[
@@ -151,60 +145,64 @@ class SystemStatusPanelContentContract:
 
 
 def _derive_panel_state(
-    total_panels: int,
-    degraded_panels: int,
-    broken_panels: int,
-    warming_up_panels: int,
-    truth_mismatch_panels: int,
-    historical_only_panels: int,
+    total_panels: int, degraded_panels: int, broken_panels: int,
+    warming_up_panels: int, truth_mismatch_panels: int, historical_only_panels: int,
+    *, dead_panels: int = 0, unknown_panels: int = 0, partial_panels: int = 0,
+    alive_panels: int = 0, consistent_panels: int = 0,
 ) -> SystemStatusPanelState:
-    """Derive canonical system-status panel state."""
+    if broken_panels > 0 or dead_panels > 0:
+        return "incident"
     if total_panels == 0:
         return "empty"
-    if warming_up_panels > 0:
-        return "loading"
-    if broken_panels > 0:
-        return "incident"
     if truth_mismatch_panels > 0:
         return "stale"
-    if historical_only_panels > 0 or degraded_panels > 0:
+    if (total_panels != 4 or unknown_panels > 0 or partial_panels > 0
+            or historical_only_panels > 0 or degraded_panels > 0):
         return "degraded"
-    return "normal"
+    if warming_up_panels > 0:
+        return "loading"
+    return "normal" if alive_panels == total_panels == consistent_panels else "degraded"
 
 
-def build_system_status_panel_content_contract() -> SystemStatusPanelContentContract:
+def build_system_status_panel_content_contract(observation: dict | None = None) -> SystemStatusPanelContentContract:
     """Build canonical content contract for the system-status panel."""
-    unified_dashboard_view = build_foundation_unified_dashboard_view()
-    live_historical_view = build_foundation_live_historical_state_split_view()
-    truth_consistency_view = build_foundation_truth_consistency_view()
+    truth_consistency_view = build_foundation_truth_consistency_view(observation=observation)
+    statuses = [item.derived_status for item in truth_consistency_view.entries]
+    historical = (4 if isinstance(observation, dict) and observation.get("historical_only") is True else 0)
+    current_visible = sum(value != "UNKNOWN" for value in statuses) if not historical else 0
 
     entry = SystemStatusPanelContentEntry(
         panel_id="system_status",
         panel_state=_derive_panel_state(
-            total_panels=unified_dashboard_view.total_panels,
-            degraded_panels=unified_dashboard_view.degraded_panels,
-            broken_panels=unified_dashboard_view.broken_panels,
-            warming_up_panels=unified_dashboard_view.warming_up_panels,
+            total_panels=truth_consistency_view.total_entries,
+            degraded_panels=statuses.count("DEGRADED"),
+            broken_panels=statuses.count("BROKEN"),
+            warming_up_panels=statuses.count("WARMING_UP"),
             truth_mismatch_panels=truth_consistency_view.mismatch_entries,
-            historical_only_panels=live_historical_view.historical_only_entries,
+            historical_only_panels=historical,
+            dead_panels=statuses.count("DEAD"),
+            unknown_panels=sum(item.derived_status == "UNKNOWN" for item in truth_consistency_view.entries),
+            partial_panels=truth_consistency_view.partial_entries,
+            alive_panels=statuses.count("ALIVE"),
+            consistent_panels=truth_consistency_view.consistent_entries,
         ),
-        total_foundation_panels=unified_dashboard_view.total_panels,
-        alive_panels=unified_dashboard_view.alive_panels,
-        degraded_panels=unified_dashboard_view.degraded_panels,
-        broken_panels=unified_dashboard_view.broken_panels,
-        warming_up_panels=unified_dashboard_view.warming_up_panels,
+        total_foundation_panels=truth_consistency_view.total_entries,
+        alive_panels=statuses.count("ALIVE"),
+        degraded_panels=statuses.count("DEGRADED"),
+        broken_panels=statuses.count("BROKEN"),
+        warming_up_panels=statuses.count("WARMING_UP"),
         truth_consistent_panels=truth_consistency_view.consistent_entries,
         truth_partial_panels=truth_consistency_view.partial_entries,
         truth_mismatch_panels=truth_consistency_view.mismatch_entries,
-        historical_only_panels=live_historical_view.historical_only_entries,
-        current_live_visible_panels=live_historical_view.current_live_visible_entries,
+        historical_only_panels=historical,
+        current_live_visible_panels=current_visible,
         visible_in_main_dashboard=True,
         visible_in_oob_dashboard=True,
         read_only=True,
         operator_visible=True,
         description=(
             "Canonical system-status panel content contract derived from "
-            "foundation unified dashboard view, live/historical split view, "
+            "one canonical observation and "
             "and truth consistency view."
         ),
     )

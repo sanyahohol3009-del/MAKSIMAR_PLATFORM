@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from tools.jarvis_live_runtime.owner_identity_claim import (
+from MAKSIMAR_CORE_LIB.security_layer.owner_identity_claim import (
     build_owner_identity_claim_for_terminal,
     build_owner_identity_claim_for_voice_unverified,
 )

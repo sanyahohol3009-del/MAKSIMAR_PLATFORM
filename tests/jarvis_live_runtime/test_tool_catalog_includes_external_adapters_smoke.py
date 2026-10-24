@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from tools.jarvis_live_runtime.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_jarvis_live_tool_catalog_read_model
 
 
 def test_tool_catalog_includes_external_adapters_smoke(monkeypatch) -> None:
     monkeypatch.setattr(
-        "tools.jarvis_live_runtime.jarvis_live_read_models.build_jarvis_external_adapter_visibility_read_model",
+        "MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models.build_jarvis_external_adapter_visibility_read_model",
         lambda: {
             "registry": {
                 "tools": (

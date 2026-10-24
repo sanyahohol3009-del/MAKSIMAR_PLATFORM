@@ -3,23 +3,15 @@ from __future__ import annotations
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_approval_runtime import build_swarm_approval_decision
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_conflict_detector import detect_swarm_conflicts
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_task_router import route_swarm_task
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
+from MAKSIMAR_CORE_LIB.swarm_coordination import SwarmTaskContract
 
 
 def test_swarm_approval_runtime_returns_decision_not_execution() -> None:
-    route = route_swarm_task(
-        "open browser",
-        input_channel="text",
-        owner_identity_claim=OwnerIdentityClaim(
-            claim_id="swarm_safe_owner_v1",
-            source="local_terminal_session",
-            verified=True,
-            verification_method="test_override",
-            session_token_present=False,
-            process_owner_matches_os_user=True,
-            reason_codes=("os_user_verified",),
-        ),
-    )
+    route = route_swarm_task(SwarmTaskContract(
+        "task", "typed pc step", "text", "safe_pc_open_browser", "jarvis_chat_model", "jarvis:chat8b",
+        ("pc_open_browser",), ("action_worker_agent",), "light", False, False, True, False,
+        "local_terminal_session", True,
+    ))
     conflict_report = detect_swarm_conflicts((route,))
     approval = build_swarm_approval_decision(route, conflict_report).to_read_model()
 

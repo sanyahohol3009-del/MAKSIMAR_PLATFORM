@@ -6,7 +6,7 @@ import subprocess
 from typing import Any
 
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
-    build_jarvis_external_adapter_visibility_read_model,
+    build_jarvis_external_adapter_visibility_read_model as _build_external_visibility,
 )
 from MAKSIMAR_CORE_LIB.enterprise_memory_domains.enterprise_memory_preview_builder import (
     build_enterprise_memory_preview,
@@ -57,6 +57,18 @@ from MAKSIMAR_SERVER.AI_ORCHESTRATION.session_memory_store import (
     DANGEROUS_MEMORY_FLAGS,
 )
 
+
+
+def build_provider_observation_context() -> dict[str, Any]:
+    """Read canonical process launch context before any provider observation.
+
+    This read model is not an HTTP-controlled permission or an admission decision.
+    Invalid canonical context propagates before any observer can start I/O.
+    """
+    from CORE_ROOT.run_context import model_free_startup
+    disabled = model_free_startup()
+    return {"model_free_startup": disabled,
+            "provider_observation_status": "NOT_ATTEMPTED" if disabled else "ELIGIBLE_FOR_OBSERVATION"}
 
 
 def _operator_capability_flags() -> dict[str, Any]:
@@ -464,3 +476,188 @@ def _run_optional_read_only_command(command: tuple[str, ...]) -> str:
     if shutil.which(command[0]) is None:
         return ""
     return _run_read_only_command(command)
+
+
+# Process import observation is composed here; Core Lib only validates truth.
+from pathlib import Path
+import sys
+from MAKSIMAR_CORE_LIB.action_library_adapters.agent_tooling_runtime_probe import (
+    AgentToolingRuntimeProbeResult, EXTERNAL_RUNTIME_PYTHON,
+    EXTERNAL_IMPORT_PROBE_TIMEOUT_SECONDS, _probe_path_only_manifest, parse_import_probe_response,
+)
+from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import load_external_tool_manifests
+
+
+def _probe_import_in_external_runtime(package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
+    return _probe_import_with_runtime_python(str(EXTERNAL_RUNTIME_PYTHON), package_name, import_name)
+
+
+def _probe_import_with_runtime_python(runtime_python: str, package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
+    if build_provider_observation_context()["model_free_startup"]:
+        # Existing bool DTO: False means not proven, with explicit skipped reason.
+        # Registration remains in manifests; this result grants no availability.
+        return AgentToolingRuntimeProbeResult(
+            installed=False, import_probe_passed=False, package_name=package_name,
+            import_name=import_name, version_if_available="", runtime_python=runtime_python,
+            errors=("model_free_import_not_attempted",), import_attempted=False,
+        )
+    runtime_python_path = Path(runtime_python)
+    if not runtime_python_path.is_file():
+        return AgentToolingRuntimeProbeResult(
+            installed=False,
+            import_probe_passed=False,
+            package_name=package_name,
+            import_name=import_name,
+            version_if_available="",
+            runtime_python=runtime_python,
+            errors=("runtime_python_missing",),
+            import_attempted=False,
+        )
+    probe_script = """
+import importlib
+import importlib.metadata
+import json
+import sys
+
+package_name = sys.argv[1]
+import_name = sys.argv[2]
+result = {
+    "installed": False,
+    "import_probe_passed": False,
+    "import_attempted": False,
+    "package_name": package_name,
+    "import_name": import_name,
+    "version_if_available": "",
+    "runtime_python": sys.executable,
+    "errors": [],
+}
+try:
+    result["import_attempted"] = True
+    importlib.import_module(import_name)
+    result["installed"] = True
+    result["import_probe_passed"] = True
+    try:
+        result["version_if_available"] = importlib.metadata.version(package_name)
+    except Exception:
+        try:
+            result["version_if_available"] = importlib.metadata.version(import_name)
+        except Exception:
+            result["version_if_available"] = ""
+except Exception as exc:
+    result["errors"] = [f"{type(exc).__name__}:{exc}"]
+print(json.dumps(result, ensure_ascii=False))
+"""
+    try:
+        completed = subprocess.run(
+            [runtime_python, "-c", probe_script, package_name, import_name],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=EXTERNAL_IMPORT_PROBE_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return AgentToolingRuntimeProbeResult(
+            installed=False, import_probe_passed=False, package_name=package_name,
+            import_name=import_name, version_if_available="", runtime_python=runtime_python,
+            errors=(type(exc).__name__,), import_attempted=None if isinstance(exc, subprocess.TimeoutExpired) else False,
+        )
+
+    return parse_import_probe_response(completed, runtime_python, package_name, import_name)
+
+
+def probe_agent_tooling_runtime() -> tuple[AgentToolingRuntimeProbeResult, ...]:
+    results: list[AgentToolingRuntimeProbeResult] = []
+    for manifest in load_external_tool_manifests():
+        metadata = manifest.metadata if isinstance(manifest.metadata, dict) else {}
+        external_path = str(metadata.get("external_path", "")).strip()
+        if external_path:
+            results.append(_probe_path_only_manifest(external_path, manifest.tool_id))
+            continue
+        runtime_selector = str(metadata.get("probe_runtime", "")).strip()
+        package_name = manifest.package_name or manifest.module_import_name or manifest.tool_id
+        import_name = manifest.module_import_name or manifest.package_name or manifest.tool_id
+        if runtime_selector == "current_python":
+            results.append(_probe_import_with_runtime_python(sys.executable, package_name, import_name))
+            continue
+        results.append(_probe_import_in_external_runtime(package_name, import_name))
+    return tuple(results)
+
+
+def build_agent_tooling_runtime_probe_read_model() -> dict[str, Any]:
+    results = probe_agent_tooling_runtime()
+    return {
+        "runtime_python": str(EXTERNAL_RUNTIME_PYTHON),
+        "probe_results": tuple(result.to_read_model() for result in results),
+        "installed": tuple(result.package_name for result in results if result.installed),
+        "import_probe_passed": tuple(result.package_name for result in results if result.import_probe_passed),
+        "errors": tuple(result.errors for result in results if result.errors),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Probe external agent/tooling runtime packages in the isolated venv.")
+    parser.parse_args()
+    print(json.dumps(build_agent_tooling_runtime_probe_read_model(), indent=2, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+def build_jarvis_external_adapter_visibility_read_model(probe_read_model=None):
+    try:
+        observation = build_agent_tooling_runtime_probe_read_model() if probe_read_model is None else probe_read_model
+    except Exception:
+        # Preserve the existing visibility consumer's unavailable-on-probe-error contract.
+        observation = {"runtime_python": "", "probe_results": (), "installed": (),
+                       "import_probe_passed": (), "errors": ("runtime_probe_unavailable",)}
+    return _build_external_visibility(probe_read_model=observation)
+
+
+def build_agent_tooling_runtime_adapter_read_model():
+    from MAKSIMAR_CORE_LIB.action_library_adapters.agent_tooling_runtime_adapter import build_agent_tooling_runtime_adapter_read_model as build_adapter
+    return build_adapter(probe_read_model=build_agent_tooling_runtime_probe_read_model())
+
+
+def observe_foundation_consistency() -> dict:
+    """Project a single canonical preflight snapshot, without rereading runtime files."""
+    from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live.jarvis_live_observability_read_model import (
+        observe_runtime_preflight, classify_observed_runtime,
+    )
+    from CORE_ROOT import runtime_paths as paths
+
+    try:
+        snapshot = observe_runtime_preflight()
+        decision = classify_observed_runtime(snapshot)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        return {"observation_error": "canonical_preflight_unavailable"}
+    if not isinstance(snapshot, dict):
+        return {"observation_error": "canonical_preflight_malformed"}
+    def mapping(value):
+        return value if isinstance(value, dict) else {}
+    heartbeats = mapping(snapshot.get("heartbeats"))
+    tmux = mapping(snapshot.get("tmux"))
+    raw_sessions = tmux.get("sessions")
+    sessions_known = (tmux.get("available") is True and not tmux.get("error")
+                      and isinstance(raw_sessions, list) and all(isinstance(v, str) for v in raw_sessions))
+    session_names = {
+        "runtime": paths.RUNTIME_SESSION_NAME, "guard": paths.GUARD_SESSION_NAME,
+        "core_guard": paths.CORE_GUARD_SESSION_NAME, "kernel_guard": paths.KERNEL_GUARD_SESSION_NAME,
+    }
+    processes = {}
+    for scope in session_names:
+        verified = mapping(heartbeats.get(scope)).get("process_verified")
+        processes[scope] = verified if type(verified) is bool else None
+    health, port = mapping(snapshot.get("health")), mapping(snapshot.get("port"))
+    api = None
+    if type(health.get("ok")) is bool and type(port.get("owned_by_project")) is bool:
+        api = health["ok"] is True and port["owned_by_project"] is True and decision.get("healthy") is True
+    return {
+        "heartbeats": heartbeats, "processes": processes,
+        "sessions": {scope: name in raw_sessions if sessions_known else None for scope, name in session_names.items()},
+        "logs": {scope: None for scope in session_names},
+        "runtime_api": api,
+        "run_metadata": snapshot.get("run_metadata"),
+        "observed_wall_time": snapshot.get("observed_wall_time"),
+        "observed_monotonic_time": snapshot.get("observed_monotonic_time"),
+        "canonical_decision": decision,
+        "historical_only": mapping(snapshot.get("run_metadata")).get("status") in ("shutdown", "crashed"),
+        "epoch_verified": decision.get("heartbeat_chain_valid") is True,
+    }

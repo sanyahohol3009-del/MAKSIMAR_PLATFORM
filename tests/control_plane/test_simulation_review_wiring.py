@@ -2,6 +2,8 @@ import json
 from dataclasses import replace
 from types import SimpleNamespace
 
+import pytest
+
 from CONTROL_PLANE.canonical_semantic_spine import _execute_evidence
 from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import (
     EvidenceBundle,
@@ -9,6 +11,7 @@ from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import (
     ExecutionPlan,
     ExecutionReceipt,
     PlanStep,
+    RequestDeadline,
     utc_observed_at,
 )
 from MAKSIMAR_CORE_LIB.workers_registry.simulation_io_contracts import SimulationEngineResult
@@ -18,6 +21,13 @@ TRACE_ID = "trace-review-test"
 REQUEST_ID = "request-review-test"
 STEP_ID = "step-1"
 CAPABILITY_ID = "skill_simulation_simulation_analysis"
+
+
+@pytest.fixture
+def request_deadline():
+    deadline = RequestDeadline(10)
+    with deadline.bind():
+        yield deadline
 
 
 def _plan() -> ExecutionPlan:
@@ -90,11 +100,15 @@ def _simulation_bundle() -> EvidenceBundle:
 
 class _SimulationPort:
     def collect_evidence(self, understanding, plan, trace_id, deadline):
+        assert deadline is RequestDeadline.current()
+        deadline.check()
         return _simulation_bundle()
 
 
 class _NonSimulationPort:
     def collect_evidence(self, understanding, plan, trace_id, deadline):
+        assert deadline is RequestDeadline.current()
+        deadline.check()
         item = EvidenceItem(
             kind="generic_result", source="other_worker", observation="{}",
             scope="local", confidence=1.0, trace_id=TRACE_ID,
@@ -111,18 +125,20 @@ class _NonSimulationPort:
 
 class _MalformedSimulationPort:
     def collect_evidence(self, understanding, plan, trace_id, deadline):
+        assert deadline is RequestDeadline.current()
+        deadline.check()
         bundle = _simulation_bundle()
         return replace(bundle, items=(replace(bundle.items[0], observation="{"),))
 
 
-def test_simulation_receipt_is_reviewed_before_bundle_completion():
+def test_simulation_receipt_is_reviewed_before_bundle_completion(request_deadline):
     bundle = _execute_evidence(
         SimpleNamespace(request_id=REQUEST_ID),
         _plan(),
         TRACE_ID,
         identity=None,
         session_context={},
-        deadline=None,
+        deadline=request_deadline,
         capability_ids=(CAPABILITY_ID,),
         ports={CAPABILITY_ID: _SimulationPort()},
     )
@@ -133,7 +149,7 @@ def test_simulation_receipt_is_reviewed_before_bundle_completion():
     assert bundle.receipts[0].operation_id == "analyze_simulation"
 
 
-def test_review_rejection_fails_closed(monkeypatch):
+def test_review_rejection_fails_closed(monkeypatch, request_deadline):
     import MAKSIMAR_SERVER.SANDBOX_REVIEW.sandbox_result_reader as reader
 
     monkeypatch.setattr(reader, "review_simulation_result", lambda result: {
@@ -141,7 +157,7 @@ def test_review_rejection_fails_closed(monkeypatch):
     })
     bundle = _execute_evidence(
         SimpleNamespace(request_id=REQUEST_ID), _plan(), TRACE_ID,
-        identity=None, session_context={}, deadline=None,
+        identity=None, session_context={}, deadline=request_deadline,
         capability_ids=(CAPABILITY_ID,), ports={CAPABILITY_ID: _SimulationPort()},
     )
     reviews = [item for item in bundle.items if item.kind == "sandbox_review"]
@@ -151,7 +167,7 @@ def test_review_rejection_fails_closed(monkeypatch):
     assert "sandbox_review:step-1:policy_rejected" in bundle.errors
 
 
-def test_non_simulation_result_is_not_sent_to_simulation_review():
+def test_non_simulation_result_is_not_sent_to_simulation_review(request_deadline):
     capability = "other.capability"
     plan = ExecutionPlan(
         request_id=REQUEST_ID,
@@ -164,19 +180,65 @@ def test_non_simulation_result_is_not_sent_to_simulation_review():
     )
     bundle = _execute_evidence(
         SimpleNamespace(request_id=REQUEST_ID), plan, TRACE_ID,
-        identity=None, session_context={}, deadline=None,
+        identity=None, session_context={}, deadline=request_deadline,
         capability_ids=(capability,), ports={capability: _NonSimulationPort()},
     )
     assert not any(item.kind == "sandbox_review" for item in bundle.items)
 
 
-def test_malformed_simulation_result_fails_closed():
+def test_malformed_simulation_result_fails_closed(request_deadline):
     bundle = _execute_evidence(
         SimpleNamespace(request_id=REQUEST_ID), _plan(), TRACE_ID,
-        identity=None, session_context={}, deadline=None,
+        identity=None, session_context={}, deadline=request_deadline,
         capability_ids=(CAPABILITY_ID,), ports={CAPABILITY_ID: _MalformedSimulationPort()},
     )
     review = next(item for item in bundle.items if item.kind == "sandbox_review")
     assert bundle.status == "PARTIAL"
     assert json.loads(review.observation)["review_status"] == "REJECTED"
     assert review.confidence == 0.0
+
+
+@pytest.mark.parametrize("end_state", ["cancelled", "expired"])
+def test_simulation_review_deadline_stops_before_operation(request_deadline, end_state):
+    if end_state == "cancelled":
+        request_deadline.cancel()
+    else:
+        request_deadline.expires_at = request_deadline.started_at - 1
+    class ForbiddenPort:
+        def collect_evidence(self, *args):
+            pytest.fail("cancelled simulation reached its operation")
+    bundle = _execute_evidence(
+        SimpleNamespace(request_id=REQUEST_ID), _plan(), TRACE_ID,
+        identity=None, session_context={}, deadline=request_deadline,
+        capability_ids=(CAPABILITY_ID,), ports={CAPABILITY_ID: ForbiddenPort()},
+    )
+    assert bundle.status != "COMPLETE"
+    assert bundle.items == () and bundle.receipts == ()
+    assert "canonical_request_cancelled_or_expired" in bundle.errors
+
+
+@pytest.mark.parametrize("end_state", ["cancelled", "expired"])
+def test_simulation_review_deadline_preserves_completed_receipt(request_deadline, monkeypatch, end_state):
+    import MAKSIMAR_SERVER.SANDBOX_REVIEW.sandbox_result_reader as reader
+
+    completed = []
+    class EndingPort(_SimulationPort):
+        def collect_evidence(self, understanding, plan, trace_id, deadline):
+            result = super().collect_evidence(understanding, plan, trace_id, deadline)
+            completed.append(result)
+            if end_state == "cancelled":
+                deadline.cancel()
+            else:
+                deadline.expires_at = deadline.started_at - 1
+            return result
+    monkeypatch.setattr(reader, "review_simulation_result", lambda *a: pytest.fail("review started after cancellation"))
+    bundle = _execute_evidence(
+        SimpleNamespace(request_id=REQUEST_ID), _plan(), TRACE_ID,
+        identity=None, session_context={}, deadline=request_deadline,
+        capability_ids=(CAPABILITY_ID,), ports={CAPABILITY_ID: EndingPort()},
+    )
+    assert len(completed) == 1 and bundle.status == "PARTIAL"
+    assert bundle.receipts == completed[0].receipts
+    assert bundle.items == completed[0].items
+    assert not any(item.kind == "sandbox_review" for item in bundle.items)
+    assert "canonical_request_cancelled_or_expired" in bundle.errors

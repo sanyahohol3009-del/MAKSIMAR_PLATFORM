@@ -50,3 +50,50 @@ def test_guard_pid_hint_waits_for_transition_mutation_scope(tmp_path,monkeypatch
         assert not done.wait(0.1) and hint.read_text()=="1111\n"
     thread.join(3)
     assert done.is_set() and hint.read_text()=="4242\n"
+
+
+def test_nested_transition_rejected_before_second_fd_and_outer_lock_remains(tmp_path, monkeypatch):
+    import pytest
+    state = tmp_path / "state"
+    state.mkdir()
+    monkeypatch.setattr(gate, "ensure_runtime_layout", lambda: None)
+    monkeypatch.setattr(gate, "RUNTIME_STATE_DIR", state)
+    monkeypatch.setattr(rc, "RUNTIME_STATE_DIR", state)
+    with gate._transition_lock():
+        first = gate._transition_local.handle.fileno()
+        with pytest.raises(RuntimeError, match="not reentrant"):
+            with gate._transition_lock():
+                pytest.fail("second transition acquisition was allowed")
+        assert gate._transition_local.handle.fileno() == first
+        gate._require_transition_scope()
+    with gate._transition_lock():
+        gate._require_transition_scope()
+
+
+def test_fork_child_cannot_borrow_parent_transition_lease(tmp_path, monkeypatch):
+    import multiprocessing
+    state = tmp_path / "state"
+    state.mkdir()
+    monkeypatch.setattr(gate, "ensure_runtime_layout", lambda: None)
+    monkeypatch.setattr(gate, "RUNTIME_STATE_DIR", state)
+    monkeypatch.setattr(rc, "RUNTIME_STATE_DIR", state)
+    context = multiprocessing.get_context("fork")
+    started, acquired = context.Event(), context.Event()
+    def child():
+        started.set()
+        with gate._transition_lock():
+            gate._require_transition_scope()
+            acquired.set()
+    with gate._transition_lock():
+        process = context.Process(target=child)
+        process.start()
+        assert started.wait(1)
+        assert not acquired.wait(0.15)
+    try:
+        assert acquired.wait(2)
+        process.join(2)
+        assert process.exitcode == 0
+    finally:
+        if process.is_alive():
+            process.terminate()
+            process.join(2)

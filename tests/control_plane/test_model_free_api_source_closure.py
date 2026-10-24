@@ -2,6 +2,8 @@
 import asyncio
 import subprocess
 import pytest
+
+from control_plane.offline_api_source_fixtures import no_external_package_import_probe
 import CONTROL_PLANE.api_server as api
 from MAKSIMAR_SERVER.OBSERVABILITY.jarvis_live import jarvis_live_observability_read_model as obs
 from MAKSIMAR_SERVER.AI_ORCHESTRATION import browser_provider_adapter as browser, ollama_transport as transport

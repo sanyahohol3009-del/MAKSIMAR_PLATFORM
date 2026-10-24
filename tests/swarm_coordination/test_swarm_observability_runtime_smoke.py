@@ -5,23 +5,14 @@ from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_observability_runtime impo
     build_swarm_observability_read_model,
 )
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_task_router import route_swarm_task
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
+from MAKSIMAR_CORE_LIB.swarm_coordination import SwarmTaskContract
 
 
 def test_swarm_observability_runtime_exposes_required_read_model_fields() -> None:
-    route = route_swarm_task(
-        "open browser",
-        input_channel="text",
-        owner_identity_claim=OwnerIdentityClaim(
-            claim_id="swarm_observability_owner_v1",
-            source="local_terminal_session",
-            verified=True,
-            verification_method="test_override",
-            session_token_present=False,
-            process_owner_matches_os_user=True,
-            reason_codes=("os_user_verified",),
-        ),
-    )
+    route = route_swarm_task(SwarmTaskContract(
+        "task", "typed pc step", "text", "safe_pc_open_browser", "jarvis_chat_model", "jarvis:chat8b",
+        ("pc_open_browser",), ("action_worker_agent",), "light", False, False, True, False,
+        "local_terminal_session", True))
     payload = build_swarm_observability_read_model(route, detect_swarm_conflicts((route,)))
 
     assert payload["active_agents"] == ("action_worker_agent",)

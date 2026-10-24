@@ -202,3 +202,15 @@ def test_normal_model_diagnostic_routes_keep_existing_read_model(guarded, monkey
     payload = getattr(api, endpoint)()
     assert calls == ["existing_owner"]
     assert payload == {"ok": True, "surface": "CONTROL_PLANE/api_server.py", "models": original, "read_only": True}
+def test_provider_context_uses_fresh_canonical_authority_without_payload(monkeypatch):
+    from CORE_ROOT import run_context
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION import jarvis_live_read_models as models
+    values = iter((True, False))
+    calls = []
+    def canonical():
+        calls.append(True)
+        return next(values)
+    monkeypatch.setattr(run_context, "model_free_startup", canonical)
+    assert models.build_provider_observation_context()["model_free_startup"] is True
+    assert models.build_provider_observation_context()["model_free_startup"] is False
+    assert calls == [True, True]

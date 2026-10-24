@@ -5,10 +5,15 @@ from pathlib import Path
 
 REQUIRED_ACTIONS = (
     "open_browser",
-    "open_youtube",
-    "open_youtube_kids_search",
-    "read_project_status",
-    "show_test_status",
+    "open_opera",
+    "close_opera",
+    "close_all_opera",
+    "type_text",
+    "volume_up",
+    "volume_down",
+    "volume_mute",
+    "read_screen",
+    "browser_search",
 )
 
 
@@ -36,15 +41,15 @@ def test_jarvis_pc_action_allowlist_yaml_is_safe_contract() -> None:
     actions = _parse_action_blocks(text)
 
     assert tuple(action["action_id"] for action in actions) == REQUIRED_ACTIONS
-    assert "allowlist_id: jarvis_pc_action_allowlist_v0_1" in text
+    assert "allowlist_id: jarvis_pc_action_allowlist_v1" in text
     for action in actions:
         assert action["requires_owner_command"] == "true"
-        assert action["requires_approval"] == "true"
+        assert action["requires_approval"] == "false"
         assert action["requires_audit"] == "true"
-        assert action["runtime_execution_allowed"] == "false"
+        assert action["operation_allowlisted"] == "true"
         assert action["direct_shell_allowed"] == "false"
-        assert action["direct_browser_automation_allowed"] == "false"
-        assert action["direct_pc_control_allowed"] == "false"
+        assert action["owner_low_risk_policy_eligible"] == "true"
+        assert "runtime_execution_allowed" not in action
 
     lowered = text.lower()
     for marker in (
@@ -61,4 +66,3 @@ def test_jarvis_pc_action_allowlist_yaml_is_safe_contract() -> None:
         "hidden",
     ):
         assert marker not in lowered
-

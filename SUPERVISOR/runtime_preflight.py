@@ -428,6 +428,38 @@ def inspect_runtime_state() -> dict[str, Any]:
     return observation
 
 
+def recover_previous_run_degradation() -> bool:
+    """Only recovery entrypoint: fresh canonical proof inside one Core lock scope."""
+    from CORE_ROOT import stop_gate
+    from CORE_ROOT.run_context import _identity
+
+    def fresh_epoch():
+        try:
+            observation = inspect_runtime_state()
+            # Never trust a supplied/cached decision member, even from a test seam.
+            if classify_runtime_observation(observation).get("healthy") is not True:
+                return None
+            return (_identity(observation["run_metadata"]) + (observation["run_metadata"]["status"],),
+                    observation["runtime_pid"], observation["runtime_pid_identity"]["process_start_ticks"])
+        except (OSError, RuntimeError, ValueError, TypeError, KeyError, AttributeError):
+            return None
+
+    with stop_gate._transition_lock():
+        try:
+            state = stop_gate._capture_previous_run_marker()
+        except (OSError, RuntimeError, ValueError, TypeError):
+            return False
+        if state is None:
+            return True
+        epoch = fresh_epoch()
+        if epoch is None or not stop_gate._prepare_previous_run_recovery(state, epoch):
+            return False
+        # Intent fsync can take time: obtain a complete new observation, not a partial refresh.
+        if fresh_epoch() != epoch:
+            return False
+        return stop_gate._commit_previous_run_recovery(state, epoch)
+
+
 def check_python(details: dict[str, Any]) -> bool:
     """Validate canonical python interpreter."""
     try:

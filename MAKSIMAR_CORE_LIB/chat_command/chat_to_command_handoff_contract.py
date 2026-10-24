@@ -44,7 +44,10 @@ class ChatToCommandHandoffContract:
     sandbox_required: bool
     direct_execution_allowed: bool
     runtime_mutation_allowed: bool
-    external_adapter_execution_allowed: bool
+    external_adapter_selection_allowed: bool = True
+    external_adapter_status_allowed: bool = True
+    external_adapter_planning_allowed: bool = True
+    external_adapter_execution_requires_approval: bool = True
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "handoff_id", _ensure_non_empty(self.handoff_id, "handoff_id"))
@@ -70,8 +73,14 @@ class ChatToCommandHandoffContract:
             raise ValueError("direct_execution_allowed must be False")
         if self.runtime_mutation_allowed:
             raise ValueError("runtime_mutation_allowed must be False")
-        if self.external_adapter_execution_allowed:
-            raise ValueError("external_adapter_execution_allowed must be False")
+        if not self.external_adapter_selection_allowed:
+            raise ValueError("external_adapter_selection_allowed must be True")
+        if not self.external_adapter_status_allowed:
+            raise ValueError("external_adapter_status_allowed must be True")
+        if not self.external_adapter_planning_allowed:
+            raise ValueError("external_adapter_planning_allowed must be True")
+        if not self.external_adapter_execution_requires_approval:
+            raise ValueError("external_adapter_execution_requires_approval must be True")
 
         if self.handoff_state == "ready_for_control_plane" and self.control_plane_target == "approval_gate":
             raise ValueError("ready_for_control_plane must target proposal_engine, policy_gate, or sandbox_planner first")

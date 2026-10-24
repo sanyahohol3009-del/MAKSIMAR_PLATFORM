@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from shared_mobile_core.mobile_sync_models.mobile_sync_policy import MobileSyncPolicy
+from shared_mobile_core.mobile_sync_models.mobile_sync_cursor_contract import MobileSyncCursorContract
+from shared_mobile_core.mobile_sync_models.mobile_sync_envelope_contract import MobileSyncEnvelopeContract
 
 
 _SESSION_REF_PREFIXES = ("session://", "ref://")
@@ -81,6 +83,30 @@ class MobileSyncSessionState:
         for field_name, value in required_false.items():
             if value is not False:
                 raise ValueError(f"{field_name} must be False")
+
+    def validate_reference_binding(
+        self,
+        envelope: MobileSyncEnvelopeContract,
+        cursor: MobileSyncCursorContract,
+    ) -> None:
+        """Bind a reference-only sync request to this existing session."""
+        if not isinstance(envelope, MobileSyncEnvelopeContract):
+            raise ValueError("envelope must be MobileSyncEnvelopeContract")
+        if not isinstance(cursor, MobileSyncCursorContract):
+            raise ValueError("cursor must be MobileSyncCursorContract")
+        for field_name, expected in (
+            ("owner_identity_id", self.owner_identity_id),
+            ("source_device_id", self.device_id),
+            ("app_id", self.app_id),
+        ):
+            if getattr(envelope, field_name) != expected:
+                raise ValueError(f"envelope {field_name} must match session")
+        if cursor.source_device_id != self.device_id:
+            raise ValueError("cursor source_device_id must match session")
+        if envelope.memory_domain != cursor.memory_domain:
+            raise ValueError("envelope memory_domain must match cursor")
+        if envelope.cursor_ref != cursor.accepted_checkpoint_ref:
+            raise ValueError("envelope cursor_ref must match accepted cursor checkpoint")
 
     def to_read_model(self) -> dict[str, Any]:
         return {

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from CORE_ROOT.run_context import model_free_startup
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import build_provider_observation_context
 import threading
 import time
 import json
@@ -183,7 +183,7 @@ def build_jarvis_live_observability_read_model() -> dict[str, Any]:
 
 def build_runtime_readiness_payload(control_plane_alive: bool = True) -> dict[str, Any]:
     """Publish only directly observed runtime facts from the existing observability owner."""
-    model_free = model_free_startup()  # Validate before any provider observation.
+    model_free = build_provider_observation_context()["model_free_startup"]  # Validate before any provider observation.
     if model_free:
         # None means unobserved, not a failed probe or an absent installation.
         ollama_alive = stt_alive = windows_edge_alive = None
@@ -280,3 +280,64 @@ def _model_residency_truth(
 def _http_alive(url: str) -> bool:
     payload = ollama_get_json(url, timeout_seconds=2.5)
     return payload.get("ok", True) is not False
+
+
+def observe_runtime_preflight() -> dict[str, Any]:
+    """Fresh canonical runtime observations; no start, repair or permission decision."""
+    from SUPERVISOR.runtime_preflight import inspect_runtime_state
+    return inspect_runtime_state()
+
+
+def observe_model_provider_identity(endpoint: str, *, check_request, proc_root=None) -> dict[str, Any]:
+    """Endpoint-bound physical read port; identity never grants management rights."""
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter import observe_provider_process_identity
+    return observe_provider_process_identity(endpoint, check_request=check_request, proc_root=proc_root)
+
+
+def observe_model_provider_hardware(provider_identity: dict, *, check_request) -> dict[str, Any]:
+    """Collect resource facts only for a proven provider PID, never client scope."""
+    from MAKSIMAR_SERVER.EXECUTION_CONTROL.node_runtime.hardware_detection_adapter import detect_model_resource_observation
+    if provider_identity.get("status") != "PROVEN":
+        raise ValueError("provider_process_identity_unproven")
+    pid = provider_identity.get("identity", {}).get("pid")
+    if type(pid) is not int or pid <= 0:
+        raise ValueError("provider_pid_unproven")
+    check_request()
+    observation = detect_model_resource_observation(provider_pid=pid)
+    check_request()
+    return observation
+
+
+def classify_observed_runtime(observation: dict) -> dict[str, Any]:
+    """Reuse the canonical pure classifier for the same collected snapshot."""
+    from SUPERVISOR.runtime_preflight import classify_runtime_observation
+    return classify_runtime_observation(observation)
+
+
+def build_foundation_panel_payloads() -> dict[str, Any]:
+    """Compose the three existing pure payloads from one canonical observation."""
+    from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import observe_foundation_consistency
+    from MAKSIMAR_CORE_LIB.oob_dashboard.system_status_panel_payload_builder import build_system_status_panel_payload
+    from MAKSIMAR_CORE_LIB.oob_dashboard.topology_panel_payload_builder import build_topology_panel_payload
+    from MAKSIMAR_CORE_LIB.oob_dashboard.guard_chain_panel_payload_builder import build_guard_chain_panel_payload
+    observation = observe_foundation_consistency()
+    # Explicit empty input prevents legacy/no-argument acquisition after unavailable observation.
+    if not isinstance(observation, dict):
+        observation = {}
+    return {
+        "system_status": build_system_status_panel_payload(observation=observation),
+        "topology": build_topology_panel_payload(observation=observation),
+        "guard_chain": build_guard_chain_panel_payload(observation=observation),
+    }
+
+
+def build_system_status_panel_payload() -> dict[str, Any]:
+    return build_foundation_panel_payloads()["system_status"]
+
+
+def build_topology_panel_payload() -> dict[str, Any]:
+    return build_foundation_panel_payloads()["topology"]
+
+
+def build_guard_chain_panel_payload() -> dict[str, Any]:
+    return build_foundation_panel_payloads()["guard_chain"]

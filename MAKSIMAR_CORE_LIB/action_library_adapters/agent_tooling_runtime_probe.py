@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from CORE_ROOT.run_context import model_free_startup
 
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import load_external_tool_manifests
 
@@ -92,76 +90,9 @@ def _probe_path_only_manifest(path_value: str, capability_name: str) -> AgentToo
     )
 
 
-def _probe_import_with_runtime_python(runtime_python: str, package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
-    if model_free_startup():
-        # Existing bool DTO: False means not proven, with explicit skipped reason.
-        # Registration remains in manifests; this result grants no availability.
-        return AgentToolingRuntimeProbeResult(
-            installed=False, import_probe_passed=False, package_name=package_name,
-            import_name=import_name, version_if_available="", runtime_python=runtime_python,
-            errors=("model_free_import_not_attempted",), import_attempted=False,
-        )
+def parse_import_probe_response(completed, runtime_python: str, package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
+    """Validate child truth/identity; never execute a probe or grant capability."""
     runtime_python_path = Path(runtime_python)
-    if not runtime_python_path.is_file():
-        return AgentToolingRuntimeProbeResult(
-            installed=False,
-            import_probe_passed=False,
-            package_name=package_name,
-            import_name=import_name,
-            version_if_available="",
-            runtime_python=runtime_python,
-            errors=("runtime_python_missing",),
-            import_attempted=False,
-        )
-    probe_script = """
-import importlib
-import importlib.metadata
-import json
-import sys
-
-package_name = sys.argv[1]
-import_name = sys.argv[2]
-result = {
-    "installed": False,
-    "import_probe_passed": False,
-    "import_attempted": False,
-    "package_name": package_name,
-    "import_name": import_name,
-    "version_if_available": "",
-    "runtime_python": sys.executable,
-    "errors": [],
-}
-try:
-    result["import_attempted"] = True
-    importlib.import_module(import_name)
-    result["installed"] = True
-    result["import_probe_passed"] = True
-    try:
-        result["version_if_available"] = importlib.metadata.version(package_name)
-    except Exception:
-        try:
-            result["version_if_available"] = importlib.metadata.version(import_name)
-        except Exception:
-            result["version_if_available"] = ""
-except Exception as exc:
-    result["errors"] = [f"{type(exc).__name__}:{exc}"]
-print(json.dumps(result, ensure_ascii=False))
-"""
-    try:
-        completed = subprocess.run(
-            [runtime_python, "-c", probe_script, package_name, import_name],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=EXTERNAL_IMPORT_PROBE_TIMEOUT_SECONDS,
-        )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        return AgentToolingRuntimeProbeResult(
-            installed=False, import_probe_passed=False, package_name=package_name,
-            import_name=import_name, version_if_available="", runtime_python=runtime_python,
-            errors=(type(exc).__name__,), import_attempted=None if isinstance(exc, subprocess.TimeoutExpired) else False,
-        )
-
     if completed.returncode != 0 and not completed.stdout.strip():
         return AgentToolingRuntimeProbeResult(
             installed=False,
@@ -225,6 +156,15 @@ print(json.dumps(result, ensure_ascii=False))
         errors=tuple(str(error) for error in errors if str(error).strip()),
         import_attempted=attempted,
         package_metadata_exists=bool(str(payload.get("version_if_available", "")).strip()) if valid_import and payload.get("import_probe_passed") is True else None,
+    )
+
+
+def _probe_import_with_runtime_python(runtime_python: str, package_name: str, import_name: str) -> AgentToolingRuntimeProbeResult:
+    """Compatibility metadata fallback; physical probes require server composition."""
+    return AgentToolingRuntimeProbeResult(
+        installed=False, import_probe_passed=False, package_name=package_name,
+        import_name=import_name, version_if_available="", runtime_python=runtime_python,
+        errors=("probe_observation_required",), import_attempted=False,
     )
 
 

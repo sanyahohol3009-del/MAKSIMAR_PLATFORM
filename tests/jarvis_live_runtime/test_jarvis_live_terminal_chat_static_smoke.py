@@ -1,5 +1,15 @@
 from pathlib import Path
 import importlib.util
+import inspect
+import json
+
+import httpx
+import pytest
+
+# Reuse the canonical endpoint's synthetic secret and temporary session/trace fixture.
+from tests.control_plane.test_jarvis_live_hot_endpoint_smoke import (
+    isolate_existing_hot_endpoint_state,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,62 +31,78 @@ def _module():
 
 def test_terminal_chat_uses_existing_control_plane_routes_only() -> None:
     source = _source()
+    module = _module()
 
-    assert "/jarvis-live/command" in source
-    assert "/jarvis-live/chat/stream" in source
-    assert "/jarvis-live/health" in source
+    assert module.API_BASE_URL == "http://127.0.0.1:8000"
+    assert module.HOT_URL == "http://127.0.0.1:8000/jarvis-live/hot"
+    assert "/jarvis-live/hot" in source
+    assert "8765" not in source
+    assert "/jarvis-live/chat/stream" not in source
+    assert "/jarvis-live/command" not in source
+    assert 'HEALTH_URL = f"{API_BASE_URL}/health"' in source
     assert "/jarvis-live/status" in source
     assert "import httpx" in source
-    assert "/debug ollama" in source
+    assert "Every content request" in source
     assert "tools.jarvis_live_runtime.jarvis_live_brain_loop" not in source
-    assert "CONTROL_PLANE.api_server" not in source.replace(
-        "python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765",
-        "",
-    )
+    assert "CONTROL_PLANE.api_server" not in source
 
 
 def test_terminal_chat_sends_safe_command_payload() -> None:
     source = _source()
+    module = _module()
 
     assert '"session_id": SESSION_ID' in source
-    assert '"pc_control_allowed": False' in source
+    payload = module._build_hot_payload("привет")
+    verified = module.identity_from_host_token(payload["host_auth_token"])
+    assert verified is not None and verified[1].owner_authorized
+    assert verified[0].session_id == payload["session_id"] == module.SESSION_ID
+    assert "identity" not in payload
+    assert "TERMINAL_IDENTITY" not in source
+    assert "pc_control_allowed" not in module._build_hot_payload("привет")
     assert "SESSION_ID = \"terminal_chat\"" in source
     assert "canonical_memory_write_allowed" in source
 
 
-def test_terminal_chat_supports_operator_commands() -> None:
+def test_trusted_local_terminal_identity_preserves_owner_autonomy(monkeypatch) -> None:
+    import CONTROL_PLANE.api_server as api_server
+
+    module = _module()
+    monkeypatch.setattr(api_server, "run_canonical_semantic_turn", lambda **_: {
+        "handled": True,
+        "orchestration_path": "canonical_semantic_turn_v2",
+        "trace_id": "terminal-owner",
+        "understanding_schema_version": "request_understanding.v2",
+        "understanding": {"current_topic": "project status"},
+        "selected_capabilities": ("project.read",),
+        "selected_provider_operation": ("inspect_git_status",),
+        "selection_source": "model_semantic_registry",
+        "fallback_used": False,
+        "fallback_reason": "",
+        "response_text": "На связи.",
+        "operation_status": "COMPLETE",
+        "trace": {"trace_id": "terminal-owner"},
+    })
+
+    response = api_server.jarvis_live_hot(module._build_hot_payload("покажи статус"))
+
+    assert response["owner_pc_action_eligible"] is True
+    assert response["policy_execution_allowed"] is False
+    assert response["pc_executor_available"] is None
+    assert response["pc_operation_authorized_for_this_turn"] is False
+    assert response["executed"] is False
+    assert response["execution_receipt"] is None
+    assert response["pc_control_allowed"] is False
+
+
+def test_terminal_chat_keeps_only_interface_commands_local() -> None:
     source = _source()
 
-    assert "/ping" in source
-    assert "/status" in source
-    assert "/memory" in source
-    assert "/memory recent" in source
-    assert "/memory style" in source
-    assert "/memory sources" in source
-    assert "/models" in source
-    assert "/tools" in source
-    assert "/project" in source
-    assert "/project status" in source
-    assert "/project tree" in source
-    assert "/project files" in source
-    assert "/project dirty" in source
-    assert "/project search" in source
-    assert "/project file" in source
-    assert "/project outline" in source
-    assert "/project imports" in source
-    assert "/project tests" in source
-    assert "/project roadmap" in source
-    assert "/project models" in source
-    assert "/project safety" in source
-    assert "/logs" in source
-    assert "/debug ollama" in source
     assert "/trace on" in source
     assert "/trace off" in source
     assert "/debug on" in source
     assert "/debug off" in source
-    assert "/stream" in source
-    assert "/command" in source
     assert "/exit" in source
+    assert "canonical /jarvis-live/hot" in source
     assert "JARVIS>" in source
     assert "JARVIS terminal ready" in source
 
@@ -108,13 +134,12 @@ def test_terminal_chat_does_not_start_server_or_execute_local_control() -> None:
     assert "_run_local_command((\"git\", \"diff\", \"-U5\", \"--color=always\")" in source
     assert "_print_tests((\"pytest\", \"-q\", \"--tb=short\", \"--maxfail=20\", \"tests/\"))" in source
     assert "target.relative_to(root)" in source
-    assert "python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765" in source
+    assert "python -m uvicorn" not in source
 
 
 def test_terminal_chat_preserves_utf8_and_russian_output_path() -> None:
     source = _source()
 
-    assert "response.iter_lines()" in source
     assert "response.json()" in source
     assert "httpx.Timeout(COMMAND_TIMEOUT_SECONDS" in source
     assert "reconfigure(encoding=\"utf-8\"" in source
@@ -146,16 +171,54 @@ def test_terminal_chat_has_clear_api_connectivity_diagnostics() -> None:
     assert "api_error=" in source
 
 
-def test_terminal_chat_has_long_command_timeout_and_stream_route() -> None:
+def test_terminal_chat_has_long_command_timeout_and_canonical_hot_route() -> None:
     module = _module()
     source = _source()
 
     assert module.COMMAND_TIMEOUT_SECONDS >= 180
     assert "httpx.Client(timeout=timeout)" in source
     assert "def _print_stream_response(text: str) -> None:" in source
-    assert "def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:" in source
-    assert "STREAM_URL" in source
+    assert "def _build_hot_payload(text: str) -> dict[str, Any]:" in source
+    assert "HOT_URL" in source
     assert "MODELS_URL" in source
+
+
+def test_terminal_chat_extracts_canonical_text_and_never_returns_empty() -> None:
+    module = _module()
+
+    assert module._canonical_response_text({"response_text": "ответ"}) == "ответ"
+    assert module._canonical_response_text({"llm_response": "модель"}) == "модель"
+    assert module._canonical_response_text({"result": {"response_text": "вложенный"}}) == "вложенный"
+    assert module._canonical_response_text({"error_kind": "component_unavailable"})
+    assert module._canonical_response_text({})
+
+
+def test_terminal_chat_posts_hot_payload_and_displays_response_text(monkeypatch, capsys) -> None:
+    module = _module()
+    calls = []
+
+    def fake_post(url, payload):
+        calls.append((url, payload))
+        return {"response_text": "На связи."}
+
+    monkeypatch.setattr(module, "_post_json", fake_post)
+    module._print_stream_response("джарвис привет")
+
+    output = capsys.readouterr().out
+    assert calls[0][0] == "http://127.0.0.1:8000/jarvis-live/hot"
+    verified = module.identity_from_host_token(calls[0][1]["host_auth_token"])
+    assert verified is not None and verified[1].identity_source == "authenticated_http_session"
+    assert verified[0].session_id == calls[0][1]["session_id"] == module.SESSION_ID
+    assert "На связи." in output
+
+
+def test_terminal_chat_displays_llm_response(monkeypatch, capsys) -> None:
+    module = _module()
+    monkeypatch.setattr(module, "_post_json", lambda url, payload: {"llm_response": "Работаю."})
+
+    module._print_stream_response("как дела?")
+
+    assert "Работаю." in capsys.readouterr().out
 
 
 def test_terminal_chat_prints_read_only_ollama_models_and_debug_view(capsys) -> None:
@@ -369,14 +432,14 @@ def test_terminal_chat_command_timeout_does_not_claim_api_is_down(monkeypatch, c
 
     monkeypatch.setattr(module, "_post_json", lambda url, payload: None)
     monkeypatch.setattr(module, "_get_json", lambda url: {"ok": True})
-    module._LAST_API_ERROR = "timeout url=http://127.0.0.1:8765/jarvis-live/command"
+    module._LAST_API_ERROR = "timeout url=http://127.0.0.1:8000/jarvis-live/hot"
 
     module._print_command_response("Джарвис привет")
 
     output = capsys.readouterr().out
     assert "JARVIS command timed out. API is running" in output
     assert "JARVIS API is not running" not in output
-    assert "api_error=timeout url=http://127.0.0.1:8765/jarvis-live/command" in output
+    assert "api_error=timeout url=http://127.0.0.1:8000/jarvis-live/hot" in output
 
 
 def test_terminal_chat_dispatches_normal_text_to_stream_by_default(monkeypatch) -> None:
@@ -390,7 +453,7 @@ def test_terminal_chat_dispatches_normal_text_to_stream_by_default(monkeypatch) 
     assert calls == [("stream", "Джарвис привет")]
 
 
-def test_terminal_chat_dispatches_explicit_command_and_stream(monkeypatch) -> None:
+def test_terminal_chat_migrates_legacy_command_and_stream_text_to_hot(monkeypatch) -> None:
     module = _module()
     calls: list[tuple[str, str]] = []
 
@@ -399,14 +462,17 @@ def test_terminal_chat_dispatches_explicit_command_and_stream(monkeypatch) -> No
 
     assert module._dispatch_user_text("/command Джарвис привет") is False
     assert module._dispatch_user_text("/stream Джарвис привет") is False
-    assert calls == [("command", "Джарвис привет"), ("stream", "Джарвис привет")]
+    assert calls == [
+        ("stream", "/command Джарвис привет"),
+        ("stream", "/stream Джарвис привет"),
+    ]
 
 
-def test_terminal_chat_dispatches_trace_debug_and_logs_commands(monkeypatch, capsys) -> None:
+def test_terminal_chat_keeps_only_ui_trace_debug_local_and_routes_logs_to_hot(monkeypatch, capsys) -> None:
     module = _module()
     calls: list[str] = []
 
-    monkeypatch.setattr(module, "_print_logs", lambda: calls.append("logs"))
+    monkeypatch.setattr(module, "_print_stream_response", lambda text: calls.append(text))
 
     assert module._dispatch_user_text("/trace on") is False
     assert module._TRACE_ENABLED is True
@@ -417,34 +483,31 @@ def test_terminal_chat_dispatches_trace_debug_and_logs_commands(monkeypatch, cap
     assert module._dispatch_user_text("/debug off") is False
     assert module._DEBUG_ENABLED is False
     assert module._dispatch_user_text("/logs") is False
-    assert calls == ["logs"]
+    assert calls == ["/logs"]
     capsys.readouterr()
 
 
-def test_terminal_chat_dispatches_memory_subcommands(monkeypatch) -> None:
+def test_terminal_chat_routes_memory_subcommands_to_hot(monkeypatch) -> None:
     module = _module()
     calls: list[str] = []
 
-    monkeypatch.setattr(module, "_print_memory", lambda: calls.append("memory"))
-    monkeypatch.setattr(module, "_print_memory_recent", lambda: calls.append("recent"))
-    monkeypatch.setattr(module, "_print_memory_style", lambda: calls.append("style"))
-    monkeypatch.setattr(module, "_print_memory_sources", lambda: calls.append("sources"))
+    monkeypatch.setattr(module, "_print_stream_response", lambda text: calls.append(text))
 
     assert module._dispatch_user_text("/memory") is False
     assert module._dispatch_user_text("/memory recent") is False
     assert module._dispatch_user_text("/memory style") is False
     assert module._dispatch_user_text("/memory sources") is False
-    assert calls == ["memory", "recent", "style", "sources"]
+    assert calls == ["/memory", "/memory recent", "/memory style", "/memory sources"]
 
 
-def test_terminal_chat_dispatches_tools_command(monkeypatch) -> None:
+def test_terminal_chat_routes_tools_command_to_hot(monkeypatch) -> None:
     module = _module()
     calls: list[str] = []
 
-    monkeypatch.setattr(module, "_print_tools", lambda: calls.append("tools"))
+    monkeypatch.setattr(module, "_print_stream_response", lambda text: calls.append(text))
 
     assert module._dispatch_user_text("/tools") is False
-    assert calls == ["tools"]
+    assert calls == ["/tools"]
 
 
 def test_terminal_chat_dispatches_project_commands_to_stream(monkeypatch) -> None:
@@ -522,6 +585,7 @@ def test_terminal_chat_memory_recent_reads_existing_session_file(monkeypatch, ca
 
 def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, capsys) -> None:
     module = _module()
+    monkeypatch.setattr(module, "_setup_readline", lambda: None)
     inputs = iter(["Джарвис привет", "/exit"])
 
     monkeypatch.setattr(module, "_print_ping", lambda startup=False: None)
@@ -542,6 +606,7 @@ def test_terminal_chat_handles_keyboard_interrupt_during_request(monkeypatch, ca
 
 def test_terminal_chat_survives_runtime_exception_and_keeps_loop_alive(monkeypatch, capsys) -> None:
     module = _module()
+    monkeypatch.setattr(module, "_setup_readline", lambda: None)
     inputs = iter(["/project status", "/exit"])
     calls = {"count": 0}
 
@@ -563,17 +628,11 @@ def test_terminal_chat_survives_runtime_exception_and_keeps_loop_alive(monkeypat
     assert "Traceback" not in output
 
 
-def test_terminal_truth_ui_v2_operator_shell_commands_are_present() -> None:
-    source = _source()
-
-    assert "/git" in source
-    assert "/diff" in source
-    assert "/tests" in source
-    assert "/show <file>" in source or "/show " in source
-    assert "def _run_local_command(" in source
-    assert "target.relative_to(root)" in source
-    assert "AGENTS_INFO" not in source
-    assert "SKILLS_INFO" not in source
+def test_terminal_truth_ui_v2_content_commands_use_hot_semantic_ingress() -> None:
+    dispatch = inspect.getsource(_module()._dispatch_user_text)
+    assert "_run_jarvis_turn(user_text)" in dispatch
+    for legacy_local_action in ("_print_git_status", "_print_diff", "_print_tests", "_show_file"):
+        assert legacy_local_action not in dispatch
 
 
 def test_terminal_truth_ui_formats_operator_work_text(capsys) -> None:
@@ -691,52 +750,6 @@ def test_terminal_truth_ui_semantic_block_policy(capsys) -> None:
     assert "РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP" not in output
 
 
-def test_terminal_truth_ui_semantic_policy_deepseek_claude_cases() -> None:
-    module = _module()
-    facts = {
-        "execution_allowed": "false",
-        "proposal_only": "true",
-        "canonical_write_allowed": "false",
-        "pc_control_allowed": "false",
-    }
-    rows = [{"name": "external_adapter:mcp_python_sdk", "status": "available"}]
-
-    factual = module._operator_block_policy(
-        "проверь инструменты я сегодня буду подключать тебе много агентов инструментов и скилов",
-        facts,
-        rows,
-    )
-    assert factual["show_facts"] is True
-    assert factual["show_available"] is True
-    assert factual["show_closed"] is True
-    assert factual["show_fact_summary"] is False
-    assert factual["show_next_recommendation"] is False
-
-    opinion = module._operator_block_policy(
-        "проверь инструменты и скажи что ты думаешь",
-        facts,
-        rows,
-    )
-    assert opinion["show_fact_summary"] is True
-    assert opinion["show_next_recommendation"] is False
-
-    next_only = module._operator_block_policy(
-        "проверь инструменты и скажи что делать дальше",
-        facts,
-        rows,
-    )
-    assert next_only["show_fact_summary"] is False
-    assert next_only["show_next_recommendation"] is True
-
-    both = module._operator_block_policy(
-        "проверь инструменты и скажи что ты думаешь что делать дальше",
-        facts,
-        rows,
-    )
-    assert both["show_fact_summary"] is True
-    assert both["show_next_recommendation"] is True
-
-
 def test_terminal_truth_ui_detects_work_marker_split_across_chunks(capsys) -> None:
     module = _module()
     module._LAST_USER_TEXT = "проверь инструменты и скажи что ты думаешь что делать дальше"
@@ -769,99 +782,6 @@ def test_terminal_truth_ui_detects_work_marker_split_across_chunks(capsys) -> No
     assert "external_adapter:autogen" in output
 
 
-def test_operator_block_policy_uses_helper_semantic_route_without_template_spam() -> None:
-    module = _module()
-
-    facts = {
-        "execution_allowed": "false",
-        "proposal_only": "true",
-        "pc_control_allowed": "false",
-    }
-    rows = [
-        {
-            "name": "external_adapter:mcp_python_sdk",
-            "status": "available",
-            "availability_status": "available",
-        }
-    ]
-    helper_route = {
-        "helper_model_called": True,
-        "helper_model_used": True,
-        "selection_source": "helper_model",
-        "helper_model_id": "jarvis:helper3b",
-        "helper_decision_confidence": 0.91,
-        "intent_family": "EXTERNAL_ADAPTER_SELECTION",
-        "selected_tools": ("external_adapter:mcp_python_sdk",),
-        "selected_agent_roles": ("tool_selector_agent",),
-        "risk_class": "risk_gate",
-        "evidence_required": True,
-        "retrieved_snippet_count": 1,
-    }
-
-    plain = module._operator_block_policy(
-        "проверь инструменты",
-        facts,
-        rows,
-        helper_route,
-    )
-    assert plain["helper_semantic_used"] is True
-    assert plain["show_fact_summary"] is False
-    assert plain["show_next_recommendation"] is False
-
-    opinion = module._operator_block_policy(
-        "проверь инструменты и скажи что ты думаешь",
-        facts,
-        rows,
-        helper_route,
-    )
-    assert opinion["show_fact_summary"] is True
-    assert opinion["show_next_recommendation"] is False
-
-    next_step = module._operator_block_policy(
-        "проверь инструменты и скажи что делать дальше",
-        facts,
-        rows,
-        helper_route,
-    )
-    assert next_step["show_fact_summary"] is False
-    assert next_step["show_next_recommendation"] is True
-
-    both = module._operator_block_policy(
-        "проверь инструменты и скажи что ты думаешь что делать дальше",
-        facts,
-        rows,
-        helper_route,
-    )
-    assert both["show_fact_summary"] is True
-    assert both["show_next_recommendation"] is True
-
-
-def test_operator_block_policy_does_not_show_summary_without_grounded_input() -> None:
-    module = _module()
-
-    empty_route = {
-        "helper_model_called": True,
-        "helper_model_used": True,
-        "selection_source": "helper_model",
-        "intent_family": "CONVERSATION",
-        "selected_tools": (),
-        "selected_agent_roles": (),
-        "evidence_required": False,
-        "retrieved_snippet_count": 0,
-    }
-
-    policy = module._operator_block_policy(
-        "скажи что ты думаешь и что делать дальше",
-        {},
-        [],
-        empty_route,
-    )
-
-    assert policy["helper_semantic_used"] is True
-    assert policy["show_fact_summary"] is False
-    assert policy["show_next_recommendation"] is False
-
-
 def test_terminal_operator_renderer_does_not_emit_canned_summary_or_next_steps() -> None:
     source = _source()
 
@@ -876,3 +796,178 @@ def test_terminal_operator_renderer_does_not_emit_canned_summary_or_next_steps()
     )
     for marker in forbidden:
         assert marker not in source
+
+
+def test_terminal_import_never_issues_a_credential(monkeypatch):
+    from MAKSIMAR_CORE_LIB.security_layer import host_principal
+    monkeypatch.setattr(host_principal, "bootstrap_local_owner_token",
+                        lambda **_: pytest.fail("import must not bootstrap"))
+    _module()
+
+
+@pytest.mark.parametrize("entrypoint", ["_print_command_response", "_print_stream_response"],
+                         ids=["command", "stream"])
+def test_terminal_posts_fresh_signed_context_without_owner_claim(monkeypatch, capsys, tmp_path, entrypoint):
+    import CONTROL_PLANE.api_server as api
+    from tests.control_plane.test_jarvis_live_hot_endpoint_smoke import canonical_result
+    module = _module()
+    issuer = module.bootstrap_local_owner_token
+    issued_sessions = []
+    credentials = []
+    constructor_flags = []
+    requests = []
+    def issue(**kwargs):
+        issued_sessions.append(kwargs["session_id"])
+        return issuer(**kwargs)
+    monkeypatch.setattr(module, "bootstrap_local_owner_token", issue)
+    monkeypatch.setattr(api, "run_canonical_semantic_turn", lambda **_: canonical_result())
+    def handle(request):
+        payload = json.loads(request.content)
+        credentials.append(payload["host_auth_token"])
+        requests.append(str(request.url))
+        assert payload["session_id"] == module.SESSION_ID
+        assert "identity" not in payload and "pc_control_allowed" not in payload
+        result = api.jarvis_live_hot(payload)
+        assert result["owner_pc_action_eligible"] is True
+        assert result["pc_operation_authorized_for_this_turn"] is False
+        assert result["executed"] is False and result["execution_receipt"] is None
+        return httpx.Response(200, json=result)
+    real_client = httpx.Client
+    def client(**kwargs):
+        constructor_flags.append((kwargs["trust_env"], kwargs["follow_redirects"]))
+        return real_client(transport=httpx.MockTransport(handle), **kwargs)
+    monkeypatch.setattr(module.httpx, "Client", client)
+    for _ in range(2):
+        getattr(module, entrypoint)("authenticated terminal request")
+    assert issued_sessions == [module.SESSION_ID, module.SESSION_ID]
+    assert requests == [module.HOT_URL, module.HOT_URL]
+    assert constructor_flags == [(False, False), (False, False)]
+    rendered = capsys.readouterr()
+    assert all(value not in rendered.out + rendered.err for value in credentials)
+    for path in tmp_path.rglob("*.json*"):
+        assert all(value not in path.read_text() for value in credentials)
+
+
+@pytest.mark.parametrize("case", ["missing", "forged", "expired", "wrong_payload_session",
+                                  "wrong_signed_session", "non_owner", "json_owner", "malformed"])
+def test_terminal_auth_rejection_precedes_http(monkeypatch, case):
+    from MAKSIMAR_CORE_LIB.security_layer import host_principal as host
+    module = _module()
+    payload = {"text": "test", "session_id": module.SESSION_ID}
+    if case not in {"missing", "json_owner"}:
+        token = host.issue_host_token(host.HostPrincipal(
+            "synthetic-owner", "other" if case == "wrong_signed_session" else module.SESSION_ID,
+            "child" if case == "non_owner" else "owner"),
+            ttl_seconds=-1 if case == "expired" else 300)
+        payload["host_auth_token"] = token + ".invalid" if case == "forged" else token
+    if case == "wrong_payload_session":
+        payload["session_id"] = "other"
+    if case == "json_owner":
+        payload["identity"] = {"identity_id": "aleksandr", "profile_type": "owner", "verified": True}
+    if case == "malformed":
+        payload["host_auth_token"] = "body.подпись"
+    monkeypatch.setattr(module.httpx, "Client", lambda **_: pytest.fail("HTTP before authenticated binding"))
+    assert module._post_json(module.HOT_URL, payload) is None
+    assert module._LAST_API_ERROR == "canonical_host_auth_context_required"
+
+
+@pytest.mark.parametrize("case", ["failure", "empty", "none", "untyped"])
+def test_terminal_failed_issuer_has_no_http_or_secret_diagnostic(monkeypatch, capsys, case):
+    module = _module()
+    def issue(**_):
+        if case == "failure":
+            raise RuntimeError("private-bootstrap-sentinel")
+        return {"empty": "", "none": None, "untyped": {}}[case]
+    monkeypatch.setattr(module, "bootstrap_local_owner_token", issue)
+    monkeypatch.setattr(module.httpx, "Client", lambda **_: pytest.fail("failed issuer must not send HTTP"))
+    with pytest.raises(RuntimeError, match="canonical_host_bootstrap") as error:
+        module._build_hot_payload("test")
+    assert "private-bootstrap-sentinel" not in str(error.value)
+    assert error.value.__suppress_context__ or error.value.__context__ is None
+    module._print_stream_response("test")
+    rendered = capsys.readouterr()
+    assert "private-bootstrap-sentinel" not in rendered.out + rendered.err
+
+
+@pytest.mark.parametrize("url", [
+    "http://0.0.0.0:8000/jarvis-live/hot", "http://192.0.2.1:8000/jarvis-live/hot",
+    "http://localhost:8000/jarvis-live/hot", "http://foreign.invalid:8000/jarvis-live/hot",
+    "https://127.0.0.1:8000/jarvis-live/hot", "http://127.0.0.1:8001/jarvis-live/hot",
+    "http://127.0.0.1:8000/other", "http://user:pass@127.0.0.1:8000/jarvis-live/hot",
+    "http://127.0.0.1:8000/jarvis-live/hot?token=untrusted",
+    "http://127.0.0.1:8000/jarvis-live/hot#fragment",
+    "http://127.0.0.1:8000/jarvis-live/%68ot", "http://127.0.0.1:8000/jarvis-live/hot?",
+], ids=["wildcard", "remote", "hostname", "foreign", "scheme", "port", "path", "userinfo",
+        "query", "fragment", "encoded_path", "empty_query"])
+def test_terminal_destination_checked_before_issuance_and_send(monkeypatch, url):
+    module = _module()
+    monkeypatch.setattr(module, "HOT_URL", url)
+    monkeypatch.setattr(module, "bootstrap_local_owner_token", lambda **_: pytest.fail("unsafe issuance"))
+    monkeypatch.setattr(module, "identity_from_host_token", lambda *_: pytest.fail("unsafe destination validation"))
+    monkeypatch.setattr(module.httpx, "Client", lambda **_: pytest.fail("unsafe destination send"))
+    with pytest.raises(RuntimeError, match="canonical_local_host_endpoint_required"):
+        module._build_hot_payload("test")
+    assert module._post_json(url, {"session_id": module.SESSION_ID, "host_auth_token": "unused"}) is None
+
+
+def test_terminal_wildcard_config_does_not_become_trusted(monkeypatch):
+    module = _module()
+    monkeypatch.setattr(module, "CONTROL_PLANE_HOST", "0.0.0.0")
+    monkeypatch.setattr(module, "HOT_URL", "http://0.0.0.0:8000/jarvis-live/hot")
+    monkeypatch.setattr(module, "bootstrap_local_owner_token", lambda **_: pytest.fail("wildcard issuance"))
+    with pytest.raises(RuntimeError, match="canonical_local_host_endpoint_required"):
+        module._build_hot_payload("test")
+
+
+@pytest.mark.parametrize("status", [302, 307, 401, 403])
+def test_terminal_proxy_redirect_and_auth_errors_never_forward_or_replay(monkeypatch, status):
+    module = _module()
+    for name in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+        monkeypatch.setenv(name, "http://proxy.invalid:3128")
+    monkeypatch.delenv("NO_PROXY", raising=False)
+    monkeypatch.delenv("no_proxy", raising=False)
+    requests = []
+    real_client = httpx.Client
+    def handle(request):
+        requests.append(str(request.url))
+        return httpx.Response(status, headers={"Location": "http://foreign.invalid/collect"})
+    def client(**kwargs):
+        assert kwargs["trust_env"] is False and kwargs["follow_redirects"] is False
+        return real_client(transport=httpx.MockTransport(handle), **kwargs)
+    monkeypatch.setattr(module.httpx, "Client", client)
+    assert module._post_json(module.HOT_URL, module._build_hot_payload("test")) is None
+    assert requests == [module.HOT_URL]
+    assert module._LAST_API_ERROR.startswith("http_error status=")
+
+
+def test_terminal_httpx_does_not_consult_environment_proxy_configuration(monkeypatch):
+    module = _module()
+    monkeypatch.setenv("HTTP_PROXY", "http://proxy.invalid:3128")
+    # Exercise HTTPX's real constructor with no supplied transport, so its
+    # environment-proxy branch would run if trust_env were accidentally enabled.
+    monkeypatch.setattr(httpx._client, "get_environment_proxies",
+                        lambda: pytest.fail("environment proxy configuration consulted"))
+    monkeypatch.setattr(httpx._client, "HTTPTransport", lambda **_: httpx.MockTransport(
+        lambda request: httpx.Response(200, json={"response_text": "offline"})))
+    result = module._post_json(module.HOT_URL, module._build_hot_payload("test"))
+    assert result == {"response_text": "offline"}
+
+
+@pytest.mark.parametrize("kind", ["request", "unexpected"])
+def test_terminal_transport_error_does_not_expose_authenticated_payload(monkeypatch, capsys, kind):
+    module = _module()
+    credentials = []
+    real_client = httpx.Client
+    def handle(request):
+        credentials.append(json.loads(request.content)["host_auth_token"])
+        if kind == "request":
+            raise httpx.RequestError(request.content.decode(), request=request)
+        raise RuntimeError(request.content.decode())
+    monkeypatch.setattr(module.httpx, "Client", lambda **kw: real_client(transport=httpx.MockTransport(handle), **kw))
+    monkeypatch.setattr(module, "_get_json", lambda _: {"ok": True})
+    module._set_debug(True)
+    module._print_stream_response("test")
+    rendered = capsys.readouterr()
+    assert len(credentials) == 1
+    assert credentials[0] not in rendered.out + rendered.err + module._LAST_API_ERROR
+    assert "host_auth_token" not in rendered.out + rendered.err + module._LAST_API_ERROR

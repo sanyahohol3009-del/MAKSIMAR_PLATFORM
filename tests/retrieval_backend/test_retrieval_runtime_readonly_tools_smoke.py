@@ -20,6 +20,9 @@ def test_retrieval_runtime_readonly_availability_is_source_bound_and_read_only()
 
     assert [item["backend_kind"] for item in read_model] == ["mgrep", "sqlite_vec", "qdrant"]
     assert all(item["source_present"] is True for item in read_model)
+    assert all(item["configured"] is False for item in read_model)
+    assert all(item["available"] is False for item in read_model)
+    assert all(item["usable_now"] is item["available"] for item in read_model)
     assert all(item["read_only"] is True for item in read_model)
     assert all(item["direct_execution_allowed"] is False for item in read_model)
     assert all(item["canonical_write_allowed"] is False for item in read_model)
@@ -28,24 +31,31 @@ def test_retrieval_runtime_readonly_availability_is_source_bound_and_read_only()
     assert all(item["docker_required_now"] is False for item in read_model)
 
 
-def test_mgrep_readonly_fails_closed_without_built_executable() -> None:
+def test_mgrep_readonly_fails_closed_without_auth_index_and_provider(monkeypatch) -> None:
+    monkeypatch.delenv("MXBAI_API_KEY", raising=False)
     status = inspect_mgrep_readonly_availability(PROJECT_ROOT).to_read_model()
 
     assert status["source_present"] is True
-    assert status["selected_tool"] in {"mgrep_readonly", "repo_search"}
-    if status["usable_now"] is False:
-        assert status["selected_tool"] == "repo_search"
-        assert "dist/index.js" in str(status["unavailable_reason"])
+    assert status["implementation_exists"] is True
+    assert status["configured"] is False
+    assert status["available"] is False
+    assert status["usable_now"] is False
+    assert status["selected_tool"] == "repo_search"
+    assert "MXBAI_API_KEY" in str(status["unavailable_reason"])
+    assert "index" in str(status["unavailable_reason"])
 
 
-def test_sqlite_vec_readonly_falls_back_without_local_extension() -> None:
+def test_sqlite_vec_extension_is_not_misreported_as_jarvis_runtime() -> None:
     status = inspect_sqlite_vec_readonly_availability(PROJECT_ROOT).to_read_model()
 
     assert status["source_present"] is True
-    assert status["selected_tool"] in {"sqlite_vec_readonly", "repo_search"}
-    if status["usable_now"] is False:
-        assert status["selected_tool"] == "repo_search"
-        assert "loadable extension" in str(status["unavailable_reason"])
+    assert status["implementation_exists"] is True
+    assert status["configured"] is False
+    assert status["available"] is False
+    assert status["usable_now"] is False
+    assert status["selected_tool"] == "repo_search"
+    assert "vector database" in str(status["unavailable_reason"])
+    assert "query owner" in str(status["unavailable_reason"])
 
 
 def test_qdrant_readonly_is_status_only_until_runtime_batch() -> None:

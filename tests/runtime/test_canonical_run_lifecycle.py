@@ -258,18 +258,20 @@ def test_exact_heartbeat_propagation_and_actual_preflight_chain(world,monkeypatc
         monkeypatch.setattr(stop_gate,'log',lambda _:None)
         monkeypatch.setattr(incident_history,'INCIDENT_HISTORY_FILE',world.state/'incident_history.jsonl')
         monkeypatch.setattr(incident_history,'ensure_runtime_layout',lambda:None)
-        assert stop_gate.recover_previous_run_degradation() is True
+        assert preflight.recover_previous_run_degradation() is True
         assert not marker.exists() and trigger.read_text()=='previous trigger' and reason.read_text()=='previous reason'
-        receipt=json.loads((world.state/'incident_history.jsonl').read_text())
+        receipts=[json.loads(line) for line in (world.state/'incident_history.jsonl').read_text().splitlines()]
+        assert [r['status'] for r in receipts] == ['recovery_pending', 'recovered']
+        receipt=receipts[-1]
         assert receipt['status']=='recovered' and receipt['run_id']==rc.read_run_metadata()['run_id']
         # An incident after run init but before a later PID mtime is current.
         marker.write_text('current startup incident')
         epoch=rc.read_run_metadata()['wall_time']
         os.utime(marker,ns=(int(epoch*1e9)+1000,)*2)
         os.utime(world.root/'RUNTIME/runtime.pid',ns=(int(epoch*1e9)+1000000,)*2)
-        assert stop_gate.recover_previous_run_degradation() is False
+        assert preflight.recover_previous_run_degradation() is False
         assert marker.read_text()=='current startup incident'
-        assert len((world.state/'incident_history.jsonl').read_text().splitlines())==1
+        assert len((world.state/'incident_history.jsonl').read_text().splitlines())==2
         # Abrupt owner loss: retained RUNNING metadata cannot substitute for process proof.
         (world.proc/str(os.getpid())/'cmdline').write_bytes(b'')
         assert rc.read_run_status()=='running'

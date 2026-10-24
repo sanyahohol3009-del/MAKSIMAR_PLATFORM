@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from tools.jarvis_live_runtime.stt_engine_policy import build_default_stt_engine_policy
@@ -21,13 +23,53 @@ from tools.jarvis_live_runtime.wake_vad_echo_guard_policy import (
 def test_voice_edge_v2_routes_only_to_control_plane() -> None:
     policy = build_default_voice_edge_v2_policy()
 
-    assert "127.0.0.1:8765" in policy.control_plane_stream_url
+    assert "127.0.0.1:8000" in policy.control_plane_stream_url
     assert "11434" not in policy.control_plane_stream_url
     assert policy.direct_ollama_allowed is False
-    assert policy.pc_control_allowed is False
-    assert policy.direct_execution_allowed is False
+    assert policy.visibility_allowed is True
+    assert policy.selection_allowed is True
+    assert policy.safe_owner_pc_control_allowed is True
+    assert policy.control_plane_stream_url.endswith("/jarvis-live/hot")
+    assert policy.protected_execution_allowed is False
+    assert policy.owner_gate_required is True
+    assert policy.approval_required is True
     assert policy.public_network_allowed is False
     assert policy.tunnel_allowed is False
+
+
+def test_existing_windows_edge_uses_canonical_8000_hot_endpoint_only() -> None:
+    edge_root = Path("/mnt/c/MAKSIMAR_EDGE")
+    production_paths = (
+        edge_root / "jarvis_windows_live_runtime.py",
+        edge_root / "jarvis_windows_voice_edge.py",
+    )
+    if not all(path.is_file() for path in production_paths):
+        pytest.skip("Windows Edge mount is unavailable")
+
+    combined = "\n".join(path.read_text(encoding="utf-8-sig") for path in production_paths)
+    assert 'CONTROL_PLANE_URL = "http://127.0.0.1:8000/jarvis-live/hot"' in combined
+    assert "127.0.0.1:8765" not in combined
+    assert "/jarvis-live/chat/stream" not in combined
+    assert "127.0.0.1:11434" not in combined
+    assert "/api/generate" not in combined
+    assert "/api/chat" not in combined
+
+
+def test_existing_windows_edge_does_not_own_control_plane_lifecycle() -> None:
+    edge_root = Path("/mnt/c/MAKSIMAR_EDGE")
+    production_paths = (
+        edge_root / "jarvis_windows_live_runtime.py",
+        edge_root / "jarvis_windows_voice_edge.py",
+    )
+    if not all(path.is_file() for path in production_paths):
+        pytest.skip("Windows Edge mount is unavailable")
+
+    combined = "\n".join(path.read_text(encoding="utf-8-sig") for path in production_paths)
+    for forbidden in (
+        "CONTROL_PLANE.api_server", "uvicorn", "start_jarvis_edge",
+        "JARVIS_EDGE_OLLAMA_URL", "OLLAMA_URL", "OllamaClient",
+    ):
+        assert forbidden not in combined
 
 
 def test_voice_personality_blocks_generic_tails() -> None:
@@ -93,10 +135,14 @@ def test_invalid_direct_ollama_policy_fails() -> None:
         VoiceEdgeV2Policy(
             policy_id="bad",
             control_plane_stream_url="http://127.0.0.1:11434/api/generate",
-            control_plane_health_url="http://127.0.0.1:8765/jarvis-live/health",
+            control_plane_health_url="http://127.0.0.1:8000/jarvis-live/health",
             direct_ollama_allowed=True,
-            pc_control_allowed=False,
-            direct_execution_allowed=False,
+            visibility_allowed=True,
+            selection_allowed=True,
+            safe_owner_pc_control_allowed=True,
+            protected_execution_allowed=False,
+            owner_gate_required=True,
+            approval_required=True,
             public_network_allowed=False,
             tunnel_allowed=False,
             final_mode_requires_always_listening=True,

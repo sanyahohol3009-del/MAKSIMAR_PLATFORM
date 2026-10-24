@@ -55,9 +55,21 @@ def heartbeat_age(path: Path) -> str:
 
 def heartbeat_status(path: Path) -> str:
     """Return simplified heartbeat status."""
-    age = heartbeat_age_seconds(path)
-    if age is None:
+    payload = read_json(path)
+    ts = payload.get("ts")
+    if not isinstance(ts, (int, float)):
         return "MISSING"
+    age = time.time() - float(ts)
+    expected_source = {
+        RUNTIME_HEARTBEAT_FILE: "process_supervisor",
+        GUARD_HEARTBEAT_FILE: "stop_gate_watcher",
+        CORE_GUARD_HEARTBEAT_FILE: "core_guard",
+        KERNEL_HEARTBEAT_FILE: "kernel_watchdog",
+    }.get(path)
+    if age < -5 or payload.get("source") != expected_source:
+        return "DEGRADED"
+    if payload.get("status") != "alive":
+        return "STOPPED" if payload.get("status") == "stopped" else "DEGRADED"
     if age <= HEARTBEAT_FRESH_SEC:
         return "ALIVE"
     return "STALE"
@@ -132,14 +144,36 @@ def preflight_status() -> str:
 
 
 def tail_log(path: Path, max_lines: int = 3) -> list[str]:
-    """Return tail lines from a log file."""
-    if not path.exists():
+    """Read at most 64 KiB of the existing log; never load it for a small tail."""
+    if max_lines <= 0:
         return []
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except Exception:
+        with path.open("rb") as handle:
+            handle.seek(0, os.SEEK_END)
+            cursor = handle.tell()
+            chunks: list[bytes] = []
+            read_bytes = 0
+            newline_count = 0
+            while cursor > 0 and read_bytes < 65536 and newline_count <= max_lines:
+                count = min(8192, cursor, 65536 - read_bytes)
+                cursor -= count
+                handle.seek(cursor)
+                chunk = handle.read(count)
+                chunks.insert(0, chunk)
+                read_bytes += len(chunk)
+                newline_count += chunk.count(b"\n")
+            data = b"".join(chunks)
+    except OSError:
         return []
-    return lines[-max_lines:]
+    lines = data.decode("utf-8", errors="replace").splitlines()
+    truncated = cursor > 0 and newline_count <= max_lines
+    if cursor > 0 and newline_count:
+        lines = lines[1:]  # The first suffix fragment is not a complete source line.
+    lines = lines[-max_lines:]
+    if truncated:
+        marker = "[log tail truncated to 64 KiB; source retained] "
+        lines = [marker + lines[0], *lines[1:]] if lines else [marker]
+    return lines
 
 
 def render_screen() -> str:

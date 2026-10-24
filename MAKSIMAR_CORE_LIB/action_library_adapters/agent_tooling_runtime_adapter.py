@@ -6,7 +6,9 @@ from typing import Any
 from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
     build_jarvis_external_adapter_visibility_read_model,
 )
-from tools.jarvis_live_runtime.agent_tooling_runtime_probe import build_agent_tooling_runtime_probe_read_model
+from MAKSIMAR_CORE_LIB.action_library_adapters.agent_tooling_runtime_probe import (
+    build_agent_tooling_runtime_probe_read_model,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,9 +35,9 @@ class AgentToolingRuntimeAdapterReadModel:
         }
 
 
-def build_agent_tooling_runtime_adapter_read_model() -> dict[str, Any]:
-    visibility = build_jarvis_external_adapter_visibility_read_model()
-    probe = build_agent_tooling_runtime_probe_read_model()
+def build_agent_tooling_runtime_adapter_read_model(probe_read_model: dict[str, Any] | None = None) -> dict[str, Any]:
+    probe = probe_read_model if probe_read_model is not None else build_agent_tooling_runtime_probe_read_model()
+    visibility = build_jarvis_external_adapter_visibility_read_model(probe_read_model=probe)
     return AgentToolingRuntimeAdapterReadModel(
         adapter_id="agent_tooling_runtime_adapter_v1",
         runtime_python=probe["runtime_python"],

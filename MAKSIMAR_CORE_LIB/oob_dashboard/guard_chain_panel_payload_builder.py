@@ -8,9 +8,9 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.guard_chain_panel_content_contract import (
 )
 
 
-def build_guard_chain_panel_payload() -> dict[str, Any]:
+def build_guard_chain_panel_payload(observation: dict | None = None) -> dict[str, Any]:
     """Build canonical payload for the guard-chain panel."""
-    contract = build_guard_chain_panel_content_contract()
+    contract = build_guard_chain_panel_content_contract(observation=observation)
     entry = contract.entries[0]
 
     return {

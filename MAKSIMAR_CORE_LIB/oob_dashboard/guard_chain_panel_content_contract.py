@@ -6,15 +6,6 @@ from typing import Literal
 from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_guard_chain_truth_view import (
     build_foundation_guard_chain_truth_view,
 )
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_live_historical_state_split_view import (
-    build_foundation_live_historical_state_split_view,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_truth_consistency_view import (
-    build_foundation_truth_consistency_view,
-)
-from MAKSIMAR_CORE_LIB.oob_dashboard.foundation_unified_dashboard_view import (
-    build_foundation_unified_dashboard_view,
-)
 
 GuardChainPanelState = Literal[
     "normal",
@@ -170,33 +161,31 @@ class GuardChainPanelContentContract:
 
 
 def _derive_guard_chain_panel_state(
-    total_entries: int,
-    broken_entries: int,
-    dead_entries: int,
-    degraded_entries: int,
-    mismatch_entries: int,
-    warming_up_panels: int,
-    historical_only_panels: int,
+    total_entries: int, broken_entries: int, dead_entries: int,
+    degraded_entries: int, mismatch_entries: int, warming_up_panels: int,
+    historical_only_panels: int, *, unknown_entries: int = 0,
+    partial_entries: int = 0, alive_entries: int = 0, consistent_entries: int = 0,
 ) -> GuardChainPanelState:
-    if total_entries == 0:
-        return "empty"
-    if warming_up_panels > 0:
-        return "loading"
     if broken_entries > 0 or dead_entries > 0:
         return "incident"
+    if total_entries == 0:
+        return "empty"
     if mismatch_entries > 0:
         return "stale"
-    if historical_only_panels > 0 or degraded_entries > 0:
+    if (total_entries != 4 or unknown_entries > 0 or partial_entries > 0
+            or historical_only_panels > 0 or degraded_entries > 0):
+        return "degraded"
+    if warming_up_panels > 0:
+        return "loading"
+    if alive_entries != total_entries or consistent_entries != total_entries:
         return "degraded"
     return "normal"
 
 
-def build_guard_chain_panel_content_contract() -> GuardChainPanelContentContract:
+def build_guard_chain_panel_content_contract(observation: dict | None = None) -> GuardChainPanelContentContract:
     """Build canonical content contract for the guard-chain panel."""
-    guard_chain_truth_view = build_foundation_guard_chain_truth_view()
-    unified_dashboard_view = build_foundation_unified_dashboard_view()
-    live_historical_view = build_foundation_live_historical_state_split_view()
-    truth_consistency_view = build_foundation_truth_consistency_view()
+    guard_chain_truth_view = build_foundation_guard_chain_truth_view(observation=observation)
+    historical = (4 if isinstance(observation, dict) and observation.get("historical_only") is True else 0)
 
     truth_scopes = {entry.truth_scope for entry in guard_chain_truth_view.entries}
 
@@ -207,9 +196,13 @@ def build_guard_chain_panel_content_contract() -> GuardChainPanelContentContract
             broken_entries=guard_chain_truth_view.broken_entries,
             dead_entries=guard_chain_truth_view.dead_entries,
             degraded_entries=guard_chain_truth_view.degraded_entries,
-            mismatch_entries=truth_consistency_view.mismatch_entries,
-            warming_up_panels=unified_dashboard_view.warming_up_panels,
-            historical_only_panels=live_historical_view.historical_only_entries,
+            mismatch_entries=guard_chain_truth_view.mismatch_entries,
+            warming_up_panels=sum(item.derived_status == "WARMING_UP" for item in guard_chain_truth_view.entries),
+            historical_only_panels=historical,
+            unknown_entries=guard_chain_truth_view.unknown_entries,
+            partial_entries=guard_chain_truth_view.partial_entries,
+            alive_entries=guard_chain_truth_view.alive_entries,
+            consistent_entries=guard_chain_truth_view.consistent_entries,
         ),
         total_chain_entries=guard_chain_truth_view.total_entries,
         consistent_chain_entries=guard_chain_truth_view.consistent_entries,
@@ -220,8 +213,8 @@ def build_guard_chain_panel_content_contract() -> GuardChainPanelContentContract
         degraded_chain_entries=guard_chain_truth_view.degraded_entries,
         dead_chain_entries=guard_chain_truth_view.dead_entries,
         broken_chain_entries=guard_chain_truth_view.broken_entries,
-        warming_up_panels=unified_dashboard_view.warming_up_panels,
-        historical_only_panels=live_historical_view.historical_only_entries,
+        warming_up_panels=sum(item.derived_status == "WARMING_UP" for item in guard_chain_truth_view.entries),
+        historical_only_panels=historical,
         runtime_entry_present="runtime" in truth_scopes,
         guard_entry_present="guard" in truth_scopes,
         core_guard_entry_present="core_guard" in truth_scopes,
@@ -232,8 +225,8 @@ def build_guard_chain_panel_content_contract() -> GuardChainPanelContentContract
         operator_visible=True,
         description=(
             "Canonical guard-chain panel content contract derived from "
-            "foundation guard-chain truth view, foundation unified dashboard view, "
-            "foundation live/historical split view, and foundation truth consistency view."
+            "one canonical observed guard-chain truth view; "
+            "unverified and historical evidence cannot grant health."
         ),
     )
 

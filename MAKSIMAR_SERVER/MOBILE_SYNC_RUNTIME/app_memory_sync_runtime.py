@@ -56,6 +56,7 @@ class AppMemorySyncDecision:
             raise ValueError("app memory runtime accepts only app_memory envelopes")
         if self.cursor.memory_domain != "app_memory":
             raise ValueError("app memory runtime requires app_memory cursor")
+        self.session.validate_reference_binding(self.envelope, self.cursor)
         if self.envelope.policy_ref != self.policy.policy_ref:
             raise ValueError("envelope policy_ref must match runtime policy")
         if self.session.policy.policy_ref != self.policy.policy_ref:

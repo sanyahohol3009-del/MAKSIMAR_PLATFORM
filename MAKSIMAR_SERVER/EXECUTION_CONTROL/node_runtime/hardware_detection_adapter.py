@@ -498,47 +498,148 @@ def _detect_windows_parent_memory():
     return _parse_windows_parent_memory(raw, started=started, finished=time.monotonic())
 
 
-def _memory_constraint_domains(available_bytes, *, host_observation=None):
+def _cgroup_interface_state(path):
+    # Unlike _read_text_file, ENOENT is distinct from unreadable/unsafe metadata.
+    import stat
+    try:
+        mode = os.lstat(path).st_mode
+        return "PRESENT" if stat.S_ISREG(mode) else "UNKNOWN"
+    except FileNotFoundError:
+        return "ABSENT"
+    except OSError:
+        return "UNKNOWN"
+
+
+def _cgroup_v2_topology(*, process_pid=None):
+    """Prove a full hierarchy view, not merely a namespace-visible '/' path."""
+    if process_pid is not None and (type(process_pid) is not int or process_pid <= 0):
+        return {"status": "UNKNOWN", "mountinfo": ""}
+    proc = "/proc/self" if process_pid is None else f"/proc/{process_pid}"
+    access_prefix = "" if process_pid is None else proc + "/root"
+    raw = _read_text_file(proc + "/mountinfo")
+    proof = {"status": "UNKNOWN", "mountinfo": raw}
+    if process_pid is not None:
+        proof["process_pid"] = process_pid
+    try:
+        proof["cgroup_namespace"] = os.readlink(proc + "/ns/cgroup")
+        proof["mount_namespace"] = os.readlink(proc + "/ns/mnt")
+        # Membership paths are relative to the reader's cgroup namespace.
+        # A different coordinate namespace cannot be silently treated as self.
+        if process_pid is not None and proof["cgroup_namespace"] != os.readlink("/proc/self/ns/cgroup"):
+            return proof
+    except OSError:
+        return proof
+    if (not re.fullmatch(r"cgroup:\[[0-9]+\]", proof["cgroup_namespace"])
+            or not re.fullmatch(r"mnt:\[[0-9]+\]", proof["mount_namespace"])):
+        return proof
+    mounts = []
+    for line in raw.splitlines():
+        fields = line.split()
+        try:
+            sep = fields.index("-")
+            if sep < 6 or len(fields) != sep + 4:
+                return proof
+            decode = lambda value: re.sub(r"\\(040|011|012|134)",
+                                          lambda match: chr(int(match[1], 8)), value)
+            mount_root, point = decode(fields[3]), decode(fields[4])
+            if "\\" in mount_root or "\\" in point:
+                return proof
+            mounts.append((mount_root, point, fields[sep + 1], fields[0]))
+        except (ValueError, IndexError):
+            return proof
+    candidates = [m for m in mounts if m[1] == "/sys/fs/cgroup"]
+    if len(candidates) != 1:
+        return proof
+    root, point, filesystem, mount_id = candidates[0]
+    proof.update(mount_root=root, mount_point=point, filesystem=filesystem, mount_id=mount_id)
+    if (filesystem != "cgroup2" or root != "/"
+            or any(m[1].startswith(point + "/") for m in mounts)):
+        return proof
+    # Kernel CFTYPE_NOT_ON_ROOT tests cgroup_parent(), not namespace root.
+    # cgroup.type cannot be removed from a live non-root cgroup.
+    inspection_root = access_prefix + point
+    if process_pid is not None:
+        proof["inspection_root"] = inspection_root
+    proof["root_type_state"] = _cgroup_interface_state(inspection_root + "/cgroup.type")
+    proof["root_events_state"] = _cgroup_interface_state(inspection_root + "/cgroup.events")
+    proof["root_memory_states"] = tuple(_cgroup_interface_state(inspection_root + "/" + name)
+                                         for name in ("memory.max", "memory.current"))
+    if (proof["root_type_state"] == "ABSENT"
+            and proof["root_events_state"] == "ABSENT"
+            and proof["root_memory_states"] == ("ABSENT", "ABSENT")
+            and "memory" in _read_text_file(inspection_root + "/cgroup.controllers").split()):
+        proof["status"] = "TRUE_HIERARCHY_ROOT"
+    return proof
+
+
+def _memory_constraint_domains(available_bytes, *, host_observation=None, provenance=None, process_pid=None):
     """Intersect environment/cgroup budgets; unsupported host scope stays unknown."""
     if type(available_bytes) is not int or available_bytes <= 0:
         return (), False
+    if process_pid is not None and (type(process_pid) is not int or process_pid <= 0):
+        return (), False
     domains = [("execution_environment", available_bytes)]
     complete = True
-    cgroups = _read_text_file("/proc/self/cgroup")
+    proc = "/proc/self" if process_pid is None else f"/proc/{process_pid}"
+    access_prefix = "" if process_pid is None else proc + "/root"
+    cgroups = _read_text_file(proc + "/cgroup")
+    topology = None
+    memory_memberships = 0
     for line in cgroups.splitlines():
         parts = line.split(":", 2)
-        if len(parts) != 3:
+        if len(parts) != 3 or not parts[0].isascii() or not parts[0].isdigit():
             complete = False; continue
         controllers, relative = parts[1], parts[2]
         if controllers and "memory" not in controllers.split(","):
             continue
-        root = Path("/sys/fs/cgroup") if not controllers else Path("/sys/fs/cgroup/memory")
-        target = root / relative.lstrip("/")
-        if ".." in target.parts:
+        memory_memberships += 1
+        if (not relative.startswith("/") or "\x00" in relative
+                or any(part in {".", ".."} for part in relative.split("/"))
+                or "//" in relative or (relative != "/" and relative.endswith("/"))
+                or (not controllers and parts[0] != "0")):
             complete = False; continue
+        root = Path(access_prefix + ("/sys/fs/cgroup" if not controllers else "/sys/fs/cgroup/memory"))
+        target = root / relative.lstrip("/")
+        if not controllers:
+            topology = _cgroup_v2_topology(process_pid=process_pid)
+            complete = complete and topology["status"] == "TRUE_HIERARCHY_ROOT"
+        elif process_pid is not None:
+            # Legacy client v1 behavior stays unchanged; provider mount proof
+            # is not established by the legacy hard-coded v1 mount assumption.
+            complete = False
         limit_name, current_name = (("memory.max", "memory.current") if not controllers
                                     else ("memory.limit_in_bytes", "memory.usage_in_bytes"))
-        # Every visible ancestor constrains the same allocation, not only self.
-        chain = []
         cursor = target
         while cursor == root or root in cursor.parents:
-            chain.append(cursor)
+            if cursor == root and not controllers and topology["status"] == "TRUE_HIERARCHY_ROOT":
+                # Only the proven hierarchy root has no resource interfaces.
+                break
+            limit = _read_text_file(str(cursor / limit_name)).strip()
+            current = _read_text_file(str(cursor / current_name)).strip()
+            if limit == "max" and (controllers or (current.isascii() and current.isdigit())):
+                pass
+            elif limit.isascii() and limit.isdigit() and current.isascii() and current.isdigit():
+                domains.append((("cgroup:" if process_pid is None else "provider_cgroup:")
+                                + str(cursor).removeprefix(access_prefix), max(0, int(limit) - int(current))))
+            else:
+                complete = False
             if cursor == root:
                 break
             cursor = cursor.parent
-        for cursor in chain:
-            limit = _read_text_file(str(cursor / limit_name)).strip()
-            current = _read_text_file(str(cursor / current_name)).strip()
-            if limit == "max":
-                continue
-            if limit.isdigit() and current.isdigit():
-                domains.append(("cgroup:" + str(cursor), max(0, int(limit) - int(current))))
-            else:
-                complete = False
-    if not cgroups:
+    if not cgroups or memory_memberships != 1:
         complete = False
-    # Guest/host/commit constrain the same worst-case incremental allocation.
-    # They are never added; missing cgroup ancestors remain incomplete.
+    if topology is not None:
+        after = _cgroup_v2_topology(process_pid=process_pid)
+        stable = after == topology and _read_text_file(proc + "/cgroup") == cgroups
+        complete = complete and stable
+        if provenance is not None:
+            import hashlib
+            provenance.update({k: v for k, v in topology.items() if k != "mountinfo"})
+            provenance.update(membership=cgroups.strip(), stable=stable,
+                              mountinfo_sha256=hashlib.sha256(topology["mountinfo"].encode()).hexdigest(),
+                              root_controls=("NOT_APPLICABLE" if stable and topology["status"] == "TRUE_HIERARCHY_ROOT"
+                                             else "UNKNOWN"))
+    # Simultaneous guest/host/commit constraints are never added.
     kernel = _read_text_file("/proc/sys/kernel/osrelease").lower()
     if not kernel:
         complete = False
@@ -550,7 +651,7 @@ def _memory_constraint_domains(available_bytes, *, host_observation=None):
     return tuple(domains), complete
 
 
-def detect_model_resource_observation() -> dict:
+def detect_model_resource_observation(*, provider_pid=None) -> dict:
     """Targeted fresh physical observations; no logical-node duplication or store."""
     import time
     started = time.monotonic()
@@ -558,7 +659,9 @@ def detect_model_resource_observation() -> dict:
     raw = _read_text_file("/proc/meminfo")
     available = _parse_meminfo_value_kb(raw, "MemAvailable") * 1024
     host = _detect_windows_parent_memory()
-    domains, complete = _memory_constraint_domains(available or None, host_observation=host)
+    cgroup_provenance = {}
+    domains, complete = _memory_constraint_domains(available or None, host_observation=host,
+                                                    provenance=cgroup_provenance, process_pid=provider_pid)
     primary, _ = _detect_nvidia_gpus()
     secondary, _ = _detect_generic_gpus()
     gpus = _merge_gpu_snapshots(primary, secondary)
@@ -571,15 +674,19 @@ def detect_model_resource_observation() -> dict:
             continue
         accelerator_values.append((identity, gpu.vram_free_gb * 1024 ** 3))
     try:
-        threads = len(os.sched_getaffinity(0))
-    except (AttributeError, OSError):
-        threads = os.cpu_count() or 0
+        threads = len(os.sched_getaffinity(0 if provider_pid is None else provider_pid))
+    except (AttributeError, OSError, ValueError):
+        threads = (os.cpu_count() or 0) if provider_pid is None else 0
+        if provider_pid is not None:
+            complete = False
     return {"observed_monotonic": started, "memory_available_bytes": domains,
             "accelerator_available_bytes": tuple(accelerator_values),
             "physical_identity_verified": identities_verified,
             "cpu_threads": threads, "scope_complete": complete,
-            "scope_id": "local_execution_environment",
-            "source": (__name__ + ";windows_parent_cim_v1;local_windows_interop" if host else __name__),
+            "scope_id": "local_execution_environment" if provider_pid is None else f"provider_process:{provider_pid}",
+            "source": ((__name__ + ";windows_parent_cim_v1;local_windows_interop" if host else __name__)
+                       + (";cgroup_v2=" + json.dumps(cgroup_provenance, sort_keys=True, separators=(",", ":"))
+                          if cgroup_provenance else "")),
             "host_memory_observation": host}
 
 
@@ -603,3 +710,96 @@ def detect_node_hardware(node_id: CanonicalNodeId) -> NodeHardwareDetectionContr
         gpus=merged_gpus,
         detection_sources=detection_sources,
     )
+
+
+def observe_provider_process_identity(endpoint: str, *, check_request, proc_root=None):
+    """Read-only endpoint/socket/process association; never management authority."""
+    from pathlib import Path
+    from shutil import which
+    from urllib.parse import urlsplit
+    from ipaddress import ip_address
+    from uuid import UUID
+    from CORE_ROOT.heartbeat_io import _process_start_ticks
+    import hashlib
+    unknown = {"status": "UNKNOWN", "reason": "provider_process_identity_unproven"}
+    try:
+        check_request()
+        url = urlsplit(endpoint)
+        address = ip_address(url.hostname or "")
+        port = url.port if url.port is not None else (80 if url.scheme == "http" else 443)
+        if (url.scheme != "http" or not address.is_loopback or url.username or url.password
+                or url.query or url.fragment or url.path not in ("", "/") or not 1 <= port <= 65535):
+            return {**unknown, "reason": "unsupported_direct_local_endpoint"}
+        # A proxy path cannot be associated with a local listener by assumption.
+        if any(os.environ.get(name) for name in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+                                                 "http_proxy", "https_proxy", "all_proxy")):
+            return {**unknown, "reason": "environment_proxy_binding_unproven"}
+        executable = which("ollama")  # Same installed executable discovery as existing transport.
+        if not executable:
+            return {**unknown, "reason": "provider_executable_unavailable"}
+        expected = Path(executable).resolve(strict=True).stat()
+        raw = _run_command(["ss", "-H", "-ltnpe", f"sport = :{port}"])
+        check_request()
+        candidates = []
+        for line in raw.splitlines():
+            fields = line.split()
+            if len(fields) < 5 or fields[0] != "LISTEN":
+                return {**unknown, "reason": "listener_metadata_malformed"}
+            host, observed_port = fields[3].rsplit(":", 1)
+            host = host.strip("[]")
+            if host == "*":
+                return {**unknown, "reason": "listener_address_ambiguous"}
+            observed_address = ip_address(host)
+            if int(observed_port) != port:
+                return {**unknown, "reason": "listener_port_mismatch"}
+            if observed_address != address and not (observed_address.version == address.version and observed_address.is_unspecified):
+                continue
+            owners = re.findall(r"pid=([0-9]+),fd=([0-9]+)", line)
+            inodes = re.findall(r"\bino:([0-9]+)\b", line)
+            if len(owners) != 1 or len(inodes) != 1:
+                return {**unknown, "reason": "listener_owner_ambiguous_or_inaccessible"}
+            candidates.append((int(owners[0][0]), int(owners[0][1]), inodes[0]))
+        if len(candidates) != 1:
+            return {**unknown, "reason": "listener_not_uniquely_proven"}
+        pid, fd, inode = candidates[0]
+        if pid <= 0 or int(inode) <= 0:
+            return unknown
+        root = Path("/proc") if proc_root is None else Path(proc_root)
+        process = root / str(pid)
+        boot_path = root / "sys/kernel/random/boot_id"
+        boot = _read_text_file(str(boot_path)).strip()
+        if str(UUID(boot)) != boot:
+            return {**unknown, "reason": "kernel_boot_identity_invalid"}
+        ticks = _process_start_ticks(process)
+        if not isinstance(ticks, str) or not ticks.isascii() or not ticks.isdigit() or int(ticks) <= 0:
+            return {**unknown, "reason": "process_start_identity_unavailable"}
+        actual = process.joinpath("exe").stat()
+        if (actual.st_dev, actual.st_ino) != (expected.st_dev, expected.st_ino):
+            return {**unknown, "reason": "listener_executable_identity_mismatch"}
+        socket_identity = f"socket:[{inode}]"
+        if os.readlink(process / "fd" / str(fd)) != socket_identity:
+            return {**unknown, "reason": "listener_socket_identity_mismatch"}
+        namespaces = {name: os.readlink(process / "ns" / name) for name in ("net", "mnt", "cgroup")}
+        client_namespaces = {name: os.readlink(root / "self/ns" / name) for name in ("net", "cgroup")}
+        if (any(not re.fullmatch(name + r":\[[0-9]+\]", value) for name, value in namespaces.items())
+                or any(namespaces[name] != value for name, value in client_namespaces.items())):
+            return {**unknown, "reason": "provider_namespace_coordinates_unproven"}
+        cgroup = _read_text_file(str(process / "cgroup"))
+        mountinfo = _read_text_file(str(process / "mountinfo"))
+        if not cgroup or not mountinfo:
+            return {**unknown, "reason": "provider_scope_metadata_unavailable"}
+        if (_process_start_ticks(process) != ticks
+                or _read_text_file(str(boot_path)).strip() != boot
+                or os.readlink(process / "fd" / str(fd)) != socket_identity):
+            return {**unknown, "reason": "provider_identity_changed_during_read"}
+        identity = {"endpoint": endpoint, "boot_id": boot, "pid": pid,
+                    "process_start_ticks": ticks, "socket_inode": inode, "socket_fd": fd,
+                    "executable_identity": (actual.st_dev, actual.st_ino),
+                    "namespaces": namespaces, "client_coordinate_namespaces": client_namespaces,
+                    "cgroup_membership": cgroup.strip(), "mountinfo_sha256": hashlib.sha256(mountinfo.encode()).hexdigest()}
+        instance = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        check_request()
+        return {"status": "PROVEN", "provider_instance_id": "linux_listener:" + instance,
+                "identity": identity, "management_authority": "NONE"}
+    except (OSError, ValueError, IndexError, TypeError):
+        return unknown

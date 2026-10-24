@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import atexit
+import ipaddress
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -12,6 +14,7 @@ import textwrap
 import unicodedata
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -22,13 +25,23 @@ except ImportError:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from CORE_ROOT.runtime_paths import CONTROL_PLANE_HOST, CONTROL_PLANE_PORT
+from MAKSIMAR_CORE_LIB.security_layer.host_principal import (
+    bootstrap_local_owner_token, identity_from_host_token,
+)
+
 API_LOG_FILE = PROJECT_ROOT / ".runtime" / "jarvis_live" / "api.log"
 HISTORY_FILE = PROJECT_ROOT / ".runtime" / "jarvis_live" / ".chat_history"
 
-API_BASE_URL = "http://127.0.0.1:8765"
-COMMAND_URL = f"{API_BASE_URL}/jarvis-live/command"
-STREAM_URL = f"{API_BASE_URL}/jarvis-live/chat/stream"
-HEALTH_URL = f"{API_BASE_URL}/jarvis-live/health"
+API_BASE_URL = os.environ.get(
+    "MAKSIMAR_CONTROL_PLANE_BASE_URL",
+    f"http://{CONTROL_PLANE_HOST}:{CONTROL_PLANE_PORT}",
+).rstrip("/")
+HOT_URL = f"{API_BASE_URL}/jarvis-live/hot"
+HEALTH_URL = f"{API_BASE_URL}/health"
 STATUS_URL = f"{API_BASE_URL}/jarvis-live/status"
 MODELS_URL = f"{API_BASE_URL}/jarvis-live/models"
 TOOLS_URL = f"{API_BASE_URL}/jarvis-live/tools"
@@ -70,22 +83,6 @@ ANSI = {
     "bg_red": "\033[41m",
 }
 
-PROJECT_COMMANDS = (
-    "/project",
-    "/project status",
-    "/project tree",
-    "/project files",
-    "/project dirty",
-    "/project search",
-    "/project file",
-    "/project outline",
-    "/project imports",
-    "/project tests",
-    "/project roadmap",
-    "/project models",
-    "/project safety",
-)
-
 
 def main() -> int:
     _configure_utf8_stdio()
@@ -113,74 +110,10 @@ def main() -> int:
 
 
 def _dispatch_user_text(user_text: str) -> bool:
-    aliases = {
-        "st": "/status",
-        "g": "/git",
-        "m": "/memory",
-        "p": "/project",
-        "t": "/tools",
-        "mdl": "/models",
-        "ag": "/agents",
-        "sk": "/skills",
-        "ts": "/tests",
-        "h": "/help",
-        "df": "/diff",
-    }
-    user_text = aliases.get(user_text, user_text)
-
+    # Only terminal-UI controls are handled locally. Every content request,
+    # including historical slash commands, enters the canonical Semantic Spine.
     if user_text == "/exit":
         return True
-    if user_text == "/ping":
-        _print_ping()
-        return False
-    if user_text == "/status":
-        _print_full_status()
-        return False
-    if user_text == "/git":
-        _print_git_status()
-        return False
-    if user_text == "/diff":
-        _print_diff()
-        return False
-    if user_text == "/tests":
-        _print_tests(("pytest", "-q", "--tb=short", "--maxfail=20", "tests/"))
-        return False
-    if user_text.startswith("/tests "):
-        _handle_tests_command(user_text[len("/tests "):].strip())
-        return False
-    if user_text.startswith("/show "):
-        _show_file(user_text[len("/show "):].strip())
-        return False
-    if user_text == "/memory":
-        _print_memory()
-        return False
-    if user_text == "/memory recent":
-        _print_memory_recent()
-        return False
-    if user_text == "/memory style":
-        _print_memory_style()
-        return False
-    if user_text == "/memory sources":
-        _print_memory_sources()
-        return False
-    if user_text == "/models":
-        _print_models()
-        return False
-    if user_text == "/tools":
-        _print_tools()
-        return False
-    if user_text == "/agents":
-        _print_agents()
-        return False
-    if user_text == "/skills":
-        _print_skills()
-        return False
-    if user_text == "/debug ollama":
-        _print_models(verbose=True)
-        return False
-    if user_text == "/logs":
-        _print_logs()
-        return False
     if user_text == "/trace on":
         _set_trace(True)
         return False
@@ -205,16 +138,6 @@ def _dispatch_user_text(user_text: str) -> bool:
     if user_text in {"/помощь", "/help"}:
         _print_chat_help()
         return False
-    if user_text.startswith("/command "):
-        _print_command_response(user_text[len("/command "):].strip())
-        return False
-    if user_text.startswith("/stream "):
-        _run_jarvis_turn(user_text[len("/stream "):].strip())
-        return False
-    if user_text == "/project" or user_text.startswith("/project "):
-        _run_jarvis_turn(user_text)
-        return False
-
     _run_jarvis_turn(user_text)
     return False
 
@@ -256,7 +179,17 @@ def _setup_readline() -> None:
         readline.read_history_file(str(HISTORY_FILE))
     except FileNotFoundError:
         pass
-    atexit.register(readline.write_history_file, str(HISTORY_FILE))
+    atexit.register(_write_history_safely)
+
+
+def _write_history_safely() -> None:
+    if readline is None:
+        return
+    try:
+        readline.write_history_file(str(HISTORY_FILE))
+    except OSError:
+        # Chat shutdown must stay clean if the runtime filesystem is read-only.
+        pass
 
 
 def _color(name: str, text: str) -> str:
@@ -459,14 +392,13 @@ def _show_file(file_path: str) -> None:
 
 
 def _print_command_response(text: str) -> None:
-    payload = {"text": _sanitize_text(text), "session_id": SESSION_ID, "pc_control_allowed": False}
-    response = _post_json(COMMAND_URL, payload)
+    response = _post_json(HOT_URL, _build_hot_payload(text))
     if response is None:
         _print_command_unavailable()
         return
+    response_text = _canonical_response_text(response)
+    print(response_text)
     result = response.get("result") if isinstance(response.get("result"), dict) else {}
-    llm_response = response.get("llm_response") or result.get("llm_response") or ""
-    print(str(llm_response))
     error_kind = response.get("error_kind") or result.get("error_kind") or ""
     if error_kind:
         _print_stream_error(
@@ -508,6 +440,8 @@ def _print_memory() -> None:
         "MEMORY",
         (
             f"recent_turn_count={session.get('recent_turn_count', payload.get('recent_turn_count', 0))}",
+            f"logical_component_count={payload.get('logical_component_count', 'UNAVAILABLE')}",
+            f"component_inventory_scope={payload.get('component_inventory_scope', 'UNAVAILABLE')}",
             f"rolling_summary={session.get('rolling_summary', '')}",
             f"active_topics={_csv(session.get('active_topics', ())) }",
             f"session_memory_path={session.get('session_memory_path', payload.get('session_memory_path', ''))}",
@@ -717,40 +651,54 @@ def _print_chat_help() -> None:
         "COMMANDS",
         (
             "/m, /multi                 многострочная вставка; завершение: /end",
-            "/status, st                git status + API status",
-            "/git, g                    git status -sb + git log -5",
-            "/diff, df                  git diff --stat + полный git diff",
-            "/tests, ts                 полный pytest tests/",
-            "/tests all                 полный pytest tests/",
-            "/tests jarvis              pytest tests/jarvis_live_runtime",
-            "/tests tests/<path>        pytest по конкретному пути",
-            "/show <file>               показать файл с номерами строк",
-            "/tools, t                  реальные tools из API",
-            "/agents, ag                реальные agents из API, если endpoint отдаёт",
-            "/skills, sk                реальные skills или runtime surfaces",
-            "/models, mdl               модели из API/Ollama status",
-            "/memory                    память сессии",
-            "/memory recent             последние реплики",
-            "/memory style              стиль",
-            "/memory sources            поверхности памяти",
+            "Любой содержательный запрос отправляется в canonical /jarvis-live/hot.",
             "/mode compact              короткий режим",
             "/mode detailed             подробный режим",
             "/mode debug                полный trace/work metadata",
             "/trace on|off              trace",
             "/debug on|off              debug",
-            "/command <text>            non-stream command route",
-            "/stream <text>             stream route",
-            "/project ...               " + ", ".join(PROJECT_COMMANDS[1:]),
             "/exit                      выход",
         ),
         "cyan",
     )
 
 
+def _require_canonical_host_post_url(url: str) -> None:
+    """Confine signed HOST credentials to the existing local POST endpoint."""
+    try:
+        target = urlsplit(url)
+        valid = (
+            ipaddress.ip_address(CONTROL_PLANE_HOST).is_loopback
+            and target.scheme == "http"
+            and target.hostname == CONTROL_PLANE_HOST
+            and target.port == CONTROL_PLANE_PORT
+            and target.path == "/jarvis-live/hot"
+            and target.username is None and target.password is None
+            and not target.query and not target.fragment
+            and url == f"http://{CONTROL_PLANE_HOST}:{CONTROL_PLANE_PORT}/jarvis-live/hot"
+        )
+    except (TypeError, ValueError):
+        valid = False
+    if not valid:
+        raise RuntimeError("canonical_local_host_endpoint_required")
+
+
 def _post_json(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+    try:
+        _require_canonical_host_post_url(url)
+        session_id = payload.get("session_id")
+        token = payload.get("host_auth_token")
+        if session_id != SESSION_ID or not isinstance(token, str) or not token:
+            raise ValueError("host_context_required")
+        verified = identity_from_host_token(token)
+        if verified is None or verified[0].session_id != session_id:
+            raise ValueError("host_session_binding_required")
+    except Exception:
+        _set_last_api_error("canonical_host_auth_context_required")
+        return None
     timeout = httpx.Timeout(COMMAND_TIMEOUT_SECONDS, connect=min(10.0, COMMAND_TIMEOUT_SECONDS))
     try:
-        with httpx.Client(timeout=timeout) as client:
+        with httpx.Client(timeout=timeout, trust_env=False, follow_redirects=False) as client:
             response = client.post(url, json=payload)
             response.raise_for_status()
             payload_json = response.json()
@@ -762,10 +710,13 @@ def _post_json(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:
         _set_last_api_error(f"timeout url={url}")
         return None
     except httpx.RequestError as exc:
-        _set_last_api_error(_describe_httpx_error(exc, url))
+        _set_last_api_error(f"request_error type={exc.__class__.__name__} url={url}")
         return None
     except ValueError:
         _set_last_api_error(f"invalid_json url={url}")
+        return None
+    except Exception as exc:
+        _set_last_api_error(f"request_error type={exc.__class__.__name__} url={url}")
         return None
 
 
@@ -803,42 +754,56 @@ def _print_stream_response(text: str) -> None:
     if not text:
         print("stream_error=empty_text")
         return
-    payload = {"text": _sanitize_text(text), "session_id": SESSION_ID, "pc_control_allowed": False}
     try:
-        if _stream_json_lines(STREAM_URL, payload) is None:
+        response = _post_json(HOT_URL, _build_hot_payload(text))
+        if response is None:
             _print_command_unavailable()
+            return
+        _render_chunk(_canonical_response_text(response))
+        if _trace_enabled():
+            result = response.get("result") if isinstance(response.get("result"), dict) else {}
+            _print_response_trace(response | result)
     except Exception as exc:
         _print_terminal_runtime_error(text, exc)
 
 
-def _stream_json_lines(url: str, payload: dict[str, Any]) -> dict[str, Any] | None:
-    global _LAST_API_ERROR, _THINKING_ACTIVE
-    _LAST_API_ERROR = ""
-    _THINKING_ACTIVE = False
-    done_event: dict[str, Any] = {}
+def _build_hot_payload(text: str) -> dict[str, Any]:
+    """Acquire a short-lived credential from the existing HOST issuer."""
+    _require_canonical_host_post_url(HOT_URL)
     try:
-        timeout = httpx.Timeout(COMMAND_TIMEOUT_SECONDS, connect=min(10.0, COMMAND_TIMEOUT_SECONDS))
-        with httpx.Client(timeout=timeout) as client:
-            with client.stream("POST", url, json=payload) as response:
-                response.raise_for_status()
-                for line in response.iter_lines():
-                    if not line:
-                        continue
-                    event = _print_stream_event(line)
-                    if isinstance(event, dict) and str(event.get("event") or event.get("type") or "") == "done":
-                        done_event = event
-    except httpx.HTTPStatusError as exc:
-        _LAST_API_ERROR = f"http_error status={exc.response.status_code} url={url}"
-        return None
-    except httpx.TimeoutException:
-        _LAST_API_ERROR = f"timeout url={url}"
-        return None
-    except httpx.RequestError as exc:
-        _LAST_API_ERROR = _describe_httpx_error(exc, url)
-        return None
-    if done_event:
-        _print_stream_metadata(done_event)
-    return done_event or {}
+        token = bootstrap_local_owner_token(session_id=SESSION_ID)
+    except Exception:
+        raise RuntimeError("canonical_host_bootstrap_failed") from None
+    if not isinstance(token, str) or not token:
+        raise RuntimeError("canonical_host_bootstrap_invalid")
+    return {
+        "text": _sanitize_text(text),
+        "session_id": SESSION_ID,
+        "input_channel": "terminal",
+        "host_auth_token": token,
+    }
+
+
+def _canonical_response_text(response: dict[str, Any]) -> str:
+    """Return a non-empty answer from the canonical /hot response envelope."""
+    result = response.get("result") if isinstance(response.get("result"), dict) else {}
+    for value in (
+        response.get("response_text"),
+        response.get("llm_response"),
+        result.get("response_text"),
+        result.get("llm_response"),
+    ):
+        text = str(value or "").strip()
+        if text:
+            return text
+
+    error_kind = str(response.get("error_kind") or result.get("error_kind") or "").strip()
+    error_message = str(response.get("error_message") or result.get("error_message") or "").strip()
+    if error_message:
+        return f"JARVIS сообщил о деградации: {error_message}"
+    if error_kind:
+        return f"JARVIS не вернул текст ответа; компонент недоступен ({error_kind})."
+    return "JARVIS не вернул текст ответа; canonical runtime сообщил о деградации."
 
 
 def _print_stream_event(line: str) -> dict[str, Any]:
@@ -1075,17 +1040,6 @@ def _render_operator_work_text(text: str) -> None:
     if closed_rows:
         _box("ЗАКРЫТО / НЕДОСТУПНО", closed_rows, "red")
 
-    policy = _operator_block_policy(_LAST_USER_TEXT, facts, rows, _LAST_SEMANTIC_ROUTE_EVENT)
-    if policy["show_fact_summary"]:
-        fact_summary_lines = _operator_work_opinion(facts, rows)
-        if fact_summary_lines:
-            _box("ВЫВОД ПО ФАКТАМ", fact_summary_lines, "magenta")
-    if policy["show_next_recommendation"]:
-        next_recommendation_lines = _operator_work_next_steps(facts, rows)
-        if next_recommendation_lines:
-            _box("РЕКОМЕНДАЦИЯ ПО ФАКТАМ, НЕ ROADMAP", next_recommendation_lines, "cyan")
-
-
 def _operator_work_facts(text: str) -> dict[str, str]:
     result: dict[str, str] = {}
 
@@ -1215,206 +1169,6 @@ def _format_operator_row(row: dict[str, str]) -> str:
         parts.append(row["raw"])
 
     return " | ".join(parts)
-
-
-def _operator_work_opinion(facts: dict[str, str], rows: list[dict[str, str]]) -> tuple[str, ...]:
-    """Return no canned opinion lines.
-
-    Operator work renderer is factual only. Semantic opinion must come from
-    the model/brain response, not from terminal templates.
-    """
-    del facts, rows
-    return ()
-
-
-def _operator_user_requested_opinion() -> bool:
-    return _operator_block_policy(_LAST_USER_TEXT, {}, [])["show_fact_summary"]
-
-
-def _operator_user_requested_next_step() -> bool:
-    return _operator_block_policy(_LAST_USER_TEXT, {}, [])["show_next_recommendation"]
-
-
-def _operator_block_policy(
-    user_text: str,
-    facts: dict[str, str],
-    rows: list[dict[str, str]],
-    route_event: dict[str, Any] | None = None,
-) -> dict[str, bool]:
-    """Decide which operator blocks should be rendered.
-
-    The policy is semantic and grounded:
-    - user wording controls summary/next-step intent;
-    - helper/router metadata may strengthen semantic classification;
-    - no fact summary or recommendation is shown without grounded input.
-    """
-
-    route_event = route_event if isinstance(route_event, dict) else {}
-    lowered = str(user_text or "").casefold()
-
-    intent_family = str(route_event.get("intent_family") or "").casefold()
-    selection_source = str(route_event.get("selection_source") or "").casefold()
-    risk_class = str(route_event.get("risk_class") or "").casefold()
-    selected_tools = tuple(str(item).casefold() for item in _as_tuple(route_event.get("selected_tools", ())))
-    selected_agents = tuple(str(item).casefold() for item in _as_tuple(route_event.get("selected_agent_roles", ())))
-
-    helper_used = bool(route_event.get("helper_model_used")) or selection_source == "helper_model"
-    evidence_required = bool(route_event.get("evidence_required", False))
-    retrieved_count = int(route_event.get("retrieved_snippet_count", 0) or 0)
-
-    has_facts = bool(facts)
-    has_rows = bool(rows)
-    has_tools = bool(selected_tools)
-    has_grounded_input = bool(
-        has_facts
-        or has_rows
-        or retrieved_count > 0
-        or evidence_required
-        or has_tools
-        or intent_family not in {"", "conversation", "unknown"}
-    )
-
-    asks_for_opinion = _semantic_user_asks_fact_summary(lowered)
-    asks_for_next = _semantic_user_asks_next_recommendation(lowered)
-
-    helper_summary_signal = bool(
-        helper_used
-        and has_grounded_input
-        and (
-            "summary" in intent_family
-            or "status" in intent_family
-            or "comparison" in intent_family
-            or "selection" in intent_family
-            or "catalog" in intent_family
-            or "tool_selector_agent" in selected_agents
-            or "architect_agent" in selected_agents
-        )
-        and asks_for_opinion
-    )
-
-    helper_next_signal = bool(
-        helper_used
-        and has_grounded_input
-        and asks_for_next
-        and (
-            "roadmap" in intent_family
-            or "project" in intent_family
-            or "selection" in intent_family
-            or "catalog" in intent_family
-            or any(tool.startswith("external_adapter:") for tool in selected_tools)
-            or "architect_agent" in selected_agents
-            or "tool_selector_agent" in selected_agents
-        )
-    )
-
-    risky_or_proposal = bool(
-        risk_class in {"risk_gate", "safe_direct"}
-        or any("operator_proposal" == tool for tool in selected_tools)
-        or any(tool.startswith("external_adapter:") for tool in selected_tools)
-    )
-
-    show_fact_summary = bool(has_grounded_input and (asks_for_opinion or helper_summary_signal))
-    show_next_recommendation = bool(has_grounded_input and (asks_for_next or helper_next_signal))
-
-    row_statuses = tuple(
-        str(row.get("status") or row.get("availability_status") or "").casefold()
-        for row in rows
-        if isinstance(row, dict)
-    )
-    fact_values = {str(key).casefold(): str(value).casefold() for key, value in facts.items()}
-
-    show_available = any(status in {"available", "ready", "enabled", "ok"} for status in row_statuses)
-    show_unavailable = any(
-        status in {"unavailable", "disabled", "missing", "blocked", "error", "not_available"}
-        for status in row_statuses
-    )
-    show_blocked = any(
-        key.endswith("_allowed") and value in {"false", "0", "no", "disabled", "blocked"}
-        for key, value in fact_values.items()
-    ) or risk_class == "risk_gate"
-    show_closed = bool(
-        show_blocked
-        or fact_values.get("proposal_only") in {"true", "1", "yes", "enabled"}
-        or fact_values.get("execution_allowed") in {"false", "0", "no", "disabled", "blocked"}
-        or fact_values.get("canonical_write_allowed") in {"false", "0", "no", "disabled", "blocked"}
-        or fact_values.get("canonical_memory_write_allowed") in {"false", "0", "no", "disabled", "blocked"}
-        or fact_values.get("pc_control_allowed") in {"false", "0", "no", "disabled", "blocked"}
-    )
-
-    return {
-        # Backward-compatible truth/facts block keys.
-        "show_facts": bool(has_grounded_input),
-        "show_available": bool(show_available),
-        "show_unavailable": bool(show_unavailable),
-        "show_closed": bool(show_closed),
-        "show_blocked": bool(show_blocked),
-        "show_proposal_only": bool(fact_values.get("proposal_only") in {"true", "1", "yes", "enabled"}),
-        # Semantic optional blocks.
-        "show_fact_summary": show_fact_summary,
-        "show_next_recommendation": show_next_recommendation,
-        # Backward-compatible alias for older callers/tests.
-        "show_next_step": show_next_recommendation,
-        # Extra semantic metadata.
-        "show_proposal_context": risky_or_proposal,
-        "helper_semantic_used": helper_used,
-    }
-
-
-def _semantic_user_asks_fact_summary(lowered: str) -> bool:
-    return any(
-        marker in lowered
-        for marker in (
-            "что думаешь",
-            "что ты думаешь",
-            "как думаешь",
-            "думаешь",
-            "как считаешь",
-            "твоё мнение",
-            "твое мнение",
-            "мнение",
-            "оцени",
-            "оценка",
-            "вывод",
-            "дай вывод",
-            "сделай вывод",
-            "по фактам",
-            "разбери",
-            "проанализируй",
-        )
-    )
-
-
-def _semantic_user_asks_next_recommendation(lowered: str) -> bool:
-    return any(
-        marker in lowered
-        for marker in (
-            "что дальше",
-            "что делать дальше",
-            "что делать",
-            "следующий шаг",
-            "следующие шаги",
-            "как дальше",
-            "как продолжить",
-            "продолжить",
-            "куда дальше",
-            "что подключать дальше",
-            "что включить дальше",
-            "что надо включить",
-            "рекомендац",
-            "предложи",
-            "план дальше",
-        )
-    )
-
-
-def _operator_work_next_steps(facts: dict[str, str], rows: list[dict[str, str]]) -> tuple[str, ...]:
-    """Return no canned next-step lines.
-
-    Next-step content must be generated by the model/brain layer from grounded
-    context and policy, not hardcoded in the terminal renderer.
-    """
-    del facts, rows
-    return ()
 
 
 def _render_chunk(chunk: str) -> None:
@@ -1636,8 +1390,8 @@ def _set_last_api_error(value: str) -> None:
 
 def _print_api_not_running() -> None:
     print(_color("red", "JARVIS API не запущен."))
-    print("Старт API:")
-    print("python -m uvicorn CONTROL_PLANE.api_server:app --host 127.0.0.1 --port 8765")
+    print(f"Canonical Control Plane недоступен: {API_BASE_URL}")
+    print("Запусти runtime командой: ./tools/work")
     if _LAST_API_ERROR:
         print(f"api_error={_LAST_API_ERROR}")
 

@@ -4,29 +4,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from MAKSIMAR_CORE_LIB.swarm_coordination import SwarmTaskContract
-from tools.jarvis_live_runtime.autonomous_tool_model_router import build_autonomous_tool_model_decision
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
-
-
-def _read_only_discovery_only(selected_tools: tuple[str, ...]) -> bool:
-    return all(
-        tool in {
-            "weather_lookup",
-            "calendar_lookup",
-            "mail_lookup",
-            "screen_observer_read",
-            "repo_git_status",
-            "repo_tree",
-            "repo_files",
-            "read_file_snippet",
-            "repo_search",
-            "read_file_outline",
-            "pytest_report_read",
-            "session_memory",
-            "local_chat_memory",
-        }
-        for tool in selected_tools
-    )
 
 
 def _select_agent_role(normalized_intent: str) -> tuple[str, tuple[str, ...]]:
@@ -90,60 +67,36 @@ class SwarmTaskRoute:
 
 
 def route_swarm_task(
-    user_text: str,
-    *,
-    input_channel: str,
-    owner_identity_claim: OwnerIdentityClaim,
+    task_contract: SwarmTaskContract,
 ) -> SwarmTaskRoute:
-    decision = build_autonomous_tool_model_decision(
-        user_text,
-        input_channel=input_channel,
-        owner_identity_claim=owner_identity_claim,
-    )
-    selected_tools = tuple(str(tool) for tool in decision["selected_tools"])
-    selected_agent_role, candidate_roles = _select_agent_role(str(decision["normalized_intent"]))
-    direct_execution_requested = any(tool.startswith("pc_") for tool in selected_tools)
-    read_only_only = _read_only_discovery_only(selected_tools)
-    task_contract = SwarmTaskContract(
-        task_id="swarm_task_contract_v1",
-        user_text=str(user_text),
-        input_channel=str(decision["input_channel"]),
-        normalized_intent=str(decision["normalized_intent"]),
-        selected_model_role_id=str(decision["selected_model_role_id"]),
-        selected_model_id=str(decision["selected_model_id"]),
-        selected_tools=selected_tools,
-        candidate_agent_roles=candidate_roles,
-        task_complexity=str(decision["task_complexity"]),
-        heavy_model_requested=bool(decision["heavy_model_selected"]),
-        risk_gate_required=bool(decision["risk_gate_required"]),
-        safe_direct_action_candidate=bool(decision["safe_direct_action_allowed"]),
-        read_only_discovery_only=read_only_only,
-        owner_identity_source=str(owner_identity_claim.source),
-        direct_execution_requested=direct_execution_requested,
-    )
+    selected_tools = task_contract.selected_tools
+    selected_agent_role, default_roles = _select_agent_role(task_contract.normalized_intent)
+    candidate_roles = task_contract.candidate_agent_roles or default_roles
+    if selected_agent_role not in candidate_roles:
+        selected_agent_role = candidate_roles[0]
     delegated_surface = "none"
     action_library_required = False
-    if direct_execution_requested:
+    if task_contract.direct_execution_requested:
         delegated_surface = "action_library"
         action_library_required = True
-    elif bool(decision["risk_gate_required"]):
+    elif task_contract.risk_gate_required:
         delegated_surface = "risk_gate"
     return SwarmTaskRoute(
         route_id="swarm_task_route_v1",
         task_contract=task_contract,
         selected_agent_role=selected_agent_role,
         selected_agent_roles=candidate_roles,
-        selected_model_role_id=str(decision["selected_model_role_id"]),
-        selected_model_id=str(decision["selected_model_id"]),
+        selected_model_role_id=task_contract.selected_model_role_id,
+        selected_model_id=task_contract.selected_model_id,
         selected_tools=selected_tools,
-        heavy_model_requested=bool(decision["heavy_model_selected"]),
+        heavy_model_requested=task_contract.heavy_model_requested,
         delegated_execution_surface=delegated_surface,
         action_library_delegation_required=action_library_required,
-        risk_gate_required=bool(decision["risk_gate_required"]),
+        risk_gate_required=task_contract.risk_gate_required,
         direct_execution_disabled=True,
         reason_codes=(
-            f"intent:{decision['normalized_intent']}",
+            f"intent:{task_contract.normalized_intent}",
             f"agent:{selected_agent_role}",
-            f"model:{decision['selected_model_role_id']}",
+            f"model:{task_contract.selected_model_role_id}",
         ),
     )

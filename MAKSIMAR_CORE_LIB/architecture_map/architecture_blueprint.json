@@ -34,6 +34,8 @@
   "ignored_path_globs": [
     ".git/**",
     ".venv/**",
+    ".runtime/**",
+    ".codex/**",
     "venv/**",
     "__pycache__/**",
     ".pytest_cache/**",
@@ -43,6 +45,18 @@
     "node_modules/**",
     "dist/**",
     "build/**",
+    "htmlcov/**",
+    "RUNTIME/audits/**",
+    "RUNTIME/deleted_live_track_archive/**",
+    "RUNTIME/n8n/rollback-snapshots/pre-2.42.6-20261011/**",
+    "EXTERNAL_BACKENDS/vendor_quarantine/**",
+    "generated/cache/**",
+    "runtime_history_store/**",
+    "**/runtime_history_store/**",
+    "**/*.before_*",
+    "**/*before_patch*",
+    "**/*manual*backup*",
+    "**/test_evidence_bundles/**",
     "*.egg-info/**",
     "EXTERNAL_BACKENDS/**/.git/**",
     "EXTERNAL_BACKENDS/**/.venv/**",
@@ -64,7 +78,8 @@
   ],
   "allowed_unmapped_file_globs": [
     "setup.py",
-    "conftest.py"
+    "conftest.py",
+    "audit_project.py"
   ],
   "containerization": {
     "purpose": "Read-only readiness radar. It reports missing container markers but does not fail by default.",
@@ -888,21 +903,15 @@
       "container_profile": "server_service",
       "path_prefixes": [
         "BOOT",
-        "CORE_ROOT/run_context.py",
         "refactor.py"
       ],
       "module_prefixes": [
         "BOOT",
-        "CORE_ROOT.run_context",
         "refactor"
       ],
       "expected_paths": [
         {
           "path": "BOOT",
-          "mandatory": false
-        },
-        {
-          "path": "CORE_ROOT/run_context.py",
           "mandatory": false
         },
         {

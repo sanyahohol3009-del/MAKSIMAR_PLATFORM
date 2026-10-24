@@ -18,20 +18,21 @@ def test_jarvis_pc_action_audit_binding_requirements_are_visible() -> None:
     approval = build_jarvis_pc_action_approval_binding().to_read_model()
 
     assert adapter["audit_required"] is True
-    assert adapter["approval_required"] is True
+    assert adapter["approval_required"] is False
     assert adapter["allowlist_required"] is True
     assert approval["audit_record_required"] is True
-    assert approval["owner_approval_required"] is True
+    assert approval["owner_gate_required"] is True
+    assert approval["policy_execution_allowed_when_requirements_satisfied"] is True
     assert approval["bypass_approval_allowed"] is False
     assert approval["bypass_audit_allowed"] is False
-    assert approval["pc_control_allowed"] is False
+    assert approval["approval_prompt_required"] is False
 
     root = Path(__file__).resolve().parents[2]
     text = (root / "WORKFLOW_ENGINE/config/jarvis_pc_action_allowlist.yaml").read_text(
         encoding="utf-8"
     )
-    assert text.count("requires_audit: true") == 5
-    assert text.count("requires_approval: true") == 5
+    assert text.count("requires_audit: true") == 10
+    assert text.count("requires_approval: false") == 10
 
 
 def test_jl14_ready_finishes_printed_roadmap_without_opening_pc_control() -> None:
@@ -44,4 +45,3 @@ def test_jl14_ready_finishes_printed_roadmap_without_opening_pc_control() -> Non
     assert status["runtime_start_allowed_now"] is False
     assert status["voice_allowed_now"] is False
     assert status["pc_control_allowed_now"] is False
-

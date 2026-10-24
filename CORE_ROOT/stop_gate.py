@@ -6,6 +6,8 @@ from __future__ import annotations
 import sys
 import time
 import fcntl
+import os
+import threading
 from contextlib import contextmanager
 
 from CORE_ROOT.runtime_paths import (
@@ -19,46 +21,132 @@ from CORE_ROOT.runtime_paths import (
 )
 
 
+_transition_local = threading.local()
+
+
 @contextmanager
 def _transition_lock():
+    """Mutation -> transition, one actual transition FD per thread/process scope."""
+    held = getattr(_transition_local, "handle", None)
+    if held is not None:
+        if getattr(_transition_local, "pid", None) == os.getpid():
+            raise RuntimeError("StopGate transition scope is not reentrant")
+        held.close()  # Child copy only; never unlock a parent's file description.
+        _transition_local.handle = None
     ensure_runtime_layout()
-    from CORE_ROOT.run_context import runtime_mutation
+    from CORE_ROOT.run_context import runtime_mutation, _coordination_fd
     with runtime_mutation():
-        with (RUNTIME_STATE_DIR / "stop_gate_transition.lock").open("a") as handle:
+        fd = _coordination_fd(RUNTIME_STATE_DIR / "stop_gate_transition.lock")
+        with os.fdopen(fd, "a") as handle:
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-            yield
+            _transition_local.handle, _transition_local.pid = handle, os.getpid()
+            try:
+                yield
+            finally:
+                _transition_local.handle = None
 
 
-def recover_previous_run_degradation() -> bool:
-    """Clear only a previous run's diagnostic marker after verified WORK.
+def _require_transition_scope() -> None:
+    """Private mutation requires the live Core-owned kernel lock, not a proof token."""
+    handle = getattr(_transition_local, "handle", None)
+    if (handle is None or handle.closed
+            or getattr(_transition_local, "pid", None) != os.getpid()):
+        raise RuntimeError("previous-run mutation requires the active StopGate transition scope")
+    opened = os.fstat(handle.fileno())
+    current = os.stat(RUNTIME_STATE_DIR / "stop_gate_transition.lock", follow_symlinks=False)
+    if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+        raise RuntimeError("StopGate transition inode changed")
 
-    Reuse the existing preflight ownership/health classifier. A STOP-GATE
-    raised during this run remains active; preserve trigger/reason/history.
-    This does not reset settings or alter host authorization.
-    """
-    from SUPERVISOR.runtime_preflight import inspect_runtime_state, _finite_number
-    from CORE_ROOT.incident_history import write_incident_record
-    with _transition_lock():
-        if not DEGRADED_MODE_FILE.is_file():
-            return True
-        observation = inspect_runtime_state()
-        if observation["decision"].get("healthy") is not True:
+
+def _capture_previous_run_marker():
+    """Capture immutable marker/PID evidence; no marker keeps existing no-op success."""
+    _require_transition_scope()
+    from CORE_ROOT.incident_history import _evidence_file_identity
+    try:
+        DEGRADED_MODE_FILE.lstat()
+    except FileNotFoundError:
+        return None
+    marker = _evidence_file_identity(DEGRADED_MODE_FILE)
+    data = DEGRADED_MODE_FILE.read_bytes()
+    if _evidence_file_identity(DEGRADED_MODE_FILE) != marker:
+        raise RuntimeError("degradation marker changed during capture")
+    pid_file = ROOT / "RUNTIME/runtime.pid"
+    pid = _evidence_file_identity(pid_file)
+    return (tuple(sorted(marker.items())), data, tuple(sorted(pid.items())))
+
+
+def _previous_run_marker_eligible(state, epoch) -> bool:
+    """Recheck local identity/order only; health authority stays in Supervisor."""
+    _require_transition_scope()
+    from CORE_ROOT.incident_history import _evidence_file_identity
+    from CORE_ROOT.run_context import read_run_metadata, _identity
+    try:
+        metadata = read_run_metadata()
+        if not isinstance(metadata, dict):
             return False
-        metadata = observation.get("run_metadata")
-        if not isinstance(metadata, dict) or not _finite_number(metadata.get("wall_time")):
+        if (_identity(metadata) + (metadata.get("status"),)) != epoch[0]:
             return False
-        # Run identity now exists before PID publication. An incident in that
-        # startup interval is current even if PID discovery/reconciliation is later.
-        if DEGRADED_MODE_FILE.stat().st_mtime >= metadata["wall_time"]:
-            return False
+        marker = _evidence_file_identity(DEGRADED_MODE_FILE)
         pid_file = ROOT / "RUNTIME/runtime.pid"
-        if not pid_file.is_file() or DEGRADED_MODE_FILE.stat().st_mtime_ns >= pid_file.stat().st_mtime_ns:
+        pid = _evidence_file_identity(pid_file)
+        if tuple(sorted(marker.items())) != state[0] or tuple(sorted(pid.items())) != state[2]:
             return False
-        reason = LAST_DEGRADED_REASON_FILE.read_text(encoding="utf-8").strip() if LAST_DEGRADED_REASON_FILE.is_file() else "previous run degradation"
+        if pid_file.read_text(encoding="utf-8").strip() != str(epoch[1]):
+            return False
+        return (marker["st_mtime_ns"] < int(metadata["wall_time"] * 1_000_000_000)
+                and marker["st_mtime_ns"] < pid["st_mtime_ns"])
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError):
+        return False
+
+
+def _prepare_previous_run_recovery(state, epoch) -> bool:
+    """Durable intent before mutation, never a completed recovery receipt."""
+    if not _previous_run_marker_eligible(state, epoch):
+        return False
+    from CORE_ROOT.incident_history import write_incident_record
+    reason = (LAST_DEGRADED_REASON_FILE.read_text(encoding="utf-8").strip()
+              if LAST_DEGRADED_REASON_FILE.is_file() else "previous run degradation")
+    write_incident_record("Verified WORK preparing previous-run recovery: " + reason, status="recovery_pending")
+    return True
+
+
+def _commit_previous_run_recovery(state, epoch) -> bool:
+    """Private marker commit in the existing scope; accepts no health override."""
+    if not _previous_run_marker_eligible(state, epoch):
+        return False
+    from CORE_ROOT.incident_history import write_incident_record
+    reason = (LAST_DEGRADED_REASON_FILE.read_text(encoding="utf-8").strip()
+              if LAST_DEGRADED_REASON_FILE.is_file() else "previous run degradation")
+    # The second full inspection has just completed under this same lock.
+    # Revalidate after reading diagnostic text, immediately before mutation.
+    if not _previous_run_marker_eligible(state, epoch):
+        return False
+    DEGRADED_MODE_FILE.unlink()
+    try:
         write_incident_record("Verified WORK recovered previous run: " + reason, status="recovered")
-        DEGRADED_MODE_FILE.unlink()
+    except BaseException:
+        # Restore only our absent marker; never overwrite an independent activation.
+        try:
+            with DEGRADED_MODE_FILE.open("xb") as handle:
+                handle.write(state[1])
+                handle.flush()
+                os.fsync(handle.fileno())
+            previous = dict(state[0])
+            os.chmod(DEGRADED_MODE_FILE, previous["st_mode"] & 0o777)
+            os.utime(DEGRADED_MODE_FILE, ns=(previous["st_mtime_ns"], previous["st_mtime_ns"]))
+        except FileExistsError:
+            pass
+        try:
+            write_incident_record("Previous-run recovery completion failed; degradation retained", status="recovery_failed")
+        except (OSError, ValueError):
+            pass
+        raise
+    try:
         log("RECOVERED previous run degradation after owned runtime and full heartbeat chain verification")
-        return True
+    except OSError:
+        # Authoritative completion is durable; an auxiliary log failure is not a failed mutation.
+        pass
+    return True
 
 
 def log(message: str) -> None:

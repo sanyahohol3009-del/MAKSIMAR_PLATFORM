@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from MAKSIMAR_CORE_LIB.action_library_adapters.external_tool_library_adapter import (
+from MAKSIMAR_SERVER.AI_ORCHESTRATION.jarvis_live_read_models import (
     build_jarvis_external_adapter_visibility_read_model,
 )
 from MAKSIMAR_CORE_LIB.memory_engine.memory_accessor import list_memory_definitions

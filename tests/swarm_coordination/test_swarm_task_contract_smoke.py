@@ -1,33 +1,14 @@
 from __future__ import annotations
 
 from MAKSIMAR_SERVER.SWARM_COORDINATION_RUNTIME.swarm_task_router import route_swarm_task
-from tools.jarvis_live_runtime.owner_identity_claim import (
-    OwnerIdentityClaim,
-    build_owner_identity_claim_for_terminal,
-)
-
-
-def _verified_terminal_claim() -> OwnerIdentityClaim:
-    claim = build_owner_identity_claim_for_terminal()
-    if claim.verified:
-        return claim
-    return OwnerIdentityClaim(
-        claim_id="swarm_task_verified_terminal_v1",
-        source="local_terminal_session",
-        verified=True,
-        verification_method="test_override",
-        session_token_present=False,
-        process_owner_matches_os_user=True,
-        reason_codes=("os_user_verified",),
-    )
+from MAKSIMAR_CORE_LIB.swarm_coordination import SwarmTaskContract
 
 
 def test_swarm_task_contract_tracks_router_decision() -> None:
-    route = route_swarm_task(
-        "Джарвис, pytest упал, проверь ошибку",
-        input_channel="text",
-        owner_identity_claim=_verified_terminal_claim(),
-    )
+    route = route_swarm_task(SwarmTaskContract(
+        "task", "typed test failure task", "text", "code_debug", "daily_coder_model", "jarvis:coder7b",
+        ("repo_search", "pytest_report_read"), ("project_coder_agent",), "medium", False, False,
+        False, True, "local_terminal_session", False))
     task = route.task_contract.to_read_model()
 
     assert task["normalized_intent"] == "code_debug"

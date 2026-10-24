@@ -31,10 +31,6 @@ from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import (
     RequestUnderstanding,
     utc_observed_at,
 )
-from tools.jarvis_live_runtime.jarvis_skill_visibility import (
-    load_automation_n8n_private_skill_context,
-    select_skills_for_tools,
-)
 
 PROVIDER_ID = "existing_n8n_workflow_automation"
 
@@ -48,6 +44,33 @@ _API_KEY_PATH = _CANONICAL_DATA_ROOT / "jarvis_api_key"
 _NODE24 = Path.home() / ".nvm/versions/node/v24.19.0/bin/node"
 _RUNNER_TOKEN_PATH = _PROJECT_ROOT / "RUNTIME/n8n/config/task-runner-auth-token"
 
+
+def load_automation_n8n_private_skill_context(selected_skill_ids: tuple[str, ...]) -> dict[str, Any]:
+    """Read only the bounded official skills selected for the Automation Organ."""
+    allowed = {
+        "using-n8n-skills-official",
+        "n8n-workflow-lifecycle-official",
+        "n8n-node-configuration-official",
+        "n8n-agents-official",
+        "n8n-extending-mcp-official",
+    }
+    entries = []
+    root = _PROJECT_ROOT / "RUNTIME/n8n/authoring/.agents/skills"
+    for skill_id in dict.fromkeys(selected_skill_ids):
+        if skill_id not in allowed:
+            continue
+        path = root / skill_id / "SKILL.md"
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        entries.append({"skill_id": skill_id, "path": str(path.relative_to(_PROJECT_ROOT)), "content": text[:800]})
+    return {
+        "organ_id": "automation",
+        "skill_ids": tuple(item["skill_id"] for item in entries),
+        "entries": tuple(entries),
+        "provider_policy_evidence_owned_by_host": True,
+        "direct_execution_allowed": False,
+    }
 
 def _canonical_user_folder() -> Path:
     """Return the explicit, stable owner of the canonical n8n data.
@@ -688,10 +711,10 @@ class ExistingN8nAdapter:
                 # Consume bounded Automation Organ authoring context at the
                 # canonical provider boundary; skills can advise compilation
                 # but cannot execute, authorize, or emit evidence.
+                # Compatibility fallback for this existing create/build call only;
+                # it is not a global limit on Automation Organ skill discovery.
                 skill_context = load_automation_n8n_private_skill_context(
-                    tuple(skill for skill in select_skills_for_tools(("workflow_automation:n8n",), ())
-                          if skill != "automation_n8n")
-                    or ("using-n8n-skills-official", "n8n-node-configuration-official")
+                    ("using-n8n-skills-official", "n8n-node-configuration-official")
                 )
                 binding_report = tuple(workflow.pop("_jarvis_binding_report", ()))
                 created = _n8n_request("POST", "/api/v1/workflows", workflow)

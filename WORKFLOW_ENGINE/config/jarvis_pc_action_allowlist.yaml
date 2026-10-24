@@ -1,49 +1,93 @@
-allowlist_id: jarvis_pc_action_allowlist_v0_1
-version: "0.1"
+allowlist_id: jarvis_pc_action_allowlist_v1
+version: "1.0"
 actions:
   - action_id: open_browser
-    description: Prepare a browser open proposal for owner approval.
+    description: Open the default browser after verified owner typed policy.
     requires_owner_command: true
-    requires_approval: true
+    requires_approval: false
     requires_audit: true
-    runtime_execution_allowed: false
+    operation_allowlisted: true
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: true
+    owner_low_risk_policy_eligible: true
+  - action_id: open_opera
+    description: Open Opera after verified owner typed policy.
+    requires_owner_command: true
+    requires_approval: false
+    requires_audit: true
+    operation_allowlisted: true
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: true
+    owner_low_risk_policy_eligible: true
+  - action_id: close_opera
+    description: Gracefully close one Opera window after verified owner typed policy.
+    requires_owner_command: true
+    requires_approval: false
+    requires_audit: true
+    operation_allowlisted: true
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: true
+    owner_low_risk_policy_eligible: true
+  - action_id: close_all_opera
+    description: Kill all Opera processes after verified owner typed policy.
+    requires_owner_command: true
+    requires_approval: false
+    requires_audit: true
+    operation_allowlisted: true
     direct_shell_allowed: false
     direct_browser_automation_allowed: false
-    direct_pc_control_allowed: false
-  - action_id: open_youtube
-    description: Prepare a YouTube open proposal for owner approval.
+    owner_low_risk_policy_eligible: true
+  - action_id: type_text
+    description: Type supplied text into the typed active-window target after verified owner policy.
     requires_owner_command: true
-    requires_approval: true
+    requires_approval: false
     requires_audit: true
-    runtime_execution_allowed: false
+    operation_allowlisted: true
     direct_shell_allowed: false
     direct_browser_automation_allowed: false
-    direct_pc_control_allowed: false
-  - action_id: open_youtube_kids_search
-    description: Prepare a YouTube Kids search proposal for owner approval.
+    owner_low_risk_policy_eligible: true
+  - action_id: volume_up
+    description: Raise system volume after verified owner typed policy.
     requires_owner_command: true
-    requires_approval: true
+    requires_approval: false
     requires_audit: true
-    runtime_execution_allowed: false
+    operation_allowlisted: true
     direct_shell_allowed: false
     direct_browser_automation_allowed: false
-    direct_pc_control_allowed: false
-  - action_id: read_project_status
-    description: Prepare a read-only project status proposal for owner approval.
+    owner_low_risk_policy_eligible: true
+  - action_id: volume_down
+    description: Lower system volume after verified owner typed policy.
     requires_owner_command: true
-    requires_approval: true
+    requires_approval: false
     requires_audit: true
-    runtime_execution_allowed: false
+    operation_allowlisted: true
     direct_shell_allowed: false
     direct_browser_automation_allowed: false
-    direct_pc_control_allowed: false
-  - action_id: show_test_status
-    description: Prepare a read-only test status proposal for owner approval.
+    owner_low_risk_policy_eligible: true
+  - action_id: volume_mute
+    description: Mute system volume after verified owner typed policy.
     requires_owner_command: true
-    requires_approval: true
+    requires_approval: false
     requires_audit: true
-    runtime_execution_allowed: false
+    operation_allowlisted: true
     direct_shell_allowed: false
     direct_browser_automation_allowed: false
-    direct_pc_control_allowed: false
-
+    owner_low_risk_policy_eligible: true
+  - action_id: read_screen
+    description: Read the current screen after verified owner typed policy.
+    requires_owner_command: true
+    requires_approval: false
+    requires_audit: true
+    operation_allowlisted: true
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: false
+    owner_low_risk_policy_eligible: true
+  - action_id: browser_search
+    description: Search in the browser after verified owner typed policy.
+    requires_owner_command: true
+    requires_approval: false
+    requires_audit: true
+    operation_allowlisted: true
+    direct_shell_allowed: false
+    direct_browser_automation_allowed: true
+    owner_low_risk_policy_eligible: true

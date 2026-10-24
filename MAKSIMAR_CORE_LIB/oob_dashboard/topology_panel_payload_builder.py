@@ -8,9 +8,9 @@ from MAKSIMAR_CORE_LIB.oob_dashboard.topology_panel_content_contract import (
 )
 
 
-def build_topology_panel_payload() -> dict[str, Any]:
+def build_topology_panel_payload(observation: dict | None = None) -> dict[str, Any]:
     """Build canonical payload for the topology panel."""
-    contract = build_topology_panel_content_contract()
+    contract = build_topology_panel_content_contract(observation=observation)
     entry = contract.entries[0]
 
     return {

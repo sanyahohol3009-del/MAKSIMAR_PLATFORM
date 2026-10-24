@@ -77,9 +77,9 @@ def _reason_for_entry(consistency_status: str, derived_status: str) -> str | Non
     return None
 
 
-def build_foundation_guard_chain_truth_view() -> FoundationGuardChainTruthView:
+def build_foundation_guard_chain_truth_view(observation: dict | None = None) -> FoundationGuardChainTruthView:
     """Build canonical guard-chain truth view from truth consistency contract."""
-    contract = build_foundation_truth_consistency_contract()
+    contract = build_foundation_truth_consistency_contract(observation=observation)
 
     ordered_entries = sorted(
         contract.entries,

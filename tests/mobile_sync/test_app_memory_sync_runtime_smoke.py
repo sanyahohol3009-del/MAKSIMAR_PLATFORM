@@ -113,3 +113,39 @@ def test_app_memory_sync_runtime_rejects_store_mutation_claim() -> None:
             mutates_app_memory_store=True,
             mutates_chat_memory_store=False,
         )
+
+
+@pytest.mark.parametrize("mutation, expected_error", [
+    ("owner", "owner_identity_id"),
+    ("device", "source_device_id"),
+    ("app", "app_id"),
+    ("cursor_device", "cursor source_device_id"),
+    ("checkpoint", "cursor_ref"),
+])
+def test_app_memory_sync_rejects_cross_session_reference_binding(mutation, expected_error):
+    from dataclasses import replace
+
+    envelope = _app_envelope()
+    cursor = _app_cursor()
+    if mutation == "owner":
+        envelope = replace(envelope, owner_identity_id="other_owner")
+    elif mutation == "device":
+        envelope = replace(envelope, source_device_id="other_device")
+    elif mutation == "app":
+        envelope = replace(envelope, app_id="other_app")
+    elif mutation == "cursor_device":
+        cursor = replace(cursor, source_device_id="other_device")
+    else:
+        envelope = replace(envelope, cursor_ref="cursor://device_001/app_memory/999")
+    runtime = AppMemorySyncRuntime.default(runtime_id="binding_check", policy=_policy())
+    with pytest.raises(ValueError, match=expected_error):
+        runtime.evaluate(session=_session(), envelope=envelope, cursor=cursor)
+
+
+def test_app_memory_sync_decision_constructor_enforces_session_binding():
+    from dataclasses import replace
+
+    runtime = AppMemorySyncRuntime.default(runtime_id="binding_check", policy=_policy())
+    decision = runtime.evaluate(session=_session(), envelope=_app_envelope(), cursor=_app_cursor())
+    with pytest.raises(ValueError, match="owner_identity_id"):
+        replace(decision, envelope=replace(decision.envelope, owner_identity_id="other_owner"))

@@ -18,12 +18,19 @@ def test_chat_to_command_handoff_contract_smoke() -> None:
         sandbox_required=True,
         direct_execution_allowed=False,
         runtime_mutation_allowed=False,
-        external_adapter_execution_allowed=False,
+        external_adapter_selection_allowed=True,
+        external_adapter_status_allowed=True,
+        external_adapter_planning_allowed=True,
+        external_adapter_execution_requires_approval=True,
     )
 
     assert handoff.policy_review_required is True
     assert handoff.operator_approval_required is True
     assert handoff.direct_execution_allowed is False
+    assert handoff.external_adapter_selection_allowed is True
+    assert handoff.external_adapter_status_allowed is True
+    assert handoff.external_adapter_planning_allowed is True
+    assert handoff.external_adapter_execution_requires_approval is True
 
 
 def test_chat_to_command_handoff_requires_policy_review() -> None:
@@ -42,7 +49,10 @@ def test_chat_to_command_handoff_requires_policy_review() -> None:
             sandbox_required=True,
             direct_execution_allowed=False,
             runtime_mutation_allowed=False,
-            external_adapter_execution_allowed=False,
+            external_adapter_selection_allowed=True,
+            external_adapter_status_allowed=True,
+            external_adapter_planning_allowed=True,
+            external_adapter_execution_requires_approval=True,
         )
 
 
@@ -62,5 +72,8 @@ def test_chat_to_command_handoff_never_executes_directly() -> None:
             sandbox_required=True,
             direct_execution_allowed=True,
             runtime_mutation_allowed=False,
-            external_adapter_execution_allowed=False,
+            external_adapter_selection_allowed=True,
+            external_adapter_status_allowed=True,
+            external_adapter_planning_allowed=True,
+            external_adapter_execution_requires_approval=True,
         )

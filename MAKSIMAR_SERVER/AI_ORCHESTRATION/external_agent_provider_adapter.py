@@ -151,10 +151,46 @@ class ExistingExternalAgentProviderAdapter:
                 if step.operation == "run_local_mcp":
                     result = {"value": int(completed.stdout.strip()), "transport": "stdio"}
                 elif step.operation == "run_local_smolagent":
-                    marker = next((line for line in completed.stdout.splitlines() if line.startswith("SMOLAGENTS_PROOF=")), "")
-                    if "42" not in marker or "sha256" not in marker:
-                        raise RuntimeError("smolagents_bounded_result_missing")
-                    result = json.loads(marker.split("=", 1)[1])
+                    markers = [line for line in completed.stdout.splitlines()
+                               if line.startswith("SMOLAGENTS_PROOF=")]
+                    if len(markers) != 1:
+                        raise RuntimeError("smolagents_bounded_proof_missing_or_ambiguous")
+                    proof_text = markers[0].split("=", 1)[1]
+                    result = json.loads(proof_text)
+                    # The current child produces exactly this structured proof.
+                    # Reject duplicate JSON keys rather than silently taking the last value.
+                    pending = [json.loads(proof_text, object_pairs_hook=tuple)]
+                    while pending:
+                        value = pending.pop()
+                        if isinstance(value, tuple):
+                            keys = [key for key, _ in value]
+                            if len(keys) != len(set(keys)):
+                                raise RuntimeError("smolagents_bounded_proof_duplicate_key")
+                            pending.extend(item for _, item in value)
+                        elif isinstance(value, list):
+                            pending.extend(value)
+                    if (not isinstance(result, dict)
+                            or set(result) != {"agent_result", "model_response"}
+                            or result.get("agent_result") != "42"):
+                        raise RuntimeError("smolagents_bounded_result_invalid")
+                    proof = result["model_response"]
+                    if not isinstance(proof, dict) or set(proof) != {"sha256", "chars", "model_role"}:
+                        raise RuntimeError("smolagents_model_proof_invalid")
+                    digest, chars, role = proof["sha256"], proof["chars"], proof["model_role"]
+                    from MAKSIMAR_SERVER.AI_ORCHESTRATION.model_role_adapter import MODEL_ROLE_BINDINGS
+                    from MAKSIMAR_SERVER.AI_ORCHESTRATION.ollama_transport import model_role_for_model_id
+                    expected_model = {operation: model for model, operation in MODEL_ROLE_BINDINGS.values()}[
+                        "generate_code_proposal"
+                    ]
+                    expected_role = model_role_for_model_id(expected_model)
+                    if (not isinstance(digest, str) or len(digest) != 64
+                            or any(char not in "0123456789abcdefABCDEF" for char in digest)
+                            or not isinstance(chars, int) or isinstance(chars, bool) or chars <= 0
+                            or not isinstance(role, str) or expected_role == "unknown" or role != expected_role):
+                        raise RuntimeError("smolagents_model_proof_invalid")
+                    # Structure is verified, not independent attestation of model execution.
+                    if deadline is not None:
+                        deadline.check()
                 else:
                     result = {"value": int(completed.stdout.strip())}
             except Exception as exc:  # noqa: BLE001

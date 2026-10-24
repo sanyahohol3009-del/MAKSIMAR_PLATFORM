@@ -9,8 +9,8 @@ def test_foundation_guard_chain_truth_view_counts() -> None:
 
     assert view.view_id == "foundation_guard_chain_truth_view_001"
     assert view.total_entries == 4
-    assert view.consistent_entries == 1
-    assert view.partial_entries == 3
+    assert view.consistent_entries == 4
+    assert view.partial_entries == 0
     assert view.mismatch_entries == 0
     assert view.unknown_entries == 0
     assert view.alive_entries == 4
@@ -55,9 +55,9 @@ def test_foundation_guard_chain_truth_view_kernel_entry() -> None:
     assert entry.api_truth is False
     assert entry.log_truth is True
     assert entry.derived_status == "ALIVE"
-    assert entry.consistency_status == "PARTIAL"
+    assert entry.consistency_status == "CONSISTENT"
     assert entry.last_seen_label == "fresh"
-    assert entry.reason == "Truth sources are only partially aligned."
+    assert entry.reason is None
     assert entry.read_only is True
 
 
@@ -72,3 +72,20 @@ def test_foundation_guard_chain_truth_view_order() -> None:
         "kernel_guard",
     ]
     assert [entry.chain_order_index for entry in view.entries] == [1, 2, 3, 4]
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def observed_foundation_fixture(monkeypatch):
+    from tests.oob_dashboard.test_foundation_truth_consistency_contract_smoke import _observed_foundation_fixture
+    return _observed_foundation_fixture(monkeypatch)
+
+
+def test_guard_chain_view_preserves_observed_missing_heartbeat(observed_foundation_fixture):
+    state = observed_foundation_fixture["heartbeats"]["guard"]
+    state.update(exists=False, fresh=False, source=None, status=None)
+    entry = build_foundation_guard_chain_truth_view().entries[1]
+    assert entry.last_seen_label == "missing"
+    assert entry.heartbeat_truth is False
+    assert entry.derived_status != "ALIVE"

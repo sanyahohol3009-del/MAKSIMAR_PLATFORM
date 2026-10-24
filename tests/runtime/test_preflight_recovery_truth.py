@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from CORE_ROOT import heartbeat_io, incident_history, stop_gate
+from CORE_ROOT import heartbeat_io, incident_history, stop_gate, run_context
 from SUPERVISOR import runtime_preflight as preflight
 from pathlib import Path
 
@@ -133,6 +133,7 @@ def test_incomplete_contradictory_or_foreign_chain_cannot_recover(monkeypatch, t
     # Use the actual classifier verdict, not a fabricated healthy boolean.
     state = tmp_path / "RUNTIME/state"
     state.mkdir(parents=True)
+    monkeypatch.setattr(run_context, "RUNTIME_STATE_DIR", state)
     pid = tmp_path / "RUNTIME/runtime.pid"
     pid.write_text("1234")
     flag, reason, trigger = [state / name for name in ("degraded.flag", "reason", "trigger")]
@@ -149,7 +150,7 @@ def test_incomplete_contradictory_or_foreign_chain_cannot_recover(monkeypatch, t
     monkeypatch.setattr(stop_gate, "log", lambda _: pytest.fail("false recovery log"))
     monkeypatch.setattr(preflight, "inspect_runtime_state", lambda: {"decision": decision})
     monkeypatch.setattr(incident_history, "write_incident_record", lambda *a, **k: pytest.fail("false recovered incident"))
-    assert stop_gate.recover_previous_run_degradation() is False
+    assert preflight.recover_previous_run_degradation() is False
     assert all(f.read_bytes() == data for f, data in originals.items())
     # NaN is not equal to itself; structural input immutability is checked by bytes.
     assert json.dumps(observation, sort_keys=True) == json.dumps(before, sort_keys=True)
@@ -290,6 +291,7 @@ def test_preflight_report_does_not_upgrade_fresh_foreign_chain(monkeypatch):
 def test_actual_healthy_verdict_preserves_marker_epoch_and_history(monkeypatch, tmp_path, current_marker, incident_fails):
     state = tmp_path / "RUNTIME/state"
     state.mkdir(parents=True)
+    monkeypatch.setattr(run_context, "RUNTIME_STATE_DIR", state)
     pid = tmp_path / "RUNTIME/runtime.pid"
     pid.write_text("1234")
     flag, trigger, reason = [state / f for f in ("degraded.flag", "trigger", "reason")]
@@ -310,15 +312,19 @@ def test_actual_healthy_verdict_preserves_marker_epoch_and_history(monkeypatch, 
     monkeypatch.setattr(incident_history,"write_incident_record",append)
     decision = preflight.classify_runtime_observation(_observation())
     assert decision["healthy"] is True
-    monkeypatch.setattr(preflight,"inspect_runtime_state",lambda:{"decision":decision,"run_metadata":_observation()["run_metadata"]})
+    complete = _observation()
+    complete["run_metadata"]["wall_time"] = 1.5
+    monkeypatch.setattr(run_context, "RUN_METADATA_FILE", state / "run_metadata.json")
+    run_context.RUN_METADATA_FILE.write_text(json.dumps(complete["run_metadata"]))
+    monkeypatch.setattr(preflight,"inspect_runtime_state",lambda:copy.deepcopy(complete))
     if incident_fails:
         with pytest.raises(OSError):
-            stop_gate.recover_previous_run_degradation()
+            preflight.recover_previous_run_degradation()
         assert flag.exists() and records == []
     else:
-        assert stop_gate.recover_previous_run_degradation() is (not current_marker)
+        assert preflight.recover_previous_run_degradation() is (not current_marker)
         assert flag.exists() is current_marker
-        assert [status for _,status in records] == ([] if current_marker else ["recovered"])
+        assert [status for _,status in records] == ([] if current_marker else ["recovery_pending", "recovered"])
     assert trigger.read_text() == "original trigger"
     assert reason.read_text() == "original reason"
 

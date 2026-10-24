@@ -331,3 +331,44 @@ def test_failed_preparation_does_not_overwrite_original_status(world,monkeypatch
     with pytest.raises(SystemExit) as error:pf.main()
     assert error.value.code==1 and pf.PREFLIGHT_RESULT_FILE.read_bytes()==b"original failed diagnostic"
     intact(world)
+
+
+def test_concurrent_stopgate_activation_after_recovery_is_not_lost(world, monkeypatch):
+    from tests.runtime.test_preflight_recovery_truth import _observation
+    raw = _observation()
+    # The world fixture changes canonical project root: identities must match that root.
+    identities = [row["identity"] for row in raw["heartbeats"].values()]
+    identities += [raw["runtime_pid_identity"], *raw["port"]["owner_identities"]]
+    for identity in identities:
+        identity["cwd"] = str(world.root)
+    assert pf.classify_runtime_observation(raw)["healthy"] is True
+    rc.RUN_METADATA_FILE.write_text(json.dumps(raw["run_metadata"]))
+    monkeypatch.setattr(gate, "ROOT", world.root)
+    pid = world.root / "RUNTIME/runtime.pid"
+    pid.write_text("1234")
+    marker = gate.DEGRADED_MODE_FILE
+    marker.write_text("previous")
+    os.utime(marker, ns=(1_000_000_000,) * 2)
+    os.utime(pid, ns=(2_000_000_000,) * 2)
+    monkeypatch.setattr(history, "write_incident_record", world.append)
+    with rp.INCIDENT_HISTORY_FILE.open("a") as handle:
+        handle.write("\n")  # preserve retained prefix and separate new JSON journal records
+    started, done = threading.Event(), threading.Event()
+    def activate():
+        started.set()
+        gate.main()
+        done.set()
+    threads = []
+    def inspect():
+        if not threads:
+            thread = threading.Thread(target=activate, daemon=True)
+            threads.append(thread)
+            thread.start()
+            assert started.wait(1) and not done.wait(0.1)
+        return copy.deepcopy(raw)
+    monkeypatch.setattr(pf, "inspect_runtime_state", inspect)
+    assert pf.recover_previous_run_degradation() is True
+    threads[0].join(2)
+    assert done.is_set() and marker.read_text() == "1\n"
+    assert gate.STOP_GATE_TRIGGER_FILE.exists() and gate.LAST_DEGRADED_REASON_FILE.exists()
+    assert [json.loads(line)["status"] for line in rp.INCIDENT_HISTORY_FILE.read_text().splitlines()[1:]] == ["recovery_pending", "recovered"]

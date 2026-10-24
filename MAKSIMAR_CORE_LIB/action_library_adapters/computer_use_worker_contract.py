@@ -15,8 +15,8 @@ from MAKSIMAR_CORE_LIB.action_library_adapters.cli_worker_adapter_contract impor
 from MAKSIMAR_CORE_LIB.action_library_adapters.gui_worker_adapter_contract import (
     build_gui_worker_adapter_contract,
 )
-from tools.jarvis_live_runtime.autonomous_tool_model_router import build_autonomous_tool_model_decision
-from tools.jarvis_live_runtime.owner_identity_claim import OwnerIdentityClaim
+from MAKSIMAR_CORE_LIB.ai_orchestration.semantic_intent_contract import PlanStep
+from MAKSIMAR_CORE_LIB.security_layer.owner_identity_claim import OwnerIdentityClaim
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,65 +110,61 @@ def build_computer_use_worker_contract() -> ComputerUseWorkerContract:
     )
 
 
-def build_action_request_from_intent(
-    user_text: str,
+def resolve_computer_use_action_request(
+    plan_step: PlanStep,
     *,
+    target: str,
     input_channel: str,
     owner_identity_claim: OwnerIdentityClaim,
 ) -> ComputerUseActionRequest | None:
-    decision = build_autonomous_tool_model_decision(
-        user_text,
-        input_channel=input_channel,
-        owner_identity_claim=owner_identity_claim,
-    )
-    selected_tools = tuple(str(tool) for tool in decision["selected_tools"])
-    if "pc_open_browser" in selected_tools:
+    if plan_step.capability_id != "pc.control":
+        return None
+    if plan_step.operation == "open_browser":
         contract = build_browser_worker_adapter_contract()
         return ComputerUseActionRequest(
             request_id="computer_use_action_request_v1",
             capability_id=contract.capability_id,
             action_name="open_browser",
-            target="default_browser",
+            target=target,
             input_channel=input_channel,
             owner_identity_claim=owner_identity_claim,
             risk_class=contract.risk_class,
             read_only=contract.read_only,
             side_effects=contract.side_effects,
         )
-    if "pc_open_app" in selected_tools:
+    if plan_step.operation == "open_application":
         contract = build_gui_worker_adapter_contract()
         return ComputerUseActionRequest(
             request_id="computer_use_action_request_v1",
             capability_id=contract.capability_id,
             action_name="open_application",
-            target="desktop_application",
+            target=target,
             input_channel=input_channel,
             owner_identity_claim=owner_identity_claim,
             risk_class=contract.risk_class,
             read_only=contract.read_only,
             side_effects=contract.side_effects,
         )
-    lowered = str(user_text).casefold()
-    if any(marker in lowered for marker in ("git push", "delete", "sudo", "rm -rf")):
+    if plan_step.operation == "mutating_shell_request":
         contract = build_cli_worker_adapter_contract()
         return ComputerUseActionRequest(
             request_id="computer_use_action_request_v1",
             capability_id=contract.capability_id,
             action_name="mutating_shell_request",
-            target=str(user_text),
+            target=target,
             input_channel=input_channel,
             owner_identity_claim=owner_identity_claim,
             risk_class=contract.risk_class,
             read_only=contract.read_only,
             side_effects=contract.side_effects,
         )
-    if any(marker in lowered for marker in ("cad", "cam", "cnc", "machine")):
+    if plan_step.operation == "machine_control_request":
         contract = build_cad_cam_worker_adapter_contract()
         return ComputerUseActionRequest(
             request_id="computer_use_action_request_v1",
             capability_id=contract.capability_id,
             action_name="machine_control_request",
-            target=str(user_text),
+            target=target,
             input_channel=input_channel,
             owner_identity_claim=owner_identity_claim,
             risk_class=contract.risk_class,

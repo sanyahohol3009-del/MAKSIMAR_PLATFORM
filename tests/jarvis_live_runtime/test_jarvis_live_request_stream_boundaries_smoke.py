@@ -1,24 +1,21 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 
 from tools.jarvis_live_runtime import jarvis_live_brain_loop
-from tools.jarvis_live_runtime import jarvis_live_request_planner
 from tools.jarvis_live_runtime import jarvis_live_stream_events
 
 
-def test_brain_loop_uses_request_planner_boundary() -> None:
-    assert inspect.getmodule(jarvis_live_brain_loop._plan_jarvis_request).__name__ == (
-        "tools.jarvis_live_runtime.jarvis_live_request_planner"
-    )
-    assert jarvis_live_request_planner._route_mode("джарвис привет") == "FAST"
-    assert jarvis_live_request_planner._plan_jarvis_request("джарвис запусти браузер")["request_route"] == "pc_action_proposal"
+def test_brain_loop_uses_canonical_semantic_boundary_without_text_planner() -> None:
+    source = Path(jarvis_live_brain_loop.__file__).read_text(encoding="utf-8")
+    assert "run_canonical_brain_once" in source
+    assert "stream_canonical_brain_response" in source
+    assert "jarvis_live_request_planner" not in source
+    assert "_plan_jarvis_request" not in source
 
 
 def test_brain_loop_uses_stream_events_boundary() -> None:
-    assert inspect.getmodule(jarvis_live_brain_loop._event).__name__ == (
-        "tools.jarvis_live_runtime.jarvis_live_stream_events"
-    )
     event = jarvis_live_stream_events._event("done", ok=True)
     assert event["event"] == "done"
     assert event["ok"] is True
